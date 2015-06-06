@@ -58,7 +58,7 @@ Slides: <a href="http://homes.cs.washington.edu/%7Emernst/pubs/feedback-testgen-
 Slides: <a href="http://randoop.googlecode.com/files/randoop_case_study_2008.pdf">PDF</a> <a href="http://randoop.googlecode.com/files/randoop_case_study_2008.ppt">PPT</a></p>
 
 <ul>
-<li>This case study details the use of Randoop at Microsoft (using a .NET version of Randoop, developed internally at Microsoft). A team of test engineers applied Randoop to a critical .NET component that had been thorughly tested for years. Still, Randoop found many serious errors.</li>
+<li>This case study details the use of Randoop at Microsoft (using a <a href="#net-version-of-randoop">.NET version of Randoop</a>). A team of test engineers applied Randoop to a critical .NET component that had been thoroughly tested for years. Still, Randoop found many serious errors.</li>
 </ul>
 
 <p>Directed Random Testing (dissertation).
@@ -74,7 +74,7 @@ There are 393 results as of 2015-05-10.</p>
 
 <ul>
 <li>Predicting Effectiveness of Automatic Testing Tools by Brett Daniel and Marat Boshernitsan. In ASE 2008.</li>
-<li>Predicting and Explaining Automatic Testing Tool Effectiveness by Brett Daniel and Marat Boshernitsan.UIUC Tech Report UIUCDCS-R-2008-2956.</li>
+<li>Predicting and Explaining Automatic Testing Tool Effectiveness by Brett Daniel and Marat Boshernitsan. UIUC Tech Report UIUCDCS-R-2008-2956.</li>
 <li>Improving Structural Testing of Object-Oriented Programs via Integrating Evolutionary Testing and Symbolic Execution by Kobi Inkumsah and Tao Xie. In ASE 2008.</li>
 <li>Making Program Refactoring Safer, by Gustavo Soares, Rohit Gheyi, Dalton Serey, and Tiago Massoni. In IEEE Software, July/August 2010.</li>
 </ul>
@@ -91,16 +91,28 @@ If you wish to have your course listed here, let us know.</p>
 <li>UIUC Topics in Software Engineering (Randoop was used in this course in <a href="https://agora.cs.illinois.edu/display/cs527/Home">Fall 2007</a>, <a href="https://agora.cs.illinois.edu/display/cs527fa08/Home">Fall 2008</a>, and <a href="https://agora.cs.illinois.edu/display/cs527fa10/Home">Fall 2010</a>.</li>
 <li>Automatic Program Checking, Karlsruhe Institute of Technology (2010).</li>
 <li>RIO 2011 C5: Automated Test Generation and Repair.</li>
-<li>Automatic Program Checking, Karlsruhe Institute of Technoloy (2010, 2011)</li>
+<li>Automatic Program Checking, Karlsruhe Institute of Technology (2010, 2011)</li>
 </ul>
 
 <h3>
 <a id="net-version-of-randoop" class="anchor" href="#net-version-of-randoop" aria-hidden="true"><span class="octicon octicon-link"></span></a>.NET version of Randoop</h3>
 
-<p>A version of Randoop that works with Microsoft's .NET platform is available at <a href="http://randoop.codeplex.com/">http://randoop.codeplex.com/</a>.  Check it out!  Randoop.NET is a from-scratch re-implementation of feedback-directed test generation.  Also, the "Randoop" name is due to the Microsoft group, even though the idea and the Java tool (previously known as "Joe") predate their work.  The project was created in September 2010, but no further development was done.  (The <a href="http://randoop.codeplex.com/discussions">discussions webpage</a> has only two conversations, both from 2011.)</p>
+<p>A version of Randoop that works with Microsoft's .NET platform is available at <a href="https://github.com/abb-iss/Randoop.NET">https://github.com/abb-iss/Randoop.NET</a>.  Randoop.NET is a from-scratch re-implementation of feedback-directed test generation.
+<!-- (who also came up with the "Randoop" name; the previous Java toolwas known as "Joe")
+  -->
+The link above is to <a href="https://github.com/abb-iss/Randoop.NET">ABB Corporation's updated version of Randoop.NET</a>.  Compared to <a href="http://randoop.codeplex.com/">the original version of Randoop.NET from Microsoft Research</a>:
+</p>
+<ul>
+  <li>It fixes some bugs.</li>
+  <li>It adds new features, notably regression assertions for more effective regression testing, method transformers to delete or replace calls to specific methods in the assembly, and richer debug information collection.</li>
+  <li>It adds a GUI, as a VS2010 add-in.</li>
+</ul>
       </section>
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     
   </body>
 </html>
+
+<!--  LocalWords:  Eclat Shuvendu Lahiri PPT Boshernitsan UIUC UIUCDCS Kobi Inkumsah Xie Soares Rohit Gheyi Serey Tiago Massoni Pernambuco d'Amorim Groce Karlsruhe C5 ABB VS2010 Universidade de
+ -->
