@@ -51,10 +51,28 @@
 <h2>
 <a id="how-does-randoop-work" class="anchor" href="#how-does-randoop-work" aria-hidden="true"><span class="octicon octicon-link"></span></a>How does Randoop work?</h2>
 
-<ul>
-<li>Randoop generates unit tests using feedback-directed random test generation. In a nutshell, this technique randomly, but smartly, generates sequences of methods and constructor invocations for the classes under test, and uses the sequences to create tests. Randoop executes the sequences it creates, using the results of the execution to create assertions that capture the behavior or your program and that catch bugs.</li>
-<li>Randoop has created tests that find previously unknown errors even in widely-used libraries including Sun and IBM's JDKs. A .NET version of Randoop, used internally at Microsoft, has been used successfully by a team of test engineers to find errors in a core .NET component that has been heavily tested for years. Randoop's combination of randomized test generation and test execution results in a highly effective test generation technique.</li>
-</ul>
+<p>
+Randoop generates unit tests using feedback-directed random test generation.
+This technique randomly, but smartly, generates sequences of
+method/constructor invocations for the classes under test.
+Randoop executes the sequences it creates, using the results of the
+execution to create assertions that capture the behavior or your program.
+Randoop creates tests from the code sequences and assertions.
+</p>
+
+<p>
+Randoop can be used for two purposes:  to find bugs in your program, and to
+create regression tests to warn you if you change your program's behavior
+in the future.
+</p>
+
+<p>
+Randoop's combination of randomized test generation and test execution
+results in a highly effective test generation technique.
+Randoop has revealed previously-unknown errors even in widely-used
+libraries including Sun's and IBM's JDKs and a core .NET component.
+Randoop continues to be used in industry, for example at ABB corporation.
+</p>
 
 <hr>
 
@@ -91,5 +109,5 @@ The link above is to <a href="https://github.com/abb-iss/Randoop.NET">ABB Corpor
   </body>
 </html>
 
-<!--  LocalWords:  mernst randoop plugin
+<!--  LocalWords:  mernst randoop plugin JDKs ABB VS2010
  -->
