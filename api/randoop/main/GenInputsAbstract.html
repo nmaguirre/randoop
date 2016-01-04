@@ -48,7 +48,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../randoop/main/GenBranchDir.html" title="class in randoop.main"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../index.html?randoop/main/GenInputsAbstract.html" target="_top">Frames</a></li>
@@ -139,6 +139,12 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static class&nbsp;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a></span></code>
+<div class="block">The possible values for exception behavior types.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static class&nbsp;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main">GenInputsAbstract.ClassLiteralsMode</a></span></code>
 <div class="block">The possible values of the literals_level command-line argument.</div>
 </td>
@@ -171,111 +177,88 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>static String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#ALL">ALL</a></span></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#always_use_ints_as_objects">always_use_ints_as_objects</a></span></code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#capture_output">capture_output</a></span></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#check_object_contracts">check_object_contracts</a></span></code>
-<div class="block">Use Randoop's default set of object contracts as assertions.</div>
-</td>
-</tr>
 <tr class="altColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#check_regression_behavior">check_regression_behavior</a></span></code>
-<div class="block">Capture the current behavior as assertions.</div>
+<td class="colFirst"><code>static <a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#checked_exception">checked_exception</a></span></code>
+<div class="block">If a test throws a checked exception, should it be included in the 
+ error-revealing test suite (value: ERROR), regression test suite 
+ (value: EXPECTED), or should it be discarded (value: INVALID)?</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#classlist">classlist</a></span></code>
-<div class="block">The name of a file that lists classes under test.</div>
+<div class="block">The name of a file that lists classes to test.</div>
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>static File</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#clean_checks">clean_checks</a></span></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#clear">clear</a></span></code>
 <div class="block">Clear the component set each time it contains the given number of inputs.</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#comm_port">comm_port</a></span></code>
-<div class="block">Randoop uses the specified port for output, in serialized form (used by Eclipse plugin).</div>
-</td>
-</tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#compare_checks">compare_checks</a></span></code>
-<div class="block">Run each test twice and compare the checks.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>static List&lt;String&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#componentfile_ser">componentfile_ser</a></span></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static List&lt;String&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#componentfile_txt">componentfile_txt</a></span></code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#coverage_instrumented_classes">coverage_instrumented_classes</a></span></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#debug_checks">debug_checks</a></span></code>&nbsp;</td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#dont_output_tests">dont_output_tests</a></span></code>&nbsp;</td>
-</tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#dont_output_tests">dont_output_tests</a></span></code>
+<div class="block">Run test generation without output.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#dontexecute">dontexecute</a></span></code>
 <div class="block">Create sequences but never execute them.</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>static FileWriter</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#expfile">expfile</a></span></code>&nbsp;</td>
-</tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#FAIL">FAIL</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#error_test_filename">error_test_filename</a></span></code>
+<div class="block">Base name (no ".java" suffix) of the JUnit file containing error-revealing tests</div>
+</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#forbid_null">forbid_null</a></span></code>
-<div class="block">Never use null as input to methods or constructors.</div>
+<div class="block">Do not use <code>null</code> as input to methods or constructors when no 
+ other argument value can be generated.</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static Pattern</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#include_only_classes">include_only_classes</a></span></code>
+<div class="block">Indicate which classes that any test written to output must use.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#init_routine">init_routine</a></span></code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#inputlimit">inputlimit</a></span></code>
-<div class="block">Maximum number of test candidates generated.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#junit_classname">junit_classname</a></span></code>
-<div class="block">Base name (no ".java" suffix) of the JUnit file containing Randoop-generated tests</div>
+<div class="block">Maximum number of test method candidates generated.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -306,7 +289,8 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main">GenInputsAbstract.ClassLiteralsMode</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#literals_level">literals_level</a></span></code>
-<div class="block">How to use literal values (see --literals-file).</div>
+<div class="block">How to use literal values that are specified via the
+ <tt>--literals-file</tt> command-line option.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -334,33 +318,65 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <tr class="rowColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#methodlist">methodlist</a></span></code>
-<div class="block">The name of a file that lists methods under test.</div>
+<div class="block">The name of a file that lists methods to test.</div>
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#no_error_revealing_tests">no_error_revealing_tests</a></span></code>
+<div class="block">Whether to output error-revealing tests.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#no_regression_assertions">no_regression_assertions</a></span></code>
+<div class="block">Whether to include assertions in regression tests.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#no_regression_tests">no_regression_tests</a></span></code>
+<div class="block">Whether to output regression tests.</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#noprogressdisplay">noprogressdisplay</a></span></code>&nbsp;</td>
 </tr>
+<tr class="altColor">
+<td class="colFirst"><code>static <a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#npe_on_non_null_input">npe_on_non_null_input</a></span></code>
+<div class="block">If a test where no <code>null</code> values are given as an input throws a
+ <code>NullPointerExceptoin</code>, should the test be included in the 
+ error-revealing test suite (value: ERROR), regression test suite 
+ (value: EXPECTED), or should it be discarded (value: INVALID)?</div>
+</td>
+</tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static double</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#null_ratio">null_ratio</a></span></code>
-<div class="block">Use null with the given frequency.</div>
+<td class="colFirst"><code>static <a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#npe_on_null_input">npe_on_null_input</a></span></code>
+<div class="block">If a test where a <code>null</code> value is given as an input throws a 
+ <code>NullPointerException</code>, should the test be be included in the 
+ error-revealing test suite (value: ERROR), regression test suite 
+ (value: EXPECTED), or should it be discarded (value: INVALID)?</div>
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>static File</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#observers">observers</a></span></code>
-<div class="block">Use the methods specified in the given file to create regression assertions.</div>
+<td class="colFirst"><code>static double</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#null_ratio">null_ratio</a></span></code>
+<div class="block">Use null with the given frequency as an argument to method calls.</div>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#offline">offline</a></span></code>&nbsp;</td>
+<td class="colFirst"><code>static File</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#observers">observers</a></span></code>
+<div class="block">File containing side-effect-free observer methods.</div>
+</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#omit_field_list">omit_field_list</a></span></code>
-<div class="block">omit_field_list is the name of a file that contains fully-qualified
+<div class="block">The name of a file that contains fully-qualified
  field names to be excluded from test generation.</div>
 </td>
 </tr>
@@ -372,85 +388,73 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 </td>
 </tr>
 <tr class="altColor">
+<td class="colFirst"><code>static <a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#oom_exception">oom_exception</a></span></code>
+<div class="block">If a test throws an <code>OutOfMemoryError</code> exception, should it be 
+ included in the error-revealing test suite (value: ERROR), regression test 
+ suite (value: EXPECTED), or should it be discarded (value: INVALID)?</div>
+</td>
+</tr>
+<tr class="rowColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#output_branches">output_branches</a></span></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#output_components">output_components</a></span></code>
 <div class="block">Output components (serialized, GZIPPED) to the given file.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#output_cov_witnesses">output_cov_witnesses</a></span></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#output_covmap">output_covmap</a></span></code>&nbsp;</td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#output_nonexec">output_nonexec</a></span></code>
-<div class="block">Output sequences even if they do not complete execution.</div>
-</td>
-</tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#output_tests">output_tests</a></span></code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#output_tests_serialized">output_tests_serialized</a></span></code>
 <div class="block">Output tests (sequences plus checkers) in serialized form to the given file.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#outputlimit">outputlimit</a></span></code>
-<div class="block">Determines the maximum number of tests to output.</div>
+<div class="block">The maximum number of regression and error-revealing tests to output.</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>static String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#PASS">PASS</a></span></code>&nbsp;</td>
-</tr>
 <tr class="rowColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#print_diff_obs">print_diff_obs</a></span></code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>static long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#progressinterval">progressinterval</a></span></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#public_only">public_only</a></span></code>
 <div class="block">If the command line argument public_only is true, only public
  classes/methods are considered visible.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#randomseed">randomseed</a></span></code>
-<div class="block">The random seed to use in the generation process</div>
+<div class="block">The random seed to use in the generation process.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>static String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#regression_test_filename">regression_test_filename</a></span></code>
+<div class="block">Base name (no ".java" suffix) of the JUnit file containing regression tests</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#remove_subsequences">remove_subsequences</a></span></code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#repeat_heuristic">repeat_heuristic</a></span></code>&nbsp;</td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#silently_ignore_bad_class_names">silently_ignore_bad_class_names</a></span></code>&nbsp;</td>
-</tr>
 <tr class="altColor">
 <td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#simplify_failed_tests">simplify_failed_tests</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#silently_ignore_bad_class_names">silently_ignore_bad_class_names</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
@@ -461,7 +465,7 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#string_maxlen">string_maxlen</a></span></code>
-<div class="block">Maximum length of strings in generated tests.</div>
+<div class="block">Maximum length of strings in generated tests, including in assertions.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -469,32 +473,30 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#system_props">system_props</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>static Pattern</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#test_classes">test_classes</a></span></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><code>static List&lt;String&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#testclass">testclass</a></span></code>
-<div class="block">Each element is the fully-qualified name of a class under test.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#testsperfile">testsperfile</a></span></code>
-<div class="block">Maximum number of tests to write to each JUnit file</div>
+<div class="block">The fully-qualified name of a class to test.</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#testsperfile">testsperfile</a></span></code>&nbsp;</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#timelimit">timelimit</a></span></code>
 <div class="block">Maximum number of seconds to spend generating tests.</div>
 </td>
 </tr>
-<tr class="altColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#use_object_cache">use_object_cache</a></span></code>&nbsp;</td>
-</tr>
 <tr class="rowColor">
+<td class="colFirst"><code>static <a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#unchecked_exception">unchecked_exception</a></span></code>
+<div class="block">If a test throws a unchecked exception, should the test be included in the 
+ error-revealing test suite (value: ERROR), regression test suite 
+ (value: EXPECTED), or should it be discarded (value: INVALID)?</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>static List&lt;String&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/GenInputsAbstract.html#visitor">visitor</a></span></code>
 <div class="block">Install the given runtime visitor.</div>
@@ -590,7 +592,8 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>testclass</h4>
 <pre>public static&nbsp;List&lt;String&gt; testclass</pre>
-<div class="block">Each element is the fully-qualified name of a class under test.</div>
+<div class="block">The fully-qualified name of a class to test.
+ These classes are tested in addition to any specified using <tt>--classlist</tt>.</div>
 </li>
 </ul>
 <a name="classlist">
@@ -600,10 +603,12 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>classlist</h4>
 <pre>public static&nbsp;String classlist</pre>
-<div class="block">The name of a file that lists classes under test.
+<div class="block">The name of a file that lists classes to test.
  
  In the file, each class under test is specified by its
- fully-qualified name on a separate line.</div>
+ fully-qualified name on a separate line.
+ See an <a href="https://raw.githubusercontent.com/randoop/randoop/master/doc/class_list_example.txt">example</a>.
+ These classes are tested in addition to any specified using <tt>--testclass</tt>.</div>
 </li>
 </ul>
 <a name="methodlist">
@@ -613,15 +618,37 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>methodlist</h4>
 <pre>public static&nbsp;String methodlist</pre>
-<div class="block">The name of a file that lists methods under test.
+<div class="block">The name of a file that lists methods to test.
  
  In the file, each each method under test is specified on a separate
  line. The list of methods given by this argument augment
  any methods derived via the <tt>--testclass</tt> or
  <tt>--classlist</tt> option.
  
- Also see the manual section on <a href="https://rawgit.com/randoop/randoop/master/doc/index.html#specifying-methods">specifying methods 
- and constructors that may appear in a test</a>.</div>
+ <p>
+ A constructor line begins with <code>"cons :"</code> followed by the
+ classname, the string <code>&lt;init&gt;</code> and the constructor's
+ parameter types, enclosed in parentheses. Methods are specified in a
+ similar way. For example:
+ <pre class="code">
+ cons : Type0.&lt;init&gt;(Type1, Type2, ..., TypeN)
+ method : Type0.method_name(Type1, Type2, ..., TypeN)
+ </pre>
+ Each <code>Type<i>i</i></code> must be <b>fully-qualified</b> (include package names).
+
+ <p>
+ See an <a href="https://raw.githubusercontent.com/randoop/randoop/master/doc/method_list_example.txt">example</a>.</div>
+</li>
+</ul>
+<a name="observers">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>observers</h4>
+<pre>public static&nbsp;File observers</pre>
+<div class="block">File containing side-effect-free observer methods.
+ These are used to create regression assertions, and to prune tests.</div>
 </li>
 </ul>
 <a name="omitmethods">
@@ -650,7 +677,7 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>omit_field_list</h4>
 <pre>public static&nbsp;String omit_field_list</pre>
-<div class="block">omit_field_list is the name of a file that contains fully-qualified
+<div class="block">The name of a file that contains fully-qualified
  field names to be excluded from test generation. Otherwise, Randoop
  includes all public fields of a visible class.</div>
 </li>
@@ -673,15 +700,6 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
         probably be an enum with PUBLIC, PACKAGE, PUBLIC elements.</div>
 </li>
 </ul>
-<a name="init_routine">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>init_routine</h4>
-<pre>public static&nbsp;String init_routine</pre>
-</li>
-</ul>
 <a name="silently_ignore_bad_class_names">
 <!--   -->
 </a>
@@ -691,42 +709,118 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <pre>public static&nbsp;boolean silently_ignore_bad_class_names</pre>
 </li>
 </ul>
-<a name="literals_level">
+<a name="no_error_revealing_tests">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>literals_level</h4>
-<pre>public static&nbsp;<a href="../../randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main">GenInputsAbstract.ClassLiteralsMode</a> literals_level</pre>
-<div class="block">How to use literal values (see --literals-file).</div>
-<dl>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main"><code>GenInputsAbstract.ClassLiteralsMode</code></a></dd>
-</dl>
+<h4>no_error_revealing_tests</h4>
+<pre>public static&nbsp;boolean no_error_revealing_tests</pre>
+<div class="block">Whether to output error-revealing tests.
+ <p>
+ Will completely disable output when used with 
+ <code>--no-regression-tests</code>.
+ Be aware that restricting output can result in long runs if the default
+ values of <code>--inputlimit</code> and <code>--timelimit</code> are used.</div>
 </li>
 </ul>
-<a name="literals_file">
+<a name="no_regression_tests">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>literals_file</h4>
-<pre>public static&nbsp;List&lt;String&gt; literals_file</pre>
-<div class="block">A file containing literal values to be used as inputs to methods under test.
- 
- Literals in these files are used in addition to all other constants in the pool.
- For the format of this file, see documentation in class <a href="../../randoop/LiteralFileReader.html" title="class in randoop"><code>LiteralFileReader</code></a>.
- The special value "CLASSES" (with no quotes) means to read literals from all classes under test.</div>
+<h4>no_regression_tests</h4>
+<pre>public static&nbsp;boolean no_regression_tests</pre>
+<div class="block">Whether to output regression tests.
+ <p>
+ Will completely disable output when used with 
+ <code>--no-error-revealing-tests</code>.
+ Be aware that restricting output can result in long runs if the default
+ values of <code>--inputlimit</code> and <code>--timelimit</code> are used.</div>
 </li>
 </ul>
-<a name="randomseed">
+<a name="no_regression_assertions">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>randomseed</h4>
-<pre>public static&nbsp;int randomseed</pre>
-<div class="block">The random seed to use in the generation process</div>
+<h4>no_regression_assertions</h4>
+<pre>public static&nbsp;boolean no_regression_assertions</pre>
+<div class="block">Whether to include assertions in regression tests.
+ If false, then the regression tests contain no assertions
+ (except that if the test throws an exception, it should continue to
+ throw an exception of the same type).
+ Tests without assertions can be used to exercise the code, but they
+ do not enforce any particular behavior, such as values returned.</div>
+</li>
+</ul>
+<a name="checked_exception">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>checked_exception</h4>
+<pre>public static&nbsp;<a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a> checked_exception</pre>
+<div class="block">If a test throws a checked exception, should it be included in the 
+ error-revealing test suite (value: ERROR), regression test suite 
+ (value: EXPECTED), or should it be discarded (value: INVALID)?</div>
+</li>
+</ul>
+<a name="unchecked_exception">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>unchecked_exception</h4>
+<pre>public static&nbsp;<a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a> unchecked_exception</pre>
+<div class="block">If a test throws a unchecked exception, should the test be included in the 
+ error-revealing test suite (value: ERROR), regression test suite 
+ (value: EXPECTED), or should it be discarded (value: INVALID)? 
+ <p>
+ The arguments --npe-on-null-input and --oom-exception handle special cases of 
+ unchecked exceptions.</div>
+</li>
+</ul>
+<a name="npe_on_null_input">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>npe_on_null_input</h4>
+<pre>public static&nbsp;<a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a> npe_on_null_input</pre>
+<div class="block">If a test where a <code>null</code> value is given as an input throws a 
+ <code>NullPointerException</code>, should the test be be included in the 
+ error-revealing test suite (value: ERROR), regression test suite 
+ (value: EXPECTED), or should it be discarded (value: INVALID)?
+ <p>
+ Alternatively see <code>--npe-on-non-null-input</code></div>
+</li>
+</ul>
+<a name="npe_on_non_null_input">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>npe_on_non_null_input</h4>
+<pre>public static&nbsp;<a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a> npe_on_non_null_input</pre>
+<div class="block">If a test where no <code>null</code> values are given as an input throws a
+ <code>NullPointerExceptoin</code>, should the test be included in the 
+ error-revealing test suite (value: ERROR), regression test suite 
+ (value: EXPECTED), or should it be discarded (value: INVALID)?
+ <p>
+ Alternatively, see <code>--npe-on-null-input</code></div>
+</li>
+</ul>
+<a name="oom_exception">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>oom_exception</h4>
+<pre>public static&nbsp;<a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main">GenInputsAbstract.BehaviorType</a> oom_exception</pre>
+<div class="block">If a test throws an <code>OutOfMemoryError</code> exception, should it be 
+ included in the error-revealing test suite (value: ERROR), regression test 
+ suite (value: EXPECTED), or should it be discarded (value: INVALID)?</div>
 </li>
 </ul>
 <a name="timelimit">
@@ -738,12 +832,13 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <pre>public static&nbsp;int timelimit</pre>
 <div class="block">Maximum number of seconds to spend generating tests.
  
- Used to determine when to stop test generation. Generation stops when
- either the time limit (--timelimit=int) OR the input limit
- (--inputlimit=int) is reached.
+ Test generation stops when either the time limit (--timelimit) is reached, 
+ OR the number of generated sequences reaches the input limit (--inputlimit), 
+ OR the number of error-revealing and regression tests reaches the output 
+ limit (--outputlimit).
 
  The default value is appropriate for generating tests for a single
- class in the context of a larger program, but is too small to be effectiev
+ class in the context of a larger program, but is too small to be effective
  for generating tests for an entire program.
 
  Note that if you use this option, Randoop is nondeterministic: it
@@ -757,11 +852,25 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>outputlimit</h4>
 <pre>public static&nbsp;int outputlimit</pre>
-<div class="block">Determines the maximum number of tests to output.
- 
- This command-line option is generally more appropriate than
- --inputlimit, which controls how many test candidates Randoop
- generates internally.</div>
+<div class="block">The maximum number of regression and error-revealing tests to output.
+ Test generation stops when either the time limit (--timelimit) is reached, 
+ OR the number of generated sequences reaches the input limit (--inputlimit), 
+ OR the number of error-revealing and regression tests reaches the output 
+ limit (--outputlimit).
+ <p>
+ This option affects how many tests will occur in the output, as opposed to
+ --inputlimit, which affects the number of test method candidates that are 
+ generated internally. This option is a better choice for controlling the 
+ tests you get, because the number of candidates generated will always be 
+ larger than the number output since redundant and invalid tests are filtered. 
+ However, the current implementation means that the actual number of tests 
+ in the output can still be substantially smaller than this limit.
+ <p>
+ This limit will have no effect if there is no output, which occurs when
+ using either <code>--dont-output-tests</code> or 
+ <code>--no-error-revealing-tests</code> together with 
+ <code>--no-regression-tests</code>. 
+ In this case, the option <code>--inputlimit</code> should be used.</div>
 </li>
 </ul>
 <a name="inputlimit">
@@ -771,16 +880,20 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>inputlimit</h4>
 <pre>public static&nbsp;int inputlimit</pre>
-<div class="block">Maximum number of test candidates generated.
- 
- Used to determine when to stop test generation. Generation stops when
- either the time limit (--timelimit=int) OR the input limit
- (--inputlimit=int) is reached.  The number of tests output
- may be smaller than then number of test candidates generated,
- because redundant and illegal tests may be discarded.
- 
- The --outputlimit command-line option is usually more appropriate than
- --inputlimit.</div>
+<div class="block">Maximum number of test method candidates generated.
+ Test generation stops when either the time limit (--timelimit) is reached, 
+ OR the number of generated sequences reaches the input limit (--inputlimit), 
+ OR the number of error-revealing and regression tests reaches the output 
+ limit (--outputlimit).  
+ The number of tests output will be smaller than then number of test 
+ candidates generated, because redundant and illegal tests may be discarded.
+ <p>
+ This limit should be used when no tests are output, which occurs when
+ using either <code>--dont-output-tests</code> or 
+ <code>--no-error-revealing-tests</code> together with 
+ <code>--no-regression-tests</code>.
+ Otherwise the <code>--outputlimit</code> command-line option is usually 
+ more appropriate.</div>
 </li>
 </ul>
 <a name="maxsize">
@@ -793,6 +906,25 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <div class="block">Do not generate tests with more than this many statements</div>
 </li>
 </ul>
+<a name="null_ratio">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>null_ratio</h4>
+<pre>public static&nbsp;double null_ratio</pre>
+<div class="block">Use null with the given frequency as an argument to method calls.
+ 
+ For example, a null ratio of 0.05 directs Randoop to use
+ <code>null</code> as an input 5 percent of the time when a
+ non-<code>null</code> value of the appropriate type is available.
+ 
+ Unless --forbid_null is true, a <code>null</code> value will still be used 
+ if no other value can be passed as an argument even if --null-ratio=0.
+ 
+ Randoop never uses <code>null</code> for receiver values.</div>
+</li>
+</ul>
 <a name="forbid_null">
 <!--   -->
 </a>
@@ -800,13 +932,45 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>forbid_null</h4>
 <pre>public static&nbsp;boolean forbid_null</pre>
-<div class="block">Never use null as input to methods or constructors.
- 
- This option causes Randoop to abandon the method call rather than providing
- null as an input, when no non-null value of the appropriate type is available.
- 
- To ask Randoop to calls methods with null with greater frequency,
- see option --null-ratio.</div>
+<div class="block">Do not use <code>null</code> as input to methods or constructors when no 
+ other argument value can be generated.
+ <p>
+ If true, Randoop will not generate a test when unable to find a non-null
+ value of appropriate type as an input. This could result in certain class
+ members being untested.
+ <p>
+ Does not affect the behavior based on --null_ratio, which independently 
+ determines the frequency that <code>null</code> is used as an input.</div>
+</li>
+</ul>
+<a name="literals_file">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>literals_file</h4>
+<pre>public static&nbsp;List&lt;String&gt; literals_file</pre>
+<div class="block">A file containing literal values to be used as inputs to methods under test.
+ <p>
+ Literals in these files are used in addition to all other constants in the 
+ pool. For the format of this file, see documentation in class 
+ <a href="../../randoop/LiteralFileReader.html" title="class in randoop"><code>LiteralFileReader</code></a>. The special value "CLASSES" (with no 
+ quotes) means to read literals from all classes under test.</div>
+</li>
+</ul>
+<a name="literals_level">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>literals_level</h4>
+<pre>public static&nbsp;<a href="../../randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main">GenInputsAbstract.ClassLiteralsMode</a> literals_level</pre>
+<div class="block">How to use literal values that are specified via the
+ <tt>--literals-file</tt> command-line option.</div>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main"><code>GenInputsAbstract.ClassLiteralsMode</code></a></dd>
+</dl>
 </li>
 </ul>
 <a name="string_maxlen">
@@ -816,26 +980,19 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>string_maxlen</h4>
 <pre>public static&nbsp;int string_maxlen</pre>
-<div class="block">Maximum length of strings in generated tests.  Strings longer than
+<div class="block">Maximum length of strings in generated tests, including in assertions.
+ Strings longer than
  65KB (or about 10,000 characters) may be rejected by the Java
  compiler, according to the Java Virtual Machine specification.</div>
 </li>
 </ul>
-<a name="null_ratio">
+<a name="init_routine">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>null_ratio</h4>
-<pre>public static&nbsp;double null_ratio</pre>
-<div class="block">Use null with the given frequency.
- 
- If a null ratio is given, it should be between 0 and 1. A ratio of X means that
- null will be used instead of a non-null value as a parameter to method calls,
- with X frequency (1 means always use null, 0 means never use null). For example,
- a ratio of 0.5 directs Randoop to use null inputs 50 percent of the time.
- 
- Randoop never uses null for receiver values.</div>
+<h4>init_routine</h4>
+<pre>public static&nbsp;String init_routine</pre>
 </li>
 </ul>
 <a name="alias_ratio">
@@ -846,9 +1003,8 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <h4>alias_ratio</h4>
 <pre>public static&nbsp;double alias_ratio</pre>
 <div class="block">Try to reuse values from a sequence with the given frequency.
- 
  If an alias ratio is given, it should be between 0 and 1.
- 
+ <p>
  A ratio of 0 results in tests where each value created within a test input is typically used at most once
  as an argument in a method call. A ratio of 1 tries to maximize the number of times
  values are used as inputs to parameters within a test.</div>
@@ -862,8 +1018,8 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <h4>small_tests</h4>
 <pre>public static&nbsp;boolean small_tests</pre>
 <div class="block">Favor shorter sequences when assembling new sequences out of old ones.
-
- Randoop generate new tests by combining old previously-generated tests.
+ <p>
+ Randoop generates new tests by combining old previously-generated tests.
  If this option is given, tests with fewer calls are given greater weight during
  its random selection. This has the overall effect of producing smaller JUnit tests.</div>
 </li>
@@ -876,111 +1032,11 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <h4>clear</h4>
 <pre>public static&nbsp;int clear</pre>
 <div class="block">Clear the component set each time it contains the given number of inputs.
-
  <p>
  Randoop stores previously-generated tests in a "component" set, and uses them to
  generate new tests. Setting this variable to a small number can sometimes result
  in a greater variety of tests generated during a single run.
  </p></div>
-</li>
-</ul>
-<a name="observers">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>observers</h4>
-<pre>public static&nbsp;File observers</pre>
-<div class="block">Use the methods specified in the given file to create regression assertions.</div>
-</li>
-</ul>
-<a name="check_object_contracts">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>check_object_contracts</h4>
-<pre>public static&nbsp;boolean check_object_contracts</pre>
-<div class="block">Use Randoop's default set of object contracts as assertions.
- If disabled, these assertions are not created.
- 
- <p>
- The default set of contracts includes:
-   equals(Object) is reflexive,
-   equals(Object) is symmetric,
-   equals(Object) and hashCode() are consistent,
-   x.equals(null) returns false,
-   any nullary method annotated with <code>@CheckRep</code> returns true.
- </p></div>
-</li>
-</ul>
-<a name="check_regression_behavior">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>check_regression_behavior</h4>
-<pre>public static&nbsp;boolean check_regression_behavior</pre>
-<div class="block">Capture the current behavior as assertions.
- This makes Randoop's tests act as regression tests that ensure that the
- code continues to behave as it did when the tests were generated.</div>
-</li>
-</ul>
-<a name="output_tests">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>output_tests</h4>
-<pre>public static&nbsp;String output_tests</pre>
-</li>
-</ul>
-<a name="ALL">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>ALL</h4>
-<pre>public static final&nbsp;String ALL</pre>
-<dl>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../constant-values.html#randoop.main.GenInputsAbstract.ALL">Constant Field Values</a></dd>
-</dl>
-</li>
-</ul>
-<a name="FAIL">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>FAIL</h4>
-<pre>public static final&nbsp;String FAIL</pre>
-<dl>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../constant-values.html#randoop.main.GenInputsAbstract.FAIL">Constant Field Values</a></dd>
-</dl>
-</li>
-</ul>
-<a name="PASS">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>PASS</h4>
-<pre>public static final&nbsp;String PASS</pre>
-<dl>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../constant-values.html#randoop.main.GenInputsAbstract.PASS">Constant Field Values</a></dd>
-</dl>
-</li>
-</ul>
-<a name="simplify_failed_tests">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>simplify_failed_tests</h4>
-<pre>public static&nbsp;boolean simplify_failed_tests</pre>
 </li>
 </ul>
 <a name="testsperfile">
@@ -990,17 +1046,26 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>testsperfile</h4>
 <pre>public static&nbsp;int testsperfile</pre>
-<div class="block">Maximum number of tests to write to each JUnit file</div>
 </li>
 </ul>
-<a name="junit_classname">
+<a name="error_test_filename">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>junit_classname</h4>
-<pre>public static&nbsp;String junit_classname</pre>
-<div class="block">Base name (no ".java" suffix) of the JUnit file containing Randoop-generated tests</div>
+<h4>error_test_filename</h4>
+<pre>public static&nbsp;String error_test_filename</pre>
+<div class="block">Base name (no ".java" suffix) of the JUnit file containing error-revealing tests</div>
+</li>
+</ul>
+<a name="regression_test_filename">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>regression_test_filename</h4>
+<pre>public static&nbsp;String regression_test_filename</pre>
+<div class="block">Base name (no ".java" suffix) of the JUnit file containing regression tests</div>
 </li>
 </ul>
 <a name="junit_package_name">
@@ -1030,29 +1095,24 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <li class="blockList">
 <h4>dont_output_tests</h4>
 <pre>public static&nbsp;boolean dont_output_tests</pre>
+<div class="block">Run test generation without output. 
+ May be desirable when running with a visitor. 
+ <p>
+ NOTE: Because there is no output, the value of <code>--outputlimit</code> 
+ will never be met, so be sure to set <code>--inputlimit</code> or
+ <code>--timelimit</code> to a reasonable value when using this option.</div>
 </li>
 </ul>
-<a name="output_nonexec">
+<a name="include_only_classes">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>output_nonexec</h4>
-<pre>public static&nbsp;boolean output_nonexec</pre>
-<div class="block">Output sequences even if they do not complete execution.
- 
-  Randoop's default behavior is to output only tests consisting of
-  method call sequences that execute every statement, rather than throwing
-  an exception or failing a contract check before the last statement.</div>
-</li>
-</ul>
-<a name="test_classes">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>test_classes</h4>
-<pre>public static&nbsp;Pattern test_classes</pre>
+<h4>include_only_classes</h4>
+<pre>public static&nbsp;Pattern include_only_classes</pre>
+<div class="block">Indicate which classes that any test written to output must use. 
+ Written test suites will only include tests that have at least one 
+ use of a member of a class whose name matches the regular expression.</div>
 </li>
 </ul>
 <a name="junit_reflection_allowed">
@@ -1136,7 +1196,6 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <h4>output_components</h4>
 <pre>public static&nbsp;String output_components</pre>
 <div class="block">Output components (serialized, GZIPPED) to the given file.
- 
  Suggestion: use a .gz suffix in file name.</div>
 </li>
 </ul>
@@ -1148,23 +1207,20 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <h4>output_tests_serialized</h4>
 <pre>public static&nbsp;String output_tests_serialized</pre>
 <div class="block">Output tests (sequences plus checkers) in serialized form to the given file.
- 
  Suggestion: use a .gz suffix in file name.</div>
 </li>
 </ul>
-<a name="comm_port">
+<a name="randomseed">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>comm_port</h4>
-<pre>public static&nbsp;int comm_port</pre>
-<div class="block">Randoop uses the specified port for output, in serialized form (used by Eclipse plugin).
- 
- If this value is not -1, Randoop relays information about the
- program's execution over a connection to the specified port on the
- local machine. Information is sent using a serialized
- randoop.runtime.Message object. Printing is also suppressed.</div>
+<h4>randomseed</h4>
+<pre>public static&nbsp;int randomseed</pre>
+<div class="block">The random seed to use in the generation process.
+ Note that Randoop is deterministic:  running it twice will produce the
+ same test suite.  If you want to produced multiple different test
+ suites, run Randoop multiple times with a different random seed.</div>
 </li>
 </ul>
 <a name="noprogressdisplay">
@@ -1284,78 +1340,13 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <pre>public static&nbsp;String output_branches</pre>
 </li>
 </ul>
-<a name="remove_subsequences">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>remove_subsequences</h4>
-<pre>public static&nbsp;boolean remove_subsequences</pre>
-</li>
-</ul>
-<a name="compare_checks">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>compare_checks</h4>
-<pre>public static&nbsp;boolean compare_checks</pre>
-<div class="block">Run each test twice and compare the checks.  If the results differ,
- then disable the test.</div>
-</li>
-</ul>
-<a name="clean_checks">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>clean_checks</h4>
-<pre>public static&nbsp;File clean_checks</pre>
-</li>
-</ul>
-<a name="print_diff_obs">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>print_diff_obs</h4>
-<pre>public static&nbsp;boolean print_diff_obs</pre>
-</li>
-</ul>
-<a name="expfile">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>expfile</h4>
-<pre>public static&nbsp;FileWriter expfile</pre>
-</li>
-</ul>
-<a name="offline">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>offline</h4>
-<pre>public static&nbsp;boolean offline</pre>
-</li>
-</ul>
 <a name="repeat_heuristic">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>repeat_heuristic</h4>
-<pre>public static&nbsp;boolean repeat_heuristic</pre>
-</li>
-</ul>
-<a name="use_object_cache">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>use_object_cache</h4>
-<pre>public static&nbsp;boolean use_object_cache</pre>
+<h4>repeat_heuristic</h4>
+<pre>public static&nbsp;boolean repeat_heuristic</pre>
 </li>
 </ul>
 </li>
@@ -1430,7 +1421,7 @@ extends <a href="../../randoop/main/CommandHandler.html" title="class in randoop
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../randoop/main/GenBranchDir.html" title="class in randoop.main"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../index.html?randoop/main/GenInputsAbstract.html" target="_top">Frames</a></li>

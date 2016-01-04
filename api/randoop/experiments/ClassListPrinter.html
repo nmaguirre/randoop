@@ -118,7 +118,7 @@ extends Object</pre>
  Inner classes (those ending in $D, where D is a digit) are ignored.
 
   If the -omit:"REGEXP" option is given, then any class names that
-  match REGEXP will be omitted. 
+  match REGEXP will be omitted.
 
  Results are output to destinationFile.</div>
 </li>
@@ -215,12 +215,14 @@ extends Object</pre>
                                       throws IOException</pre>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>destinationFile</code> - </dd>
-<dd><code>classDir</code> - </dd>
-<dd><code>packageName</code> - may be null.</dd>
-<dd><code>filter</code> - </dd>
+<dd><code>destinationFile</code> - the file where class names are written</dd>
+<dd><code>classDir</code> - the directory for the package</dd>
+<dd><code>packageName</code> - the name of the package (may be null)</dd>
+<dd><code>filter</code> - the class filter</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>IOException</code></dd>
+<dd><code>IOException</code> - if there is an error writing the file</dd>
+<dd><code>IllegalArgumentException</code> - if filter is null, classDir is invalid, or
+         packageName doesn't correspond to directory</dd>
 </dl>
 </li>
 </ul>

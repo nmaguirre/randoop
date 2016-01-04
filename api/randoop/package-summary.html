@@ -107,19 +107,13 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><a href="../randoop/ITestFilter.html" title="interface in randoop">ITestFilter</a></td>
-<td class="colLast">
-<div class="block">Used by Randoop's test generator to determine if a given sequence should be output to the user.</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="../randoop/ObjectContract.html" title="interface in randoop">ObjectContract</a></td>
 <td class="colLast">
 <div class="block">An object contract represents a property that must hold of any object of
  a given class.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../randoop/StateMatcher.html" title="interface in randoop">StateMatcher</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -149,61 +143,61 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><a href="../randoop/ContractCheckingVisitor.html" title="class in randoop">ContractCheckingVisitor</a></td>
-<td class="colLast">
-<div class="block">An execution visitor that checks unary and binary object contracts on the
- values created by the sequence.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><a href="../randoop/DefaultTestFilter.html" title="class in randoop">DefaultTestFilter</a></td>
-<td class="colLast">
-<div class="block">Randoop's default test filter determines if a generated test should be output
- to the user.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><a href="../randoop/DummyVisitor.html" title="class in randoop">DummyVisitor</a></td>
 <td class="colLast">
 <div class="block">A visitor that does nothing and adds no checks.</div>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><a href="../randoop/EmptyExceptionCheck.html" title="class in randoop">EmptyExceptionCheck</a></td>
+<td class="colLast">
+<div class="block">An <code>ExceptionCheck</code> that doesn't enforce the expectation of an
+ exception by the statement at the statement index.</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><a href="../randoop/EqualsHashcode.html" title="class in randoop">EqualsHashcode</a></td>
 <td class="colLast">
 <div class="block">The contract: <code>o1.equals(o2) &rArr; o1.hashCode() == o2.hashCode()</code>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../randoop/EqualsMethodMatcher.html" title="class in randoop">EqualsMethodMatcher</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../randoop/EqualsReflexive.html" title="class in randoop">EqualsReflexive</a></td>
 <td class="colLast">
 <div class="block">The contract: <code>x0.equals(x0)==true</code>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../randoop/EqualsSymmetric.html" title="class in randoop">EqualsSymmetric</a></td>
 <td class="colLast">
 <div class="block">The contract: <code>o1.equals(o2) &rArr; o2.equals(o1)</code>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../randoop/EqualsToNullRetFalse.html" title="class in randoop">EqualsToNullRetFalse</a></td>
 <td class="colLast">
 <div class="block">The contract: <code>x0.equals(null)==false</code>.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../randoop/EverythingIsDifferentMatcher.html" title="class in randoop">EverythingIsDifferentMatcher</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../randoop/ExceptionalExecution.html" title="class in randoop">ExceptionalExecution</a></td>
 <td class="colLast">
 <div class="block">Means that the execution of a statement threw an exception.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><a href="../randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a></td>
+<td class="colLast">
+<div class="block">An <code>ExceptionCheck</code> is used to indicate that an exception is expected
+ at a particular statement in a sequence.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -216,22 +210,8 @@
 <tr class="rowColor">
 <td class="colFirst"><a href="../randoop/ExpectedExceptionCheck.html" title="class in randoop">ExpectedExceptionCheck</a></td>
 <td class="colLast">
-<div class="block">A checker that checks for an expected exception from a method call.</div>
-</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><a href="../randoop/FailureSet.html" title="class in randoop">FailureSet</a></td>
-<td class="colLast">
-<div class="block">FailureSet represents a set of failures that occurred in the execution of a particular
- <a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence"><code>ExecutableSequence</code></a>.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><a href="../randoop/FailureSet.Failure.html" title="class in randoop">FailureSet.Failure</a></td>
-<td class="colLast">
-<div class="block">Represents an execution failure, and holds the
- statement where the failure occurred, and the type of contract that 
- was violated.</div>
+<div class="block">An <code>ExceptionCheck</code> that enforces the expectation of an exception
+ being thrown.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -294,8 +274,7 @@
 <tr class="altColor">
 <td class="colFirst"><a href="../randoop/NoExceptionCheck.html" title="class in randoop">NoExceptionCheck</a></td>
 <td class="colLast">
-<div class="block">Checks that no exception is thrown after a given statement
- in a sequence.</div>
+<div class="block">This check represents the fact that a statement should not throw an exception.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -314,7 +293,10 @@
 <td class="colFirst"><a href="../randoop/ObjectCheck.html" title="class in randoop">ObjectCheck</a></td>
 <td class="colLast">
 <div class="block">A check that checks for expected properties of one or more objects
- generated during the execution of a <a href="../randoop/sequence/Sequence.html" title="class in randoop.sequence"><code>Sequence</code></a>, for example:</div>
+ generated during the execution of a <a href="../randoop/sequence/Sequence.html" title="class in randoop.sequence"><code>Sequence</code></a>, for example:
+ 
+  Checking that the objects created during execution of a sequence 
+      respect reflexivity, transitivity and symmetry of equality.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -342,21 +324,6 @@
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><a href="../randoop/RegressionCaptureVisitor.html" title="class in randoop">RegressionCaptureVisitor</a></td>
-<td class="colLast">
-<div class="block">An execution visitor that records regression checks on the values
- created by the sequence.</div>
-</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><a href="../randoop/ReplayVisitor.html" title="class in randoop">ReplayVisitor</a></td>
-<td class="colLast">
-<div class="block">An execution visitor that evaluates the checks in the
- given executable sequence, and returns <code>false</code>
- if any of them fail.</div>
-</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><a href="../randoop/SeedSequences.html" title="class in randoop">SeedSequences</a></td>
 <td class="colLast">
 <div class="block">Provides functionality for creating a set of sequences that create a set of
@@ -370,26 +337,19 @@
 </td>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><a href="../randoop/SerializableExpectedExceptionCheck.html" title="class in randoop">SerializableExpectedExceptionCheck</a></td>
-<td class="colLast">
-<div class="block">Serialized form of <a href="../randoop/ExpectedExceptionCheck.html" title="class in randoop"><code>ExpectedExceptionCheck</code></a> allowing tests to
- be serialized.</div>
-</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="../randoop/SerializableObserverEqValue.html" title="class in randoop">SerializableObserverEqValue</a></td>
 <td class="colLast">
 <div class="block">Serialized form of <a href="../randoop/ObserverEqValue.html" title="class in randoop"><code>ObserverEqValue</code></a> allowing tests to be
  serialized.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../randoop/SubTypeSet.html" title="class in randoop">SubTypeSet</a></td>
 <td class="colLast">
 <div class="block">A set of classes.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../randoop/ToStringReturnsNormally.html" title="class in randoop">ToStringReturnsNormally</a></td>
 <td class="colLast">
 <div class="block">Checks that calling toString() on an object does not throw an exception.</div>

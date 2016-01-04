@@ -17,8 +17,8 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":9,"i7":10,"i8":10,"i9":10};
-var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var methods = {"i0":10,"i1":10,"i2":10};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
 var tableTab = "tableTab";
@@ -48,7 +48,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../randoop/ExecutionVisitor.html" title="interface in randoop"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../randoop/FailureSet.html" title="class in randoop"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../randoop/Globals.html" title="class in randoop"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../index.html?randoop/ExpectedExceptionCheck.html" target="_top">Frames</a></li>
@@ -73,7 +73,7 @@ var activeTableTab = "activeTableTab";
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#fields.inherited.from.class.ExceptionCheck">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>
@@ -98,7 +98,12 @@ var activeTableTab = "activeTableTab";
 <li>Object</li>
 <li>
 <ul class="inheritance">
+<li><a href="../randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a></li>
+<li>
+<ul class="inheritance">
 <li>ExpectedExceptionCheck</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -112,9 +117,13 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">ExpectedExceptionCheck</span>
-extends Object
-implements <a href="../randoop/Check.html" title="interface in randoop">Check</a></pre>
-<div class="block">A checker that checks for an expected exception from a method call.</div>
+extends <a href="../randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a></pre>
+<div class="block">An <code>ExceptionCheck</code> that enforces the expectation of an exception
+ being thrown. In particular,
+ <ul>
+ <li> fails if exception is not thrown, and
+ <li> succeeds only when expected exception is thrown.
+ </ul></div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../serialized-form.html#randoop.ExpectedExceptionCheck">Serialized Form</a></dd>
@@ -125,6 +134,21 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field.summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<ul class="blockList">
+<li class="blockList"><a name="fields.inherited.from.class.ExceptionCheck">
+<!--   -->
+</a>
+<h3>Fields inherited from class&nbsp;<a href="../randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a></h3>
+<code><a href="../randoop/ExceptionCheck.html#exception">exception</a>, <a href="../randoop/ExceptionCheck.html#statementIndex">statementIndex</a></code></li>
+</ul>
+</li>
+</ul>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
 <ul class="blockList">
 <li class="blockList"><a name="constructor.summary">
@@ -137,12 +161,12 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#ExpectedExceptionCheck-java.lang.Class-int-">ExpectedExceptionCheck</a></span>(Class&lt;? extends Throwable&gt;&nbsp;exception_class,
-                      int&nbsp;statementIdx)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#ExpectedExceptionCheck-java.lang.Throwable-int-">ExpectedExceptionCheck</a></span>(Throwable&nbsp;exception,
-                      int&nbsp;statementIdx)</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#ExpectedExceptionCheck-java.lang.Throwable-int-java.lang.String-">ExpectedExceptionCheck</a></span>(Throwable&nbsp;exception,
+                      int&nbsp;statementIndex,
+                      String&nbsp;catchClassName)</code>
+<div class="block">Creates check that enforces expectation that an exception is thrown by the
+ statement at the statement index.</div>
+</td>
 </tr>
 </table>
 </li>
@@ -154,68 +178,39 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#equals-java.lang.Object-">equals</a></span>(Object&nbsp;o)</code>&nbsp;</td>
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#appendCatchBehavior-java.lang.StringBuilder-java.lang.String-">appendCatchBehavior</a></span>(StringBuilder&nbsp;b,
+                   String&nbsp;exceptionClassName)</code>
+<div class="block">Appends code for catch block behavior corresponding to expected exception.</div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#evaluate-randoop.sequence.Execution-">evaluate</a></span>(<a href="../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a>&nbsp;execution)</code>
-<div class="block">Evaluates this check on the given unfolding execution of a sequence,
- returning <code>true</code> if the check succeeded, and <code>false</code>
- otherwise.</div>
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#appendTryBehavior-java.lang.StringBuilder-java.lang.String-">appendTryBehavior</a></span>(StringBuilder&nbsp;b,
+                 String&nbsp;exceptionClassName)</code>
+<div class="block">Appends code to follow the statement throwing expected exception in try block.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code>String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#get_id--">get_id</a></span>()</code>
-<div class="block">Returns a unique string identifier for the check.</div>
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#evaluate-randoop.sequence.Execution-">evaluate</a></span>(<a href="../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a>&nbsp;execution)</code>
+<div class="block">Evaluates this check on the given execution of a sequence.</div>
 </td>
-</tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#get_stmt_no--">get_stmt_no</a></span>()</code>
-<div class="block">return the offset of this statement in the sequence</div>
-</td>
-</tr>
-<tr id="i4" class="altColor">
-<td class="colFirst"><code>String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#get_value--">get_value</a></span>()</code>
-<div class="block">Returns the class of the exception thrown</div>
-</td>
-</tr>
-<tr id="i5" class="rowColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i6" class="altColor">
-<td class="colFirst"><code>static Class&lt;?&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#nearestVisibleSuperclass-java.lang.Class-">nearestVisibleSuperclass</a></span>(Class&lt;?&gt;&nbsp;clazz)</code>
-<div class="block">The nearest visible superclass -- usually the argument itself.</div>
-</td>
-</tr>
-<tr id="i7" class="rowColor">
-<td class="colFirst"><code>String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#toCodeStringPostStatement--">toCodeStringPostStatement</a></span>()</code>
-<div class="block">The "catch" half of the try-catch wrapper.</div>
-</td>
-</tr>
-<tr id="i8" class="altColor">
-<td class="colFirst"><code>String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#toCodeStringPreStatement--">toCodeStringPreStatement</a></span>()</code>
-<div class="block">The "try" half of the try-catch wrapper.</div>
-</td>
-</tr>
-<tr id="i9" class="rowColor">
-<td class="colFirst"><code>String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExpectedExceptionCheck.html#toString--">toString</a></span>()</code>&nbsp;</td>
 </tr>
 </table>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.ExceptionCheck">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;<a href="../randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a></h3>
+<code><a href="../randoop/ExceptionCheck.html#equals-java.lang.Object-">equals</a>, <a href="../randoop/ExceptionCheck.html#getException--">getException</a>, <a href="../randoop/ExceptionCheck.html#getExceptionName--">getExceptionName</a>, <a href="../randoop/ExceptionCheck.html#getID--">getID</a>, <a href="../randoop/ExceptionCheck.html#getStatementIndex--">getStatementIndex</a>, <a href="../randoop/ExceptionCheck.html#getValue--">getValue</a>, <a href="../randoop/ExceptionCheck.html#hashCode--">hashCode</a>, <a href="../randoop/ExceptionCheck.html#toCodeStringPostStatement--">toCodeStringPostStatement</a>, <a href="../randoop/ExceptionCheck.html#toCodeStringPreStatement--">toCodeStringPreStatement</a>, <a href="../randoop/ExceptionCheck.html#toString--">toString</a></code></li>
+</ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.Object">
 <!--   -->
@@ -237,24 +232,23 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="ExpectedExceptionCheck-java.lang.Throwable-int-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>ExpectedExceptionCheck</h4>
-<pre>public&nbsp;ExpectedExceptionCheck(Throwable&nbsp;exception,
-                              int&nbsp;statementIdx)</pre>
-</li>
-</ul>
-<a name="ExpectedExceptionCheck-java.lang.Class-int-">
+<a name="ExpectedExceptionCheck-java.lang.Throwable-int-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>ExpectedExceptionCheck</h4>
-<pre>public&nbsp;ExpectedExceptionCheck(Class&lt;? extends Throwable&gt;&nbsp;exception_class,
-                              int&nbsp;statementIdx)</pre>
+<pre>public&nbsp;ExpectedExceptionCheck(Throwable&nbsp;exception,
+                              int&nbsp;statementIndex,
+                              String&nbsp;catchClassName)</pre>
+<div class="block">Creates check that enforces expectation that an exception is thrown by the
+ statement at the statement index.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>exception</code> - the expected exception</dd>
+<dd><code>statementIndex</code> - the index of the statement in the sequence where exception is thrown</dd>
+<dd><code>catchClassName</code> - the name of exception to be caught</dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -265,129 +259,41 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="equals-java.lang.Object-">
+<a name="appendTryBehavior-java.lang.StringBuilder-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>equals</h4>
-<pre>public&nbsp;boolean&nbsp;equals(Object&nbsp;o)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>equals</code>&nbsp;in class&nbsp;<code>Object</code></dd>
-</dl>
-</li>
-</ul>
-<a name="hashCode--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>hashCode</h4>
-<pre>public&nbsp;int&nbsp;hashCode()</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>hashCode</code>&nbsp;in class&nbsp;<code>Object</code></dd>
-</dl>
-</li>
-</ul>
-<a name="toString--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>toString</h4>
-<pre>public&nbsp;String&nbsp;toString()</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>toString</code>&nbsp;in class&nbsp;<code>Object</code></dd>
-</dl>
-</li>
-</ul>
-<a name="get_id--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>get_id</h4>
-<pre>public&nbsp;String&nbsp;get_id()</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../randoop/Check.html#get_id--">Check</a></code></span></div>
-<div class="block">Returns a unique string identifier for the check.  Two checks are
- the same if these identifers match.  The value is NOT included.
- with.  Used to match up checks between the same sequence run at
- different times.  Note that because of changes in the environment
- (eg, static variables), two executions of the same sequence may
- have different checks (because the existence of some checks
- depends on the value of variables)</div>
+<h4>appendTryBehavior</h4>
+<pre>protected&nbsp;void&nbsp;appendTryBehavior(StringBuilder&nbsp;b,
+                                 String&nbsp;exceptionClassName)</pre>
+<div class="block">Appends code to follow the statement throwing expected exception in try block.
+ Appends a fail assertion after statement in try block.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../randoop/Check.html#get_id--">get_id</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
+<dd><code><a href="../randoop/ExceptionCheck.html#appendTryBehavior-java.lang.StringBuilder-java.lang.String-">appendTryBehavior</a></code>&nbsp;in class&nbsp;<code><a href="../randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>b</code> - the string builder to which code text is added</dd>
+<dd><code>exceptionClassName</code> - the class name of the expected exception</dd>
 </dl>
 </li>
 </ul>
-<a name="get_value--">
+<a name="appendCatchBehavior-java.lang.StringBuilder-java.lang.String-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>get_value</h4>
-<pre>public&nbsp;String&nbsp;get_value()</pre>
-<div class="block">Returns the class of the exception thrown</div>
+<h4>appendCatchBehavior</h4>
+<pre>protected&nbsp;void&nbsp;appendCatchBehavior(StringBuilder&nbsp;b,
+                                   String&nbsp;exceptionClassName)</pre>
+<div class="block">Appends code for catch block behavior corresponding to expected exception.
+ Appends assertion to confirm expected exception caught.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../randoop/Check.html#get_value--">get_value</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="get_stmt_no--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>get_stmt_no</h4>
-<pre>public&nbsp;int&nbsp;get_stmt_no()</pre>
-<div class="block">return the offset of this statement in the sequence</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../randoop/Check.html#get_stmt_no--">get_stmt_no</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="toCodeStringPreStatement--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>toCodeStringPreStatement</h4>
-<pre>public&nbsp;String&nbsp;toCodeStringPreStatement()</pre>
-<div class="block">The "try" half of the try-catch wrapper.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../randoop/Check.html#toCodeStringPreStatement--">toCodeStringPreStatement</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
-</dl>
-</li>
-</ul>
-<a name="nearestVisibleSuperclass-java.lang.Class-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>nearestVisibleSuperclass</h4>
-<pre>public static&nbsp;Class&lt;?&gt;&nbsp;nearestVisibleSuperclass(Class&lt;?&gt;&nbsp;clazz)</pre>
-<div class="block">The nearest visible superclass -- usually the argument itself.</div>
-</li>
-</ul>
-<a name="toCodeStringPostStatement--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>toCodeStringPostStatement</h4>
-<pre>public&nbsp;String&nbsp;toCodeStringPostStatement()</pre>
-<div class="block">The "catch" half of the try-catch wrapper.</div>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../randoop/Check.html#toCodeStringPostStatement--">toCodeStringPostStatement</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
+<dd><code><a href="../randoop/ExceptionCheck.html#appendCatchBehavior-java.lang.StringBuilder-java.lang.String-">appendCatchBehavior</a></code>&nbsp;in class&nbsp;<code><a href="../randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>b</code> - the string builder to which code text is to be added</dd>
+<dd><code>exceptionClassName</code> - the class name of the expected exception</dd>
 </dl>
 </li>
 </ul>
@@ -398,13 +304,14 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <li class="blockList">
 <h4>evaluate</h4>
 <pre>public&nbsp;boolean&nbsp;evaluate(<a href="../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a>&nbsp;execution)</pre>
-<div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../randoop/Check.html#evaluate-randoop.sequence.Execution-">Check</a></code></span></div>
-<div class="block">Evaluates this check on the given unfolding execution of a sequence,
- returning <code>true</code> if the check succeeded, and <code>false</code>
- otherwise.</div>
+<div class="block">Evaluates this check on the given execution of a sequence.
+ Checks that an exception of the expected type is thrown by the statement
+ in this object in the given <code>Execution</code>.</div>
 <dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../randoop/Check.html#evaluate-randoop.sequence.Execution-">evaluate</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>execution</code> - the execution of sequence on which to test this check</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if statement throws the expected exception, and false otherwise</dd>
 </dl>
 </li>
 </ul>
@@ -436,7 +343,7 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <div class="subNav">
 <ul class="navList">
 <li><a href="../randoop/ExecutionVisitor.html" title="interface in randoop"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../randoop/FailureSet.html" title="class in randoop"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../randoop/Globals.html" title="class in randoop"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../index.html?randoop/ExpectedExceptionCheck.html" target="_top">Frames</a></li>
@@ -461,7 +368,7 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
 <li>Nested&nbsp;|&nbsp;</li>
-<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#fields.inherited.from.class.ExceptionCheck">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
 </ul>

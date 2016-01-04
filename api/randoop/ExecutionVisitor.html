@@ -99,7 +99,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../randoop/ContractCheckingVisitor.html" title="class in randoop">ContractCheckingVisitor</a>, <a href="../randoop/experiments/CovWitnessHelperVisitor.html" title="class in randoop.experiments">CovWitnessHelperVisitor</a>, <a href="../randoop/DummyVisitor.html" title="class in randoop">DummyVisitor</a>, <a href="../randoop/MultiVisitor.html" title="class in randoop">MultiVisitor</a>, <a href="../randoop/RegressionCaptureVisitor.html" title="class in randoop">RegressionCaptureVisitor</a>, <a href="../randoop/ReplayVisitor.html" title="class in randoop">ReplayVisitor</a></dd>
+<dd><a href="../randoop/experiments/CovWitnessHelperVisitor.html" title="class in randoop.experiments">CovWitnessHelperVisitor</a>, <a href="../randoop/DummyVisitor.html" title="class in randoop">DummyVisitor</a>, <a href="../randoop/MultiVisitor.html" title="class in randoop">MultiVisitor</a></dd>
 </dl>
 <hr>
 <br>
@@ -107,9 +107,8 @@ var activeTableTab = "activeTableTab";
 <div class="block">A visitor that is invoked as the execution of a sequence unfolds.
  Typically such a visitor adds decorations to the sequence based
  on checks of the runtime behavior.
-
- IMPORTANT: Implementing classes should have a zero-argument
- constructor.</div>
+ <p>
+ IMPORTANT: Implementing classes should have a default constructor.</div>
 </li>
 </ul>
 </div>
@@ -137,15 +136,15 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExecutionVisitor.html#visitAfter-randoop.sequence.ExecutableSequence-int-">visitAfter</a></span>(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
-          int&nbsp;i)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExecutionVisitor.html#visitAfterStatement-randoop.sequence.ExecutableSequence-int-">visitAfterStatement</a></span>(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
+                   int&nbsp;i)</code>
 <div class="block">Invoked by ExecutableSequence.execute after the i-th statement executes.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExecutionVisitor.html#visitBefore-randoop.sequence.ExecutableSequence-int-">visitBefore</a></span>(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
-           int&nbsp;i)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExecutionVisitor.html#visitBeforeStatement-randoop.sequence.ExecutableSequence-int-">visitBeforeStatement</a></span>(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
+                    int&nbsp;i)</code>
 <div class="block">Invoked by ExecutableSequence.execute before
  the i-th statement executes.</div>
 </td>
@@ -165,31 +164,41 @@ var activeTableTab = "activeTableTab";
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="visitBefore-randoop.sequence.ExecutableSequence-int-">
+<a name="visitBeforeStatement-randoop.sequence.ExecutableSequence-int-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>visitBefore</h4>
-<pre>void&nbsp;visitBefore(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
-                 int&nbsp;i)</pre>
+<h4>visitBeforeStatement</h4>
+<pre>void&nbsp;visitBeforeStatement(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
+                          int&nbsp;i)</pre>
 <div class="block">Invoked by ExecutableSequence.execute before
  the i-th statement executes.
-
+ <p>
  Precondition: statements 0..i-1 have been executed.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>sequence</code> - the code sequence to be visited</dd>
+<dd><code>i</code> - the position of statement to visit</dd>
+</dl>
 </li>
 </ul>
-<a name="visitAfter-randoop.sequence.ExecutableSequence-int-">
+<a name="visitAfterStatement-randoop.sequence.ExecutableSequence-int-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>visitAfter</h4>
-<pre>void&nbsp;visitAfter(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
-                int&nbsp;i)</pre>
+<h4>visitAfterStatement</h4>
+<pre>void&nbsp;visitAfterStatement(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
+                         int&nbsp;i)</pre>
 <div class="block">Invoked by ExecutableSequence.execute after the i-th statement executes.
-
+ <p>
  Precondition: statements 0..i have been executed.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>sequence</code> - the code sequence to be visited</dd>
+<dd><code>i</code> - the position of statement to visit</dd>
+</dl>
 </li>
 </ul>
 <a name="initialize-randoop.sequence.ExecutableSequence-">
@@ -203,7 +212,7 @@ var activeTableTab = "activeTableTab";
  perform any initialization steps required before execution.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>executableSequence</code> - </dd>
+<dd><code>executableSequence</code> - the code sequence to be visited</dd>
 </dl>
 </li>
 </ul>

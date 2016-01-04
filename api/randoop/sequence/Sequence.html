@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":9,"i4":9,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":9,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10,"i26":10,"i27":10,"i28":10,"i29":10,"i30":10,"i31":10,"i32":9,"i33":9,"i34":10,"i35":10,"i36":10,"i37":10,"i38":9,"i39":10,"i40":10,"i41":10,"i42":10,"i43":10,"i44":10,"i45":10,"i46":10,"i47":10,"i48":10,"i49":9};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":9,"i5":9,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":9,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10,"i26":10,"i27":10,"i28":10,"i29":10,"i30":10,"i31":10,"i32":10,"i33":10,"i34":9,"i35":9,"i36":10,"i37":10,"i38":10,"i39":9,"i40":10,"i41":10,"i42":10,"i43":10,"i44":10,"i45":10,"i46":10,"i47":10,"i48":10,"i49":10,"i50":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -47,7 +47,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../randoop/sequence/RedundantStatementRemover.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../randoop/sequence/PackageLiterals.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../randoop/sequence/Sequence.RelativeNegativeIndex.html" title="class in randoop.sequence"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -167,7 +167,9 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>BitSet</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#activeFlags">activeFlags</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#activeFlags">activeFlags</a></span></code>
+<div class="block">A set of bits, where there is one bit associated with each index.</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>double</code></td>
@@ -219,38 +221,45 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#appendCode-java.lang.StringBuilder-int-">appendCode</a></span>(StringBuilder&nbsp;b,
+          int&nbsp;index)</code>
+<div class="block">Appends the statement at the given index to the <code>StringBuilder</code>.</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>protected void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#checkIndex-int-">checkIndex</a></span>(int&nbsp;i)</code>&nbsp;</td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#clearActiveFlag-int-">clearActiveFlag</a></span>(int&nbsp;i)</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#clearAllActiveFlags--">clearAllActiveFlags</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>static <a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#concatenate-java.util.List-">concatenate</a></span>(List&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;&nbsp;sequences)</code>
 <div class="block">Create a new sequence that is the concatenation of the given sequences.</div>
 </td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>static <a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#create-randoop.operation.NonreceiverTerm-">create</a></span>(<a href="../../randoop/operation/NonreceiverTerm.html" title="class in randoop.operation">NonreceiverTerm</a>&nbsp;info)</code>
 <div class="block">Returns a sequence that consists of a single primitive declaration
  statement (e.g.</div>
 </td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#equals-java.lang.Object-">equals</a></span>(Object&nbsp;o)</code>
 <div class="block">Two sequences are equal if their statements(+inputs) are element-wise
  equal.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#extend-randoop.operation.Operation-java.util.List-">extend</a></span>(<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&nbsp;operation,
       List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputVariables)</code>
@@ -258,7 +267,7 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  statement appended at the end.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#extend-randoop.operation.Operation-randoop.sequence.Variable...-">extend</a></span>(<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&nbsp;operation,
       <a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>...&nbsp;inputs)</code>
@@ -266,70 +275,70 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  statement appended at the end.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#extend-randoop.sequence.Statement-java.util.List-">extend</a></span>(<a href="../../randoop/sequence/Statement.html" title="class in randoop.sequence">Statement</a>&nbsp;statement,
       List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputs)</code>
 <div class="block">extend adds a new statement to this sequence using the operation of the given statement.</div>
 </td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getAllVariables--">getAllVariables</a></span>()</code>
 <div class="block">The values associated with this sequence.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Statement.html" title="class in randoop.sequence">Statement</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getCreatingStatement-randoop.sequence.Variable-">getCreatingStatement</a></span>(<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&nbsp;value)</code>
 <div class="block">The statement that created this value.</div>
 </td>
 </tr>
-<tr id="i11" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getFirstVariableFromLastStatementVariables--">getFirstVariableFromLastStatementVariables</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getInputs-int-">getInputs</a></span>(int&nbsp;statementIndex)</code>
 <div class="block">The inputs for the ith statement.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>List&lt;Integer&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getInputsAsAbsoluteIndices-int-">getInputsAsAbsoluteIndices</a></span>(int&nbsp;i)</code>
 <div class="block">The inputs for the ith statement, as indices.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Statement.html" title="class in randoop.sequence">Statement</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getLastStatement--">getLastStatement</a></span>()</code>
 <div class="block">The last Statement in the sequence.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>List&lt;Class&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getLastStatementTypes--">getLastStatementTypes</a></span>()</code>
 <div class="block">The types of all the variables involved in the last statement.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getLastStatementVariables--">getLastStatementVariables</a></span>()</code>
 <div class="block">The variables involved in the last statement.</div>
 </td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getLastVariable--">getLastVariable</a></span>()</code>
 <div class="block">The value created by the last statement in the sequence.</div>
 </td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getNetSize--">getNetSize</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>static <a href="../../randoop/sequence/Sequence.RelativeNegativeIndex.html" title="class in randoop.sequence">Sequence.RelativeNegativeIndex</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getRelativeIndexForVariable-int-randoop.sequence.Variable-">getRelativeIndexForVariable</a></span>(int&nbsp;statementPosition,
                            <a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&nbsp;v)</code>
@@ -337,25 +346,25 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  value as an input to the statement at position statementPosition.</div>
 </td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i21" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Statement.html" title="class in randoop.sequence">Statement</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getStatement-int-">getStatement</a></span>(int&nbsp;index)</code>
 <div class="block">The statement for the statement at the given index.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>protected <a href="../../randoop/sequence/Statement.html" title="class in randoop.sequence">Statement</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getStatementWithInputs-int-">getStatementWithInputs</a></span>(int&nbsp;index)</code>
 <div class="block">The statement(+inputs) at the given index.</div>
 </td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getVariable-int-">getVariable</a></span>(int&nbsp;i)</code>
 <div class="block">The value created by the ith statement.</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getVariableForInput-int-randoop.sequence.Sequence.RelativeNegativeIndex-">getVariableForInput</a></span>(int&nbsp;statementPosition,
                    <a href="../../randoop/sequence/Sequence.RelativeNegativeIndex.html" title="class in randoop.sequence">Sequence.RelativeNegativeIndex</a>&nbsp;input)</code>
@@ -363,7 +372,7 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  the statement at position statementPosition.</div>
 </td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i25" class="rowColor">
 <td class="colFirst"><code>List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getVariablesOfType-java.lang.Class-randoop.util.Reflection.Match-">getVariablesOfType</a></span>(Class&lt;?&gt;&nbsp;clazz,
                   <a href="../../randoop/util/Reflection.Match.html" title="enum in randoop.util">Reflection.Match</a>&nbsp;match)</code>
@@ -371,71 +380,71 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  given class.</div>
 </td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>double</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#getWeight--">getWeight</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i26" class="altColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#hasActiveFlags--">hasActiveFlags</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i28" class="altColor">
+<tr id="i29" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#hasUseOfMatchingClass-java.util.regex.Pattern-">hasUseOfMatchingClass</a></span>(Pattern&nbsp;classNames)</code>
+<div class="block">Test whether any statement of this sequence has an operation whose 
+ declaring class matches the given regular expression.</div>
+</td>
+</tr>
+<tr id="i30" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#isActive-int-">isActive</a></span>(int&nbsp;i)</code>&nbsp;</td>
 </tr>
-<tr id="i29" class="rowColor">
+<tr id="i31" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#isOwnerOf-randoop.sequence.Variable-">isOwnerOf</a></span>(<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&nbsp;v)</code>
 <div class="block">Checks whether the variable is defined in this sequence.</div>
 </td>
 </tr>
-<tr id="i30" class="altColor">
+<tr id="i32" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#isPrimitive--">isPrimitive</a></span>()</code>
 <div class="block">A sequence representing a single primitive values, like
  "Foo var0 = null" or "int var0 = 1".</div>
 </td>
 </tr>
-<tr id="i31" class="rowColor">
+<tr id="i33" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#lastUseBefore-int-randoop.sequence.Variable-">lastUseBefore</a></span>(int&nbsp;idx,
              <a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&nbsp;var)</code>&nbsp;</td>
 </tr>
-<tr id="i32" class="altColor">
+<tr id="i34" class="altColor">
 <td class="colFirst"><code>static <a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#parse-java.util.List-">parse</a></span>(List&lt;String&gt;&nbsp;statements)</code>
 <div class="block">Parse a sequence encoded as a list of strings, each string corresponding to
  one statement.</div>
 </td>
 </tr>
-<tr id="i33" class="rowColor">
+<tr id="i35" class="rowColor">
 <td class="colFirst"><code>static <a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#parse-java.lang.String-">parse</a></span>(String&nbsp;string)</code>
 <div class="block">Parse a sequence encoded as a strings.</div>
 </td>
 </tr>
-<tr id="i34" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#printStatement-java.lang.StringBuilder-int-">printStatement</a></span>(StringBuilder&nbsp;b,
-              int&nbsp;index)</code>
-<div class="block">Appends the statement at the given index to the <code>StringBuilder</code>.</div>
-</td>
-</tr>
-<tr id="i35" class="rowColor">
+<tr id="i36" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#randomVariableForType-java.lang.Class-randoop.util.Reflection.Match-">randomVariableForType</a></span>(Class&lt;?&gt;&nbsp;t,
                      <a href="../../randoop/util/Reflection.Match.html" title="enum in randoop.util">Reflection.Match</a>&nbsp;match)</code>&nbsp;</td>
 </tr>
-<tr id="i36" class="altColor">
+<tr id="i37" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#randomVariableForTypeLastStatement-java.lang.Class-randoop.util.Reflection.Match-">randomVariableForTypeLastStatement</a></span>(Class&lt;?&gt;&nbsp;t,
                                   <a href="../../randoop/util/Reflection.Match.html" title="enum in randoop.util">Reflection.Match</a>&nbsp;match)</code>&nbsp;</td>
 </tr>
-<tr id="i37" class="rowColor">
+<tr id="i38" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#randomVariableOfTypeLastStatement-java.lang.Class-randoop.util.Reflection.Match-">randomVariableOfTypeLastStatement</a></span>(Class&lt;?&gt;&nbsp;clazz,
                                  <a href="../../randoop/util/Reflection.Match.html" title="enum in randoop.util">Reflection.Match</a>&nbsp;match)</code>
@@ -443,7 +452,7 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  class.</div>
 </td>
 </tr>
-<tr id="i38" class="altColor">
+<tr id="i39" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#readTextSequences-java.lang.String-java.util.Collection-">readTextSequences</a></span>(String&nbsp;file,
                  Collection&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;&nbsp;collection)</code>
@@ -451,7 +460,7 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  representation.</div>
 </td>
 </tr>
-<tr id="i39" class="rowColor">
+<tr id="i40" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#repeat-randoop.operation.Operation-int-">repeat</a></span>(<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&nbsp;operation,
       int&nbsp;times)</code>
@@ -459,52 +468,52 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  this object as a prefix, repeating the operation the given number of times.</div>
 </td>
 </tr>
-<tr id="i40" class="altColor">
+<tr id="i41" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#setActiveFlag-int-">setActiveFlag</a></span>(int&nbsp;i)</code>&nbsp;</td>
 </tr>
-<tr id="i41" class="rowColor">
+<tr id="i42" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#setAllActiveFlags--">setAllActiveFlags</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i42" class="altColor">
+<tr id="i43" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#size--">size</a></span>()</code>
 <div class="block">The number of statements in the sequence.</div>
 </td>
 </tr>
-<tr id="i43" class="rowColor">
+<tr id="i44" class="altColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#toCodeString--">toCodeString</a></span>()</code>
 <div class="block">A Java source code representation of this sequence.</div>
 </td>
 </tr>
-<tr id="i44" class="altColor">
+<tr id="i45" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/MutableSequence.html" title="class in randoop.sequence">MutableSequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#toModifiableSequence--">toModifiableSequence</a></span>()</code>
 <div class="block">Creates a <code>MutableSequence</code> from this sequence.</div>
 </td>
 </tr>
-<tr id="i45" class="rowColor">
+<tr id="i46" class="altColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#toParseableString--">toParseableString</a></span>()</code>
 <div class="block">Returns a string representing this sequence.</div>
 </td>
 </tr>
-<tr id="i46" class="altColor">
+<tr id="i47" class="rowColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#toParseableString-java.lang.String-">toParseableString</a></span>(String&nbsp;statementSep)</code>
 <div class="block">Like toParseableString, but the client can specify a string that
  will be used a separator between statements.</div>
 </td>
 </tr>
-<tr id="i47" class="rowColor">
+<tr id="i48" class="altColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#toString--">toString</a></span>()</code>
 <div class="block">Equivalent to toParseableString().</div>
 </td>
 </tr>
-<tr id="i48" class="altColor">
+<tr id="i49" class="rowColor">
 <td class="colFirst"><code>List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#valuesAppearingInLastStatement-java.lang.Class-randoop.util.Reflection.Match-">valuesAppearingInLastStatement</a></span>(Class&lt;?&gt;&nbsp;clazz,
                               <a href="../../randoop/util/Reflection.Match.html" title="enum in randoop.util">Reflection.Match</a>&nbsp;match)</code>
@@ -512,7 +521,7 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  given class.</div>
 </td>
 </tr>
-<tr id="i49" class="rowColor">
+<tr id="i50" class="altColor">
 <td class="colFirst"><code>static <a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Sequence.html#zero-java.lang.Class-">zero</a></span>(Class&lt;?&gt;&nbsp;c)</code>
 <div class="block">Returns a sequence that is of the form "Foo f = null;" where Foo is the
@@ -566,6 +575,10 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
 <li class="blockList">
 <h4>activeFlags</h4>
 <pre>public&nbsp;BitSet activeFlags</pre>
+<div class="block">A set of bits, where there is one bit associated with each index.
+ Active flags are used during generation, to determine what values
+ in an existing sequence are useful to be used as inputs when
+ creating a new sequence out of the existing one.</div>
 </li>
 </ul>
 <a name="savedHashCode">
@@ -1042,14 +1055,14 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  the sequence.</div>
 </li>
 </ul>
-<a name="printStatement-java.lang.StringBuilder-int-">
+<a name="appendCode-java.lang.StringBuilder-int-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>printStatement</h4>
-<pre>public&nbsp;void&nbsp;printStatement(StringBuilder&nbsp;b,
-                           int&nbsp;index)</pre>
+<h4>appendCode</h4>
+<pre>public&nbsp;void&nbsp;appendCode(StringBuilder&nbsp;b,
+                       int&nbsp;index)</pre>
 <div class="block">Appends the statement at the given index to the <code>StringBuilder</code>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -1121,7 +1134,7 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
  <pre>
   st.equals(parse(st.toParseableCode()))
  </pre>
- See the <a href="../../randoop/sequence/Sequence.html#parse-java.util.List-"><code>parse(List)</code></a> for the 
+ See the <a href="../../randoop/sequence/Sequence.html#parse-java.util.List-"><code>parse(List)</code></a> for the
  required format of a String representing a Sequence.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
@@ -1202,20 +1215,20 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
 <div class="block">Parse a sequence encoded as a strings. Convenience method for <a href="../../randoop/sequence/Sequence.html#parse-java.util.List-"><code>parse(List)</code></a>,
  which parses a sequence of strings, each representing a Statement. See
  that method for more documentation on the string representation of a sequence.
-
+ <p>
  This method breaks up the given string into statements assuming that each
  statement is separated by a line separator character.
-
+ <p>
  The following invariant holds:
-
+ <pre>
      st.equals(parse(st.toParseableCode()))
-
+ </pre>
  When writing/reading sequences out to file: you have two options: serialize
  the sequences using java's serialization mechanism, or write them out as
  parseable text. Serialization is faster, and text is human-readable.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../randoop/sequence/SequenceParseException.html" title="class in randoop.sequence">SequenceParseException</a></code></dd>
+<dd><code><a href="../../randoop/sequence/SequenceParseException.html" title="class in randoop.sequence">SequenceParseException</a></code> - if string is not valid sequence</dd>
 </dl>
 </li>
 </ul>
@@ -1250,12 +1263,29 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
 <a name="isPrimitive--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>isPrimitive</h4>
 <pre>public&nbsp;boolean&nbsp;isPrimitive()</pre>
 <div class="block">A sequence representing a single primitive values, like
  "Foo var0 = null" or "int var0 = 1".</div>
+</li>
+</ul>
+<a name="hasUseOfMatchingClass-java.util.regex.Pattern-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>hasUseOfMatchingClass</h4>
+<pre>public&nbsp;boolean&nbsp;hasUseOfMatchingClass(Pattern&nbsp;classNames)</pre>
+<div class="block">Test whether any statement of this sequence has an operation whose 
+ declaring class matches the given regular expression.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>classNames</code> - the regular expression to test class names</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if any statement has operation with matching declaring class, false otherwise</dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -1285,7 +1315,7 @@ implements Serializable, <a href="../../randoop/util/WeightedElement.html" title
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../randoop/sequence/RedundantStatementRemover.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../randoop/sequence/PackageLiterals.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../randoop/sequence/Sequence.RelativeNegativeIndex.html" title="class in randoop.sequence"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">

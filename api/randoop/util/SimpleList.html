@@ -137,7 +137,6 @@ extends Object</pre>
  differently.  We store the list of statements in a Sequence in a
  SimpleList, an abstract class that has three subclasses:
 
- <p>
  <ul>
  <li> <a href="../../randoop/util/ArrayListSimpleList.html" title="class in randoop.util"><code>ArrayListSimpleList</code></a>: a typical list is stored as an array list.
  <li> <a href="../../randoop/util/ListOfLists.html" title="class in randoop.util"><code>ListOfLists</code></a>: a list that only stores pointers to its constituent
@@ -152,8 +151,7 @@ extends Object</pre>
  <p>
  When extending a Sequence with a new statement, we store the old sequence's
  statements plus the new statement in a <code>OneMoreElementList</code>, which takes up
- only 2 references in memory (and constant creation time).
- <p></div>
+ only 2 references in memory (and constant creation time).</div>
 </li>
 </ul>
 </div>

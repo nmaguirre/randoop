@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":9,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":9,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":9,"i22":9,"i23":9,"i24":9,"i25":10,"i26":10,"i27":10,"i28":10,"i29":10,"i30":10,"i31":10,"i32":10,"i33":10,"i34":10,"i35":10,"i36":10,"i37":10,"i38":10,"i39":10,"i40":10,"i41":10,"i42":10,"i43":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":9,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":9,"i14":9,"i15":9,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10,"i21":10,"i22":10,"i23":10,"i24":10,"i25":10,"i26":10,"i27":10,"i28":10,"i29":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -120,7 +120,6 @@ implements Serializable</pre>
  <p>
  An ExecutableSequence augments a sequence with three additional pieces
  of data:
- <p>
  <ul>
  <li> <b>Execution results.</b> An ExecutableSequence can be executed, and the
       results of the execution (meaning the objects created during execution,
@@ -194,28 +193,31 @@ implements Serializable</pre>
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>protected List&lt;List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#checks">checks</a></span></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>protected List&lt;List&lt;Boolean&gt;&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#checksResults">checksResults</a></span></code>&nbsp;</td>
-</tr>
-<tr class="altColor">
 <td class="colFirst"><code>long</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#exectime">exectime</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#exectime">exectime</a></span></code>
+<div class="block">How long it took to execute this sequence in nanoseconds,
+ excluding generation time.</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>protected <a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#executionResults">executionResults</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#executionResults">executionResults</a></span></code>
+<div class="block">Contains the runtime objects created and exceptions thrown (if any)
+ during execution of this sequence.</div>
+</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>long</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#gentime">gentime</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#gentime">gentime</a></span></code>
+<div class="block">How long it took to generate this sequence in nanoseconds,
+ excluding execution time.</div>
+</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#sequence">sequence</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#sequence">sequence</a></span></code>
+<div class="block">The underlying sequence.</div>
+</td>
 </tr>
 </table>
 </li>
@@ -237,9 +239,9 @@ implements Serializable</pre>
 </td>
 </tr>
 <tr class="rowColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#ExecutableSequence-randoop.sequence.Sequence-randoop.sequence.Execution-java.util.List-">ExecutableSequence</a></span>(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;sequence,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#ExecutableSequence-randoop.sequence.Sequence-randoop.sequence.Execution-randoop.test.TestChecks-">ExecutableSequence</a></span>(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;sequence,
                   <a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a>&nbsp;exec,
-                  List&lt;List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&gt;&nbsp;checks)</code>
+                  <a href="../../randoop/test/TestChecks.html" title="interface in randoop.test">TestChecks</a>&nbsp;checks)</code>
 <div class="block">Create an executable sequence directly using the given arguments.</div>
 </td>
 </tr>
@@ -259,237 +261,168 @@ implements Serializable</pre>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#addCheck-int-randoop.Check-boolean-">addCheck</a></span>(int&nbsp;i,
-        <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&nbsp;check,
-        boolean&nbsp;passed)</code>
-<div class="block">Adds the given check to the i-th element of the sequence.</div>
-</td>
-</tr>
-<tr id="i1" class="rowColor">
-<td class="colFirst"><code>static int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#checks_count-java.util.List-">checks_count</a></span>(List&lt;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt;&nbsp;seqs)</code>
-<div class="block">Return the total number of checks in a list of sequences</div>
-</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#compare_checks-randoop.sequence.ExecutableSequence-boolean-boolean-">compare_checks</a></span>(<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;es,
-              boolean&nbsp;remove_diffs,
-              boolean&nbsp;print_diffs)</code>
-<div class="block">Compares the results of the checks of two sequences (the code in
- each sequence should be the same).</div>
-</td>
-</tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code><a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#duplicate--">duplicate</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i4" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#equals-java.lang.Object-">equals</a></span>(Object&nbsp;obj)</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#exceptionIndex--">exceptionIndex</a></span>()</code>
 <div class="block">Returns the index i for which this.isExceptionalExecution(i), or -1 if
  there is no such index.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#execute-randoop.ExecutionVisitor-">execute</a></span>(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor)</code>
-<div class="block">Executes sequence, stopping on exceptions</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#execute-randoop.ExecutionVisitor-randoop.test.TestCheckGenerator-">execute</a></span>(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor,
+       <a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>&nbsp;gen)</code>
+<div class="block">Executes sequence, stopping on exceptions.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#execute-randoop.ExecutionVisitor-boolean-">execute</a></span>(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor,
-       boolean&nbsp;stop_on_exception)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#execute-randoop.ExecutionVisitor-randoop.test.TestCheckGenerator-boolean-">execute</a></span>(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor,
+       <a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>&nbsp;gen,
+       boolean&nbsp;ignoreException)</code>
 <div class="block">Execute this sequence, invoking the given visitor as the execution
  unfolds.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#executedSize--">executedSize</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i9" class="rowColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#executeStatement-randoop.sequence.Sequence-java.util.List-int-java.lang.Object:A-">executeStatement</a></span>(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;s,
                 List&lt;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&gt;&nbsp;outcome,
                 int&nbsp;index,
                 Object[]&nbsp;inputVariables)</code>&nbsp;</td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>[]</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getAllResults--">getAllResults</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i11" class="rowColor">
-<td class="colFirst"><code>List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getChecks-int-">getChecks</a></span>(int&nbsp;i)</code>
-<div class="block">Get the checks for the i-th element of the sequence.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getAllResults--">getAllResults</a></span>()</code>
+<div class="block">Return the results of each statement for the most recent execution.</div>
 </td>
 </tr>
-<tr id="i12" class="altColor">
-<td class="colFirst"><code>List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getChecks-int-java.lang.Class-">getChecks</a></span>(int&nbsp;i,
-         Class&lt;? extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;clazz)</code>&nbsp;</td>
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code><a href="../../randoop/test/TestChecks.html" title="interface in randoop.test">TestChecks</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getChecks--">getChecks</a></span>()</code>
+<div class="block">Return the set of test checks for the most recent execution.</div>
+</td>
 </tr>
-<tr id="i13" class="rowColor">
-<td class="colFirst"><code>List&lt;List&lt;Boolean&gt;&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getChecksResults--">getChecksResults</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i14" class="altColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getContractCheckIndex-java.lang.Class-">getContractCheckIndex</a></span>(Class&lt;? extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;clazz)</code>&nbsp;</td>
-</tr>
-<tr id="i15" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getExceptionIndex-java.lang.Class-">getExceptionIndex</a></span>(Class&lt;?&gt;&nbsp;exceptionClass)</code>&nbsp;</td>
 </tr>
-<tr id="i16" class="altColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getFailureIndex--">getFailureIndex</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i17" class="rowColor">
-<td class="colFirst"><code>List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getFailures-int-">getFailures</a></span>(int&nbsp;idx)</code>&nbsp;</td>
-</tr>
-<tr id="i18" class="altColor">
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getNonExecutedIndex--">getNonExecutedIndex</a></span>()</code>
 <div class="block">Returns the index i for a non-executed statement, or -1 if
  there is no such index.</div>
 </td>
 </tr>
-<tr id="i19" class="rowColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getNonNormalExecutionIndex--">getNonNormalExecutionIndex</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i20" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getResult-int-">getResult</a></span>(int&nbsp;index)</code>
 <div class="block">This method is typically used by ExecutionVisitors.</div>
 </td>
 </tr>
-<tr id="i21" class="rowColor">
-<td class="colFirst"><code>static boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getRuntimeInputs-randoop.sequence.Sequence-java.util.List-int-java.util.List-java.lang.Object:A-">getRuntimeInputs</a></span>(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;s,
+<tr id="i12" class="altColor">
+<td class="colFirst"><code>Object[]</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getRuntimeInputs-randoop.sequence.Sequence-java.util.List-int-java.util.List-">getRuntimeInputs</a></span>(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;s,
                 List&lt;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&gt;&nbsp;outcome,
                 int&nbsp;i,
-                List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputs,
-                Object[]&nbsp;runtimeObjects)</code>&nbsp;</td>
+                List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputs)</code>&nbsp;</td>
 </tr>
-<tr id="i22" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code>static Object[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getRuntimeValuesForVars-java.util.List-randoop.sequence.Execution-">getRuntimeValuesForVars</a></span>(List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;vars,
                        <a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a>&nbsp;execution)</code>
 <div class="block">Returns the values for the given variables in the <a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence"><code>Execution</code></a> object.</div>
 </td>
 </tr>
-<tr id="i23" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code>protected static Object[]</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getRuntimeValuesForVars-java.util.List-java.util.List-">getRuntimeValuesForVars</a></span>(List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;vars,
                        List&lt;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&gt;&nbsp;execution)</code>&nbsp;</td>
 </tr>
-<tr id="i24" class="altColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>static &lt;D extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;<br>List&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getSequences-java.util.List-">getSequences</a></span>(List&lt;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt;&nbsp;exec)</code>&nbsp;</td>
 </tr>
-<tr id="i25" class="rowColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasCheck-java.lang.Class-">hasCheck</a></span>(Class&lt;? extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;clazz)</code>&nbsp;</td>
-</tr>
-<tr id="i26" class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasCheck-int-java.lang.Class-">hasCheck</a></span>(int&nbsp;i,
-        Class&lt;? extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;clazz)</code>
-<div class="block">True iff this sequences has at least one check of the given type at index i.</div>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasChecks--">hasChecks</a></span>()</code>
+<div class="block">Indicate whether there are any checks.</div>
 </td>
 </tr>
-<tr id="i27" class="rowColor">
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasChecks-int-">hasChecks</a></span>(int&nbsp;i)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasFailure--">hasFailure</a></span>()</code>
+<div class="block">Indicate whether checks are failing or passing.</div>
+</td>
 </tr>
-<tr id="i28" class="altColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasFailure--">hasFailure</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i29" class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasFailure-int-">hasFailure</a></span>(int&nbsp;i)</code>&nbsp;</td>
-</tr>
-<tr id="i30" class="altColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hashCode--">hashCode</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i31" class="rowColor">
+<tr id="i19" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasInvalidBehavior--">hasInvalidBehavior</a></span>()</code>
+<div class="block">Indicate whether there are any invalid checks.</div>
+</td>
+</tr>
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasNonExecutedStatements--">hasNonExecutedStatements</a></span>()</code>
 <div class="block">Returns whether the sequence contains a non-executed statement.</div>
 </td>
 </tr>
-<tr id="i32" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#initializeChecks--">initializeChecks</a></span>()</code>
-<div class="block">Clears and initializes array of <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a> objects.</div>
-</td>
+<tr id="i21" class="rowColor">
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#hasNullInput--">hasNullInput</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i33" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#initializeResults--">initializeResults</a></span>()</code>
-<div class="block">Initializes the array that captures <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a> results performed on
- execution of the sequence.</div>
-</td>
-</tr>
-<tr id="i34" class="altColor">
+<tr id="i22" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#isNormalExecution--">isNormalExecution</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i35" class="rowColor">
+<tr id="i23" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#isNormalExecution-int-">isNormalExecution</a></span>(int&nbsp;i)</code>
 <div class="block">This method is typically used by ExecutionVisitors.</div>
 </td>
 </tr>
-<tr id="i36" class="altColor">
-<td class="colFirst"><code>String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#oneStatementToCodeString-int-">oneStatementToCodeString</a></span>(int&nbsp;i)</code>
-<div class="block">Return the code representation of the i'th statement.</div>
-</td>
-</tr>
-<tr id="i37" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#performChecks-int-">performChecks</a></span>(int&nbsp;i)</code>
-<div class="block">Applies <a href="../../randoop/Check.html#evaluate-randoop.sequence.Execution-"><code>Check.evaluate(Execution)</code></a> for each registered <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a>.</div>
-</td>
-</tr>
-<tr id="i38" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#removeChecks--">removeChecks</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i39" class="rowColor">
+<tr id="i24" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#seq_id--">seq_id</a></span>()</code>
 <div class="block">Returns an id based on the contents of the sequence alone.</div>
 </td>
 </tr>
-<tr id="i40" class="altColor">
+<tr id="i25" class="rowColor">
+<td class="colFirst"><code>String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#statementToCodeString-int-">statementToCodeString</a></span>(int&nbsp;i)</code>
+<div class="block">Return the code representation of the i'th statement.</div>
+</td>
+</tr>
+<tr id="i26" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#throwsException--">throwsException</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i41" class="rowColor">
+<tr id="i27" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#throwsException-java.lang.Class-">throwsException</a></span>(Class&lt;?&gt;&nbsp;exceptionClass)</code>&nbsp;</td>
 </tr>
-<tr id="i42" class="altColor">
+<tr id="i28" class="altColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#toCodeString--">toCodeString</a></span>()</code>
 <div class="block">Output this sequence as code.</div>
 </td>
 </tr>
-<tr id="i43" class="rowColor">
+<tr id="i29" class="rowColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#toString--">toString</a></span>()</code>&nbsp;</td>
 </tr>
@@ -522,24 +455,7 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>sequence</h4>
 <pre>public&nbsp;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a> sequence</pre>
-</li>
-</ul>
-<a name="checks">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>checks</h4>
-<pre>protected&nbsp;List&lt;List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&gt; checks</pre>
-</li>
-</ul>
-<a name="checksResults">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>checksResults</h4>
-<pre>protected&nbsp;List&lt;List&lt;Boolean&gt;&gt; checksResults</pre>
+<div class="block">The underlying sequence.</div>
 </li>
 </ul>
 <a name="executionResults">
@@ -549,6 +465,11 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>executionResults</h4>
 <pre>protected transient&nbsp;<a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a> executionResults</pre>
+<div class="block">Contains the runtime objects created and exceptions thrown (if any)
+ during execution of this sequence.
+ Invariant: sequence.size() == executionResults.size().
+ Transient because it can contain arbitrary objects that may not be
+ serializable.</div>
 </li>
 </ul>
 <a name="gentime">
@@ -558,6 +479,10 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>gentime</h4>
 <pre>public&nbsp;long gentime</pre>
+<div class="block">How long it took to generate this sequence in nanoseconds,
+ excluding execution time.
+ Must be directly set by the generator that creates this object
+ (no code in this class sets its value).</div>
 </li>
 </ul>
 <a name="exectime">
@@ -567,6 +492,10 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>exectime</h4>
 <pre>public&nbsp;long exectime</pre>
+<div class="block">How long it took to execute this sequence in nanoseconds,
+ excluding generation time.
+ Must be directly set by the generator that creates this object.
+ (no code in this class sets its value).</div>
 </li>
 </ul>
 </li>
@@ -587,7 +516,7 @@ implements Serializable</pre>
 <div class="block">Create an executable sequence that executes the given sequence.</div>
 </li>
 </ul>
-<a name="ExecutableSequence-randoop.sequence.Sequence-randoop.sequence.Execution-java.util.List-">
+<a name="ExecutableSequence-randoop.sequence.Sequence-randoop.sequence.Execution-randoop.test.TestChecks-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -595,7 +524,7 @@ implements Serializable</pre>
 <h4>ExecutableSequence</h4>
 <pre>public&nbsp;ExecutableSequence(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;sequence,
                           <a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a>&nbsp;exec,
-                          List&lt;List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&gt;&nbsp;checks)</pre>
+                          <a href="../../randoop/test/TestChecks.html" title="interface in randoop.test">TestChecks</a>&nbsp;checks)</pre>
 <div class="block">Create an executable sequence directly using the given arguments.
 
  Don't use this constructor! (Unless you know what you're doing.)</div>
@@ -609,36 +538,6 @@ implements Serializable</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="getChecks-int-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getChecks</h4>
-<pre>public&nbsp;List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;getChecks(int&nbsp;i)</pre>
-<div class="block">Get the checks for the i-th element of the sequence.</div>
-</li>
-</ul>
-<a name="addCheck-int-randoop.Check-boolean-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>addCheck</h4>
-<pre>public&nbsp;void&nbsp;addCheck(int&nbsp;i,
-                     <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&nbsp;check,
-                     boolean&nbsp;passed)</pre>
-<div class="block">Adds the given check to the i-th element of the sequence. Only one
- check of class StatementThrowsException is allowed for each index,
- and attempting to add a second check of this type will result in an
- IllegalArgumentException.</div>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>IllegalArgumentException</code> - If the given check's class is StatementThrowsException and
-           there is already an check of this class at the give index.</dd>
-</dl>
-</li>
-</ul>
 <a name="toString--">
 <!--   -->
 </a>
@@ -680,34 +579,40 @@ implements Serializable</pre>
  immediately after the statement.</div>
 </li>
 </ul>
-<a name="oneStatementToCodeString-int-">
+<a name="statementToCodeString-int-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>oneStatementToCodeString</h4>
-<pre>public&nbsp;String&nbsp;oneStatementToCodeString(int&nbsp;i)</pre>
+<h4>statementToCodeString</h4>
+<pre>public&nbsp;String&nbsp;statementToCodeString(int&nbsp;i)</pre>
 <div class="block">Return the code representation of the i'th statement.</div>
 </li>
 </ul>
-<a name="execute-randoop.ExecutionVisitor-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>execute</h4>
-<pre>public&nbsp;void&nbsp;execute(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor)</pre>
-<div class="block">Executes sequence, stopping on exceptions</div>
-</li>
-</ul>
-<a name="execute-randoop.ExecutionVisitor-boolean-">
+<a name="execute-randoop.ExecutionVisitor-randoop.test.TestCheckGenerator-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>execute</h4>
 <pre>public&nbsp;void&nbsp;execute(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor,
-                    boolean&nbsp;stop_on_exception)</pre>
+                    <a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>&nbsp;gen)</pre>
+<div class="block">Executes sequence, stopping on exceptions.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>visitor</code> - the <code>ExecutionVistior</code> that collects checks from results</dd>
+</dl>
+</li>
+</ul>
+<a name="execute-randoop.ExecutionVisitor-randoop.test.TestCheckGenerator-boolean-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>execute</h4>
+<pre>public&nbsp;void&nbsp;execute(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor,
+                    <a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>&nbsp;gen,
+                    boolean&nbsp;ignoreException)</pre>
 <div class="block">Execute this sequence, invoking the given visitor as the execution
  unfolds. After invoking this method, the client can query the outcome
  of executing each statement via the method <code>getResult(i)</code>.
@@ -724,7 +629,7 @@ implements Serializable</pre>
    <li> A statement's execution results in an exception and
         <code>stop_on_exception==true</code>.
    <li> A <code>null</code> input value is implicitly passed to the statement
-            (i.e., not throught explicitly declaring like  x = null)
+            (i.e., not via explicit declaration like  x = null)
    <li> After executing the i-th statement and calling the visitor's
         <code>visitAfter</code> method, a <code>ContractViolation</code>
         check is present at index i.
@@ -732,22 +637,20 @@ implements Serializable</pre>
  </ul></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>visitor</code> - can be null, in which case no visitor will be invoked
-        during execution.</dd>
+<dd><code>visitor</code> - the <code>ExecutionVisitor</code></dd>
 </dl>
 </li>
 </ul>
-<a name="getRuntimeInputs-randoop.sequence.Sequence-java.util.List-int-java.util.List-java.lang.Object:A-">
+<a name="getRuntimeInputs-randoop.sequence.Sequence-java.util.List-int-java.util.List-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>getRuntimeInputs</h4>
-<pre>public static&nbsp;boolean&nbsp;getRuntimeInputs(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;s,
-                                       List&lt;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&gt;&nbsp;outcome,
-                                       int&nbsp;i,
-                                       List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputs,
-                                       Object[]&nbsp;runtimeObjects)</pre>
+<pre>public&nbsp;Object[]&nbsp;getRuntimeInputs(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;s,
+                                 List&lt;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&gt;&nbsp;outcome,
+                                 int&nbsp;i,
+                                 List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputs)</pre>
 </li>
 </ul>
 <a name="getRuntimeValuesForVars-java.util.List-randoop.sequence.Execution-">
@@ -764,7 +667,7 @@ implements Serializable</pre>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>vars</code> - a list of <a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence"><code>Variable</code></a> objects.</dd>
-<dd><code>execution</code> - representing outcome of executing this sequence.</dd>
+<dd><code>execution</code> - the object representing outcome of executing this sequence.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>array of values corresponding to variables.</dd>
 </dl>
@@ -804,13 +707,18 @@ implements Serializable</pre>
  The result of executing the i-th element of the sequence.</div>
 </li>
 </ul>
-<a name="getChecksResults--">
+<a name="getChecks--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getChecksResults</h4>
-<pre>public&nbsp;List&lt;List&lt;Boolean&gt;&gt;&nbsp;getChecksResults()</pre>
+<h4>getChecks</h4>
+<pre>public&nbsp;<a href="../../randoop/test/TestChecks.html" title="interface in randoop.test">TestChecks</a>&nbsp;getChecks()</pre>
+<div class="block">Return the set of test checks for the most recent execution.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the <code>TestChecks</code> generated from the most recent execution</dd>
+</dl>
 </li>
 </ul>
 <a name="getAllResults--">
@@ -820,6 +728,7 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>getAllResults</h4>
 <pre>public&nbsp;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>[]&nbsp;getAllResults()</pre>
+<div class="block">Return the results of each statement for the most recent execution.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>all the execution outcomes for this sequence.</dd>
@@ -847,9 +756,11 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>isNormalExecution</h4>
 <pre>public&nbsp;boolean&nbsp;isNormalExecution(int&nbsp;i)</pre>
-<div class="block">This method is typically used by ExecutionVisitors.
-
- True if execution of the i-th statement terminated normally.</div>
+<div class="block">This method is typically used by ExecutionVisitors.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if execution of the i-th statement terminated normally</dd>
+</dl>
 </li>
 </ul>
 <a name="getNonNormalExecutionIndex--">
@@ -868,105 +779,6 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>isNormalExecution</h4>
 <pre>public&nbsp;boolean&nbsp;isNormalExecution()</pre>
-</li>
-</ul>
-<a name="getChecks-int-java.lang.Class-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getChecks</h4>
-<pre>public&nbsp;List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;getChecks(int&nbsp;i,
-                             Class&lt;? extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;clazz)</pre>
-</li>
-</ul>
-<a name="removeChecks--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>removeChecks</h4>
-<pre>public&nbsp;void&nbsp;removeChecks()</pre>
-</li>
-</ul>
-<a name="hasCheck-java.lang.Class-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>hasCheck</h4>
-<pre>public&nbsp;boolean&nbsp;hasCheck(Class&lt;? extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;clazz)</pre>
-</li>
-</ul>
-<a name="getContractCheckIndex-java.lang.Class-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getContractCheckIndex</h4>
-<pre>public&nbsp;int&nbsp;getContractCheckIndex(Class&lt;? extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;clazz)</pre>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>the first index at which an check of the given type occurs,
-         or -1 if there is no check of the given type in this
-         sequence.</dd>
-</dl>
-</li>
-</ul>
-<a name="hasCheck-int-java.lang.Class-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>hasCheck</h4>
-<pre>public&nbsp;boolean&nbsp;hasCheck(int&nbsp;i,
-                        Class&lt;? extends <a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;clazz)</pre>
-<div class="block">True iff this sequences has at least one check of the given type at index i.</div>
-</li>
-</ul>
-<a name="hasChecks-int-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>hasChecks</h4>
-<pre>public&nbsp;boolean&nbsp;hasChecks(int&nbsp;i)</pre>
-</li>
-</ul>
-<a name="hasFailure-int-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>hasFailure</h4>
-<pre>public&nbsp;boolean&nbsp;hasFailure(int&nbsp;i)</pre>
-</li>
-</ul>
-<a name="getFailureIndex--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getFailureIndex</h4>
-<pre>public&nbsp;int&nbsp;getFailureIndex()</pre>
-</li>
-</ul>
-<a name="hasFailure--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>hasFailure</h4>
-<pre>public&nbsp;boolean&nbsp;hasFailure()</pre>
-</li>
-</ul>
-<a name="getFailures-int-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getFailures</h4>
-<pre>public&nbsp;List&lt;<a href="../../randoop/Check.html" title="interface in randoop">Check</a>&gt;&nbsp;getFailures(int&nbsp;idx)</pre>
 </li>
 </ul>
 <a name="exceptionIndex--">
@@ -1030,7 +842,7 @@ implements Serializable</pre>
 <h4>hasNonExecutedStatements</h4>
 <pre>public&nbsp;boolean&nbsp;hasNonExecutedStatements()</pre>
 <div class="block">Returns whether the sequence contains a non-executed statement.
- That happnes if some statment before the last one throws an exception.</div>
+ That happens if some statement before the last one throws an exception.</div>
 </li>
 </ul>
 <a name="getNonExecutedIndex--">
@@ -1043,15 +855,6 @@ implements Serializable</pre>
 <div class="block">Returns the index i for a non-executed statement, or -1 if
  there is no such index.  Note that a statement is considered
  executed even if it throws an exception.</div>
-</li>
-</ul>
-<a name="duplicate--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>duplicate</h4>
-<pre>public&nbsp;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;duplicate()</pre>
 </li>
 </ul>
 <a name="getSequences-java.util.List-">
@@ -1089,88 +892,55 @@ implements Serializable</pre>
 </dl>
 </li>
 </ul>
-<a name="compare_checks-randoop.sequence.ExecutableSequence-boolean-boolean-">
+<a name="hasNullInput--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>compare_checks</h4>
-<pre>public&nbsp;int&nbsp;compare_checks(<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;es,
-                          boolean&nbsp;remove_diffs,
-                          boolean&nbsp;print_diffs)</pre>
-<div class="block">Compares the results of the checks of two sequences (the code in
- each sequence should be the same).  Returns the number of
- different checks.  If remove_diffs is true any differing checks
- are removed from both sequences.  Checks found in one sequence
- but not the other are also removed.  Prints any differences to
- stdout if print_diffs is true.
-
- Different checks can be generated for two runs of the same test
- sequence because of changes in
- the environment (eg, static variables) between runs.  Some
- checks are only created when the value involved in the
- check meets certain criteria and since the values can
- change, the checks may not always be created.  Its
- also possible to throw exceptions in one run and not another.
-
- The get_id() method from the Check
- interface) is used to identify check uniquely.  The id contains
- both the observer type (primitive, non-null, observer method call,
- etc) and the related variables.  When comparing two lists of
- Checks, the code presumes that the checks will occur in the same
- order on each execution.  Thus if the first remaining check in
- the first execution matches the second check from the second execution,
- the first check from the second execution is presumed to not match.
- The algorithm is far from completely optimized, but it should work
- pretty well if the two lists are pretty much the same (which
- they usually are).</div>
+<h4>hasNullInput</h4>
+<pre>public&nbsp;boolean&nbsp;hasNullInput()</pre>
 </li>
 </ul>
-<a name="checks_count-java.util.List-">
+<a name="hasFailure--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>checks_count</h4>
-<pre>public static&nbsp;int&nbsp;checks_count(List&lt;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt;&nbsp;seqs)</pre>
-<div class="block">Return the total number of checks in a list of sequences</div>
-</li>
-</ul>
-<a name="initializeResults--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>initializeResults</h4>
-<pre>public&nbsp;void&nbsp;initializeResults()</pre>
-<div class="block">Initializes the array that captures <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a> results performed on
- execution of the sequence. For use by <a href="../../randoop/ExecutionVisitor.html" title="interface in randoop"><code>ExecutionVisitor</code></a> implementations.</div>
-</li>
-</ul>
-<a name="performChecks-int-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>performChecks</h4>
-<pre>public&nbsp;void&nbsp;performChecks(int&nbsp;i)</pre>
-<div class="block">Applies <a href="../../randoop/Check.html#evaluate-randoop.sequence.Execution-"><code>Check.evaluate(Execution)</code></a> for each registered <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a>.
- For use by <a href="../../randoop/ExecutionVisitor.html" title="interface in randoop"><code>ExecutionVisitor</code></a> implementations.</div>
+<h4>hasFailure</h4>
+<pre>public&nbsp;boolean&nbsp;hasFailure()</pre>
+<div class="block">Indicate whether checks are failing or passing.</div>
 <dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>i</code> - index into checkResults to set value.</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if checks are all failing, or false if all passing</dd>
 </dl>
 </li>
 </ul>
-<a name="initializeChecks--">
+<a name="hasChecks--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>hasChecks</h4>
+<pre>public&nbsp;boolean&nbsp;hasChecks()</pre>
+<div class="block">Indicate whether there are any checks.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if the test checks are nonempty, and false otherwise</dd>
+</dl>
+</li>
+</ul>
+<a name="hasInvalidBehavior--">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>initializeChecks</h4>
-<pre>public&nbsp;void&nbsp;initializeChecks()</pre>
-<div class="block">Clears and initializes array of <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a> objects.
- For use by <a href="../../randoop/ExecutionVisitor.html" title="interface in randoop"><code>ExecutionVisitor</code></a> implementations.</div>
+<h4>hasInvalidBehavior</h4>
+<pre>public&nbsp;boolean&nbsp;hasInvalidBehavior()</pre>
+<div class="block">Indicate whether there are any invalid checks.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if the test checks have been set and are for invalid behavior, false otherwise</dd>
+</dl>
 </li>
 </ul>
 </li>

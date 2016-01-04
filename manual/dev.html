@@ -53,6 +53,11 @@
 <!-- end toc -->
 
 <p>
+There is separate <a href="../plugin/doc/dev.html">developer documentation
+    for the Eclipse plugin</a>.
+</p>
+
+<p>
 (Also see the <a href="index.html">Randoop Manual</a>.)
 </p>
 
@@ -60,7 +65,7 @@
 <hr />
 
 <h1 id="tasks">Compiling, testing, releasing, etc.</h1>
-
+ 
 
 <h2 id="compiling">Compiling Randoop</h2>
 
@@ -202,18 +207,18 @@ correctly after an element is added.
 </pre>
 
 <p>
-The test input consists of lines 3-4, which creates a list and calls the
+The test input consists of lines 3-4, which creates a list and calls the 
 <code>add</code> method, exercising the code of the list class under
 test. The test check is in line 5.
 </p>
 
 <p>
-In Randoop, test inputs are represented using
-<a href="https://randoop.github.io/randoop/api/randoop/sequence/Sequence.html">Sequences</a>, which describe
-a sequence of <a href="https://randoop.github.io/randoop/api/randoop/sequence/Statement.html">Statement</a>s
+In Randoop, test inputs are represented using 
+<a href="javadoc/randoop/Sequence.html">Sequences</a>, which describe
+a sequence of <a href="javadoc/randoop/Statement.html">Statement</a>s
 (like the statements in lines 3-4 above)
 exercising the code under test, and test checks are represented
-using <a href="https://randoop.github.io/randoop/api/randoop/Check.html">Checks</a>.
+using <a href="javadoc/randoop/Check.html">Checks</a>.
 </p>
 
 <p>
@@ -226,7 +231,7 @@ to the user as unit tests.
 
 <p>
 Randoop's main data structure is the
-<a href="https://randoop.github.io/randoop/api/randoop/sequence/Sequence.html">Sequence</a>.  A sequence
+<a href="javadoc/randoop/Sequence.html">Sequence</a>.  A sequence
 describes the syntactic structure of a test input. In Randoop, all
 test inputs are sequences of operations that use the methods and
 constructors of the classes under test.
@@ -280,8 +285,8 @@ The three elements of a statement map to the following classes in Randoop:
 
 <ul>
 
-<li>
-<p>A <a href="https://randoop.github.io/randoop/api/randoop/operation/Operation.html">StatementKind</a>
+<li> 
+<p>A <a href="javadoc/randoop/StatementKind.html">StatementKind</a>
 represents the kind of operation that the statement
 performs.
 </p>
@@ -289,7 +294,7 @@ performs.
 Randoop statements include:
 </p>
 <ul>
-<li><a href="https://randoop.github.io/randoop/api/randoop/operation/MethodCall.html">MethodCall</a> represents a particular
+<li><a href="javadoc/randoop/RMethod.html">RMethod</a> represents a particular
 method call. This class is Randoop's analogue of Java
 reflection's
 <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Method.html"><code>Method</code></a>
@@ -297,29 +302,29 @@ class, and adds additional
 functionality useful to Randoop.
 </li>
 
-<li><a href="https://randoop.github.io/randoop/api/randoop/operation/ConstructorCall.html">ConstructorCall</a>
+<li><a href="javadoc/randoop/RConstructor.html">RConstructor</a>
 represents a constructor call.
 </li>
 
 <li>
-<a href="https://randoop.github.io/randoop/api/randoop/operation/FieldGetter.html">FieldGetter</a> and <a href="https://randoop.github.io/randoop/api/randoop/FieldSetter.html">FieldSetter</a>
+<a href="javadoc/randoop/FieldGetter.html">FieldGetter</a> and <a href="javadoc/randoop/FieldSetter.html">FieldSetter</a>
 represent getting and setting a public field. Fields are represented by
-instances of classes that implement <a href="https://randoop.github.io/randoop/api/randoop/operation/PublicField.html">PublicField</a>.
+instances of classes that implement <a href="javadoc/randoop/PublicField.html">PublicField</a>.
 </li>
 
 <li>
-<a href="https://randoop.github.io/randoop/api/randoop/operation/EnumConstant.html">EnumConstant</a>
+<a href="javadoc/randoop/EnumConstant.html">EnumConstant</a> 
 represents an enum constant value.
 </li>
 
-<li><a href="https://randoop.github.io/randoop/api/randoop/operation/NonreceiverTerm.html">PrimitiveOrStringOrNullDecl</a>
+<li><a href="javadoc/randoop/PrimitiveOrStringOrNullDecl.html">PrimitiveOrStringOrNullDecl</a>
 represents a statement that declares and initializes a variable to primitive value, a String, or
 the <code>null</code> value (in code, <code>int x =
 1</code>, <code>String s = "s"</code>, <code>Foo f = null</code>,
 etc.).
 </li>
 
-<li><a href="https://randoop.github.io/randoop/api/randoop/operation/ArrayCreation.html">ArrayCreation</a>
+<li><a href="javadoc/randoop/ArrayDeclaration.html">ArrayDeclaration</a>
 represents a statement that declares and initializes an array out of values created in
 previous statements (e.g. <code>int[] x = new int[] { var0, var1
 };</code>).
@@ -327,7 +332,7 @@ previous statements (e.g. <code>int[] x = new int[] { var0, var1
 
 </ul>
 
-<li><a href="https://randoop.github.io/randoop/api/randoop/sequence/Variable.html">Variables</a> represent
+<li><a href="javadoc/randoop/Variable.html">Variables</a> represent
 both the inputs and the outputs of a statement. A variable is just a
 wrapper around an index in the sequence: given a
 sequence <code>s</code>, the variable <code>s.getVariable(i)</code>
@@ -354,7 +359,7 @@ bottom. Recall the example sequence:
 </pre>
 
 <p>
-Below is code that creates this sequence via extension.
+Below is code that creates this sequence via extension. 
 </p>
 
 <pre class="code">
@@ -366,7 +371,7 @@ Below is code that creates this sequence via extension.
   StatementKind size = RMethod.getRMethod(LinkedList.class.getMethod("size"));
   StatementKind newTS = RConstructor.getRConstructor(TreeSet.class.getConstructor(Collection.class));
   StatementKind syncS = RMethod.getRMethod(Collections.class.getMethod("synchronizedSet", Set.class));
-
+  
   // Now, create the sequence by repeated extension.
   Sequence s = new Sequence();
   s = s.extend(newLL);
@@ -418,12 +423,12 @@ A third way to create a sequence is by parsing it from a String. For
 example, given a string <code>parseable</code> with the following contents:
 </p>
 <pre class="code">
-var0 =  cons : java.util.LinkedList.&lt;init&gt;() :
-var1 =  cons : java.lang.Object.&lt;init&gt;() :
-var2 =  method : java.util.LinkedList.addFirst(java.lang.Object) : var0 var1
-var3 =  method : java.util.LinkedList.size() : var0
-var4 =  cons : java.util.TreeSet.&lt;init&gt;(java.util.Collection) : var0
-var5 =  method : java.util.Collections.synchronizedSet(java.util.Set) : var4
+var0 =  cons : java.util.LinkedList.&lt;init&gt;() : 
+var1 =  cons : java.lang.Object.&lt;init&gt;() : 
+var2 =  method : java.util.LinkedList.addFirst(java.lang.Object) : var0 var1 
+var3 =  method : java.util.LinkedList.size() : var0 
+var4 =  cons : java.util.TreeSet.&lt;init&gt;(java.util.Collection) : var0 
+var5 =  method : java.util.Collections.synchronizedSet(java.util.Set) : var4 
 </pre>
 <p>
 The following call creates a sequence corresponding to our
@@ -436,7 +441,7 @@ Sequence seq = Sequence.parse(parseable);
 <h2 id="executing_sequence">Executable Sequences</h2>
 
 <p>
-An <a href="https://randoop.github.io/randoop/api/randoop/ExecutableSequence.html">ExecutableSequence</a>
+An <a href="javadoc/randoop/ExecutableSequence.html">ExecutableSequence</a>
  wraps a <code>Sequence</code> and adds two pieces of
  functionality:
 </p>
@@ -479,7 +484,7 @@ out
 <code>1</code>, i.e. the return value of the call to
 method <code>LinkedList.size()</code>.
 </p>
-<pre class="code">
+<pre class="code">  
   ExecutableSequence es = new ExecutableSequence(s);
   es.execute(null);
 
@@ -491,8 +496,8 @@ method <code>LinkedList.size()</code>.
 </pre>
 <p>
 To dig more into execution results, explore the
-classes <a href="https://randoop.github.io/randoop/api/randoop/Execution.html">Execution</a> and
-<a href="https://randoop.github.io/randoop/api/randoop/ExecutionOutcome.html">ExecutionOutcome</a>.
+classes <a href="javadoc/randoop/Execution.html">Execution</a> and
+<a href="javadoc/randoop/ExecutionOutcome.html">ExecutionOutcome</a>.
 </p>
 
 <h3>Miscellaneous Notes</h3> <!-- omit from toc -->
@@ -537,7 +542,7 @@ Reading a list of sequences from a serialized file:
 <p>
 You can replay the execution of a deserialized sequence (including
 evaluation of its Checks) by executing it with
-a <a href="https://randoop.github.io/randoop/api/randoop/ReplayVisitor.html">ReplayVisitor</a>.
+a <a href="javadoc/randoop/ReplayVisitor.html">ReplayVisitor</a>.
 </p>
 
 <h4 id="writing_sequence_as_junit">Writing a sequence as a JUnit test</h4>
@@ -575,7 +580,7 @@ to write, how many tests to put in each, what to name them, etc.
 <h2 id="checks">Checks</h2>
 
 <p>
-A <a href="https://randoop.github.io/randoop/api/randoop/Check.html">Check</a> is an object that
+A <a href="javadoc/randoop/Check.html">Check</a> is an object that
 represents an <b>expected property</b> of a sequence. In terms of
  <a href="#unit_tests">unit test concepts</a>, a check represents some
 piece of checking code (or &ldquo;test oracle&rdquo;) of a unit test.
@@ -589,11 +594,11 @@ For example, consider the following unit test:
  3.  public void testAdd() {
  4.     LinkedList l = new LinkedList();            // Create a list.
  5.     assertTrue(l.equals(l));                    // List should be equal to itself.
- 6.     Object o = new Object();
+ 6.     Object o = new Object(); 
  7.     boolean b = l.add(o);                       // Add an element to it.
  8.     org.junit.Assert.assertTrue(l.size() == 1); // List should have size 1.
  9.     org.junit.Assert.assertTrue(l.equals(l));   // List should still be equal to itself.
-10.     int i = 10;
+10.     int i = 10;                              
 11.     try {
 12.       Object o2 = l.remove(i);                  // Removing from invalid index
 13.       org.junit.Assert.fail();                  // should throw exception.
@@ -660,7 +665,7 @@ sequence.
 <p>
 Given how Randoop treats sequences and checks differently, it makes
 more sense for a call like <code>l.equals(l)</code> to be expressed as
-a <a href="https://randoop.github.io/randoop/api/randoop/Check.html">Check</a>, so that it is always
+a <a href="javadoc/randoop/Check.html">Check</a>, so that it is always
 (not randomly) performed.
 </p>
 
@@ -672,22 +677,22 @@ a <a href="https://randoop.github.io/randoop/api/randoop/Check.html">Check</a>, 
 <h2 id="code-entry">Main entry points</h2>
 
 <ul>
-<li><a href="https://randoop.github.io/randoop/api/randoop/main/GenTests.html">randoop.main.GenTests</a>
+<li><a href="javadoc/randoop/main/GenTests.html">randoop.main.GenTests</a>
 is the main class for Randoop as it is normally used.  There are other
 mains for other purposes.
 </li>
 <li>Method <code>handle</code> is the
-main <a href="https://randoop.github.io/randoop/api/randoop/main/GenTests.html">GenTests</a>
+main <a href="javadoc/randoop/main/GenTests.html">GenTests</a>
 entrypoint for Randoop. (This is not strictly true, as Randoop's true
 entrypoint is
-class <a href="https://randoop.github.io/randoop/api/randoop/main/Main.html">randoop.main.Main</a>.
+class <a href="javadoc/randoop/main/Main.html">randoop.main.Main</a>.
 But <code>GenTests</code> is where all the action starts with test
 generation.) The <code>handle</code> method is long and mostly deals with
 setting up things before the generation process, and doing things like
 outputting tests after generation.
 </li>
 <li>Most command line options are specified
-in <a href="https://randoop.github.io/randoop/api/randoop/main/GenInputsAbstract.html">GenInputsAbstract</a>.
+in <a href="javadoc/randoop/main/GenInputsAbstract.html">GenInputsAbstract</a>.
 </li>
 </ul>
 

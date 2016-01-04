@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -47,7 +47,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../randoop/sequence/SequenceSimplifyUtils.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../randoop/sequence/SequenceParseException.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -287,13 +287,17 @@ implements Serializable</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#toParseableString-java.lang.String-java.util.List-">toParseableString</a></span>(String&nbsp;variableName,
                  List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputs)</code>&nbsp;</td>
 </tr>
+<tr id="i20" class="altColor">
+<td class="colFirst"><code>String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#toString--">toString</a></span>()</code>&nbsp;</td>
+</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.Object">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;Object</h3>
-<code>clone, finalize, getClass, notify, notifyAll, toString, wait, wait, wait</code></li>
+<code>clone, finalize, getClass, notify, notifyAll, wait, wait, wait</code></li>
 </ul>
 </li>
 </ul>
@@ -369,7 +373,7 @@ implements Serializable</pre>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
 <dd><code>equals</code>&nbsp;in class&nbsp;<code>Object</code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if operation is the same, the number of inputs is the same, 
+<dd>true if operation is the same, the number of inputs is the same,
          and inputs are equal.</dd>
 </dl>
 </li>
@@ -421,7 +425,7 @@ implements Serializable</pre>
 <dd><code>inputs</code> - the input list for the operation of the statement.</dd>
 <dd><code>b</code> - the <code>StringBuilder</code> to which code text is appended.</dd>
 <dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../randoop/sequence/Sequence.html#printStatement-java.lang.StringBuilder-int-"><code>Sequence.printStatement(StringBuilder, int)</code></a></dd>
+<dd><a href="../../randoop/sequence/Sequence.html#appendCode-java.lang.StringBuilder-int-"><code>Sequence.appendCode(StringBuilder, int)</code></a></dd>
 </dl>
 </li>
 </ul>
@@ -433,6 +437,19 @@ implements Serializable</pre>
 <h4>toParseableString</h4>
 <pre>public&nbsp;String&nbsp;toParseableString(String&nbsp;variableName,
                                 List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputs)</pre>
+</li>
+</ul>
+<a name="toString--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>toString</h4>
+<pre>public&nbsp;String&nbsp;toString()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>toString</code>&nbsp;in class&nbsp;<code>Object</code></dd>
+</dl>
 </li>
 </ul>
 <a name="toModifiableStatement-java.util.List-randoop.sequence.MutableVariable-">
@@ -447,7 +464,7 @@ implements Serializable</pre>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>inputs</code> - mutable version of variable inputs to statement.</dd>
-<dd><code>mVariable</code> - </dd>
+<dd><code>mVariable</code> - the mutable variable the statement affects</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>instance of mutable statement corresponding to this statement.</dd>
 </dl>
@@ -615,11 +632,11 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>getValue</h4>
 <pre>public&nbsp;Object&nbsp;getValue()</pre>
-<div class="block">getValue returns the "value" for a statement. Is only meaningful if 
- statement is an assignment of a constant value.  
+<div class="block">getValue returns the "value" for a statement. Is only meaningful if
+ statement is an assignment of a constant value.
  Appeals to <a href="../../randoop/operation/AbstractOperation.html" title="class in randoop.operation"><code>AbstractOperation</code></a> to throw appropriate exception when
  unable to provide a value.
- 
+
  This is a hack to allow randoop.main.GenBranchDir to do mutation.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
@@ -635,7 +652,7 @@ implements Serializable</pre>
 <h4>getOperation</h4>
 <pre>public final&nbsp;<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&nbsp;getOperation()</pre>
 <div class="block">getOperation is meant to be a temporary solution to type confusion in generators.
- This should go away. 
+ This should go away.
  Only intended to be called by <a href="../../randoop/sequence/Sequence.html#extend-randoop.operation.Operation-java.util.List-"><code>Sequence.extend(Operation, List)</code></a>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
@@ -670,7 +687,7 @@ implements Serializable</pre>
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../randoop/sequence/SequenceSimplifyUtils.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../randoop/sequence/SequenceParseException.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">

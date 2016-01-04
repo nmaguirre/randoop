@@ -6,5 +6,8 @@ randoop.operation
 randoop.reflection
 randoop.runtime
 randoop.sequence
+randoop.test
+randoop.test.predicate
 randoop.types
 randoop.util
+randoop.util.predicate

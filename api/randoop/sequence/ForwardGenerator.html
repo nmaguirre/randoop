@@ -48,7 +48,7 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../randoop/sequence/GreedySequenceSimplifier.html" title="class in randoop.sequence"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../randoop/sequence/MappedSequences.html" title="class in randoop.sequence"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../index.html?randoop/sequence/ForwardGenerator.html" target="_top">Frames</a></li>
@@ -156,7 +156,7 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <!--   -->
 </a>
 <h3>Fields inherited from class&nbsp;<a href="../../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence">AbstractGenerator</a></h3>
-<code><a href="../../randoop/sequence/AbstractGenerator.html#componentManager">componentManager</a>, <a href="../../randoop/sequence/AbstractGenerator.html#currSeq">currSeq</a>, <a href="../../randoop/sequence/AbstractGenerator.html#dump_sequences">dump_sequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#executionVisitor">executionVisitor</a>, <a href="../../randoop/sequence/AbstractGenerator.html#listenerMgr">listenerMgr</a>, <a href="../../randoop/sequence/AbstractGenerator.html#maxSequences">maxSequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#maxTimeMillis">maxTimeMillis</a>, <a href="../../randoop/sequence/AbstractGenerator.html#num_failing_sequences">num_failing_sequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#num_sequences_generated">num_sequences_generated</a>, <a href="../../randoop/sequence/AbstractGenerator.html#num_steps">num_steps</a>, <a href="../../randoop/sequence/AbstractGenerator.html#operations">operations</a>, <a href="../../randoop/sequence/AbstractGenerator.html#outputTestFilters">outputTestFilters</a>, <a href="../../randoop/sequence/AbstractGenerator.html#outSeqs">outSeqs</a>, <a href="../../randoop/sequence/AbstractGenerator.html#timer">timer</a></code></li>
+<code><a href="../../randoop/sequence/AbstractGenerator.html#checkGenerator">checkGenerator</a>, <a href="../../randoop/sequence/AbstractGenerator.html#componentManager">componentManager</a>, <a href="../../randoop/sequence/AbstractGenerator.html#currSeq">currSeq</a>, <a href="../../randoop/sequence/AbstractGenerator.html#dump_sequences">dump_sequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#executionVisitor">executionVisitor</a>, <a href="../../randoop/sequence/AbstractGenerator.html#listenerMgr">listenerMgr</a>, <a href="../../randoop/sequence/AbstractGenerator.html#maxGeneratedSequences">maxGeneratedSequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#maxOutputSequences">maxOutputSequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#maxTimeMillis">maxTimeMillis</a>, <a href="../../randoop/sequence/AbstractGenerator.html#num_failing_sequences">num_failing_sequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#num_sequences_generated">num_sequences_generated</a>, <a href="../../randoop/sequence/AbstractGenerator.html#num_steps">num_steps</a>, <a href="../../randoop/sequence/AbstractGenerator.html#operations">operations</a>, <a href="../../randoop/sequence/AbstractGenerator.html#outErrorSeqs">outErrorSeqs</a>, <a href="../../randoop/sequence/AbstractGenerator.html#outputTest">outputTest</a>, <a href="../../randoop/sequence/AbstractGenerator.html#outRegressionSeqs">outRegressionSeqs</a>, <a href="../../randoop/sequence/AbstractGenerator.html#timer">timer</a></code></li>
 </ul>
 </li>
 </ul>
@@ -172,13 +172,13 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#ForwardGenerator-java.util.List-long-int-randoop.ComponentManager-randoop.IStopper-randoop.RandoopListenerManager-java.util.List-">ForwardGenerator</a></span>(List&lt;<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&gt;&nbsp;operations,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#ForwardGenerator-java.util.List-long-int-int-randoop.ComponentManager-randoop.IStopper-randoop.RandoopListenerManager-">ForwardGenerator</a></span>(List&lt;<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&gt;&nbsp;operations,
                 long&nbsp;timeMillis,
-                int&nbsp;maxSequences,
+                int&nbsp;maxGenSequences,
+                int&nbsp;maxOutSequences,
                 <a href="../../randoop/ComponentManager.html" title="class in randoop">ComponentManager</a>&nbsp;componentManager,
                 <a href="../../randoop/IStopper.html" title="interface in randoop">IStopper</a>&nbsp;stopper,
-                <a href="../../randoop/RandoopListenerManager.html" title="class in randoop">RandoopListenerManager</a>&nbsp;listenerManager,
-                List&lt;<a href="../../randoop/ITestFilter.html" title="interface in randoop">ITestFilter</a>&gt;&nbsp;fs)</code>&nbsp;</td>
+                <a href="../../randoop/RandoopListenerManager.html" title="class in randoop">RandoopListenerManager</a>&nbsp;listenerManager)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -200,36 +200,40 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#allSequences--">allSequences</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#numSequences--">numSequences</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>Set&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#getSubsumedSequences--">getSubsumedSequences</a></span>()</code>
+<div class="block">Returns the set of sequences that are included in other sequences to
+ generate inputs (and, so, are subsumed by another sequence).</div>
+</td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#numGeneratedSequences--">numGeneratedSequences</a></span>()</code>
+<div class="block">Returns the count of sequences generated so far by the generator.</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#processSequence-randoop.sequence.ExecutableSequence-">processSequence</a></span>(<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;seq)</code>
 <div class="block">Determines what indices in the given sequence are active.</div>
 </td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>protected void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#randoopConsistencyTest2-randoop.sequence.Sequence-">randoopConsistencyTest2</a></span>(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;newSequence)</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>protected void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#randoopConsistencyTests-randoop.sequence.Sequence-">randoopConsistencyTests</a></span>(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;newSequence)</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#setObjectCache-randoop.sequence.ObjectCache-">setObjectCache</a></span>(<a href="../../randoop/sequence/ObjectCache.html" title="class in randoop.sequence">ObjectCache</a>&nbsp;newCache)</code>&nbsp;</td>
 </tr>
-<tr id="i6" class="altColor">
-<td class="colFirst"><code><a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#step--">step</a></span>()</code>&nbsp;</td>
-</tr>
 <tr id="i7" class="rowColor">
-<td class="colFirst"><code>Set&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#subsumed_sequences--">subsumed_sequences</a></span>()</code>
-<div class="block">Returns the set of sequences that are used as inputs in other sequences
- (and can thus be thought of as subsumed by another sequence).</div>
+<td class="colFirst"><code><a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ForwardGenerator.html#step--">step</a></span>()</code>
+<div class="block">Generate an individual test sequence</div>
 </td>
 </tr>
 </table>
@@ -238,7 +242,7 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;<a href="../../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence">AbstractGenerator</a></h3>
-<code><a href="../../randoop/sequence/AbstractGenerator.html#explore--">explore</a>, <a href="../../randoop/sequence/AbstractGenerator.html#stop--">stop</a></code></li>
+<code><a href="../../randoop/sequence/AbstractGenerator.html#addExecutionVisitor-randoop.ExecutionVisitor-">addExecutionVisitor</a>, <a href="../../randoop/sequence/AbstractGenerator.html#addTestCheckGenerator-randoop.test.TestCheckGenerator-">addTestCheckGenerator</a>, <a href="../../randoop/sequence/AbstractGenerator.html#addTestPredicate-randoop.util.predicate.Predicate-">addTestPredicate</a>, <a href="../../randoop/sequence/AbstractGenerator.html#explore--">explore</a>, <a href="../../randoop/sequence/AbstractGenerator.html#getErrorTestSequences--">getErrorTestSequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#getRegressionSequences--">getRegressionSequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#numOutputSequences--">numOutputSequences</a>, <a href="../../randoop/sequence/AbstractGenerator.html#outputSequenceCount--">outputSequenceCount</a>, <a href="../../randoop/sequence/AbstractGenerator.html#setCurrentSequence-randoop.sequence.Sequence-">setCurrentSequence</a>, <a href="../../randoop/sequence/AbstractGenerator.html#stop--">stop</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.Object">
@@ -299,7 +303,7 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="ForwardGenerator-java.util.List-long-int-randoop.ComponentManager-randoop.IStopper-randoop.RandoopListenerManager-java.util.List-">
+<a name="ForwardGenerator-java.util.List-long-int-int-randoop.ComponentManager-randoop.IStopper-randoop.RandoopListenerManager-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -307,11 +311,11 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <h4>ForwardGenerator</h4>
 <pre>public&nbsp;ForwardGenerator(List&lt;<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&gt;&nbsp;operations,
                         long&nbsp;timeMillis,
-                        int&nbsp;maxSequences,
+                        int&nbsp;maxGenSequences,
+                        int&nbsp;maxOutSequences,
                         <a href="../../randoop/ComponentManager.html" title="class in randoop">ComponentManager</a>&nbsp;componentManager,
                         <a href="../../randoop/IStopper.html" title="interface in randoop">IStopper</a>&nbsp;stopper,
-                        <a href="../../randoop/RandoopListenerManager.html" title="class in randoop">RandoopListenerManager</a>&nbsp;listenerManager,
-                        List&lt;<a href="../../randoop/ITestFilter.html" title="interface in randoop">ITestFilter</a>&gt;&nbsp;fs)</pre>
+                        <a href="../../randoop/RandoopListenerManager.html" title="class in randoop">RandoopListenerManager</a>&nbsp;listenerManager)</pre>
 </li>
 </ul>
 </li>
@@ -331,19 +335,6 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <pre>public&nbsp;void&nbsp;setObjectCache(<a href="../../randoop/sequence/ObjectCache.html" title="class in randoop.sequence">ObjectCache</a>&nbsp;newCache)</pre>
 </li>
 </ul>
-<a name="numSequences--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>numSequences</h4>
-<pre>public&nbsp;int&nbsp;numSequences()</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../randoop/sequence/AbstractGenerator.html#numSequences--">numSequences</a></code>&nbsp;in class&nbsp;<code><a href="../../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence">AbstractGenerator</a></code></dd>
-</dl>
-</li>
-</ul>
 <a name="step--">
 <!--   -->
 </a>
@@ -351,9 +342,13 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <li class="blockList">
 <h4>step</h4>
 <pre>public&nbsp;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;step()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../randoop/sequence/AbstractGenerator.html#step--">AbstractGenerator</a></code></span></div>
+<div class="block">Generate an individual test sequence</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/sequence/AbstractGenerator.html#step--">step</a></code>&nbsp;in class&nbsp;<code><a href="../../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence">AbstractGenerator</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>a test sequence, may be null</dd>
 </dl>
 </li>
 </ul>
@@ -405,18 +400,35 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <pre>protected&nbsp;void&nbsp;randoopConsistencyTests(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;newSequence)</pre>
 </li>
 </ul>
-<a name="subsumed_sequences--">
+<a name="getSubsumedSequences--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSubsumedSequences</h4>
+<pre>public&nbsp;Set&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;&nbsp;getSubsumedSequences()</pre>
+<div class="block">Returns the set of sequences that are included in other sequences to
+ generate inputs (and, so, are subsumed by another sequence).</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../randoop/sequence/AbstractGenerator.html#getSubsumedSequences--">getSubsumedSequences</a></code>&nbsp;in class&nbsp;<code><a href="../../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence">AbstractGenerator</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="numGeneratedSequences--">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>subsumed_sequences</h4>
-<pre>public&nbsp;Set&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;&nbsp;subsumed_sequences()</pre>
-<div class="block">Returns the set of sequences that are used as inputs in other sequences
- (and can thus be thought of as subsumed by another sequence).</div>
+<h4>numGeneratedSequences</h4>
+<pre>public&nbsp;int&nbsp;numGeneratedSequences()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../randoop/sequence/AbstractGenerator.html#numGeneratedSequences--">AbstractGenerator</a></code></span></div>
+<div class="block">Returns the count of sequences generated so far by the generator.</div>
 <dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="../../randoop/sequence/AbstractGenerator.html#subsumed_sequences--">subsumed_sequences</a></code>&nbsp;in class&nbsp;<code><a href="../../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence">AbstractGenerator</a></code></dd>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../randoop/sequence/AbstractGenerator.html#numGeneratedSequences--">numGeneratedSequences</a></code>&nbsp;in class&nbsp;<code><a href="../../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence">AbstractGenerator</a></code></dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the number of sequences generated</dd>
 </dl>
 </li>
 </ul>
@@ -448,7 +460,7 @@ extends <a href="../../randoop/sequence/AbstractGenerator.html" title="class in 
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../randoop/sequence/GreedySequenceSimplifier.html" title="class in randoop.sequence"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../randoop/sequence/MappedSequences.html" title="class in randoop.sequence"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../index.html?randoop/sequence/ForwardGenerator.html" target="_top">Frames</a></li>

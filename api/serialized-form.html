@@ -127,6 +127,15 @@
 </li>
 </ul>
 </li>
+<li class="blockList"><a name="randoop.EmptyExceptionCheck">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/EmptyExceptionCheck.html" title="class in randoop">EmptyExceptionCheck</a> extends <a href="randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>8159839339961663076L</dd>
+</dl>
+</li>
 <li class="blockList"><a name="randoop.EqualsHashcode">
 <!--   -->
 </a>
@@ -163,43 +172,42 @@
 <dd>5559088835651175150L</dd>
 </dl>
 </li>
-<li class="blockList"><a name="randoop.ExpectedExceptionCheck">
+<li class="blockList"><a name="randoop.ExceptionCheck">
 <!--   -->
 </a>
-<h3>Class <a href="randoop/ExpectedExceptionCheck.html" title="class in randoop">ExpectedExceptionCheck</a> extends Object implements Serializable</h3>
+<h3>Class <a href="randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a> extends Object implements Serializable</h3>
 <dl class="nameValue">
 <dt>serialVersionUID:</dt>
-<dd>-1172907532417774517L</dd>
+<dd>4806179088639914364L</dd>
 </dl>
 <ul class="blockList">
-<li class="blockList">
-<h3>Serialization Methods</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>writeReplace</h4>
-<pre>private&nbsp;Object&nbsp;writeReplace()
-                     throws ObjectStreamException</pre>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>ObjectStreamException</code></dd>
-</dl>
-</li>
-</ul>
-</li>
 <li class="blockList">
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockList">
-<h4>exceptionClass</h4>
-<pre>Class&lt;T&gt; exceptionClass</pre>
+<h4>exception</h4>
+<pre>Throwable exception</pre>
+</li>
+<li class="blockList">
+<h4>statementIndex</h4>
+<pre>int statementIndex</pre>
 </li>
 <li class="blockListLast">
-<h4>statementIdx</h4>
-<pre>int statementIdx</pre>
+<h4>catchClassName</h4>
+<pre>String catchClassName</pre>
 </li>
 </ul>
 </li>
 </ul>
+</li>
+<li class="blockList"><a name="randoop.ExpectedExceptionCheck">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/ExpectedExceptionCheck.html" title="class in randoop">ExpectedExceptionCheck</a> extends <a href="randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>-1172907532417774517L</dd>
+</dl>
 </li>
 <li class="blockList"><a name="randoop.HashCodeReturnsNormally">
 <!--   -->
@@ -240,9 +248,13 @@
 <li class="blockList">
 <h3>Serialized Fields</h3>
 <ul class="blockList">
-<li class="blockListLast">
+<li class="blockList">
 <h4>statementIdx</h4>
 <pre>int statementIdx</pre>
+</li>
+<li class="blockListLast">
+<h4>exceptionName</h4>
+<pre>String exceptionName</pre>
 </li>
 </ul>
 </li>
@@ -393,46 +405,6 @@
 <li class="blockListLast">
 <h4>checkRepMethod</h4>
 <pre>String checkRepMethod</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="randoop.SerializableExpectedExceptionCheck">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/SerializableExpectedExceptionCheck.html" title="class in randoop">SerializableExpectedExceptionCheck</a> extends Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>20100429L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialization Methods</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>readResolve</h4>
-<pre>private&nbsp;Object&nbsp;readResolve()
-                    throws ObjectStreamException,
-                           ClassNotFoundException</pre>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>ObjectStreamException</code></dd>
-<dd><code>ClassNotFoundException</code></dd>
-</dl>
-</li>
-</ul>
-</li>
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>exceptionClass</h4>
-<pre>String exceptionClass</pre>
-</li>
-<li class="blockListLast">
-<h4>statementIdx</h4>
-<pre>int statementIdx</pre>
 </li>
 </ul>
 </li>
@@ -597,15 +569,6 @@
 <!--   -->
 </a>
 <h3>Class <a href="randoop/experiments/ReproduceISSTA06Failure.html" title="class in randoop.experiments">ReproduceISSTA06Failure</a> extends Exception implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-</li>
-<li class="blockList"><a name="randoop.experiments.StatsWriter.EndOfFile">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/experiments/StatsWriter.EndOfFile.html" title="class in randoop.experiments">StatsWriter.EndOfFile</a> extends Exception implements Serializable</h3>
 <dl class="nameValue">
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
@@ -1349,22 +1312,34 @@
 <li class="blockList">
 <h4>sequence</h4>
 <pre><a href="randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a> sequence</pre>
+<div class="block">The underlying sequence.</div>
 </li>
 <li class="blockList">
 <h4>checks</h4>
-<pre>List&lt;E&gt; checks</pre>
-</li>
-<li class="blockList">
-<h4>checksResults</h4>
-<pre>List&lt;E&gt; checksResults</pre>
+<pre><a href="randoop/test/TestChecks.html" title="interface in randoop.test">TestChecks</a> checks</pre>
+<div class="block">The checks for this sequence</div>
 </li>
 <li class="blockList">
 <h4>gentime</h4>
 <pre>long gentime</pre>
+<div class="block">How long it took to generate this sequence in nanoseconds,
+ excluding execution time.
+ Must be directly set by the generator that creates this object
+ (no code in this class sets its value).</div>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>exectime</h4>
 <pre>long exectime</pre>
+<div class="block">How long it took to execute this sequence in nanoseconds,
+ excluding generation time.
+ Must be directly set by the generator that creates this object.
+ (no code in this class sets its value).</div>
+</li>
+<li class="blockListLast">
+<h4>hasNullInput</h4>
+<pre>boolean hasNullInput</pre>
+<div class="block">Flag to record whether execution of sequence has a null input.
+ [this is wonky really belongs to execution]</div>
 </li>
 </ul>
 </li>
@@ -1429,6 +1404,10 @@
 <li class="blockList">
 <h4>activeFlags</h4>
 <pre>BitSet activeFlags</pre>
+<div class="block">A set of bits, where there is one bit associated with each index.
+ Active flags are used during generation, to determine what values
+ in an existing sequence are useful to be used as inputs when
+ creating a new sequence out of the existing one.</div>
 </li>
 <li class="blockList">
 <h4>savedHashCode</h4>
@@ -1526,6 +1505,64 @@
 <li class="blockListLast">
 <h4>sequence</h4>
 <pre><a href="randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a> sequence</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList">
+<h2 title="Package">Package&nbsp;randoop.test</h2>
+<ul class="blockList">
+<li class="blockList"><a name="randoop.test.ErrorRevealingChecks">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/test/ErrorRevealingChecks.html" title="class in randoop.test">ErrorRevealingChecks</a> extends Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>6824110337347191631L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>checks</h4>
+<pre>Set&lt;E&gt; checks</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="randoop.test.InvalidExceptionCheck">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/test/InvalidExceptionCheck.html" title="class in randoop.test">InvalidExceptionCheck</a> extends <a href="randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>-4919647365672571645L</dd>
+</dl>
+</li>
+<li class="blockList"><a name="randoop.test.RegressionChecks">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/test/RegressionChecks.html" title="class in randoop.test">RegressionChecks</a> extends Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>-4118240133477960983L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>checks</h4>
+<pre>Set&lt;E&gt; checks</pre>
+</li>
+<li class="blockListLast">
+<h4>exceptionCheck</h4>
+<pre><a href="randoop/ExceptionCheck.html" title="class in randoop">ExceptionCheck</a> exceptionCheck</pre>
 </li>
 </ul>
 </li>
