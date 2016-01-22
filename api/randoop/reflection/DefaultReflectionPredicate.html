@@ -116,7 +116,7 @@ extends Object
 implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection">ReflectionPredicate</a></pre>
 <div class="block">Returns true for public members, with some exceptions (see
  doNotUseSpecialCase method).
-
+ <p>
  If a method has the @CheckRep annotation, returns false
  (the method will be used as a contract checker, not
   as a method under test).</div>
@@ -157,6 +157,9 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
  criteria for inclusion of reflection objects.</div>
 </td>
 </tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/reflection/DefaultReflectionPredicate.html#DefaultReflectionPredicate-randoop.reflection.VisibilityPredicate-">DefaultReflectionPredicate</a></span>(<a href="../../randoop/reflection/VisibilityPredicate.html" title="interface in randoop.reflection">VisibilityPredicate</a>&nbsp;visibility)</code>&nbsp;</td>
+</tr>
 </table>
 </li>
 </ul>
@@ -175,13 +178,13 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/reflection/DefaultReflectionPredicate.html#test-java.lang.Class-">test</a></span>(Class&lt;?&gt;&nbsp;c)</code>
-<div class="block">Indicate whether a class meets the use criteria for predicate.</div>
+<div class="block">Indicate whether Randoop should use a class.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/reflection/DefaultReflectionPredicate.html#test-java.lang.reflect.Constructor-">test</a></span>(Constructor&lt;?&gt;&nbsp;c)</code>
-<div class="block">Indicate whether a constructor meets the use criteria for the predicate.</div>
+<div class="block">Indicate whether Randoop should use a constructor.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -194,7 +197,7 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/reflection/DefaultReflectionPredicate.html#test-java.lang.reflect.Method-">test</a></span>(Method&nbsp;m)</code>
-<div class="block">Indicate whether a method meets the use criteria for the predicate.</div>
+<div class="block">Indicate whether Randoop should use a method.</div>
 </td>
 </tr>
 </table>
@@ -236,6 +239,15 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <h4>DefaultReflectionPredicate</h4>
 <pre>public&nbsp;DefaultReflectionPredicate(Pattern&nbsp;omitMethods)</pre>
 <div class="block">If omitMethods is null, then no methods are omitted.</div>
+</li>
+</ul>
+<a name="DefaultReflectionPredicate-randoop.reflection.VisibilityPredicate-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>DefaultReflectionPredicate</h4>
+<pre>public&nbsp;DefaultReflectionPredicate(<a href="../../randoop/reflection/VisibilityPredicate.html" title="interface in randoop.reflection">VisibilityPredicate</a>&nbsp;visibility)</pre>
 </li>
 </ul>
 <a name="DefaultReflectionPredicate-java.util.regex.Pattern-java.util.Set-">
@@ -284,14 +296,14 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <h4>test</h4>
 <pre>public&nbsp;boolean&nbsp;test(Class&lt;?&gt;&nbsp;c)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../randoop/reflection/ReflectionPredicate.html#test-java.lang.Class-">ReflectionPredicate</a></code></span></div>
-<div class="block">Indicate whether a class meets the use criteria for predicate.</div>
+<div class="block">Indicate whether Randoop should use a class.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/reflection/ReflectionPredicate.html#test-java.lang.Class-">test</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection">ReflectionPredicate</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>c</code> - the class to test.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if the class meets the predicate criteria, false, otherwise.</dd>
+<dd>true if the class meets the predicate criteria, false otherwise.</dd>
 </dl>
 </li>
 </ul>
@@ -302,7 +314,7 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <li class="blockList">
 <h4>test</h4>
 <pre>public&nbsp;boolean&nbsp;test(Method&nbsp;m)</pre>
-<div class="block">Indicate whether a method meets the use criteria for the predicate.
+<div class="block">Indicate whether Randoop should use a method.
  Does checks for the following cases:
  <ul>
  <li>Main methods
@@ -318,7 +330,7 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>m</code> - the method to test.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if the method meets the predicate criteria, false, otherwise.</dd>
+<dd>true if the method meets the predicate criteria, false otherwise.</dd>
 </dl>
 </li>
 </ul>
@@ -330,14 +342,14 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <h4>test</h4>
 <pre>public&nbsp;boolean&nbsp;test(Constructor&lt;?&gt;&nbsp;c)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../randoop/reflection/ReflectionPredicate.html#test-java.lang.reflect.Constructor-">ReflectionPredicate</a></code></span></div>
-<div class="block">Indicate whether a constructor meets the use criteria for the predicate.</div>
+<div class="block">Indicate whether Randoop should use a constructor.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/reflection/ReflectionPredicate.html#test-java.lang.reflect.Constructor-">test</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection">ReflectionPredicate</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>c</code> - the constructor to test.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if the constructor meets the predicate criteria, false, otherwise.</dd>
+<dd>true if the constructor meets the predicate criteria, false otherwise.</dd>
 </dl>
 </li>
 </ul>

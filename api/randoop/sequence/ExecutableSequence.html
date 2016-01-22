@@ -419,7 +419,7 @@ implements Serializable</pre>
 <tr id="i28" class="altColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#toCodeString--">toCodeString</a></span>()</code>
-<div class="block">Output this sequence as code.</div>
+<div class="block">Return this sequence as code.</div>
 </td>
 </tr>
 <tr id="i29" class="rowColor">
@@ -570,11 +570,12 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>toCodeString</h4>
 <pre>public&nbsp;String&nbsp;toCodeString()</pre>
-<div class="block">Output this sequence as code. In addition to printing out the statements,
- this method prints the checks.
+<div class="block">Return this sequence as code.
+ Similar to <a href="../../randoop/sequence/Sequence.html#toCodeString--"><code>Sequence.toCodeString()</code></a> except includes the
+ checks. 
 
  If for a given statement there is a check of type
- StatementThrowsException, that check's pre-statement code is printed
+ <a href="../../randoop/ExceptionCheck.html" title="class in randoop"><code>ExceptionCheck</code></a>, that check's pre-statement code is printed
  immediately before the statement, and its post-statement code is printed
  immediately after the statement.</div>
 </li>

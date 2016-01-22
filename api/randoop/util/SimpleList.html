@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":10,"i2":6,"i3":6};
+var methods = {"i0":6,"i1":6,"i2":10,"i3":6,"i4":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -189,17 +189,30 @@ extends Object</pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>abstract <a href="../../randoop/util/SimpleList.html" title="type parameter in SimpleList">T</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/SimpleList.html#get-int-">get</a></span>(int&nbsp;index)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/SimpleList.html#get-int-">get</a></span>(int&nbsp;index)</code>
+<div class="block">Return the element at the given position of this list.</div>
+</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/SimpleList.html#isEmpty--">isEmpty</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>abstract <a href="../../randoop/util/SimpleList.html" title="class in randoop.util">SimpleList</a>&lt;<a href="../../randoop/util/SimpleList.html" title="type parameter in SimpleList">T</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/SimpleList.html#getSublist-int-">getSublist</a></span>(int&nbsp;index)</code>
+<div class="block">Return the shortest sublist of this list that contains the index based on
+ the compositional structure of this list.</div>
+</td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code>abstract int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/SimpleList.html#size--">size</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>boolean</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/SimpleList.html#isEmpty--">isEmpty</a></span>()</code>
+<div class="block">Test if this list is empty.</div>
+</td>
 </tr>
 <tr id="i3" class="rowColor">
+<td class="colFirst"><code>abstract int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/SimpleList.html#size--">size</a></span>()</code>
+<div class="block">Return the number of elements in this list.</div>
+</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>abstract List&lt;<a href="../../randoop/util/SimpleList.html" title="type parameter in SimpleList">T</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/SimpleList.html#toJDKList--">toJDKList</a></span>()</code>
 <div class="block">Returns a java.util.List version of this list.</div>
@@ -251,6 +264,11 @@ extends Object</pre>
 <li class="blockList">
 <h4>size</h4>
 <pre>public abstract&nbsp;int&nbsp;size()</pre>
+<div class="block">Return the number of elements in this list.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the number of elements in this list</dd>
+</dl>
 </li>
 </ul>
 <a name="get-int-">
@@ -260,6 +278,30 @@ extends Object</pre>
 <li class="blockList">
 <h4>get</h4>
 <pre>public abstract&nbsp;<a href="../../randoop/util/SimpleList.html" title="type parameter in SimpleList">T</a>&nbsp;get(int&nbsp;index)</pre>
+<div class="block">Return the element at the given position of this list.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>index</code> - the position for the element</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the element at the index</dd>
+</dl>
+</li>
+</ul>
+<a name="getSublist-int-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getSublist</h4>
+<pre>public abstract&nbsp;<a href="../../randoop/util/SimpleList.html" title="class in randoop.util">SimpleList</a>&lt;<a href="../../randoop/util/SimpleList.html" title="type parameter in SimpleList">T</a>&gt;&nbsp;getSublist(int&nbsp;index)</pre>
+<div class="block">Return the shortest sublist of this list that contains the index based on
+ the compositional structure of this list.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>index</code> - the index into this list</dd>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>the sublist containing this list.</dd>
+</dl>
 </li>
 </ul>
 <a name="isEmpty--">
@@ -269,6 +311,11 @@ extends Object</pre>
 <li class="blockList">
 <h4>isEmpty</h4>
 <pre>public final&nbsp;boolean&nbsp;isEmpty()</pre>
+<div class="block">Test if this list is empty.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>true if this list is empty, false otherwise</dd>
+</dl>
 </li>
 </ul>
 <a name="toJDKList--">
