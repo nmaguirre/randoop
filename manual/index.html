@@ -14,7 +14,7 @@
 <h1>Randoop Manual</h1> <!-- omit from toc -->
 
 <p>
-This is the manual for Randoop version 2.1.0, released December 30, 2015.
+This is the manual for Randoop version 2.1.1, released January 20, 2016.
 The Randoop homepage is
 <a href="http://randoop.github.io/randoop/">http://randoop.github.io/randoop/</a>.
 </p>
@@ -52,6 +52,7 @@ The Randoop homepage is
               <li><a href="#no-tests-created">Randoop does not create tests</a></li>
               <li><a href="#nontermination">Randoop does not terminate</a></li>
               <li><a href="#nontermination">Randoop produces different output on different runs</a></li>
+              <li><a href="#flaky-tests">Randoop stopped because of a flaky test</a></li>
             </ul></li>
         </ul></li>
     </ul>
@@ -313,16 +314,28 @@ a "method under test".
 <p>Additional notes:</p>
 <ul>
 <li>
-<p>The methods under test should include any methods that a test may need to call in order to set up state.</p>
+  The methods under test should include any methods that a test may need
+  to call in order to set up state or create argument values.
 </li>
 
 <li>
-<p>
-Randoop does not currently support generics. Use raw types when
-specifying classes or methods.
-</p>
+  Use raw type names such as <code>List</code>, not parameterized types such
+  as <code>List&lt;String&gt;</code>, when specifying classes or methods.
 </li>
 
+<li>
+  Do not include methods that side-effect global state.
+  (Methods that side-effect the state of their argument or receiver are fine.)
+  The reason is that such methods create dependent tests that cannot be run
+  in isolation or reordered.
+  For example, if test A side-effects global state and test B reads global
+  state, then whether test B fails depends on whether test A is run before
+  test B.
+  If you wish to test different settings of the global variable, run
+  Randoop multiple times specifying different
+  <a href="#option:init-routine"><tt>--init-routine</tt></a> arguments that
+  set the global variable to different values.
+</li>
 
 </ul>
 
@@ -405,24 +418,59 @@ You may wish to minimize the test case to ease debugging.
 
 <h4 id="kinds_of_errors">What kinds of errors does Randoop check for?</h4>  <!-- omit from toc -->
 
-<p>Currently, Randoop checks for a small set of contracts: </p>
+<p>Currently, Randoop checks for the following contracts: </p>
 
 <ul>
-<li><i>Equals to null:</i> <tt>o.equals(null)</tt> should return <tt>false</tt> </li>
-<li><i>Reflexivity of equality:</i> <tt>o.equals(o)</tt> should return <tt>true</tt> </li>
-<li><i>Symmetry of equality:</i> <tt>o1.equals(o2)</tt> implies <tt>o2.equals(o1)</tt> </li>
-<li><i>Equals and hashcode are consistent:</i> If <tt>o1.equals(o2)==true</tt>, then <tt>o1.hashCode() == o2.hashCode()</tt> </li>
-<li><i>checkRep methods:</i> Any nullary method annotated with <tt>@CheckRep</tt> does not throw an exception; if its return type is <tt>boolean</tt>, it returns <tt>true</tt>. </li>
-<li><i>Methods that do not throw exceptions:</i> Invocations of Object
-  methods (<tt>clone</tt>, <tt>equals</tt>, <tt>hashCode</tt>,
-  <tt>toString</tt>) do not throw exceptions</li>
-<li>Any exception thrown when the exception is classified as an error.</li>
+  <li>Contracts over <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#equals-java.lang.Object-">Object.equals()</a>:
+    <ul>
+      <li><i>Reflexivity:</i> <tt>o.equals(o)</tt> == <tt>true</tt> </li>
+      <li><i>Symmetry:</i> <tt>o1.equals(o2)</tt> == <tt>o2.equals(o1)</tt> </li>
+	<li><i>Transitivity:</i> <tt>o1.equals(o2)</tt> && <tt>o2.equals(o3)</tt> &rArr; <tt>o1.equals(o3)</tt> </li>
+      <li><i>Equals to null:</i> <tt>o.equals(null)</tt> == <tt>false</tt> </li>
+      <li>it does not throw an exception</li>
+    </ul>
+  </li>
+  <li>Contracts over <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#hashCode--">Object.hashCode()</a>:
+    <ul>
+      <li><i>Equals and hashcode are consistent:</i> If <tt>o1.equals(o2)==true</tt>, then <tt>o1.hashCode() == o2.hashCode()</tt> </li>
+      <li>it does not throw an exception</li>
+    </ul>
+  </li>
+  <li>Contracts over <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#clone--">Object.clone()</a>:
+    <ul>
+      <li>it does not throw an exception</li>
+    </ul>
+  </li>
+  <li>Contracts over <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#toString--">Object.toString()</a>:
+    <ul>
+      <li>it does not throw an exception</li>
+    </ul>
+  </li>
+  <li>Contracts over <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Comparable.html">Comparable.compareTo()</a> and <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html#compare-T-T-">Comparator.compare()</a>:
+    <ul>
+      <li><i>Reflexivity:</i> <tt>o.compareTo(o)</tt> == 0  (implied by anti-symmetry)</li>
+      <li><i>Anti-symmetry:</i> <tt>sgn(o1.compareTo(o2))</tt> == <tt>-sgn(o2.compareTo(o1))</tt> </li>
+	<li><i>Transitivity:</i> <tt>o1.compareTo(o2)>0</tt> && <tt>o2.compareTo(o3)>0</tt> &rArr; <tt>o1.compareTo(o3)>0</tt> </li>
+      <li><i>Substitutability of equals:</i> <tt>x.compareTo(y)==0</tt> &rArr; <tt>sgn(x.compareTo(z)) == sgn(y.compareTo(z))</tt>
+      <li><i>Consistency with <tt>equals()</tt>:</i> <tt>(x.compareTo(y)==0) == x.equals(y)</tt> (this contract can be disabled)</li>
+      <li>it does not throw an exception</li>
+    </ul>
+  </li>
+  <li>Contracts over <tt>checkRep()</tt> (that is, any nullary method annotated with <a href="https://randoop.github.io/randoop/api/randoop/CheckRep.html"><tt>@CheckRep</tt></a>):
+    <ul>
+      <li>if its return type is <tt>boolean</tt>, it returns <tt>true</tt></li>
+      <li>it does not throw an exception</li>
+    </ul>
+  </li>
+  <li>Any exception thrown when the exception is <a href="#classifying-tests">classified</a> as an error.</li>
 </ul>
 
 <p>
 Violation of any of these contracts is highly likely to indicate an error.
-You can add additional contracts to Randoop if you discover ones
-that are important to you.
+</p>
+
+<p>
+You can add additional contracts to Randoop.
 </p>
 
 <p>
@@ -548,13 +596,17 @@ Randoop about your application, and that is how we recommend using Randoop.
   <li id="optiongroup:Code-under-test">Code under test
     <ul>
       <li id="option:testclass"><b>--testclass=</b><i>string</i> <tt>[+]</tt>. The fully-qualified name of a class to test.
- These classes are tested in addition to any specified using <tt>--classlist</tt>.</li>
+ This class is tested in addition to any specified using
+ <tt>--classlist</tt>, and must be accessible from the package of the tests
+ (set with <tt>--junit-package-name</tt>).</li>
       <li id="option:classlist"><b>--classlist=</b><i>string</i>. The name of a file that lists classes to test.
 
  In the file, each class under test is specified by its
  fully-qualified name on a separate line.
  See an <a href="https://raw.githubusercontent.com/randoop/randoop/master/doc/class_list_example.txt">example</a>.
- These classes are tested in addition to any specified using <tt>--testclass</tt>.</li>
+ These classes are tested in addition to any specified using <tt>--testclass</tt>.
+ All classes must be accessible from the package of the tests
+ (set with <tt>--junit-package-name</tt>).</li>
       <li id="option:methodlist"><b>--methodlist=</b><i>string</i>. The name of a file that lists methods to test.
 
  In the file, each each method under test is specified on a separate
@@ -590,6 +642,11 @@ Randoop about your application, and that is how we recommend using Randoop.
       <li id="option:omit-field-list"><b>--omit-field-list=</b><i>string</i>. The name of a file that contains fully-qualified
  field names to be excluded from test generation. Otherwise, Randoop
  includes all public fields of a visible class.</li>
+      <li id="option:only-test-public-members"><b>--only-test-public-members=</b><i>boolean</i>. Restrict tests to only include public members of classes.
+ Ordinarily, the setting of <tt>--junit-package-name</tt> and package
+ accessibility is used to determine which members will be used in tests.
+ Using this option restricts the tests to only use public members even if
+ the class is a member of the same package as the generated tests. [default false]</li>
       <li id="option:silently-ignore-bad-class-names"><b>--silently-ignore-bad-class-names=</b><i>boolean</i>. Ignore class names specified by user that cannot be found [default false]</li>
     </ul>
   </li>
@@ -637,6 +694,15 @@ Randoop about your application, and that is how we recommend using Randoop.
       <li id="option:oom-exception"><b>--oom-exception=</b><i>enum</i>. If a test throws an <code>OutOfMemoryError</code> exception, should it be
  included in the error-revealing test suite (value: ERROR), regression test
  suite (value: EXPECTED), or should it be discarded (value: INVALID)? [default INVALID]<ul><li><b>INVALID</b> Occurrence of exception should be considered invalid</li><li><b>ERROR</b> Occurrence of exception should be considered an error</li><li><b>EXPECTED</b> Occurrence of exception should be considered expected behavior</li></ul></li>
+      <li id="option:ignore-flaky-tests"><b>--ignore-flaky-tests=</b><i>boolean</i>. Ignore the situation where a code sequence that previously executed
+ normally throws an exception when executed as part of a longer test
+ sequence. If true, the sequence will be classified as invalid.
+ If false, Randoop will halt with information about the sequence to aid with
+ identifying the issue.
+ <p>
+ Use of this option is a last resort.  Flaky tests are usually due to
+ calling Randoop on side-effecting methods, and a better solution is
+ not to call Randoop on such methods. [default false]</li>
     </ul>
   </li>
   <li id="optiongroup:Limiting-test-generation">Limiting test generation
@@ -752,7 +818,11 @@ Randoop about your application, and that is how we recommend using Randoop.
       <li id="option:testsperfile"><b>--testsperfile=</b><i>int</i>. Maximum number of tests to write to each JUnit file [default 500]</li>
       <li id="option:error-test-filename"><b>--error-test-filename=</b><i>string</i>. Base name (no ".java" suffix) of the JUnit file containing error-revealing tests [default ErrorTest]</li>
       <li id="option:regression-test-filename"><b>--regression-test-filename=</b><i>string</i>. Base name (no ".java" suffix) of the JUnit file containing regression tests [default RegressionTest]</li>
-      <li id="option:junit-package-name"><b>--junit-package-name=</b><i>string</i>. Name of the package for the generated JUnit files [default ]</li>
+      <li id="option:junit-package-name"><b>--junit-package-name=</b><i>string</i>. Name of the package for the generated JUnit files.
+ When the package is the same as the package of a class under test, then
+ package visibility rules are used to determine whether to include the class
+ or class members in a test. Tests can be restricted to public members only
+ by using the option <tt>--only-test-public-members</tt>. [default ]</li>
       <li id="option:junit-output-dir"><b>--junit-output-dir=</b><i>string</i>. Name of the directory to which JUnit files should be written</li>
       <li id="option:dont-output-tests"><b>--dont-output-tests=</b><i>boolean</i>. Run test generation without output.
  May be desirable when running with a visitor.
@@ -946,7 +1016,8 @@ You can tell Randoop that some methods in your classes under test are
 rep invariant methods, and Randoop will call these methods on objects
 of the appropriate type, outputting violations of the rep invariant as
 failing unit tests. To tell Randoop that a method in a class under
-test is a rep invariant method, add the <code>@CheckRep</code>
+test is a rep invariant method, add the
+<a href="https://randoop.github.io/randoop/api/randoop/CheckRep.html"><code>@CheckRep</code></a>
 annotation to the method declaration (don't forget to <code>import
 randoop.*</code>).
 </p>
@@ -1218,6 +1289,57 @@ sequential Java program are:
   </li>
 </ul>
 
+<h4 id="flaky-tests">Randoop stopped because of a flaky test</h4>
+
+<p>
+Randoop extends previously-generated tests by adding new method calls to them.
+If, in the new longer test, one of the embedded subtests throws an exception,
+then we say the test is <i>flaky</i>.
+</p>
+
+<p>
+Flaky tests are usually due to Randoop calling a method that has global
+side effects.  Such methods are not appropriate for randomly-generated
+tests, and so you should not call Randoop on such methods.  If Randoop
+encounters a flaky test, Randoop halts so that you can correct your
+invocation of Randoop, excluding the side-effecting method from
+consideration.  You can do so by passing the
+<a href="#option:omitmethods"><code>--omitmethods</code></a> command-line
+option.
+</p>
+
+<p>
+To help you determine which method to omit, when logging is turned on
+(using the <a href="#option:log"><code>--log</code></a> option) Randoop
+logs the list of method calls and field manipulations since the
+first execution of the subsequence where the exception occurred.
+You should determine which of these methods affected global state, and then
+exclude it by using the
+<a href="#option:omitmethods"><code>--omitmethods</code></a> command-line
+option.
+</p>
+
+<p>
+If you find a flaky test that does not result from a method that side-effects
+global state, then please help us improve Randoop by submitting an issue via the
+<a href="https://github.com/randoop/randoop/issues" rel="nofollow">issue
+tracker</a> to let us know what you encountered.
+(Randoop already discards any test with a flaky occurrence of an
+<code>OutOfMemoryError</code> as invalid.
+Additional information can help us find other heuristics that avoid generating
+flaky tests, or improve this documentation.)
+</p>
+
+<p>
+If you are unable to determine which method caused the flaky tests and
+exclude it using the
+<a href="#option:omitmethods"><code>--omitmethods</code></a> command-line
+option, then you can resort to the command-line argument
+<a href="#option:ignore-flaky-tests"><code>--ignore-flaky-tests</code></a>
+to discard the flaky tests.
+This is a last resort because it is better to avoid generating flaky tests
+rather than discarding them after generating them.
+</p>
 
 
 <!-- <h2 id="faq">FAQ: Frequently Asked Questions (and common problems)</h2> -->
@@ -1255,9 +1377,9 @@ sequential Java program are:
  -->
 <!--  LocalWords:  subsequences online unpub javac TypeN postcondition jarpath
  -->
-<!--  LocalWords:  test1 o1 t1 s1 var0 arrayList0 Type0 Type1 Type2 o2
+<!--  LocalWords:  test1 o1 t1 s1 var0 arrayList0 Type0 Type1 Type2 o2 oom
  -->
-<!--  LocalWords:  test10 var1 var2 s2 a1 ErrorTest RegressionTest
+<!--  LocalWords:  test10 var1 var2 s2 a1 ErrorTest RegressionTest o3 sgn
  -->
-<!--  LocalWords:  npe
+<!--  LocalWords:  npe a' c' subtests
  -->
