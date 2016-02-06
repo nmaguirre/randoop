@@ -577,6 +577,120 @@
 </ul>
 </li>
 <li class="blockList">
+<h2 title="Package">Package&nbsp;randoop.field</h2>
+<ul class="blockList">
+<li class="blockList"><a name="randoop.field.AccessibleField">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a> extends Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>-8083487154339374578L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialization Methods</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>writeReplace</h4>
+<pre>protected&nbsp;Object&nbsp;writeReplace()
+                       throws ObjectStreamException</pre>
+<div class="block">Converts this object to a form that can be serialized.</div>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>ObjectStreamException</code> - if serialization fails.</dd>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="randoop/field/SerializableAccessibleField.html" title="class in randoop.field"><code>SerializableAccessibleField</code></a></dd>
+</dl>
+</li>
+</ul>
+</li>
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>field</h4>
+<pre>Field field</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="randoop.field.FinalInstanceField">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/field/FinalInstanceField.html" title="class in randoop.field">FinalInstanceField</a> extends <a href="randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>6214863094040724681L</dd>
+</dl>
+</li>
+<li class="blockList"><a name="randoop.field.InstanceField">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/field/InstanceField.html" title="class in randoop.field">InstanceField</a> extends <a href="randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>-1879588478257403865L</dd>
+</dl>
+</li>
+<li class="blockList"><a name="randoop.field.SerializableAccessibleField">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/field/SerializableAccessibleField.html" title="class in randoop.field">SerializableAccessibleField</a> extends Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>9109946164794213814L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialization Methods</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>readResolve</h4>
+<pre>private&nbsp;Object&nbsp;readResolve()
+                    throws ObjectStreamException,
+                           ClassNotFoundException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>ObjectStreamException</code></dd>
+<dd><code>ClassNotFoundException</code></dd>
+</dl>
+</li>
+</ul>
+</li>
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>fieldRep</h4>
+<pre>String fieldRep</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="randoop.field.StaticField">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/field/StaticField.html" title="class in randoop.field">StaticField</a> extends <a href="randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>240655978039880972L</dd>
+</dl>
+</li>
+<li class="blockList"><a name="randoop.field.StaticFinalField">
+<!--   -->
+</a>
+<h3>Class <a href="randoop/field/StaticFinalField.html" title="class in randoop.field">StaticFinalField</a> extends <a href="randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a> implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>5759286052853148769L</dd>
+</dl>
+</li>
+</ul>
+</li>
+<li class="blockList">
 <h2 title="Package">Package&nbsp;randoop.main</h2>
 <ul class="blockList">
 <li class="blockList"><a name="randoop.main.RandoopTextuiException">
@@ -731,10 +845,10 @@
 </li>
 </ul>
 </li>
-<li class="blockList"><a name="randoop.operation.FieldGetter">
+<li class="blockList"><a name="randoop.operation.FieldGet">
 <!--   -->
 </a>
-<h3>Class <a href="randoop/operation/FieldGetter.html" title="class in randoop.operation">FieldGetter</a> extends <a href="randoop/operation/AbstractOperation.html" title="class in randoop.operation">AbstractOperation</a> implements Serializable</h3>
+<h3>Class <a href="randoop/operation/FieldGet.html" title="class in randoop.operation">FieldGet</a> extends <a href="randoop/operation/AbstractOperation.html" title="class in randoop.operation">AbstractOperation</a> implements Serializable</h3>
 <dl class="nameValue">
 <dt>serialVersionUID:</dt>
 <dd>3966201727170073093L</dd>
@@ -745,16 +859,16 @@
 <ul class="blockList">
 <li class="blockListLast">
 <h4>field</h4>
-<pre><a href="randoop/operation/PublicField.html" title="class in randoop.operation">PublicField</a> field</pre>
+<pre><a href="randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a> field</pre>
 </li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="blockList"><a name="randoop.operation.FieldSetter">
+<li class="blockList"><a name="randoop.operation.FieldSet">
 <!--   -->
 </a>
-<h3>Class <a href="randoop/operation/FieldSetter.html" title="class in randoop.operation">FieldSetter</a> extends <a href="randoop/operation/AbstractOperation.html" title="class in randoop.operation">AbstractOperation</a> implements Serializable</h3>
+<h3>Class <a href="randoop/operation/FieldSet.html" title="class in randoop.operation">FieldSet</a> extends <a href="randoop/operation/AbstractOperation.html" title="class in randoop.operation">AbstractOperation</a> implements Serializable</h3>
 <dl class="nameValue">
 <dt>serialVersionUID:</dt>
 <dd>-5905429635469194115L</dd>
@@ -765,29 +879,11 @@
 <ul class="blockList">
 <li class="blockListLast">
 <h4>field</h4>
-<pre><a href="randoop/operation/PublicField.html" title="class in randoop.operation">PublicField</a> field</pre>
+<pre><a href="randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a> field</pre>
 </li>
 </ul>
 </li>
 </ul>
-</li>
-<li class="blockList"><a name="randoop.operation.FinalInstanceField">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/operation/FinalInstanceField.html" title="class in randoop.operation">FinalInstanceField</a> extends <a href="randoop/operation/PublicField.html" title="class in randoop.operation">PublicField</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>6214863094040724681L</dd>
-</dl>
-</li>
-<li class="blockList"><a name="randoop.operation.InstanceField">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/operation/InstanceField.html" title="class in randoop.operation">InstanceField</a> extends <a href="randoop/operation/PublicField.html" title="class in randoop.operation">PublicField</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>-1879588478257403865L</dd>
-</dl>
 </li>
 <li class="blockList"><a name="randoop.operation.MethodCall">
 <!--   -->
@@ -915,43 +1011,6 @@
 <dt>serialVersionUID:</dt>
 <dd>1L</dd>
 </dl>
-</li>
-<li class="blockList"><a name="randoop.operation.PublicField">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/operation/PublicField.html" title="class in randoop.operation">PublicField</a> extends Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>-8083487154339374578L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialization Methods</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>writeReplace</h4>
-<pre>protected&nbsp;Object&nbsp;writeReplace()
-                       throws ObjectStreamException</pre>
-<div class="block">Converts this object to a form that can be serialized.</div>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>ObjectStreamException</code> - if serialization fails.</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="randoop/operation/SerializablePublicField.html" title="class in randoop.operation"><code>SerializablePublicField</code></a></dd>
-</dl>
-</li>
-</ul>
-</li>
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>field</h4>
-<pre>Field field</pre>
-</li>
-</ul>
-</li>
-</ul>
 </li>
 <li class="blockList"><a name="randoop.operation.SerializableArrayCreation">
 <!--   -->
@@ -1104,60 +1163,6 @@
 </ul>
 </li>
 </ul>
-</li>
-<li class="blockList"><a name="randoop.operation.SerializablePublicField">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/operation/SerializablePublicField.html" title="class in randoop.operation">SerializablePublicField</a> extends Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>9109946164794213814L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialization Methods</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>readResolve</h4>
-<pre>private&nbsp;Object&nbsp;readResolve()
-                    throws ObjectStreamException,
-                           ClassNotFoundException</pre>
-<dl>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>ObjectStreamException</code></dd>
-<dd><code>ClassNotFoundException</code></dd>
-</dl>
-</li>
-</ul>
-</li>
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>fieldRep</h4>
-<pre>String fieldRep</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="randoop.operation.StaticField">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/operation/StaticField.html" title="class in randoop.operation">StaticField</a> extends <a href="randoop/operation/PublicField.html" title="class in randoop.operation">PublicField</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>240655978039880972L</dd>
-</dl>
-</li>
-<li class="blockList"><a name="randoop.operation.StaticFinalField">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/operation/StaticFinalField.html" title="class in randoop.operation">StaticFinalField</a> extends <a href="randoop/operation/PublicField.html" title="class in randoop.operation">PublicField</a> implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>5759286052853148769L</dd>
-</dl>
 </li>
 </ul>
 </li>
@@ -1668,9 +1673,13 @@
 <h4>lastElement</h4>
 <pre>Object lastElement</pre>
 </li>
-<li class="blockListLast">
+<li class="blockList">
 <h4>list</h4>
 <pre><a href="randoop/util/SimpleList.html" title="class in randoop.util">SimpleList</a>&lt;<a href="randoop/util/SimpleList.html" title="type parameter in SimpleList">T</a>&gt; list</pre>
+</li>
+<li class="blockListLast">
+<h4>size</h4>
+<pre>int size</pre>
 </li>
 </ul>
 </li>

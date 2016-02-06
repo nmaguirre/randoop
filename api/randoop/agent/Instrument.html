@@ -48,10 +48,10 @@ var activeTableTab = "activeTableTab";
 <div class="subNav">
 <ul class="navList">
 <li>Prev&nbsp;Class</li>
-<li><a href="../../randoop/instrument/Premain.html" title="class in randoop.instrument"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../randoop/agent/Premain.html" title="class in randoop.agent"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../index.html?randoop/instrument/Instrument.html" target="_top">Frames</a></li>
+<li><a href="../../index.html?randoop/agent/Instrument.html" target="_top">Frames</a></li>
 <li><a href="Instrument.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
@@ -90,7 +90,7 @@ var activeTableTab = "activeTableTab";
 <!-- ========= END OF TOP NAVBAR ========= -->
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
-<div class="subTitle">randoop.instrument</div>
+<div class="subTitle">randoop.agent</div>
 <h2 title="Class Instrument" class="title">Class Instrument</h2>
 </div>
 <div class="contentContainer">
@@ -141,31 +141,31 @@ implements ClassFileTransformer</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static SimpleLog</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#debug_instrument">debug_instrument</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#debug_instrument">debug_instrument</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static SimpleLog</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#debug_instrument_inst">debug_instrument_inst</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#debug_instrument_inst">debug_instrument_inst</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static SimpleLog</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#debug_map">debug_map</a></span></code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#debug_map">debug_map</a></span></code>
 <div class="block">Debug information on method maping</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static SimpleLog</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#debug_transform">debug_transform</a></span></code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#debug_transform">debug_transform</a></span></code>
 <div class="block">Debug information about which classes are transformed and why</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>protected InstructionFactory</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#ifact">ifact</a></span></code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#ifact">ifact</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>static List&lt;Instrument.MethodMapInfo&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#map_list">map_list</a></span></code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#map_list">map_list</a></span></code>
 <div class="block">List of all classname regexs and their corresponding method maps</div>
 </td>
 </tr>
@@ -184,7 +184,7 @@ implements ClassFileTransformer</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#Instrument--">Instrument</a></span>()</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#Instrument--">Instrument</a></span>()</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -203,43 +203,43 @@ implements ClassFileTransformer</pre>
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#add_map_file_shutdown_hook--">add_map_file_shutdown_hook</a></span>()</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#add_map_file_shutdown_hook--">add_map_file_shutdown_hook</a></span>()</code>
 <div class="block">Adds a shutdown hook that prints out the results of the method maps</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#dump_map_list--">dump_map_list</a></span>()</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#dump_map_list--">dump_map_list</a></span>()</code>
 <div class="block">Dumps out the map list to the debug_map logger</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>String</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#get_attribute_name-org.apache.bcel.classfile.Attribute-">get_attribute_name</a></span>(Attribute&nbsp;a)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#get_attribute_name-org.apache.bcel.classfile.Attribute-">get_attribute_name</a></span>(Attribute&nbsp;a)</code>
 <div class="block">Returns the attribute name for the specified attribute</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#instrument_method-org.apache.bcel.classfile.Method-org.apache.bcel.generic.MethodGen-">instrument_method</a></span>(Method&nbsp;m,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#instrument_method-org.apache.bcel.classfile.Method-org.apache.bcel.generic.MethodGen-">instrument_method</a></span>(Method&nbsp;m,
                  MethodGen&nbsp;mg)</code>
 <div class="block">Instrument the specified method to replace mapped calls.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#is_local_variable_type_table-org.apache.bcel.classfile.Attribute-">is_local_variable_type_table</a></span>(Attribute&nbsp;a)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#is_local_variable_type_table-org.apache.bcel.classfile.Attribute-">is_local_variable_type_table</a></span>(Attribute&nbsp;a)</code>&nbsp;</td>
 </tr>
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#read_map_file-java.io.File-">read_map_file</a></span>(File&nbsp;map_file)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#read_map_file-java.io.File-">read_map_file</a></span>(File&nbsp;map_file)</code>
 <div class="block">Reads the file that specifies method calls that should be replaced
  by other method calls.</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>protected static void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#replace_instructions-org.apache.bcel.generic.InstructionList-org.apache.bcel.generic.InstructionHandle-org.apache.bcel.generic.InstructionList-">replace_instructions</a></span>(InstructionList&nbsp;il,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#replace_instructions-org.apache.bcel.generic.InstructionList-org.apache.bcel.generic.InstructionHandle-org.apache.bcel.generic.InstructionList-">replace_instructions</a></span>(InstructionList&nbsp;il,
                     InstructionHandle&nbsp;ih,
                     InstructionList&nbsp;new_il)</code>
 <div class="block">Replace instruction ih in list il with the instructions in new_il.</div>
@@ -247,7 +247,7 @@ implements ClassFileTransformer</pre>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>byte[]</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/instrument/Instrument.html#transform-java.lang.ClassLoader-java.lang.String-java.lang.Class-java.security.ProtectionDomain-byte:A-">transform</a></span>(ClassLoader&nbsp;loader,
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/agent/Instrument.html#transform-java.lang.ClassLoader-java.lang.String-java.lang.Class-java.security.ProtectionDomain-byte:A-">transform</a></span>(ClassLoader&nbsp;loader,
          String&nbsp;className,
          Class&lt;?&gt;&nbsp;classBeingRedefined,
          ProtectionDomain&nbsp;protectionDomain,
@@ -502,10 +502,10 @@ implements ClassFileTransformer</pre>
 <div class="subNav">
 <ul class="navList">
 <li>Prev&nbsp;Class</li>
-<li><a href="../../randoop/instrument/Premain.html" title="class in randoop.instrument"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../randoop/agent/Premain.html" title="class in randoop.agent"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../index.html?randoop/instrument/Instrument.html" target="_top">Frames</a></li>
+<li><a href="../../index.html?randoop/agent/Instrument.html" target="_top">Frames</a></li>
 <li><a href="Instrument.html" target="_top">No&nbsp;Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">

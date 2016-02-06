@@ -72,7 +72,9 @@
 <span class="packageHierarchyLabel">Package Hierarchies:</span>
 <ul class="horizontal">
 <li><a href="randoop/package-tree.html">randoop</a>, </li>
+<li><a href="randoop/agent/package-tree.html">randoop.agent</a>, </li>
 <li><a href="randoop/experiments/package-tree.html">randoop.experiments</a>, </li>
+<li><a href="randoop/field/package-tree.html">randoop.field</a>, </li>
 <li><a href="randoop/instrument/package-tree.html">randoop.instrument</a>, </li>
 <li><a href="randoop/main/package-tree.html">randoop.main</a>, </li>
 <li><a href="randoop/operation/package-tree.html">randoop.operation</a>, </li>
@@ -101,10 +103,18 @@
 <li type="circle"><a href="randoop/operation/ArrayCreation.html" title="class in randoop.operation"><span class="typeNameLink">ArrayCreation</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
 <li type="circle"><a href="randoop/operation/ConstructorCall.html" title="class in randoop.operation"><span class="typeNameLink">ConstructorCall</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
 <li type="circle"><a href="randoop/operation/EnumConstant.html" title="class in randoop.operation"><span class="typeNameLink">EnumConstant</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
-<li type="circle"><a href="randoop/operation/FieldGetter.html" title="class in randoop.operation"><span class="typeNameLink">FieldGetter</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
-<li type="circle"><a href="randoop/operation/FieldSetter.html" title="class in randoop.operation"><span class="typeNameLink">FieldSetter</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
+<li type="circle"><a href="randoop/operation/FieldGet.html" title="class in randoop.operation"><span class="typeNameLink">FieldGet</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
+<li type="circle"><a href="randoop/operation/FieldSet.html" title="class in randoop.operation"><span class="typeNameLink">FieldSet</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
 <li type="circle"><a href="randoop/operation/MethodCall.html" title="class in randoop.operation"><span class="typeNameLink">MethodCall</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
 <li type="circle"><a href="randoop/operation/NonreceiverTerm.html" title="class in randoop.operation"><span class="typeNameLink">NonreceiverTerm</span></a> (implements <a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable)</li>
+</ul>
+</li>
+<li type="circle"><a href="randoop/field/AccessibleField.html" title="class in randoop.field"><span class="typeNameLink">AccessibleField</span></a> (implements Serializable)
+<ul>
+<li type="circle"><a href="randoop/field/FinalInstanceField.html" title="class in randoop.field"><span class="typeNameLink">FinalInstanceField</span></a></li>
+<li type="circle"><a href="randoop/field/InstanceField.html" title="class in randoop.field"><span class="typeNameLink">InstanceField</span></a></li>
+<li type="circle"><a href="randoop/field/StaticField.html" title="class in randoop.field"><span class="typeNameLink">StaticField</span></a></li>
+<li type="circle"><a href="randoop/field/StaticFinalField.html" title="class in randoop.field"><span class="typeNameLink">StaticFinalField</span></a></li>
 </ul>
 </li>
 <li type="circle"><a href="randoop/test/predicate/AlwaysFalseExceptionPredicate.html" title="class in randoop.test.predicate"><span class="typeNameLink">AlwaysFalseExceptionPredicate</span></a> (implements <a href="randoop/test/predicate/ExceptionPredicate.html" title="interface in randoop.test.predicate">ExceptionPredicate</a>)</li>
@@ -122,7 +132,8 @@
 <li type="circle"><a href="randoop/experiments/ClassListPrinter.html" title="class in randoop.experiments"><span class="typeNameLink">ClassListPrinter</span></a></li>
 <li type="circle">ClassLoader
 <ul>
-<li type="circle"><a href="randoop/instrument/Premain.BCELLoader.html" title="class in randoop.instrument"><span class="typeNameLink">Premain.BCELLoader</span></a></li>
+<li type="circle"><a href="randoop/agent/Premain.BCELLoader.html" title="class in randoop.agent"><span class="typeNameLink">Premain.BCELLoader</span></a></li>
+<li type="circle"><a href="randoop/RandoopClassLoader.html" title="class in randoop"><span class="typeNameLink">RandoopClassLoader</span></a></li>
 </ul>
 </li>
 <li type="circle"><a href="randoop/main/ClassReader.html" title="class in randoop.main"><span class="typeNameLink">ClassReader</span></a></li>
@@ -152,6 +163,7 @@
 <li type="circle"><a href="randoop/util/CountDownTimer.html" title="class in randoop.util"><span class="typeNameLink">CountDownTimer</span></a></li>
 <li type="circle"><a href="randoop/main/CountLines.html" title="class in randoop.main"><span class="typeNameLink">CountLines</span></a></li>
 <li type="circle"><a href="randoop/experiments/CoverageInstrumentedClassFilter.html" title="class in randoop.experiments"><span class="typeNameLink">CoverageInstrumentedClassFilter</span></a> (implements <a href="randoop/experiments/ClassFilter.html" title="interface in randoop.experiments">ClassFilter</a>)</li>
+<li type="circle"><a href="randoop/instrument/CoveredClassVisitor.html" title="class in randoop.instrument"><span class="typeNameLink">CoveredClassVisitor</span></a> (implements <a href="randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>)</li>
 <li type="circle"><a href="randoop/experiments/CovPlot.html" title="class in randoop.experiments"><span class="typeNameLink">CovPlot</span></a></li>
 <li type="circle"><a href="randoop/experiments/CovWitnessHelperVisitor.html" title="class in randoop.experiments"><span class="typeNameLink">CovWitnessHelperVisitor</span></a> (implements <a href="randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>)</li>
 <li type="circle"><a href="randoop/experiments/CreateCovReport.html" title="class in randoop.experiments"><span class="typeNameLink">CreateCovReport</span></a></li>
@@ -167,6 +179,7 @@
 <li type="circle"><a href="randoop/util/predicate/AndPredicate.html" title="class in randoop.util.predicate"><span class="typeNameLink">AndPredicate</span></a>&lt;T&gt;</li>
 <li type="circle"><a href="randoop/test/ErrorTestPredicate.html" title="class in randoop.test"><span class="typeNameLink">ErrorTestPredicate</span></a></li>
 <li type="circle"><a href="randoop/test/ExcludeTestPredicate.html" title="class in randoop.test"><span class="typeNameLink">ExcludeTestPredicate</span></a></li>
+<li type="circle"><a href="randoop/test/IncludeIfCoversPredicate.html" title="class in randoop.test"><span class="typeNameLink">IncludeIfCoversPredicate</span></a></li>
 <li type="circle"><a href="randoop/test/IncludeTestPredicate.html" title="class in randoop.test"><span class="typeNameLink">IncludeTestPredicate</span></a></li>
 <li type="circle"><a href="randoop/util/predicate/OrPredicate.html" title="class in randoop.util.predicate"><span class="typeNameLink">OrPredicate</span></a>&lt;T&gt;</li>
 <li type="circle"><a href="randoop/test/RegressionTestPredicate.html" title="class in randoop.test"><span class="typeNameLink">RegressionTestPredicate</span></a></li>
@@ -211,6 +224,7 @@
 <li type="circle"><a href="randoop/test/ExpectedExceptionCheckGen.html" title="class in randoop.test"><span class="typeNameLink">ExpectedExceptionCheckGen</span></a></li>
 <li type="circle"><a href="randoop/experiments/ExperimentBase.html" title="class in randoop.experiments"><span class="typeNameLink">ExperimentBase</span></a></li>
 <li type="circle"><a href="randoop/test/ExtendGenerator.html" title="class in randoop.test"><span class="typeNameLink">ExtendGenerator</span></a> (implements <a href="randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>)</li>
+<li type="circle"><a href="randoop/field/FieldParser.html" title="class in randoop.field"><span class="typeNameLink">FieldParser</span></a></li>
 <li type="circle"><a href="randoop/util/Files.html" title="class in randoop.util"><span class="typeNameLink">Files</span></a></li>
 <li type="circle"><a href="randoop/main/GenBranchDir.html" title="class in randoop.main"><span class="typeNameLink">GenBranchDir</span></a></li>
 <li type="circle"><a href="randoop/Globals.html" title="class in randoop"><span class="typeNameLink">Globals</span></a></li>
@@ -220,7 +234,7 @@
 <li type="circle"><a href="randoop/util/Histogram.html" title="class in randoop.util"><span class="typeNameLink">Histogram</span></a>&lt;T&gt;</li>
 <li type="circle"><a href="randoop/util/InformationalComparator.html" title="class in randoop.util"><span class="typeNameLink">InformationalComparator</span></a>&lt;T&gt;</li>
 <li type="circle"><a href="randoop/util/InformationalComparator.ComparisonResult.html" title="class in randoop.util"><span class="typeNameLink">InformationalComparator.ComparisonResult</span></a></li>
-<li type="circle"><a href="randoop/instrument/Instrument.html" title="class in randoop.instrument"><span class="typeNameLink">Instrument</span></a> (implements ClassFileTransformer)</li>
+<li type="circle"><a href="randoop/agent/Instrument.html" title="class in randoop.agent"><span class="typeNameLink">Instrument</span></a> (implements ClassFileTransformer)</li>
 <li type="circle"><a href="randoop/test/InvalidChecks.html" title="class in randoop.test"><span class="typeNameLink">InvalidChecks</span></a> (implements <a href="randoop/test/TestChecks.html" title="interface in randoop.test">TestChecks</a>)</li>
 <li type="circle"><a href="randoop/IsNotNull.html" title="class in randoop"><span class="typeNameLink">IsNotNull</span></a> (implements <a href="randoop/ObjectContract.html" title="interface in randoop">ObjectContract</a>)</li>
 <li type="circle"><a href="randoop/IsNull.html" title="class in randoop"><span class="typeNameLink">IsNull</span></a> (implements <a href="randoop/ObjectContract.html" title="interface in randoop">ObjectContract</a>)</li>
@@ -264,22 +278,13 @@
 <li type="circle"><a href="randoop/reflection/PackageVisibilityPredicate.html" title="class in randoop.reflection"><span class="typeNameLink">PackageVisibilityPredicate</span></a> (implements <a href="randoop/reflection/VisibilityPredicate.html" title="interface in randoop.reflection">VisibilityPredicate</a>)</li>
 <li type="circle"><a href="randoop/runtime/PercentDone.html" title="class in randoop.runtime"><span class="typeNameLink">PercentDone</span></a> (implements <a href="randoop/runtime/IMessage.html" title="interface in randoop.runtime">IMessage</a>)</li>
 <li type="circle"><a href="randoop/experiments/PreDF.html" title="class in randoop.experiments"><span class="typeNameLink">PreDF</span></a></li>
-<li type="circle"><a href="randoop/instrument/Premain.html" title="class in randoop.instrument"><span class="typeNameLink">Premain</span></a></li>
+<li type="circle"><a href="randoop/agent/Premain.html" title="class in randoop.agent"><span class="typeNameLink">Premain</span></a></li>
 <li type="circle"><a href="randoop/experiments/PrepareSubjectProgram.html" title="class in randoop.experiments"><span class="typeNameLink">PrepareSubjectProgram</span></a></li>
 <li type="circle"><a href="randoop/experiments/PrepareTargetMaker.html" title="class in randoop.experiments"><span class="typeNameLink">PrepareTargetMaker</span></a> (implements <a href="randoop/experiments/TargetMaker.html" title="interface in randoop.experiments">TargetMaker</a>)</li>
 <li type="circle"><a href="randoop/util/PrimitiveOrString.html" title="class in randoop.util"><span class="typeNameLink">PrimitiveOrString</span></a></li>
 <li type="circle"><a href="randoop/util/PrimitiveTypes.html" title="class in randoop.util"><span class="typeNameLink">PrimitiveTypes</span></a></li>
 <li type="circle"><a href="randoop/PrimValue.html" title="class in randoop"><span class="typeNameLink">PrimValue</span></a> (implements <a href="randoop/ObjectContract.html" title="interface in randoop">ObjectContract</a>)</li>
 <li type="circle"><a href="randoop/experiments/PrintStatsOneClassExp.html" title="class in randoop.experiments"><span class="typeNameLink">PrintStatsOneClassExp</span></a></li>
-<li type="circle"><a href="randoop/operation/PublicField.html" title="class in randoop.operation"><span class="typeNameLink">PublicField</span></a> (implements Serializable)
-<ul>
-<li type="circle"><a href="randoop/operation/FinalInstanceField.html" title="class in randoop.operation"><span class="typeNameLink">FinalInstanceField</span></a></li>
-<li type="circle"><a href="randoop/operation/InstanceField.html" title="class in randoop.operation"><span class="typeNameLink">InstanceField</span></a></li>
-<li type="circle"><a href="randoop/operation/StaticField.html" title="class in randoop.operation"><span class="typeNameLink">StaticField</span></a></li>
-<li type="circle"><a href="randoop/operation/StaticFinalField.html" title="class in randoop.operation"><span class="typeNameLink">StaticFinalField</span></a></li>
-</ul>
-</li>
-<li type="circle"><a href="randoop/operation/PublicFieldParser.html" title="class in randoop.operation"><span class="typeNameLink">PublicFieldParser</span></a></li>
 <li type="circle"><a href="randoop/experiments/PublicTopLevelClassFilter.html" title="class in randoop.experiments"><span class="typeNameLink">PublicTopLevelClassFilter</span></a> (implements <a href="randoop/experiments/ClassFilter.html" title="interface in randoop.experiments">ClassFilter</a>)</li>
 <li type="circle"><a href="randoop/reflection/PublicVisibilityPredicate.html" title="class in randoop.reflection"><span class="typeNameLink">PublicVisibilityPredicate</span></a> (implements <a href="randoop/reflection/VisibilityPredicate.html" title="interface in randoop.reflection">VisibilityPredicate</a>)</li>
 <li type="circle"><a href="randoop/util/Randomness.html" title="class in randoop.util"><span class="typeNameLink">Randomness</span></a></li>
@@ -321,13 +326,13 @@
 <li type="circle"><a href="randoop/sequence/Sequence.html" title="class in randoop.sequence"><span class="typeNameLink">Sequence</span></a> (implements Serializable, <a href="randoop/util/WeightedElement.html" title="interface in randoop.util">WeightedElement</a>)</li>
 <li type="circle"><a href="randoop/sequence/Sequence.RelativeNegativeIndex.html" title="class in randoop.sequence"><span class="typeNameLink">Sequence.RelativeNegativeIndex</span></a> (implements Serializable)</li>
 <li type="circle"><a href="randoop/sequence/SequenceCollection.html" title="class in randoop.sequence"><span class="typeNameLink">SequenceCollection</span></a></li>
+<li type="circle"><a href="randoop/field/SerializableAccessibleField.html" title="class in randoop.field"><span class="typeNameLink">SerializableAccessibleField</span></a> (implements Serializable)</li>
 <li type="circle"><a href="randoop/operation/SerializableArrayCreation.html" title="class in randoop.operation"><span class="typeNameLink">SerializableArrayCreation</span></a> (implements Serializable)</li>
 <li type="circle"><a href="randoop/SerializableCheckRepContract.html" title="class in randoop"><span class="typeNameLink">SerializableCheckRepContract</span></a> (implements Serializable)</li>
 <li type="circle"><a href="randoop/operation/SerializableConstructorCall.html" title="class in randoop.operation"><span class="typeNameLink">SerializableConstructorCall</span></a> (implements Serializable)</li>
 <li type="circle"><a href="randoop/operation/SerializableMethodCall.html" title="class in randoop.operation"><span class="typeNameLink">SerializableMethodCall</span></a> (implements Serializable)</li>
 <li type="circle"><a href="randoop/operation/SerializableNonreceiverTerm.html" title="class in randoop.operation"><span class="typeNameLink">SerializableNonreceiverTerm</span></a> (implements Serializable)</li>
 <li type="circle"><a href="randoop/SerializableObserverEqValue.html" title="class in randoop"><span class="typeNameLink">SerializableObserverEqValue</span></a> (implements Serializable)</li>
-<li type="circle"><a href="randoop/operation/SerializablePublicField.html" title="class in randoop.operation"><span class="typeNameLink">SerializablePublicField</span></a> (implements Serializable)</li>
 <li type="circle"><a href="randoop/util/SerializationHelper.html" title="class in randoop.util"><span class="typeNameLink">SerializationHelper</span></a></li>
 <li type="circle"><a href="randoop/util/SimpleList.html" title="class in randoop.util"><span class="typeNameLink">SimpleList</span></a>&lt;T&gt;
 <ul>
@@ -443,12 +448,12 @@
 <ul>
 <li type="circle">Enum&lt;E&gt; (implements Comparable&lt;T&gt;, Serializable)
 <ul>
+<li type="circle"><a href="randoop/PrimValue.PrintMode.html" title="enum in randoop"><span class="typeNameLink">PrimValue.PrintMode</span></a></li>
 <li type="circle"><a href="randoop/experiments/MultiRunResults.OutputFormat.html" title="enum in randoop.experiments"><span class="typeNameLink">MultiRunResults.OutputFormat</span></a></li>
 <li type="circle"><a href="randoop/experiments/RandoopRun.RunType.html" title="enum in randoop.experiments"><span class="typeNameLink">RandoopRun.RunType</span></a></li>
 <li type="circle"><a href="randoop/experiments/WriteModelCheckerDriver.Target.html" title="enum in randoop.experiments"><span class="typeNameLink">WriteModelCheckerDriver.Target</span></a></li>
 <li type="circle"><a href="randoop/main/GenInputsAbstract.BehaviorType.html" title="enum in randoop.main"><span class="typeNameLink">GenInputsAbstract.BehaviorType</span></a></li>
 <li type="circle"><a href="randoop/main/GenInputsAbstract.ClassLiteralsMode.html" title="enum in randoop.main"><span class="typeNameLink">GenInputsAbstract.ClassLiteralsMode</span></a></li>
-<li type="circle"><a href="randoop/PrimValue.PrintMode.html" title="enum in randoop"><span class="typeNameLink">PrimValue.PrintMode</span></a></li>
 <li type="circle"><a href="randoop/util/ProgressDisplay.Mode.html" title="enum in randoop.util"><span class="typeNameLink">ProgressDisplay.Mode</span></a></li>
 <li type="circle"><a href="randoop/util/RandoopSecurityManager.Status.html" title="enum in randoop.util"><span class="typeNameLink">RandoopSecurityManager.Status</span></a></li>
 <li type="circle"><a href="randoop/util/Reflection.Match.html" title="enum in randoop.util"><span class="typeNameLink">Reflection.Match</span></a></li>

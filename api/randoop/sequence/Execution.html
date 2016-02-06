@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -181,19 +181,27 @@ extends Object</pre>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Execution.html#addCoveredClass-java.lang.Class-">addCoveredClass</a></span>(Class&lt;?&gt;&nbsp;c)</code>&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Execution.html#get-int-">get</a></span>(int&nbsp;i)</code>
 <div class="block">Get the outcome in the i-th slot.</div>
 </td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>Set&lt;Class&lt;?&gt;&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Execution.html#getCoveredClasses--">getCoveredClasses</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Execution.html#set-int-randoop.ExecutionOutcome-">set</a></span>(int&nbsp;i,
    <a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&nbsp;outcome)</code>
 <div class="block">Set the i-th slot to the given outcome.</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Execution.html#size--">size</a></span>()</code>
 <div class="block">The size of the list.</div>
@@ -267,7 +275,7 @@ extends Object</pre>
 <pre>public&nbsp;Execution(<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;owner,
                  List&lt;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&gt;&nbsp;theList)</pre>
 <div class="block">Construct an Execution directly from the given arguments.
- 
+
  Do not use this constructor! (Unless you know what you're doing.)</div>
 </li>
 </ul>
@@ -303,11 +311,29 @@ extends Object</pre>
 <a name="get-int-">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>get</h4>
 <pre>public&nbsp;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&nbsp;get(int&nbsp;i)</pre>
 <div class="block">Get the outcome in the i-th slot.</div>
+</li>
+</ul>
+<a name="addCoveredClass-java.lang.Class-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>addCoveredClass</h4>
+<pre>public&nbsp;void&nbsp;addCoveredClass(Class&lt;?&gt;&nbsp;c)</pre>
+</li>
+</ul>
+<a name="getCoveredClasses--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getCoveredClasses</h4>
+<pre>public&nbsp;Set&lt;Class&lt;?&gt;&gt;&nbsp;getCoveredClasses()</pre>
 </li>
 </ul>
 </li>

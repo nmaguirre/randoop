@@ -1,5 +1,7 @@
 randoop
+randoop.agent
 randoop.experiments
+randoop.field
 randoop.instrument
 randoop.main
 randoop.operation

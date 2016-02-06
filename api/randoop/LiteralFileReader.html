@@ -127,9 +127,10 @@ extends Object</pre>
  Capitalized text must appear literally.  Lowercase text is as follows:
  <ul>
  <li>classname is the fully-qualified name of a valid class.
- More specifically, Class.forName(classname) must return a valid Class object.
+ More specifically, TypeNames.getTypeForName(classname) must return a valid
+ Class object.
  <li>Each type:value pair describes the type and value of a literal (for
- example, <tt>int:3</tt>).  
+ example, <tt>int:3</tt>).
  </ul>
  Blank lines and comment lines (lines starting with "#") are ignored, both
  between records and inside records.

@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":9,"i1":9};
+var methods = {"i0":9,"i1":9,"i2":9};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -158,8 +158,14 @@ extends Object</pre>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static Class&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/types/TypeNames.html#getTypeForName-java.lang.String-">getTypeForName</a></span>(String&nbsp;typeName)</code>
-<div class="block">Returns <code>Class</code> object for a fully qualified class name or primitive 
+<div class="block">Returns <code>Class</code> object for a fully qualified class name or primitive
  type name.</div>
+</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>static void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/types/TypeNames.html#setClassLoader-java.lang.ClassLoader-">setClassLoader</a></span>(ClassLoader&nbsp;loader)</code>
+<div class="block">Sets the class loader for loading <code>Class&lt;?&gt;</code> objects.</div>
 </td>
 </tr>
 </table>
@@ -201,6 +207,20 @@ extends Object</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
+<a name="setClassLoader-java.lang.ClassLoader-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setClassLoader</h4>
+<pre>public static&nbsp;void&nbsp;setClassLoader(ClassLoader&nbsp;loader)</pre>
+<div class="block">Sets the class loader for loading <code>Class&lt;?&gt;</code> objects.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>loader</code> - the class loader</dd>
+</dl>
+</li>
+</ul>
 <a name="getCompilableName-java.lang.Class-">
 <!--   -->
 </a>
@@ -225,7 +245,7 @@ extends Object</pre>
 <h4>getTypeForName</h4>
 <pre>public static&nbsp;Class&lt;?&gt;&nbsp;getTypeForName(String&nbsp;typeName)
                                throws ClassNotFoundException</pre>
-<div class="block">Returns <code>Class</code> object for a fully qualified class name or primitive 
+<div class="block">Returns <code>Class</code> object for a fully qualified class name or primitive
  type name.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
