@@ -109,36 +109,36 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">SequenceCollection</span>
 extends Object</pre>
-<div class="block">A collection of sequences that makes its efficient to ask for
- all the sequences that create a value of a given type.
+<div class="block">A collection of sequences that makes its efficient to ask for all the
+ sequences that create a value of a given type.
 
  <p>
  RANDOOP IMPLEMENTATION NOTE.
  <p>
  
- When creating new sequences, Randoop often needs to search for all
- the previously-generated sequences that create one or more values
- of a given type. Since this set can contain thousands of sequences,
- finding these sequences can can be time-consuming and a bottleneck
- in generation (as we discovered during profiling).
+ When creating new sequences, Randoop often needs to search for all the
+ previously-generated sequences that create one or more values of a given
+ type. Since this set can contain thousands of sequences, finding these
+ sequences can can be time-consuming and a bottleneck in generation (as we
+ discovered during profiling).
  
  <p>
 
  This class makes the above search faster by maintaining two data structures:
 
  <ul>
- <li> A map from types to the sets of all sequences that create one
-      or more values of exactly the given type.
+ <li>A map from types to the sets of all sequences that create one or more
+ values of exactly the given type.
 
- <li> A set of all the types that can be created with the existing
-      set of sequences.  The set is maintained as a <a href="../../randoop/SubTypeSet.html" title="class in randoop"><code>SubTypeSet</code></a> that allows for quick queries about can-be-used-as
-      relationships among the types in the set.
+ <li>A set of all the types that can be created with the existing set of
+ sequences. The set is maintained as a <a href="../../randoop/SubTypeSet.html" title="class in randoop"><code>SubTypeSet</code></a> that allows for
+ quick queries about can-be-used-as relationships among the types in the set.
  </ul>
 
- To find all the sequences that create values of a given type,
- Randoop first uses the <code>SubTypeSet</code> to find the set
- <code>S</code> of feasible subtypes in set of sequences, and
- returns the range of <code>S</code> in the sequence map.</div>
+ To find all the sequences that create values of a given type, Randoop first
+ uses the <code>SubTypeSet</code> to find the set <code>S</code> of feasible
+ subtypes in set of sequences, and returns the range of <code>S</code> in the
+ sequence map.</div>
 </li>
 </ul>
 </div>
@@ -232,8 +232,8 @@ extends Object</pre>
 <td class="colFirst"><code><a href="../../randoop/util/SimpleList.html" title="class in randoop.util">SimpleList</a>&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/SequenceCollection.html#getSequencesForType-java.lang.Class-boolean-">getSequencesForType</a></span>(Class&lt;?&gt;&nbsp;clazz,
                    boolean&nbsp;exactMatch)</code>
-<div class="block">Searches through the set of active sequences to find all sequences whose types
- match with the parameter type.</div>
+<div class="block">Searches through the set of active sequences to find all sequences whose
+ types match with the parameter type.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
@@ -391,12 +391,11 @@ extends Object</pre>
 <h4>getSequencesForType</h4>
 <pre>public&nbsp;<a href="../../randoop/util/SimpleList.html" title="class in randoop.util">SimpleList</a>&lt;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&gt;&nbsp;getSequencesForType(Class&lt;?&gt;&nbsp;clazz,
                                                 boolean&nbsp;exactMatch)</pre>
-<div class="block">Searches through the set of active sequences to find all sequences whose types
- match with the parameter type.</div>
+<div class="block">Searches through the set of active sequences to find all sequences whose
+ types match with the parameter type.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>clazz</code> - -
-            the type desired for the sequences being sought</dd>
+<dd><code>clazz</code> - - the type desired for the sequences being sought</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>list of sequence objects that are of typp 'type' and abide by the
          constraints defined by nullOk.</dd>

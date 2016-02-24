@@ -109,10 +109,10 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">ClassReader</span>
 extends Object</pre>
-<div class="block">ClassReader is a library of static methods that converts a list of
- class names into a list of <code>Class</code> objects.
- The list of names may be read from a file, an input stream (or reader), and the
- resulting list is constructed using reflection.
+<div class="block">ClassReader is a library of static methods that converts a list of class
+ names into a list of <code>Class</code> objects. The list of names may be read
+ from a file, an input stream (or reader), and the resulting list is
+ constructed using reflection.
  <p>
  (Extracted from class previously known as randoop.util.Reflection.)</div>
 </li>
@@ -153,8 +153,8 @@ extends Object</pre>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>static List&lt;Class&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/ClassReader.html#getClassesForFile-java.io.File-">getClassesForFile</a></span>(File&nbsp;classListingFile)</code>
-<div class="block">Returns a list of <code>Class</code> objects given a file containing
- class names.</div>
+<div class="block">Returns a list of <code>Class</code> objects given a file containing class
+ names.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -168,16 +168,16 @@ extends Object</pre>
 <td class="colFirst"><code>static List&lt;Class&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/ClassReader.html#getClassesForReader-java.io.BufferedReader-java.lang.String-">getClassesForReader</a></span>(BufferedReader&nbsp;reader,
                    String&nbsp;filename)</code>
-<div class="block">Returns a list of <code>Class</code> objects given a <code>BufferedReader</code> object
- from which to read class names.</div>
+<div class="block">Returns a list of <code>Class</code> objects given a <code>BufferedReader</code>
+ object from which to read class names.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code>static List&lt;Class&lt;?&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/main/ClassReader.html#getClassesForStream-java.io.InputStream-java.lang.String-">getClassesForStream</a></span>(InputStream&nbsp;in,
                    String&nbsp;filename)</code>
-<div class="block">Returns a list of <code>Class</code> objects given a stream
- containing class names.</div>
+<div class="block">Returns a list of <code>Class</code> objects given a stream containing class
+ names.</div>
 </td>
 </tr>
 </table>
@@ -227,9 +227,9 @@ extends Object</pre>
 <h4>getClassesForNames</h4>
 <pre>public static&nbsp;List&lt;Class&lt;?&gt;&gt;&nbsp;getClassesForNames(List&lt;String&gt;&nbsp;classNames,
                                                 <a href="../../randoop/main/ClassNameErrorHandler.html" title="interface in randoop.main">ClassNameErrorHandler</a>&nbsp;errorHandler)</pre>
-<div class="block">Returns a list of <code>Class</code> objects given a list of class names.
- In the case that the type name recognition throws an exception, an error is only thrown if
- <code>ignoreBadNames</code> is false.</div>
+<div class="block">Returns a list of <code>Class</code> objects given a list of class names. In the
+ case that the type name recognition throws an exception, an error is only
+ thrown if <code>ignoreBadNames</code> is false.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>classNames</code> - the list of fully-qualified class names.</dd>
@@ -247,14 +247,15 @@ extends Object</pre>
 <h4>getClassesForStream</h4>
 <pre>public static&nbsp;List&lt;Class&lt;?&gt;&gt;&nbsp;getClassesForStream(InputStream&nbsp;in,
                                                  String&nbsp;filename)</pre>
-<div class="block">Returns a list of <code>Class</code> objects given a stream
- containing class names. Blank lines and lines starting with "#" are ignored.</div>
+<div class="block">Returns a list of <code>Class</code> objects given a stream containing class
+ names. Blank lines and lines starting with "#" are ignored.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>in</code> - an <code>InputStream</code> from which class names are read.</dd>
 <dd><code>filename</code> - the name of the file from which class names are read.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>list of <code>Class</code> objects corresponding to class names from stream.</dd>
+<dd>list of <code>Class</code> objects corresponding to class names from
+         stream.</dd>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../randoop/main/ClassReader.html#getClassesForReader-java.io.BufferedReader-java.lang.String-"><code>getClassesForReader(BufferedReader, String)</code></a></dd>
 </dl>
@@ -268,8 +269,9 @@ extends Object</pre>
 <h4>getClassesForReader</h4>
 <pre>public static&nbsp;List&lt;Class&lt;?&gt;&gt;&nbsp;getClassesForReader(BufferedReader&nbsp;reader,
                                                  String&nbsp;filename)</pre>
-<div class="block">Returns a list of <code>Class</code> objects given a <code>BufferedReader</code> object
- from which to read class names. Blank lines and lines starting with "#" are ignored.</div>
+<div class="block">Returns a list of <code>Class</code> objects given a <code>BufferedReader</code>
+ object from which to read class names. Blank lines and lines starting with
+ "#" are ignored.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>reader</code> - a <code>BufferedReader</code> from which to read class names.</dd>
@@ -287,8 +289,8 @@ extends Object</pre>
 <h4>getClassesForFile</h4>
 <pre>public static&nbsp;List&lt;Class&lt;?&gt;&gt;&nbsp;getClassesForFile(File&nbsp;classListingFile)
                                         throws IOException</pre>
-<div class="block">Returns a list of <code>Class</code> objects given a file containing
- class names. Blank lines and lines starting with "#" are ignored.</div>
+<div class="block">Returns a list of <code>Class</code> objects given a file containing class
+ names. Blank lines and lines starting with "#" are ignored.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>classListingFile</code> - a <code>File</code> object from which to read the class names</dd>

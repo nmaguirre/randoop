@@ -126,8 +126,8 @@ extends Error</pre>
 <div class="block">Exception representing occurrence of a "flaky" test sequence where an
  exception was thrown by a statement other than the last of the sequence.
  Occurs when a statement in an input sequence, that previously terminated
- normally, throws an exception.
- Includes information needed to report the error.</div>
+ normally, throws an exception. Includes information needed to report the
+ error.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../serialized-form.html#randoop.sequence.SequenceExceptionError">Serialized Form</a></dd>
@@ -187,13 +187,15 @@ extends Error</pre>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/SequenceExceptionError.html#getStatement--">getStatement</a></span>()</code>
-<div class="block">Returns the string representation of the statement that threw the exception.</div>
+<div class="block">Returns the string representation of the statement that threw the
+ exception.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
 <td class="colFirst"><code><a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/SequenceExceptionError.html#getSubsequence--">getSubsequence</a></span>()</code>
-<div class="block">Returns the input sequence containing the statement that threw the exception.</div>
+<div class="block">Returns the input sequence containing the statement that threw the
+ exception.</div>
 </td>
 </tr>
 </table>
@@ -273,7 +275,8 @@ extends Error</pre>
 <li class="blockList">
 <h4>getStatement</h4>
 <pre>public&nbsp;String&nbsp;getStatement()</pre>
-<div class="block">Returns the string representation of the statement that threw the exception.</div>
+<div class="block">Returns the string representation of the statement that threw the
+ exception.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the string representation of the statement</dd>
@@ -301,7 +304,8 @@ extends Error</pre>
 <li class="blockList">
 <h4>getSubsequence</h4>
 <pre>public&nbsp;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a>&nbsp;getSubsequence()</pre>
-<div class="block">Returns the input sequence containing the statement that threw the exception.</div>
+<div class="block">Returns the input sequence containing the statement that threw the
+ exception.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the input sequence from which exception was thrown</dd>

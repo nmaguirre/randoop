@@ -114,8 +114,9 @@ var activeTableTab = "activeTableTab";
 <pre>public class <span class="typeNameLabel">OperationExtractor</span>
 extends Object
 implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface in randoop.reflection">ClassVisitor</a></pre>
-<div class="block">OperationExtractor is a <a href="../../randoop/reflection/ClassVisitor.html" title="interface in randoop.reflection"><code>ClassVisitor</code></a> that creates a collection of <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a>
- objects through its visit methods as called by <a href="../../randoop/reflection/ReflectionManager.html#apply-java.lang.Class-"><code>ReflectionManager.apply(Class)</code></a>.</div>
+<div class="block">OperationExtractor is a <a href="../../randoop/reflection/ClassVisitor.html" title="interface in randoop.reflection"><code>ClassVisitor</code></a> that creates a collection of
+ <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> objects through its visit methods as called by
+ <a href="../../randoop/reflection/ReflectionManager.html#apply-java.lang.Class-"><code>ReflectionManager.apply(Class)</code></a>.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../randoop/reflection/ReflectionManager.html" title="class in randoop.reflection"><code>ReflectionManager</code></a>, 
@@ -140,8 +141,8 @@ implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface
 </tr>
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/reflection/OperationExtractor.html#OperationExtractor--">OperationExtractor</a></span>()</code>
-<div class="block">Creates a visitor object that collects Operation objects corresponding
- to class members visited by <a href="../../randoop/reflection/ReflectionManager.html" title="class in randoop.reflection"><code>ReflectionManager</code></a>.</div>
+<div class="block">Creates a visitor object that collects Operation objects corresponding to
+ class members visited by <a href="../../randoop/reflection/ReflectionManager.html" title="class in randoop.reflection"><code>ReflectionManager</code></a>.</div>
 </td>
 </tr>
 </table>
@@ -185,8 +186,8 @@ implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/reflection/OperationExtractor.html#visit-java.lang.reflect.Field-">visit</a></span>(Field&nbsp;field)</code>
-<div class="block">Adds the <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> objects corresponding to 
- getters and setters appropriate to the kind of field.</div>
+<div class="block">Adds the <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> objects corresponding to getters and setters
+ appropriate to the kind of field.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
@@ -236,10 +237,10 @@ implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface
 <li class="blockList">
 <h4>OperationExtractor</h4>
 <pre>public&nbsp;OperationExtractor()</pre>
-<div class="block">Creates a visitor object that collects Operation objects corresponding
- to class members visited by <a href="../../randoop/reflection/ReflectionManager.html" title="class in randoop.reflection"><code>ReflectionManager</code></a>. 
- Stores <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> objects in an ordered collection to ensure they
- are strictly ordered once flattened to a list. This is needed to guarantee 
+<div class="block">Creates a visitor object that collects Operation objects corresponding to
+ class members visited by <a href="../../randoop/reflection/ReflectionManager.html" title="class in randoop.reflection"><code>ReflectionManager</code></a>. Stores
+ <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> objects in an ordered collection to ensure they are
+ strictly ordered once flattened to a list. This is needed to guarantee
  determinism between Randoop runs with the same classes and parameters.</div>
 </li>
 </ul>
@@ -268,8 +269,8 @@ implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface
 <h4>getOperations</h4>
 <pre>public static&nbsp;List&lt;<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&gt;&nbsp;getOperations(Collection&lt;Class&lt;?&gt;&gt;&nbsp;classListing,
                                             <a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection">ReflectionPredicate</a>&nbsp;predicate)</pre>
-<div class="block">Collects the members of a collection of classes.
- Returns a filtered list of <code>Operation</code> objects.</div>
+<div class="block">Collects the members of a collection of classes. Returns a filtered list of
+ <code>Operation</code> objects.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>classListing</code> - the collection of class objects from which to extract</dd>
@@ -291,7 +292,8 @@ implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/reflection/ClassVisitor.html#visit-java.lang.reflect.Constructor-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/reflection/ClassVisitor.html" title="interface in randoop.reflection">ClassVisitor</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>c</code> - a <code>Constructor</code> object to be represented as an <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a>.</dd>
+<dd><code>c</code> - a <code>Constructor</code> object to be represented as an
+          <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a>.</dd>
 </dl>
 </li>
 </ul>
@@ -318,8 +320,8 @@ implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface
 <li class="blockList">
 <h4>visit</h4>
 <pre>public&nbsp;void&nbsp;visit(Field&nbsp;field)</pre>
-<div class="block">Adds the <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> objects corresponding to 
- getters and setters appropriate to the kind of field.</div>
+<div class="block">Adds the <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> objects corresponding to getters and setters
+ appropriate to the kind of field.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/reflection/ClassVisitor.html#visit-java.lang.reflect.Field-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/reflection/ClassVisitor.html" title="interface in randoop.reflection">ClassVisitor</a></code></dd>
@@ -352,8 +354,7 @@ implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface
 <h4>visitBefore</h4>
 <pre>public&nbsp;void&nbsp;visitBefore(Class&lt;?&gt;&nbsp;c)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../randoop/reflection/ClassVisitor.html#visitBefore-java.lang.Class-">ClassVisitor</a></code></span></div>
-<div class="block">Perform an action on a class. 
- Occurs before other visit methods are called.</div>
+<div class="block">Perform an action on a class. Occurs before other visit methods are called.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/reflection/ClassVisitor.html#visitBefore-java.lang.Class-">visitBefore</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/reflection/ClassVisitor.html" title="interface in randoop.reflection">ClassVisitor</a></code></dd>
@@ -370,8 +371,7 @@ implements <a href="../../randoop/reflection/ClassVisitor.html" title="interface
 <h4>visitAfter</h4>
 <pre>public&nbsp;void&nbsp;visitAfter(Class&lt;?&gt;&nbsp;c)</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../randoop/reflection/ClassVisitor.html#visitAfter-java.lang.Class-">ClassVisitor</a></code></span></div>
-<div class="block">Perform an action on a class.
- Called after other visit methods are called.</div>
+<div class="block">Perform an action on a class. Called after other visit methods are called.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/reflection/ClassVisitor.html#visitAfter-java.lang.Class-">visitAfter</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/reflection/ClassVisitor.html" title="interface in randoop.reflection">ClassVisitor</a></code></dd>

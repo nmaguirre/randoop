@@ -111,13 +111,12 @@ var activeTableTab = "activeTableTab";
 extends Object</pre>
 <div class="block">PublicFieldParser defines a parser to recognize a descriptor of a field in a
  string, and return an object representing the sort of field it is in the
- corresponding class.
- The descriptor is expected to be in the form <tt>TYPE:FIELD-NAME</tt> where the
- <tt>FIELD-NAME</tt> is a fully qualified name of the form
- <i>package</i>.<i>class-name</i>.<i>name</i>.
- The parser first checks that the descriptor is in the right syntactic form,
- then extracts the type and field-name and uses reflection to determine if
- the field belongs to the class, and whether the types match.</div>
+ corresponding class. The descriptor is expected to be in the form
+ <tt>TYPE:FIELD-NAME</tt> where the <tt>FIELD-NAME</tt> is a fully qualified
+ name of the form <i>package</i>.<i>class-name</i>.<i>name</i>. The parser
+ first checks that the descriptor is in the right syntactic form, then
+ extracts the type and field-name and uses reflection to determine if the
+ field belongs to the class, and whether the types match.</div>
 </li>
 </ul>
 </div>
@@ -226,7 +225,8 @@ extends Object</pre>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>s</code> - a string in the form of "TYPE:FIELDNAME"</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>a reference to a PublicField object represented by the pair in the string.</dd>
+<dd>a reference to a PublicField object represented by the pair in the
+         string.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="../../randoop/operation/OperationParseException.html" title="class in randoop.operation">OperationParseException</a></code> - if input string is not expected format.</dd>
 <dt><span class="seeLabel">See Also:</span></dt>
@@ -241,8 +241,8 @@ extends Object</pre>
 <li class="blockList">
 <h4>recognize</h4>
 <pre>public static&nbsp;<a href="../../randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a>&nbsp;recognize(Field&nbsp;field)</pre>
-<div class="block">Create a <code>PublicField</code> object based on field given.
- The field may be an instance field, a static field, or a static final field.</div>
+<div class="block">Create a <code>PublicField</code> object based on field given. The field may be
+ an instance field, a static field, or a static final field.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>field</code> - the <code>Field</code> object for which to create a wrapper object.</dd>

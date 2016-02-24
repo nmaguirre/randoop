@@ -119,8 +119,8 @@ var activeTableTab = "activeTableTab";
 <pre>public class <span class="typeNameLabel">FieldSet</span>
 extends <a href="../../randoop/operation/AbstractOperation.html" title="class in randoop.operation">AbstractOperation</a>
 implements <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>, Serializable</pre>
-<div class="block">FieldSetter is an adapter for a <a href="../../randoop/field/AccessibleField.html" title="class in randoop.field"><code>AccessibleField</code></a> as a <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a>
- that acts like a setter for the field.</div>
+<div class="block">FieldSetter is an adapter for a <a href="../../randoop/field/AccessibleField.html" title="class in randoop.field"><code>AccessibleField</code></a> as a
+ <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> that acts like a setter for the field.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../randoop/field/AccessibleField.html" title="class in randoop.field"><code>AccessibleField</code></a>, 
@@ -216,8 +216,7 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <tr id="i5" class="rowColor">
 <td class="colFirst"><code>Class&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/operation/FieldSet.html#getOutputType--">getOutputType</a></span>()</code>
-<div class="block">Returns object for void type since since represents
- setter for field.</div>
+<div class="block">Returns object for void type since since represents setter for field.</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
@@ -233,7 +232,7 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/operation/FieldSet.html#isStatic--">isStatic</a></span>()</code>
-<div class="block">Predicate to indicate whether object represents a static operation on the 
+<div class="block">Predicate to indicate whether object represents a static operation on the
  declaring class.</div>
 </td>
 </tr>
@@ -328,8 +327,8 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <li class="blockList">
 <h4>FieldSet</h4>
 <pre>public&nbsp;FieldSet(<a href="../../randoop/field/AccessibleField.html" title="class in randoop.field">AccessibleField</a>&nbsp;field)</pre>
-<div class="block">Creates a setter <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> object for a field of a class.
- Throws an exception if the field is static final.</div>
+<div class="block">Creates a setter <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> object for a field of a class. Throws an
+ exception if the field is static final.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>field</code> - the field object to be set by setter statements.</dd>
@@ -369,8 +368,7 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <li class="blockList">
 <h4>getOutputType</h4>
 <pre>public&nbsp;Class&lt;?&gt;&nbsp;getOutputType()</pre>
-<div class="block">Returns object for void type since since represents
- setter for field.</div>
+<div class="block">Returns object for void type since since represents setter for field.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/operation/Operation.html#getOutputType--">getOutputType</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a></code></dd>
@@ -387,12 +385,13 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <h4>execute</h4>
 <pre>public&nbsp;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&nbsp;execute(Object[]&nbsp;statementInput,
                                 PrintStream&nbsp;out)</pre>
-<div class="block">Sets the value of the field given the inputs. Should the action 
- raise an exception, those are captured and returned as an <a href="../../randoop/ExecutionOutcome.html" title="class in randoop"><code>ExecutionOutcome</code></a>.
- Exceptions should only be <code>NullPointerException</code>, which happens when input 
- is null but field is an instance field. <a href="../../randoop/field/AccessibleField.html#getValue-java.lang.Object-"><code>AccessibleField.getValue(Object)</code></a> suppresses 
- exceptions that occur because the field is not valid or accessible 
- (specifically <code>IllegalArgumentException</code> and <code>IllegalAccessException</code>).</div>
+<div class="block">Sets the value of the field given the inputs. Should the action raise an
+ exception, those are captured and returned as an <a href="../../randoop/ExecutionOutcome.html" title="class in randoop"><code>ExecutionOutcome</code></a>.
+ Exceptions should only be <code>NullPointerException</code>, which happens when
+ input is null but field is an instance field.
+ <a href="../../randoop/field/AccessibleField.html#getValue-java.lang.Object-"><code>AccessibleField.getValue(Object)</code></a> suppresses exceptions that occur
+ because the field is not valid or accessible (specifically
+ <code>IllegalArgumentException</code> and <code>IllegalAccessException</code>).</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/operation/Operation.html#execute-java.lang.Object:A-java.io.PrintStream-">execute</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a></code></dd>
@@ -400,7 +399,8 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <dd><code>statementInput</code> - the inputs for statement.</dd>
 <dd><code>out</code> - the stream for printing output (unused).</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>outcome of access, either void normal execution or captured exception.</dd>
+<dd>outcome of access, either void normal execution or captured
+         exception.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="../../randoop/BugInRandoopException.html" title="class in randoop">BugInRandoopException</a></code> - if field access throws bug exception.</dd>
 </dl>
@@ -414,21 +414,23 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <h4>appendCode</h4>
 <pre>public&nbsp;void&nbsp;appendCode(List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputVars,
                        StringBuilder&nbsp;b)</pre>
-<div class="block">Generates code for setting a field.
- Should look like
+<div class="block">Generates code for setting a field. Should look like
+ 
  <pre>
-   field = value;
+ field = value;
  </pre>
+ 
  or
+ 
  <pre>
-   field = variable;
+ field = variable;
  </pre></div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/operation/Operation.html#appendCode-java.util.List-java.lang.StringBuilder-">appendCode</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>inputVars</code> - the list of input variables. Last element is value to assign. 
-                    If an instance field, first is instance, second is value.</dd>
+<dd><code>inputVars</code> - the list of input variables. Last element is value to assign. If
+          an instance field, first is instance, second is value.</dd>
 <dd><code>b</code> - the StringBuilder to which code is issued.</dd>
 </dl>
 </li>
@@ -497,8 +499,8 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <h4>parse</h4>
 <pre>public static&nbsp;<a href="../../randoop/operation/FieldSet.html" title="class in randoop.operation">FieldSet</a>&nbsp;parse(String&nbsp;descr)
                       throws <a href="../../randoop/operation/OperationParseException.html" title="class in randoop.operation">OperationParseException</a></pre>
-<div class="block">Parses a description of a field setter in the given string.
- A setter description has the form "&lt;set&gt;( field-descriptor )" where
+<div class="block">Parses a description of a field setter in the given string. A setter
+ description has the form "&lt;set&gt;( field-descriptor )" where
  "&lt;set&gt;" is literally what is expected.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -538,7 +540,7 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <h4>isStatic</h4>
 <pre>public&nbsp;boolean&nbsp;isStatic()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../randoop/operation/Operation.html#isStatic--">Operation</a></code></span></div>
-<div class="block">Predicate to indicate whether object represents a static operation on the 
+<div class="block">Predicate to indicate whether object represents a static operation on the
  declaring class.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
@@ -546,7 +548,7 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
 <dd><code><a href="../../randoop/operation/AbstractOperation.html#isStatic--">isStatic</a></code>&nbsp;in class&nbsp;<code><a href="../../randoop/operation/AbstractOperation.html" title="class in randoop.operation">AbstractOperation</a></code></dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if operation corresponds to static method or field of a class, 
+<dd>true if operation corresponds to static method or field of a class,
          and false otherwise.</dd>
 </dl>
 </li>
@@ -586,7 +588,8 @@ implements <a href="../../randoop/operation/Operation.html" title="interface in 
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>predicate</code> - the <a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection"><code>ReflectionPredicate</code></a> to be checked.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true only if the field used in this setter satisfies predicate.canUse.</dd>
+<dd>true only if the field used in this setter satisfies
+         predicate.canUse.</dd>
 </dl>
 </li>
 </ul>

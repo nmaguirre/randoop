@@ -109,8 +109,10 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">StringEscapeUtils</span>
 extends Object</pre>
-<div class="block"><p>Escapes and unescapes <code>String</code>s for
- Java, Java Script, HTML, XML, and SQL.</p></div>
+<div class="block"><p>
+ Escapes and unescapes <code>String</code>s for Java, Java Script, HTML, XML,
+ and SQL.
+ </p></div>
 <dl>
 <dt><span class="simpleTagLabel">Since:</span></dt>
 <dd>2.0</dd>
@@ -134,7 +136,8 @@ extends Object</pre>
 </tr>
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/util/StringEscapeUtils.html#StringEscapeUtils--">StringEscapeUtils</a></span>()</code>
-<div class="block"><code>StringEscapeUtils</code> instances should NOT be constructed in
+<div class="block">
+ <code>StringEscapeUtils</code> instances should NOT be constructed in
  standard programming.</div>
 </td>
 </tr>
@@ -156,14 +159,16 @@ extends Object</pre>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/StringEscapeUtils.html#escapeJava-java.lang.String-">escapeJava</a></span>(String&nbsp;str)</code>
-<div class="block">Escapes the characters in a <code>String</code> using Java String rules.</div>
+<div class="block">
+ Escapes the characters in a <code>String</code> using Java String rules.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>static void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/StringEscapeUtils.html#escapeJava-java.io.Writer-java.lang.String-">escapeJava</a></span>(Writer&nbsp;out,
           String&nbsp;str)</code>
-<div class="block">Escapes the characters in a <code>String</code> using Java String rules to
+<div class="block">
+ Escapes the characters in a <code>String</code> using Java String rules to
  a <code>Writer</code>.</div>
 </td>
 </tr>
@@ -201,14 +206,23 @@ extends Object</pre>
 <li class="blockList">
 <h4>StringEscapeUtils</h4>
 <pre>public&nbsp;StringEscapeUtils()</pre>
-<div class="block"><p><code>StringEscapeUtils</code> instances should NOT be constructed in
- standard programming.</p>
+<div class="block"><p>
+ <code>StringEscapeUtils</code> instances should NOT be constructed in
+ standard programming.
+ </p>
 
- <p>Instead, the class should be used as:</p>
- <pre>StringEscapeUtils.escapeJava("foo");</pre>
+ <p>
+ Instead, the class should be used as:
+ </p>
+ 
+ <pre>
+ StringEscapeUtils.escapeJava("foo");
+ </pre>
 
- <p>This constructor is public to permit tools that require a JavaBean
- instance to operate.</p></div>
+ <p>
+ This constructor is public to permit tools that require a JavaBean instance
+ to operate.
+ </p></div>
 </li>
 </ul>
 </li>
@@ -226,18 +240,28 @@ extends Object</pre>
 <li class="blockList">
 <h4>escapeJava</h4>
 <pre>public static&nbsp;String&nbsp;escapeJava(String&nbsp;str)</pre>
-<div class="block"><p>Escapes the characters in a <code>String</code> using Java String rules.</p>
-
- <p>Deals correctly with quotes and control-chars (tab, backslash, cr, ff, etc.) </p>
-
- <p>So a tab becomes the characters <code>'\\'</code> and
- <code>'t'</code>.</p>
-
- <p>The only difference between Java strings and JavaScript strings
- is that in JavaScript, a single quote must be escaped.</p>
-
- <p>Example:
+<div class="block"><p>
+ Escapes the characters in a <code>String</code> using Java String rules.
  </p>
+
+ <p>
+ Deals correctly with quotes and control-chars (tab, backslash, cr, ff,
+ etc.)
+ </p>
+
+ <p>
+ So a tab becomes the characters <code>'\\'</code> and <code>'t'</code>.
+ </p>
+
+ <p>
+ The only difference between Java strings and JavaScript strings is that in
+ JavaScript, a single quote must be escaped.
+ </p>
+
+ <p>
+ Example:
+ </p>
+ 
  <pre>
  input string: He didn't say, "Stop!"
  output string: He didn't say, \"Stop!\"
@@ -259,10 +283,14 @@ extends Object</pre>
 <pre>public static&nbsp;void&nbsp;escapeJava(Writer&nbsp;out,
                               String&nbsp;str)
                        throws IOException</pre>
-<div class="block"><p>Escapes the characters in a <code>String</code> using Java String rules to
- a <code>Writer</code>.</p>
+<div class="block"><p>
+ Escapes the characters in a <code>String</code> using Java String rules to
+ a <code>Writer</code>.
+ </p>
  
- <p>A <code>null</code> string input has no effect.</p></div>
+ <p>
+ A <code>null</code> string input has no effect.
+ </p></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>out</code> - Writer to write escaped string into</dd>

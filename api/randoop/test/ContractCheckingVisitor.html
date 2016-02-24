@@ -114,15 +114,14 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">ContractCheckingVisitor</span>
 extends Object
 implements <a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a></pre>
-<div class="block">An execution visitor that generates checks for error-revealing tests.
- If execution of the visited sequence is normal, it will generate checks 
- for unary and binary object contracts over the values from the execution.
- Contracts will be checked on all values except for boxed primitives or Strings.
- If the execution throws an exception considered to be an error, the visitor 
- generates a <code>NoExceptionCheck</code> indicating that the statement threw an 
- exception in error. 
- For each contract violation, the visitor adds a <code>Check</code> to
- the <code>TestChecks</code> object that is returned.</div>
+<div class="block">An execution visitor that generates checks for error-revealing tests. If
+ execution of the visited sequence is normal, it will generate checks for
+ unary and binary object contracts over the values from the execution.
+ Contracts will be checked on all values except for boxed primitives or
+ Strings. If the execution throws an exception considered to be an error, the
+ visitor generates a <code>NoExceptionCheck</code> indicating that the statement
+ threw an exception in error. For each contract violation, the visitor adds a
+ <code>Check</code> to the <code>TestChecks</code> object that is returned.</div>
 </li>
 </ul>
 </div>
@@ -165,7 +164,7 @@ implements <a href="../../randoop/test/TestCheckGenerator.html" title="interface
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/test/TestChecks.html" title="interface in randoop.test">TestChecks</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/test/ContractCheckingVisitor.html#visit-randoop.sequence.ExecutableSequence-">visit</a></span>(<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;s)</code>
-<div class="block">Generate a <code>TestChecks</code> object for the executed sequence <code>s</code> 
+<div class="block">Generate a <code>TestChecks</code> object for the executed sequence <code>s</code>
  based on the criteria of this generator.</div>
 </td>
 </tr>
@@ -224,10 +223,9 @@ implements <a href="../../randoop/test/TestCheckGenerator.html" title="interface
 <li class="blockList">
 <h4>visit</h4>
 <pre>public&nbsp;<a href="../../randoop/test/TestChecks.html" title="interface in randoop.test">TestChecks</a>&nbsp;visit(<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;s)</pre>
-<div class="block">Generate a <code>TestChecks</code> object for the executed sequence <code>s</code> 
- based on the criteria of this generator.
- Adds checks to final statement of sequence. Looks for failure exceptions, 
- and violations of contracts in <code>contracts</code>.</div>
+<div class="block">Generate a <code>TestChecks</code> object for the executed sequence <code>s</code>
+ based on the criteria of this generator. Adds checks to final statement of sequence. Looks for failure
+ exceptions, and violations of contracts in <code>contracts</code>.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/test/TestCheckGenerator.html#visit-randoop.sequence.ExecutableSequence-">visit</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a></code></dd>

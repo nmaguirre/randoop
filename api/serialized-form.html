@@ -323,8 +323,8 @@
 <li class="blockListLast">
 <h4>value</h4>
 <pre>Object value</pre>
-<div class="block">The runtime value of the observer. This variable holds a
- primitive value or String.</div>
+<div class="block">The runtime value of the observer. This variable holds a primitive value or
+ String.</div>
 </li>
 </ul>
 </li>
@@ -457,121 +457,6 @@
 <dl class="nameValue">
 <dt>serialVersionUID:</dt>
 <dd>2793644666060415571L</dd>
-</dl>
-</li>
-</ul>
-</li>
-<li class="blockList">
-<h2 title="Package">Package&nbsp;randoop.experiments</h2>
-<ul class="blockList">
-<li class="blockList"><a name="randoop.experiments.Command.KillBecauseTimeLimitExceed">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/experiments/Command.KillBecauseTimeLimitExceed.html" title="class in randoop.experiments">Command.KillBecauseTimeLimitExceed</a> extends RuntimeException implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
-</dl>
-</li>
-<li class="blockList"><a name="randoop.experiments.DataFlowInput">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/experiments/DataFlowInput.html" title="class in randoop.experiments">DataFlowInput</a> extends Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>-3010962783887743548L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>frontierMap</h4>
-<pre>Map&lt;K,V&gt; frontierMap</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="randoop.experiments.DataFlowOutput">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/experiments/DataFlowOutput.html" title="class in randoop.experiments">DataFlowOutput</a> extends Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>-4008574058179157696L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>results</h4>
-<pre>List&lt;E&gt; results</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="randoop.experiments.DFResultsOneSeq">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/experiments/DFResultsOneSeq.html" title="class in randoop.experiments">DFResultsOneSeq</a> extends Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>-7983260094515559715L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>sequence</h4>
-<pre><a href="randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a> sequence</pre>
-</li>
-<li class="blockList">
-<h4>frontierBranch</h4>
-<pre>CoverageAtom frontierBranch</pre>
-</li>
-<li class="blockListLast">
-<h4>values</h4>
-<pre>Set&lt;E&gt; values</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="randoop.experiments.DFResultsOneSeq.VariableInfo">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/experiments/DFResultsOneSeq.VariableInfo.html" title="class in randoop.experiments">DFResultsOneSeq.VariableInfo</a> extends Object implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>20080625L</dd>
-</dl>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>value</h4>
-<pre><a href="randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a> value</pre>
-</li>
-<li class="blockListLast">
-<h4>branch_compares</h4>
-<pre>Set&lt;E&gt; branch_compares</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="randoop.experiments.ReproduceISSTA06Failure">
-<!--   -->
-</a>
-<h3>Class <a href="randoop/experiments/ReproduceISSTA06Failure.html" title="class in randoop.experiments">ReproduceISSTA06Failure</a> extends Exception implements Serializable</h3>
-<dl class="nameValue">
-<dt>serialVersionUID:</dt>
-<dd>1L</dd>
 </dl>
 </li>
 </ul>
@@ -1327,24 +1212,22 @@
 <li class="blockList">
 <h4>gentime</h4>
 <pre>long gentime</pre>
-<div class="block">How long it took to generate this sequence in nanoseconds,
- excluding execution time.
- Must be directly set by the generator that creates this object
- (no code in this class sets its value).</div>
+<div class="block">How long it took to generate this sequence in nanoseconds, excluding
+ execution time. Must be directly set by the generator that creates this
+ object (no code in this class sets its value).</div>
 </li>
 <li class="blockList">
 <h4>exectime</h4>
 <pre>long exectime</pre>
-<div class="block">How long it took to execute this sequence in nanoseconds,
- excluding generation time.
- Must be directly set by the generator that creates this object.
- (no code in this class sets its value).</div>
+<div class="block">How long it took to execute this sequence in nanoseconds, excluding
+ generation time. Must be directly set by the generator that creates this
+ object. (no code in this class sets its value).</div>
 </li>
 <li class="blockListLast">
 <h4>hasNullInput</h4>
 <pre>boolean hasNullInput</pre>
-<div class="block">Flag to record whether execution of sequence has a null input.
- [this is wonky really belongs to execution]</div>
+<div class="block">Flag to record whether execution of sequence has a null input. [this is
+ wonky really belongs to execution]</div>
 </li>
 </ul>
 </li>
@@ -1409,10 +1292,10 @@
 <li class="blockList">
 <h4>activeFlags</h4>
 <pre>BitSet activeFlags</pre>
-<div class="block">A set of bits, where there is one bit associated with each index.
- Active flags are used during generation, to determine what values
- in an existing sequence are useful to be used as inputs when
- creating a new sequence out of the existing one.</div>
+<div class="block">A set of bits, where there is one bit associated with each index. Active
+ flags are used during generation, to determine what values in an existing
+ sequence are useful to be used as inputs when creating a new sequence out
+ of the existing one.</div>
 </li>
 <li class="blockList">
 <h4>savedHashCode</h4>
@@ -1512,7 +1395,8 @@
 <li class="blockList">
 <h4>operation</h4>
 <pre><a href="randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a> operation</pre>
-<div class="block">The operation (method call, constructor call, primitive values declaration, etc.).</div>
+<div class="block">The operation (method call, constructor call, primitive values declaration,
+ etc.).</div>
 </li>
 <li class="blockListLast">
 <h4>inputs</h4>

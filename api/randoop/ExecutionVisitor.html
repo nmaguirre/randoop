@@ -99,14 +99,14 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../randoop/instrument/CoveredClassVisitor.html" title="class in randoop.instrument">CoveredClassVisitor</a>, <a href="../randoop/experiments/CovWitnessHelperVisitor.html" title="class in randoop.experiments">CovWitnessHelperVisitor</a>, <a href="../randoop/DummyVisitor.html" title="class in randoop">DummyVisitor</a>, <a href="../randoop/MultiVisitor.html" title="class in randoop">MultiVisitor</a></dd>
+<dd><a href="../randoop/DummyVisitor.html" title="class in randoop">DummyVisitor</a>, <a href="../randoop/instrument/ExercisedClassVisitor.html" title="class in randoop.instrument">ExercisedClassVisitor</a>, <a href="../randoop/MultiVisitor.html" title="class in randoop">MultiVisitor</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">ExecutionVisitor</span></pre>
-<div class="block">A visitor that is invoked as the execution of a sequence unfolds.
- Typically such a visitor adds decorations to the sequence based
- on checks of the runtime behavior.
+<div class="block">A visitor that is invoked as the execution of a sequence unfolds. Typically
+ such a visitor adds decorations to the sequence based on checks of the
+ runtime behavior.
  <p>
  IMPORTANT: Implementing classes should have a default constructor.</div>
 </li>
@@ -130,8 +130,8 @@ var activeTableTab = "activeTableTab";
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExecutionVisitor.html#initialize-randoop.sequence.ExecutableSequence-">initialize</a></span>(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;executableSequence)</code>
-<div class="block">Called before execution of a sequence, to allow the visitor to
- perform any initialization steps required before execution.</div>
+<div class="block">Called before execution of a sequence, to allow the visitor to perform any
+ initialization steps required before execution.</div>
 </td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -151,8 +151,7 @@ var activeTableTab = "activeTableTab";
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ExecutionVisitor.html#visitBeforeStatement-randoop.sequence.ExecutableSequence-int-">visitBeforeStatement</a></span>(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
                     int&nbsp;i)</code>
-<div class="block">Invoked by ExecutableSequence.execute before
- the i-th statement executes.</div>
+<div class="block">Invoked by ExecutableSequence.execute before the i-th statement executes.</div>
 </td>
 </tr>
 </table>
@@ -178,8 +177,7 @@ var activeTableTab = "activeTableTab";
 <h4>visitBeforeStatement</h4>
 <pre>void&nbsp;visitBeforeStatement(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;sequence,
                           int&nbsp;i)</pre>
-<div class="block">Invoked by ExecutableSequence.execute before
- the i-th statement executes.
+<div class="block">Invoked by ExecutableSequence.execute before the i-th statement executes.
  <p>
  Precondition: statements 0..i-1 have been executed.</div>
 <dl>
@@ -214,8 +212,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>initialize</h4>
 <pre>void&nbsp;initialize(<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;executableSequence)</pre>
-<div class="block">Called before execution of a sequence, to allow the visitor to
- perform any initialization steps required before execution.</div>
+<div class="block">Called before execution of a sequence, to allow the visitor to perform any
+ initialization steps required before execution.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>executableSequence</code> - the code sequence to be visited</dd>

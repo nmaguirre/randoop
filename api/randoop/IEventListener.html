@@ -97,15 +97,11 @@ var activeTableTab = "activeTableTab";
 <div class="description">
 <ul class="blockList">
 <li class="blockList">
-<dl>
-<dt>All Known Implementing Classes:</dt>
-<dd><a href="../randoop/experiments/CodeCoverageTracker.html" title="class in randoop.experiments">CodeCoverageTracker</a></dd>
-</dl>
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">IEventListener</span></pre>
-<div class="block">Defines various event during Randoop's generation at which an
- implementing class can be notified and perform some action.</div>
+<div class="block">Defines various event during Randoop's generation at which an implementing
+ class can be notified and perform some action.</div>
 </li>
 </ul>
 </div>
@@ -133,7 +129,8 @@ var activeTableTab = "activeTableTab";
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../randoop/IEventListener.html#explorationStart--">explorationStart</a></span>()</code>
-<div class="block">Called immediately at the start of test generation, before any generation steps have occurred.</div>
+<div class="block">Called immediately at the start of test generation, before any generation
+ steps have occurred.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -184,7 +181,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>explorationStart</h4>
 <pre>void&nbsp;explorationStart()</pre>
-<div class="block">Called immediately at the start of test generation, before any generation steps have occurred.</div>
+<div class="block">Called immediately at the start of test generation, before any generation
+ steps have occurred.</div>
 </li>
 </ul>
 <a name="explorationEnd--">
@@ -223,9 +221,9 @@ var activeTableTab = "activeTableTab";
  immediately after a generation <code>step()</code> has completed.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>s</code> - sequence that was generated and executed in the last generation step.
-        Can b null, which means the last step was unable to generate a sequence
-        (e.g. due to a bad random choice).</dd>
+<dd><code>s</code> - sequence that was generated and executed in the last generation
+          step. Can b null, which means the last step was unable to generate
+          a sequence (e.g. due to a bad random choice).</dd>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence"><code>AbstractGenerator</code></a></dd>
 </dl>
@@ -253,8 +251,8 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <h4>stopGeneration</h4>
 <pre>boolean&nbsp;stopGeneration()</pre>
-<div class="block">Called by AbstractGenerator to determine if generation should stop.
- True signals to the generator that generation should stop.</div>
+<div class="block">Called by AbstractGenerator to determine if generation should stop. True
+ signals to the generator that generation should stop.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../randoop/sequence/AbstractGenerator.html" title="class in randoop.sequence"><code>AbstractGenerator</code></a></dd>

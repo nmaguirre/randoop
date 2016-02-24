@@ -114,9 +114,9 @@ var activeTableTab = "activeTableTab";
 <pre>public final class <span class="typeNameLabel">Statement</span>
 extends Object
 implements Serializable</pre>
-<div class="block">Statement represents a statement involving an operation (or term), and the list
- of inputs for the statement. The inputs are variables, but are represented by indexing
- into the enclosing sequence.</div>
+<div class="block">Statement represents a statement involving an operation (or term), and the
+ list of inputs for the statement. The inputs are variables, but are
+ represented by indexing into the enclosing sequence.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../serialized-form.html#randoop.sequence.Statement">Serialized Form</a></dd>
@@ -176,8 +176,8 @@ implements Serializable</pre>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#callsTheMethod-java.lang.reflect.Method-">callsTheMethod</a></span>(Method&nbsp;m)</code>
-<div class="block">callsTheMethod determines whether the <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> in a statement corresponds
- to the <code>Method</code> argument.</div>
+<div class="block">callsTheMethod determines whether the <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> in a statement
+ corresponds to the <code>Method</code> argument.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -190,15 +190,15 @@ implements Serializable</pre>
 <td class="colFirst"><code><a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#execute-java.lang.Object:A-java.io.PrintStream-">execute</a></span>(Object[]&nbsp;inputs,
        PrintStream&nbsp;out)</code>
-<div class="block">execute performs the operation of the statement for the input variables and returns
- outcome.</div>
+<div class="block">execute performs the operation of the statement for the input variables and
+ returns outcome.</div>
 </td>
 </tr>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>Class&lt;?&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#getDeclaringClass--">getDeclaringClass</a></span>()</code>
-<div class="block">getDeclaringClass returns the declaring class as defined by the <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a>
- of the statement.</div>
+<div class="block">getDeclaringClass returns the declaring class as defined by the
+ <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> of the statement.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
@@ -208,7 +208,8 @@ implements Serializable</pre>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code><a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#getOperation--">getOperation</a></span>()</code>
-<div class="block">getOperation is meant to be a temporary solution to type confusion in generators.</div>
+<div class="block">getOperation is meant to be a temporary solution to type confusion in
+ generators.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
@@ -218,8 +219,8 @@ implements Serializable</pre>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#getShortForm--">getShortForm</a></span>()</code>
-<div class="block">getShortForm constructs code expression of the operation for substitution into argument lists
- as opposed to using variable.</div>
+<div class="block">getShortForm constructs code expression of the operation for substitution
+ into argument lists as opposed to using variable.</div>
 </td>
 </tr>
 <tr id="i9" class="rowColor">
@@ -235,26 +236,29 @@ implements Serializable</pre>
 <tr id="i11" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#isConstructorCall--">isConstructorCall</a></span>()</code>
-<div class="block">isConstructorCall determines if operation for statement is a call to a constructor.</div>
+<div class="block">isConstructorCall determines if operation for statement is a call to a
+ constructor.</div>
 </td>
 </tr>
 <tr id="i12" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#isMethodCall--">isMethodCall</a></span>()</code>
-<div class="block">isMethodCall indicates whether a statement corresponds to a method-call-like operation.</div>
+<div class="block">isMethodCall indicates whether a statement corresponds to a
+ method-call-like operation.</div>
 </td>
 </tr>
 <tr id="i13" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#isMethodIn-java.util.List-">isMethodIn</a></span>(List&lt;Method&gt;&nbsp;list)</code>
-<div class="block">isMethodIn determines whether the <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> in a statement corresponds to
- an element of the list of reflective <code>Method</code> objects.</div>
+<div class="block">isMethodIn determines whether the <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> in a statement
+ corresponds to an element of the list of reflective <code>Method</code> objects.</div>
 </td>
 </tr>
 <tr id="i14" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#isNullInitialization--">isNullInitialization</a></span>()</code>
-<div class="block">isNullInialization determines if statement represents an initialization by null value.</div>
+<div class="block">isNullInialization determines if statement represents an initialization by
+ null value.</div>
 </td>
 </tr>
 <tr id="i15" class="rowColor">
@@ -266,7 +270,8 @@ implements Serializable</pre>
 <tr id="i16" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/Statement.html#isStatic--">isStatic</a></span>()</code>
-<div class="block">isStatic indicates whether the corresponding operation is declared as static.</div>
+<div class="block">isStatic indicates whether the corresponding operation is declared as
+ static.</div>
 </td>
 </tr>
 <tr id="i17" class="rowColor">
@@ -477,7 +482,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>isStatic</h4>
 <pre>public&nbsp;boolean&nbsp;isStatic()</pre>
-<div class="block">isStatic indicates whether the corresponding operation is declared as static.</div>
+<div class="block">isStatic indicates whether the corresponding operation is declared as
+ static.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>result of isStatic on operation corresponding to statement.</dd>
@@ -491,9 +497,10 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>isMethodCall</h4>
 <pre>public&nbsp;boolean&nbsp;isMethodCall()</pre>
-<div class="block">isMethodCall indicates whether a statement corresponds to a method-call-like operation.
- This could be either a method call, an assignment/initialization involving a method call,
- or the use of a public field in an assignment on either lhs (as "setter") or rhs (as "getter").</div>
+<div class="block">isMethodCall indicates whether a statement corresponds to a
+ method-call-like operation. This could be either a method call, an
+ assignment/initialization involving a method call, or the use of a public
+ field in an assignment on either lhs (as "setter") or rhs (as "getter").</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>true if operation is method-call-like, and false otherwise.</dd>
@@ -508,8 +515,8 @@ implements Serializable</pre>
 <h4>execute</h4>
 <pre>public&nbsp;<a href="../../randoop/ExecutionOutcome.html" title="class in randoop">ExecutionOutcome</a>&nbsp;execute(Object[]&nbsp;inputs,
                                 PrintStream&nbsp;out)</pre>
-<div class="block">execute performs the operation of the statement for the input variables and returns
- outcome.</div>
+<div class="block">execute performs the operation of the statement for the input variables and
+ returns outcome.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>inputs</code> - list of objects to use as inputs to execution.</dd>
@@ -526,8 +533,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>getDeclaringClass</h4>
 <pre>public&nbsp;Class&lt;?&gt;&nbsp;getDeclaringClass()</pre>
-<div class="block">getDeclaringClass returns the declaring class as defined by the <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a>
- of the statement.</div>
+<div class="block">getDeclaringClass returns the declaring class as defined by the
+ <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a> of the statement.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>result of getDeclaringClass for corresponding statement.</dd>
@@ -541,13 +548,14 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>isMethodIn</h4>
 <pre>public&nbsp;boolean&nbsp;isMethodIn(List&lt;Method&gt;&nbsp;list)</pre>
-<div class="block">isMethodIn determines whether the <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> in a statement corresponds to
- an element of the list of reflective <code>Method</code> objects.</div>
+<div class="block">isMethodIn determines whether the <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> in a statement
+ corresponds to an element of the list of reflective <code>Method</code> objects.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>list</code> - containing <code>Method</code> objects.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> corresponds to an object in list, and false otherwise.</dd>
+<dd>true if <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> corresponds to an object in list, and
+         false otherwise.</dd>
 </dl>
 </li>
 </ul>
@@ -558,13 +566,14 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>callsTheMethod</h4>
 <pre>public&nbsp;boolean&nbsp;callsTheMethod(Method&nbsp;m)</pre>
-<div class="block">callsTheMethod determines whether the <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> in a statement corresponds
- to the <code>Method</code> argument.</div>
+<div class="block">callsTheMethod determines whether the <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> in a statement
+ corresponds to the <code>Method</code> argument.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>m</code> - instance of <code>Method</code>.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> object of statement corresponds to m, and false otherwise.</dd>
+<dd>true if <a href="../../randoop/operation/MethodCall.html" title="class in randoop.operation"><code>MethodCall</code></a> object of statement corresponds to m,
+         and false otherwise.</dd>
 </dl>
 </li>
 </ul>
@@ -575,7 +584,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>isConstructorCall</h4>
 <pre>public&nbsp;boolean&nbsp;isConstructorCall()</pre>
-<div class="block">isConstructorCall determines if operation for statement is a call to a constructor.</div>
+<div class="block">isConstructorCall determines if operation for statement is a call to a
+ constructor.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>true if operation is a constructor call, and false otherwise.</dd>
@@ -603,10 +613,12 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>isNullInitialization</h4>
 <pre>public&nbsp;boolean&nbsp;isNullInitialization()</pre>
-<div class="block">isNullInialization determines if statement represents an initialization by null value.</div>
+<div class="block">isNullInialization determines if statement represents an initialization by
+ null value.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if statement represents null initialization, and false otherwise.</dd>
+<dd>true if statement represents null initialization, and false
+         otherwise.</dd>
 </dl>
 </li>
 </ul>
@@ -617,8 +629,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>getShortForm</h4>
 <pre>public&nbsp;String&nbsp;getShortForm()</pre>
-<div class="block">getShortForm constructs code expression of the operation for substitution into argument lists
- as opposed to using variable.</div>
+<div class="block">getShortForm constructs code expression of the operation for substitution
+ into argument lists as opposed to using variable.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>string containing code to access the value of the operation/term</dd>
@@ -633,14 +645,15 @@ implements Serializable</pre>
 <h4>getValue</h4>
 <pre>public&nbsp;Object&nbsp;getValue()</pre>
 <div class="block">getValue returns the "value" for a statement. Is only meaningful if
- statement is an assignment of a constant value.
- Appeals to <a href="../../randoop/operation/AbstractOperation.html" title="class in randoop.operation"><code>AbstractOperation</code></a> to throw appropriate exception when
- unable to provide a value.
+ statement is an assignment of a constant value. Appeals to
+ <a href="../../randoop/operation/AbstractOperation.html" title="class in randoop.operation"><code>AbstractOperation</code></a> to throw appropriate exception when unable to
+ provide a value.
 
  This is a hack to allow randoop.main.GenBranchDir to do mutation.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>value of term in statement (rhs of assignment/initialization) if any</dd>
+<dd>value of term in statement (rhs of assignment/initialization) if
+         any</dd>
 </dl>
 </li>
 </ul>
@@ -651,9 +664,9 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>getOperation</h4>
 <pre>public final&nbsp;<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&nbsp;getOperation()</pre>
-<div class="block">getOperation is meant to be a temporary solution to type confusion in generators.
- This should go away.
- Only intended to be called by <a href="../../randoop/sequence/Sequence.html#extend-randoop.operation.Operation-java.util.List-"><code>Sequence.extend(Operation, List)</code></a>.</div>
+<div class="block">getOperation is meant to be a temporary solution to type confusion in
+ generators. This should go away. Only intended to be called by
+ <a href="../../randoop/sequence/Sequence.html#extend-randoop.operation.Operation-java.util.List-"><code>Sequence.extend(Operation, List)</code></a>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>operation object in the statement.</dd>

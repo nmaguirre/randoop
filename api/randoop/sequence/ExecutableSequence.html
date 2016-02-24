@@ -115,44 +115,44 @@ var activeTableTab = "activeTableTab";
 extends Object
 implements Serializable</pre>
 <div class="block">An ExecutableSequence wraps a <a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence"><code>Sequence</code></a> with functionality for
- executing the sequence. It also lets the client add <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a>s
- that check expected behaviors of the execution.
+ executing the sequence. It also lets the client add <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a>s that check
+ expected behaviors of the execution.
  <p>
- An ExecutableSequence augments a sequence with three additional pieces
- of data:
+ An ExecutableSequence augments a sequence with three additional pieces of
+ data:
  <ul>
- <li> <b>Execution results.</b> An ExecutableSequence can be executed, and the
-      results of the execution (meaning the objects created during execution,
-      and any exceptions thrown) are made available to clients or execution
-      visitors to inspect.
- <li> <b>Checks.</b> A check is an object representing an expected runtime behavior
-      of the sequence. Clients can add checks to specific indices of the sequence.
-      For example, a client might add a <code>NotNull</code> check to the ith index
-      of a sequence to signify that the value returned by the statement at index i
-      should not be null.
- <li> <b>Check evaluation results.</b> Corresponding to every check is a boolean value that
-      represents whether the check passed or failed during the last execution
-      of the sequence.
+ <li><b>Execution results.</b> An ExecutableSequence can be executed, and the
+ results of the execution (meaning the objects created during execution, and
+ any exceptions thrown) are made available to clients or execution visitors to
+ inspect.
+ <li><b>Checks.</b> A check is an object representing an expected runtime
+ behavior of the sequence. Clients can add checks to specific indices of the
+ sequence. For example, a client might add a <code>NotNull</code> check to the
+ ith index of a sequence to signify that the value returned by the statement
+ at index i should not be null.
+ <li><b>Check evaluation results.</b> Corresponding to every check is a
+ boolean value that represents whether the check passed or failed during the
+ last execution of the sequence.
  </ul>
  <p>
 
- Of the three pieces of data above, an ExecutableSequence only directly manages
- the first one, i.e. the execution results. Other pieces of data, including
- checks and check evaluation results, are added or removed by the
+ Of the three pieces of data above, an ExecutableSequence only directly
+ manages the first one, i.e. the execution results. Other pieces of data,
+ including checks and check evaluation results, are added or removed by the
  client of the ExecutableSequence. One way of doing this is by implementing an
- <a href="../../randoop/ExecutionVisitor.html" title="interface in randoop"><code>ExecutionVisitor</code></a> and passing it as an argument to the <code>execute</code>
- method.
+ <a href="../../randoop/ExecutionVisitor.html" title="interface in randoop"><code>ExecutionVisitor</code></a> and passing it as an argument to the
+ <code>execute</code> method.
 
  <p>
 
- The method <code>execute(ExecutionVisitor v)</code> executes the code that the
- sequence represents. This method uses reflection to execute each element in the
- sequence (method call, constructor call, primitive or array declaration, etc).
- Before executing each statement (e.g. the i-th statement), execute(v)
- calls v.visitBefore(this, i), and after executing each statement, it calls
- v.visitAfter(this, i). The purpose of the visitor is to examine the unfolding
- execution, and take some action depending on its intended purpose. For example,
- it may decorate the sequence with <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a>s about the
+ The method <code>execute(ExecutionVisitor v)</code> executes the code that
+ the sequence represents. This method uses reflection to execute each element
+ in the sequence (method call, constructor call, primitive or array
+ declaration, etc). Before executing each statement (e.g. the i-th statement),
+ execute(v) calls v.visitBefore(this, i), and after executing each statement,
+ it calls v.visitAfter(this, i). The purpose of the visitor is to examine the
+ unfolding execution, and take some action depending on its intended purpose.
+ For example, it may decorate the sequence with <a href="../../randoop/Check.html" title="interface in randoop"><code>Check</code></a>s about the
  execution.
 
  <p>
@@ -160,15 +160,15 @@ implements Serializable</pre>
  NOTES.
 
  <ul>
- <li> It only makes sense to call the following methods <b>after</b> executing the
- i-th statement in a sequence:
-    <ul>
-        <li> isNormalExecution(i)
-        <li> isExceptionalExecution(i)
-        <li> getExecutionResult(i)
-        <li> getResult(i)
-        <li> getExeception(i)
-    </ul>
+ <li>It only makes sense to call the following methods <b>after</b> executing
+ the i-th statement in a sequence:
+ <ul>
+ <li>isNormalExecution(i)
+ <li>isExceptionalExecution(i)
+ <li>getExecutionResult(i)
+ <li>getResult(i)
+ <li>getExeception(i)
+ </ul>
  </ul></div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
@@ -195,22 +195,22 @@ implements Serializable</pre>
 <tr class="altColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#exectime">exectime</a></span></code>
-<div class="block">How long it took to execute this sequence in nanoseconds,
- excluding generation time.</div>
+<div class="block">How long it took to execute this sequence in nanoseconds, excluding
+ generation time.</div>
 </td>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>protected <a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#executionResults">executionResults</a></span></code>
-<div class="block">Contains the runtime objects created and exceptions thrown (if any)
- during execution of this sequence.</div>
+<div class="block">Contains the runtime objects created and exceptions thrown (if any) during
+ execution of this sequence.</div>
 </td>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#gentime">gentime</a></span></code>
-<div class="block">How long it took to generate this sequence in nanoseconds,
- excluding execution time.</div>
+<div class="block">How long it took to generate this sequence in nanoseconds, excluding
+ execution time.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -296,8 +296,7 @@ implements Serializable</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#execute-randoop.ExecutionVisitor-randoop.test.TestCheckGenerator-boolean-">execute</a></span>(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor,
        <a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>&nbsp;gen,
        boolean&nbsp;ignoreException)</code>
-<div class="block">Execute this sequence, invoking the given visitor as the execution
- unfolds.</div>
+<div class="block">Execute this sequence, invoking the given visitor as the execution unfolds.</div>
 </td>
 </tr>
 <tr id="i6" class="altColor">
@@ -330,8 +329,8 @@ implements Serializable</pre>
 <tr id="i11" class="rowColor">
 <td class="colFirst"><code>int</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/ExecutableSequence.html#getNonExecutedIndex--">getNonExecutedIndex</a></span>()</code>
-<div class="block">Returns the index i for a non-executed statement, or -1 if
- there is no such index.</div>
+<div class="block">Returns the index i for a non-executed statement, or -1 if there is no such
+ index.</div>
 </td>
 </tr>
 <tr id="i12" class="altColor">
@@ -478,11 +477,10 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>executionResults</h4>
 <pre>protected transient&nbsp;<a href="../../randoop/sequence/Execution.html" title="class in randoop.sequence">Execution</a> executionResults</pre>
-<div class="block">Contains the runtime objects created and exceptions thrown (if any)
- during execution of this sequence.
- Invariant: sequence.size() == executionResults.size().
- Transient because it can contain arbitrary objects that may not be
- serializable.</div>
+<div class="block">Contains the runtime objects created and exceptions thrown (if any) during
+ execution of this sequence. Invariant: sequence.size() ==
+ executionResults.size(). Transient because it can contain arbitrary objects
+ that may not be serializable.</div>
 </li>
 </ul>
 <a name="gentime">
@@ -492,10 +490,9 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>gentime</h4>
 <pre>public&nbsp;long gentime</pre>
-<div class="block">How long it took to generate this sequence in nanoseconds,
- excluding execution time.
- Must be directly set by the generator that creates this object
- (no code in this class sets its value).</div>
+<div class="block">How long it took to generate this sequence in nanoseconds, excluding
+ execution time. Must be directly set by the generator that creates this
+ object (no code in this class sets its value).</div>
 </li>
 </ul>
 <a name="exectime">
@@ -505,10 +502,9 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>exectime</h4>
 <pre>public&nbsp;long exectime</pre>
-<div class="block">How long it took to execute this sequence in nanoseconds,
- excluding generation time.
- Must be directly set by the generator that creates this object.
- (no code in this class sets its value).</div>
+<div class="block">How long it took to execute this sequence in nanoseconds, excluding
+ generation time. Must be directly set by the generator that creates this
+ object. (no code in this class sets its value).</div>
 </li>
 </ul>
 </li>
@@ -571,9 +567,9 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>seq_id</h4>
 <pre>public&nbsp;int&nbsp;seq_id()</pre>
-<div class="block">Returns an id based on the contents of the sequence alone.  The id
- will match for any identical sequences (no matter how they are
- constructed).  Used for debugging</div>
+<div class="block">Returns an id based on the contents of the sequence alone. The id will
+ match for any identical sequences (no matter how they are constructed).
+ Used for debugging</div>
 </li>
 </ul>
 <a name="toCodeString--">
@@ -583,9 +579,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>toCodeString</h4>
 <pre>public&nbsp;String&nbsp;toCodeString()</pre>
-<div class="block">Return this sequence as code.
- Similar to <a href="../../randoop/sequence/Sequence.html#toCodeString--"><code>Sequence.toCodeString()</code></a> except includes the
- checks.
+<div class="block">Return this sequence as code. Similar to <a href="../../randoop/sequence/Sequence.html#toCodeString--"><code>Sequence.toCodeString()</code></a>
+ except includes the checks.
 
  If for a given statement there is a check of type
  <a href="../../randoop/ExceptionCheck.html" title="class in randoop"><code>ExceptionCheck</code></a>, that check's pre-statement code is printed
@@ -627,27 +622,28 @@ implements Serializable</pre>
 <pre>public&nbsp;void&nbsp;execute(<a href="../../randoop/ExecutionVisitor.html" title="interface in randoop">ExecutionVisitor</a>&nbsp;visitor,
                     <a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>&nbsp;gen,
                     boolean&nbsp;ignoreException)</pre>
-<div class="block">Execute this sequence, invoking the given visitor as the execution
- unfolds. After invoking this method, the client can query the outcome
- of executing each statement via the method <code>getResult(i)</code>.
+<div class="block">Execute this sequence, invoking the given visitor as the execution unfolds.
+ After invoking this method, the client can query the outcome of executing
+ each statement via the method <code>getResult(i)</code>.
 
  <ul>
- <li> Before the sequence is executed, clears execution results and
-      calls <code>visitor.initialize(this)</code>.
- <li> Executes each statement in the sequence. Before executing each statement
-      calls the given visitor's <code>visitBefore</code> method. After executing
-      each statement, calls the visitor's <code>visitAfter</code> method.
- <li> Execution stops if one of the following conditions holds:
-   <ul>
-   <li> All statements in the sequences have been executed.
-   <li> A statement's execution results in an exception and
-        <code>stop_on_exception==true</code>.
-   <li> A <code>null</code> input value is implicitly passed to the statement
-            (i.e., not via explicit declaration like  x = null)
-   <li> After executing the i-th statement and calling the visitor's
-        <code>visitAfter</code> method, a <code>ContractViolation</code>
-        check is present at index i.
-   </ul>
+ <li>Before the sequence is executed, clears execution results and calls
+ <code>visitor.initialize(this)</code>.
+ <li>Executes each statement in the sequence. Before executing each
+ statement calls the given visitor's <code>visitBefore</code> method. After
+ executing each statement, calls the visitor's <code>visitAfter</code>
+ method.
+ <li>Execution stops if one of the following conditions holds:
+ <ul>
+ <li>All statements in the sequences have been executed.
+ <li>A statement's execution results in an exception and
+ <code>stop_on_exception==true</code>.
+ <li>A <code>null</code> input value is implicitly passed to the statement
+ (i.e., not via explicit declaration like x = null)
+ <li>After executing the i-th statement and calling the visitor's
+ <code>visitAfter</code> method, a <code>ContractViolation</code> check is
+ present at index i.
+ </ul>
  </ul></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -758,8 +754,8 @@ implements Serializable</pre>
 <pre>public&nbsp;int&nbsp;executedSize()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the number of elements in the sequence that were executed before
- an execution result of type randoop.NotExecuted.</dd>
+<dd>the number of elements in the sequence that were executed before an
+         execution result of type randoop.NotExecuted.</dd>
 </dl>
 </li>
 </ul>
@@ -815,9 +811,9 @@ implements Serializable</pre>
 <pre>public&nbsp;int&nbsp;getExceptionIndex(Class&lt;?&gt;&nbsp;exceptionClass)</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>The index in the sequence at which an exception of the
- given class (or a class compatible with it) was thrown. If no such
- exception, returns -1.</dd>
+<dd>The index in the sequence at which an exception of the given class
+         (or a class compatible with it) was thrown. If no such exception,
+         returns -1.</dd>
 </dl>
 </li>
 </ul>
@@ -844,7 +840,8 @@ implements Serializable</pre>
 <pre>public&nbsp;boolean&nbsp;throwsException()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>True if an exception has been thrown during this sequence's execution.</dd>
+<dd>True if an exception has been thrown during this sequence's
+         execution.</dd>
 </dl>
 </li>
 </ul>
@@ -855,8 +852,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>hasNonExecutedStatements</h4>
 <pre>public&nbsp;boolean&nbsp;hasNonExecutedStatements()</pre>
-<div class="block">Returns whether the sequence contains a non-executed statement.
- That happens if some statement before the last one throws an exception.</div>
+<div class="block">Returns whether the sequence contains a non-executed statement. That
+ happens if some statement before the last one throws an exception.</div>
 </li>
 </ul>
 <a name="getNonExecutedIndex--">
@@ -866,9 +863,9 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>getNonExecutedIndex</h4>
 <pre>public&nbsp;int&nbsp;getNonExecutedIndex()</pre>
-<div class="block">Returns the index i for a non-executed statement, or -1 if
- there is no such index.  Note that a statement is considered
- executed even if it throws an exception.</div>
+<div class="block">Returns the index i for a non-executed statement, or -1 if there is no such
+ index. Note that a statement is considered executed even if it throws an
+ exception.</div>
 </li>
 </ul>
 <a name="getSequences-java.util.List-">
@@ -953,7 +950,8 @@ implements Serializable</pre>
 <div class="block">Indicate whether there are any invalid checks.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if the test checks have been set and are for invalid behavior, false otherwise</dd>
+<dd>true if the test checks have been set and are for invalid behavior,
+         false otherwise</dd>
 </dl>
 </li>
 </ul>

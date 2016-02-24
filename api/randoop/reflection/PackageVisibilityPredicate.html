@@ -115,15 +115,14 @@ var activeTableTab = "activeTableTab";
 extends Object
 implements <a href="../../randoop/reflection/VisibilityPredicate.html" title="interface in randoop.reflection">VisibilityPredicate</a></pre>
 <div class="block">A predicate that tests for visibility of a class, method, constructor, or
- field relative to a particular package.
- A top-level class is accessible from the package if it is public, 
- or if it is package-private in the given package.
- Otherwise, an element is accessible from the package if it is either
+ field relative to a particular package. A top-level class is accessible from
+ the package if it is public, or if it is package-private in the given
+ package. Otherwise, an element is accessible from the package if it is either
  public, or, if in the same package, then not private.
  <p>
- The predicate is used to determine what can be accessed from a Randoop 
- generated JUnit test in the given package. So, this class does not implement 
- Java's full accessibility rules; those for subclasses and default-visibility 
+ The predicate is used to determine what can be accessed from a Randoop
+ generated JUnit test in the given package. So, this class does not implement
+ Java's full accessibility rules; those for subclasses and default-visibility
  are not relevant to this predicate.</div>
 </li>
 </ul>
@@ -245,7 +244,8 @@ implements <a href="../../randoop/reflection/VisibilityPredicate.html" title="in
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>c</code> - the class object to check</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if class is public or package private in <code>thePackage</code>, false otherwise</dd>
+<dd>true if class is public or package private in <code>thePackage</code>,
+         false otherwise</dd>
 </dl>
 </li>
 </ul>
@@ -263,8 +263,8 @@ implements <a href="../../randoop/reflection/VisibilityPredicate.html" title="in
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>m</code> - the Method object to check</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if method is public or a member of a class in 
- <code>thePackage</code> and not private, false otherwise</dd>
+<dd>true if method is public or a member of a class in
+         <code>thePackage</code> and not private, false otherwise</dd>
 </dl>
 </li>
 </ul>
@@ -282,8 +282,8 @@ implements <a href="../../randoop/reflection/VisibilityPredicate.html" title="in
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>c</code> - the constructor object to check</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if constructor is public or member of a class in 
- <code>thePackage</code> and not private, false otherwise</dd>
+<dd>true if constructor is public or member of a class in
+         <code>thePackage</code> and not private, false otherwise</dd>
 </dl>
 </li>
 </ul>
@@ -301,8 +301,8 @@ implements <a href="../../randoop/reflection/VisibilityPredicate.html" title="in
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>f</code> - the field object to check</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if field is public or member of a class in 
- <code>thePackage</code> and not private, false otherwise</dd>
+<dd>true if field is public or member of a class in <code>thePackage</code>
+         and not private, false otherwise</dd>
 </dl>
 </li>
 </ul>

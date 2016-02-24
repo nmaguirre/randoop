@@ -17,7 +17,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10};
+var methods = {"i0":10,"i1":10,"i2":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -109,25 +109,28 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">RecordListReader</span>
 extends Object</pre>
-<div class="block">Reads a list of records from a text file, where a record is
- partially specified by the client of this class.
+<div class="block">Reads a list of records from a text file, where a record is partially
+ specified by the client of this class.
+ <p>
  
- A record is a sequence of lines, beginning with the string
- "START &lt;recordtype&gt;" and ending with the string "END &lt;recordtype&gt;"
- where &lt;recordtype&gt; is specified by the client. For example:
+ A record is a sequence of lines, where the first line is the string
+ "START &lt;recordtype&gt;" and the last line is the string
+ "END &lt;recordtype&gt;" where &lt;recordtype&gt; is specified by the client.
+ For example:
  
- START person
- ...
- ... arbitrary text
- ...
- END person
+ <pre>START person
+ <em>... arbitrary text ...</em>
+ <em>... more arbitrary text ...</em>
+ END person</pre>
  
- Any lines within and between records, that are only whitespace
- or start with "#", are skipped.
+ Any lines within and between records, that are only whitespace or start with
+ "#", are skipped.
+ <p>
  
- This class includes the functionality to parse individual records
- out of a file. How each record is processed is up to the client,
- who provides a RecordProcessor.</div>
+ This class's built-in functionality extracts records from a file.
+ It then parses and processes each record, using the RecordProcessor
+ provided by the client.
+ .</div>
 </li>
 </ul>
 </div>
@@ -169,6 +172,10 @@ extends Object</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/RecordListReader.html#parse-java.io.BufferedReader-">parse</a></span>(BufferedReader&nbsp;reader)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/RecordListReader.html#parse-java.io.File-">parse</a></span>(File&nbsp;inFile)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/RecordListReader.html#parse-java.lang.String-">parse</a></span>(String&nbsp;inFile)</code>&nbsp;</td>
 </tr>
@@ -219,6 +226,15 @@ extends Object</pre>
 <li class="blockList">
 <h4>parse</h4>
 <pre>public&nbsp;void&nbsp;parse(String&nbsp;inFile)</pre>
+</li>
+</ul>
+<a name="parse-java.io.File-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>parse</h4>
+<pre>public&nbsp;void&nbsp;parse(File&nbsp;inFile)</pre>
 </li>
 </ul>
 <a name="parse-java.io.BufferedReader-">

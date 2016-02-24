@@ -189,8 +189,8 @@ extends Object</pre>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code>static boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/PrimitiveTypes.html#isPrimitive-java.lang.Class-">isPrimitive</a></span>(Class&lt;?&gt;&nbsp;c)</code>
-<div class="block">Same as c.isPrimitive() but faster if this test is done very
- frequently (as it is in Randoop).</div>
+<div class="block">Same as c.isPrimitive() but faster if this test is done very frequently (as
+ it is in Randoop).</div>
 </td>
 </tr>
 <tr id="i10" class="altColor">
@@ -224,8 +224,8 @@ extends Object</pre>
 <tr id="i15" class="rowColor">
 <td class="colFirst"><code>static String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/util/PrimitiveTypes.html#toCodeString-java.lang.Object-">toCodeString</a></span>(Object&nbsp;value)</code>
-<div class="block">Given a primitive, boxed primitive, or String, returns a String that can
- be uesd in Java source to represent it.</div>
+<div class="block">Given a primitive, boxed primitive, or String, returns a String that can be
+ uesd in Java source to represent it.</div>
 </td>
 </tr>
 </table>
@@ -355,8 +355,8 @@ extends Object</pre>
 <li class="blockList">
 <h4>isPrimitive</h4>
 <pre>public static&nbsp;boolean&nbsp;isPrimitive(Class&lt;?&gt;&nbsp;c)</pre>
-<div class="block">Same as c.isPrimitive() but faster if this test is done very
- frequently (as it is in Randoop).</div>
+<div class="block">Same as c.isPrimitive() but faster if this test is done very frequently (as
+ it is in Randoop).</div>
 </li>
 </ul>
 <a name="isBoxedOrPrimitiveOrStringType-java.lang.Class-">
@@ -385,12 +385,12 @@ extends Object</pre>
 <li class="blockList">
 <h4>toCodeString</h4>
 <pre>public static&nbsp;String&nbsp;toCodeString(Object&nbsp;value)</pre>
-<div class="block">Given a primitive, boxed primitive, or String, returns a String that can
- be uesd in Java source to represent it.</div>
+<div class="block">Given a primitive, boxed primitive, or String, returns a String that can be
+ uesd in Java source to represent it.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>value</code> - the value to create a String representation for.
- The value's type must be a primitive type, a String, or null.</dd>
+<dd><code>value</code> - the value to create a String representation for. The value's type
+          must be a primitive type, a String, or null.</dd>
 </dl>
 </li>
 </ul>
@@ -412,8 +412,8 @@ extends Object</pre>
 <pre>public static&nbsp;boolean&nbsp;looksLikeObjectToString(String&nbsp;s)</pre>
 <div class="block">Returns true if the given string looks like it came from a call of
  Object.toString(); in other words, looks something like
- "&lt;classname&gt;@&lt;hex&gt;". Such strings are rarely useful in generation because
- they contain non-reproducible hash strings.
+ "&lt;classname&gt;@&lt;hex&gt;". Such strings are rarely useful in
+ generation because they contain non-reproducible hash strings.
  
  This method is actually more restrictive in what it determines to look like
  it came from Object.toString(): it deems anything that matches the pattern
@@ -421,8 +421,8 @@ extends Object</pre>
  .*@[0-9a-h]{1,8}.*
  
  Meaning, if it looks like the string contains the telltale "@&lt;hex&gt;"
- pattern, the method returns false. This almost always works and is a
- faster check.</div>
+ pattern, the method returns false. This almost always works and is a faster
+ check.</div>
 </li>
 </ul>
 <a name="stringLengthOK-java.lang.String-">
@@ -432,17 +432,17 @@ extends Object</pre>
 <li class="blockList">
 <h4>stringLengthOK</h4>
 <pre>public static&nbsp;boolean&nbsp;stringLengthOK(String&nbsp;s)</pre>
-<div class="block">Returns true if the given string is deemed to be reasonable (i.e. not too long)
- based on the --string-maxlen=N parameter.
+<div class="block">Returns true if the given string is deemed to be reasonable (i.e. not too
+ long) based on the --string-maxlen=N parameter.
  <p>
- If Randoop generates tests using strings that are too long, this can
- result in non-compilable tests due to the JVM's limit on the length of a string.
+ If Randoop generates tests using strings that are too long, this can result
+ in non-compilable tests due to the JVM's limit on the length of a string.
  <p>
  A string S is too long if, when printed as code in a generated unit test,
  it may result in a non-compilable test. In order to determine this, we have
  to consider not the length of s, but the length of the string that would be
- printed to obtain s, which may be different due to escaped and unicode characters.
- This method takes this into account.</div>
+ printed to obtain s, which may be different due to escaped and unicode
+ characters. This method takes this into account.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../randoop/main/GenInputsAbstract.html" title="class in randoop.main"><code>GenInputsAbstract</code></a></dd>

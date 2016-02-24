@@ -1,8 +1,8 @@
 randoop
-randoop.agent
-randoop.experiments
 randoop.field
 randoop.instrument
+randoop.instrument.exercisedagent
+randoop.instrument.mapcallagent
 randoop.main
 randoop.operation
 randoop.reflection

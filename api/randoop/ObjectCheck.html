@@ -114,25 +114,25 @@ var activeTableTab = "activeTableTab";
 <pre>public class <span class="typeNameLabel">ObjectCheck</span>
 extends Object
 implements <a href="../randoop/Check.html" title="interface in randoop">Check</a></pre>
-<div class="block">A check that checks for expected properties of one or more objects
- generated during the execution of a <a href="../randoop/sequence/Sequence.html" title="class in randoop.sequence"><code>Sequence</code></a>, for example:
+<div class="block">A check that checks for expected properties of one or more objects generated
+ during the execution of a <a href="../randoop/sequence/Sequence.html" title="class in randoop.sequence"><code>Sequence</code></a>, for example:
  <ul>
- <li> Checking that the objects created during execution of a sequence 
-      respect reflexivity, transitivity and symmetry of equality.
- <li> Checking that calling <code>toString()</code> on the objects
-      created during execution of a sequence does not throw an exception.
- </ul>  
+ <li>Checking that the objects created during execution of a sequence respect
+ reflexivity, transitivity and symmetry of equality.
+ <li>Checking that calling <code>toString()</code> on the objects created
+ during execution of a sequence does not throw an exception.
+ </ul>
  <p>
  An <code>ObjectCheck</code> has two parts:
  <ul>
- <li>A <a href="../randoop/ObjectContract.html" title="interface in randoop"><code>ObjectContract</code></a> responsible for performing
-     the actual check on a set of runtime values. For example.
-     the class <a href="../randoop/EqualsReflexive.html" title="class in randoop"><code>EqualsReflexive</code></a> is a checker code class that,
-     given an object <i>o</i>, calls <i>o.equals(o)</i> and checks that
-     it returns <code>true</code>.
-     
- <li>A list of <a href="../randoop/sequence/Variable.html" title="class in randoop.sequence"><code>Variable</code></a>s, which describe the specific
-     objects in the sequence that the check is over.  </ul></div>
+ <li>A <a href="../randoop/ObjectContract.html" title="interface in randoop"><code>ObjectContract</code></a> responsible for performing the actual check on a
+ set of runtime values. For example. the class <a href="../randoop/EqualsReflexive.html" title="class in randoop"><code>EqualsReflexive</code></a> is a
+ checker code class that, given an object <i>o</i>, calls <i>o.equals(o)</i>
+ and checks that it returns <code>true</code>.
+ 
+ <li>A list of <a href="../randoop/sequence/Variable.html" title="class in randoop.sequence"><code>Variable</code></a>s, which describe the specific objects in the
+ sequence that the check is over.
+ </ul></div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../serialized-form.html#randoop.ObjectCheck">Serialized Form</a></dd>
@@ -237,15 +237,15 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ObjectCheck.html#toCodeStringPostStatement--">toCodeStringPostStatement</a></span>()</code>
-<div class="block">Returns a string of Java source code to be emitted after a
- statement containing this check.</div>
+<div class="block">Returns a string of Java source code to be emitted after a statement
+ containing this check.</div>
 </td>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../randoop/ObjectCheck.html#toCodeStringPreStatement--">toCodeStringPreStatement</a></span>()</code>
-<div class="block">Returns a string of Java source code to be emitted before a
- statement containing this check.</div>
+<div class="block">Returns a string of Java source code to be emitted before a statement
+ containing this check.</div>
 </td>
 </tr>
 <tr id="i8" class="altColor">
@@ -375,8 +375,8 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <h4>toCodeStringPreStatement</h4>
 <pre>public&nbsp;String&nbsp;toCodeStringPreStatement()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../randoop/Check.html#toCodeStringPreStatement--">Check</a></code></span></div>
-<div class="block">Returns a string of Java source code to be emitted before a
- statement containing this check.</div>
+<div class="block">Returns a string of Java source code to be emitted before a statement
+ containing this check.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../randoop/Check.html#toCodeStringPreStatement--">toCodeStringPreStatement</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
@@ -391,8 +391,8 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <h4>toCodeStringPostStatement</h4>
 <pre>public&nbsp;String&nbsp;toCodeStringPostStatement()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../randoop/Check.html#toCodeStringPostStatement--">Check</a></code></span></div>
-<div class="block">Returns a string of Java source code to be emitted after a
- statement containing this check.</div>
+<div class="block">Returns a string of Java source code to be emitted after a statement
+ containing this check.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../randoop/Check.html#toCodeStringPostStatement--">toCodeStringPostStatement</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
@@ -407,8 +407,8 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <h4>getValue</h4>
 <pre>public&nbsp;String&nbsp;getValue()</pre>
 <div class="block">For checks involving a primitive-like value (primitive, String, or null),
- returns a string representation of the value. Otherwise, returns
- the name of the contract class.</div>
+ returns a string representation of the value. Otherwise, returns the name
+ of the contract class.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../randoop/Check.html#getValue--">getValue</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>
@@ -457,13 +457,12 @@ implements <a href="../randoop/Check.html" title="interface in randoop">Check</a
 <h4>getID</h4>
 <pre>public&nbsp;String&nbsp;getID()</pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../randoop/Check.html#getID--">Check</a></code></span></div>
-<div class="block">Returns a unique string identifier for the check.  Two checks are
- the same if these identifiers match.  The value is NOT included.
- with.  Used to match up checks between the same sequence run at
- different times.  Note that because of changes in the environment
- (e.g., static variables), two executions of the same sequence may
- have different checks (because the existence of some checks
- depends on the value of variables)</div>
+<div class="block">Returns a unique string identifier for the check. Two checks are the same
+ if these identifiers match. The value is NOT included. with. Used to match
+ up checks between the same sequence run at different times. Note that
+ because of changes in the environment (e.g., static variables), two
+ executions of the same sequence may have different checks (because the
+ existence of some checks depends on the value of variables)</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../randoop/Check.html#getID--">getID</a></code>&nbsp;in interface&nbsp;<code><a href="../randoop/Check.html" title="interface in randoop">Check</a></code></dd>

@@ -115,10 +115,10 @@ var activeTableTab = "activeTableTab";
 extends Object</pre>
 <div class="block">Algorithm template for implementing a test generator.
  
- The main generation loop is defined in method <code>explore()</code>,
- which repeatedly generates a new sequence, determines if it a failing
- sequence, and stops the process when the time or sequence limit expires.
- The process of generating a new sequences is left abstract.</div>
+ The main generation loop is defined in method <code>explore()</code>, which
+ repeatedly generates a new sequence, determines if it a failing sequence, and
+ stops the process when the time or sequence limit expires. The process of
+ generating a new sequences is left abstract.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../randoop/sequence/ForwardGenerator.html" title="class in randoop.sequence"><code>ForwardGenerator</code></a></dd>
@@ -156,7 +156,8 @@ extends Object</pre>
 <tr class="altColor">
 <td class="colFirst"><code>static <a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/AbstractGenerator.html#currSeq">currSeq</a></span></code>
-<div class="block">This field is set by Randoop to point to the sequence currently being executed.</div>
+<div class="block">This field is set by Randoop to point to the sequence currently being
+ executed.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -208,8 +209,8 @@ extends Object</pre>
 <tr class="altColor">
 <td class="colFirst"><code>List&lt;<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/AbstractGenerator.html#operations">operations</a></span></code>
-<div class="block">The list of statement kinds (methods, constructors, primitive value declarations, etc.)
- used to generate sequences.</div>
+<div class="block">The list of statement kinds (methods, constructors, primitive value
+ declarations, etc.) used to generate sequences.</div>
 </td>
 </tr>
 <tr class="rowColor">
@@ -221,7 +222,7 @@ extends Object</pre>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../../randoop/util/predicate/Predicate.html" title="interface in randoop.util.predicate">Predicate</a>&lt;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/AbstractGenerator.html#outputTest">outputTest</a></span></code>
-<div class="block">A filter to determine whether a sequence should be added to the output 
+<div class="block">A filter to determine whether a sequence should be added to the output
  sequence lists.</div>
 </td>
 </tr>
@@ -288,8 +289,8 @@ extends Object</pre>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/sequence/AbstractGenerator.html#addTestCheckGenerator-randoop.test.TestCheckGenerator-">addTestCheckGenerator</a></span>(<a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>&nbsp;checkGenerator)</code>
-<div class="block">Registers a visitor with this object to generate checks following
- execution of each generated test sequence.</div>
+<div class="block">Registers a visitor with this object to generate checks following execution
+ of each generated test sequence.</div>
 </td>
 </tr>
 <tr id="i2" class="altColor">
@@ -443,8 +444,8 @@ extends Object</pre>
 <li class="blockList">
 <h4>maxTimeMillis</h4>
 <pre>public final&nbsp;long maxTimeMillis</pre>
-<div class="block">Time limit for generation. If generation reaches the specified time
- limit (in milliseconds), the generator stops generating sequences.</div>
+<div class="block">Time limit for generation. If generation reaches the specified time limit
+ (in milliseconds), the generator stops generating sequences.</div>
 </li>
 </ul>
 <a name="maxGeneratedSequences">
@@ -465,8 +466,8 @@ extends Object</pre>
 <li class="blockList">
 <h4>maxOutputSequences</h4>
 <pre>public final&nbsp;int maxOutputSequences</pre>
-<div class="block">Limit for output. Once the specified number of sequences are in the
- output lists, the generator will stop.</div>
+<div class="block">Limit for output. Once the specified number of sequences are in the output
+ lists, the generator will stop.</div>
 </li>
 </ul>
 <a name="operations">
@@ -476,9 +477,9 @@ extends Object</pre>
 <li class="blockList">
 <h4>operations</h4>
 <pre>public&nbsp;List&lt;<a href="../../randoop/operation/Operation.html" title="interface in randoop.operation">Operation</a>&gt; operations</pre>
-<div class="block">The list of statement kinds (methods, constructors, primitive value declarations, etc.)
- used to generate sequences. In other words, statements specifies the universe
- of operations from which sequences are generated.</div>
+<div class="block">The list of statement kinds (methods, constructors, primitive value
+ declarations, etc.) used to generate sequences. In other words, statements
+ specifies the universe of operations from which sequences are generated.</div>
 </li>
 </ul>
 <a name="executionVisitor">
@@ -522,9 +523,10 @@ extends Object</pre>
 <li class="blockList">
 <h4>currSeq</h4>
 <pre>public static&nbsp;<a href="../../randoop/sequence/Sequence.html" title="class in randoop.sequence">Sequence</a> currSeq</pre>
-<div class="block">This field is set by Randoop to point to the sequence currently being executed.
- In the event that Randoop appears to hang, this sequence is printed out to console
- to help the user debug the cause of the hanging behavior.</div>
+<div class="block">This field is set by Randoop to point to the sequence currently being
+ executed. In the event that Randoop appears to hang, this sequence is
+ printed out to console to help the user debug the cause of the hanging
+ behavior.</div>
 </li>
 </ul>
 <a name="outErrorSeqs">
@@ -534,8 +536,8 @@ extends Object</pre>
 <li class="blockList">
 <h4>outErrorSeqs</h4>
 <pre>public&nbsp;List&lt;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt; outErrorSeqs</pre>
-<div class="block">The list of error test sequences to be output as JUnit tests. 
- May include subsequences of other sequences in the list.</div>
+<div class="block">The list of error test sequences to be output as JUnit tests. May include
+ subsequences of other sequences in the list.</div>
 </li>
 </ul>
 <a name="outRegressionSeqs">
@@ -545,8 +547,8 @@ extends Object</pre>
 <li class="blockList">
 <h4>outRegressionSeqs</h4>
 <pre>public&nbsp;List&lt;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt; outRegressionSeqs</pre>
-<div class="block">The list of regression sequences to be output as JUnit tests.
- May include subsequences of other sequences in the list.</div>
+<div class="block">The list of regression sequences to be output as JUnit tests. May include
+ subsequences of other sequences in the list.</div>
 </li>
 </ul>
 <a name="outputTest">
@@ -556,7 +558,7 @@ extends Object</pre>
 <li class="blockList">
 <h4>outputTest</h4>
 <pre>public&nbsp;<a href="../../randoop/util/predicate/Predicate.html" title="interface in randoop.util.predicate">Predicate</a>&lt;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt; outputTest</pre>
-<div class="block">A filter to determine whether a sequence should be added to the output 
+<div class="block">A filter to determine whether a sequence should be added to the output
  sequence lists.</div>
 </li>
 </ul>
@@ -594,14 +596,19 @@ extends Object</pre>
 <div class="block">Constructs a generator with the given parameters.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>operations</code> - Statements (e.g. methods and constructors) used to create sequences. Cannot be null.</dd>
+<dd><code>operations</code> - Statements (e.g. methods and constructors) used to create
+          sequences. Cannot be null.</dd>
 <dd><code>timeMillis</code> - maximum time to spend in generation. Must be non-negative.</dd>
 <dd><code>maxGeneratedSequences</code> - the maximum number of sequences to generate. Must be non-negative.</dd>
 <dd><code>maxOutSequences</code> - the maximum number of sequences to output. Must be non-negative.</dd>
-<dd><code>componentManager</code> - the component manager to use to store sequences during component-based generation.
-        Can be null, in which case the generator's component manager is initialized as <code>new ComponentManager()</code>.</dd>
-<dd><code>stopper</code> - Optional, additional stopping criterion for the generator. Can be null.</dd>
-<dd><code>listenerManager</code> - Manager that stores and calls any listeners to use during generation. Can be null.</dd>
+<dd><code>componentManager</code> - the component manager to use to store sequences during
+          component-based generation. Can be null, in which case the
+          generator's component manager is initialized as
+          <code>new ComponentManager()</code>.</dd>
+<dd><code>stopper</code> - Optional, additional stopping criterion for the generator. Can be
+          null.</dd>
+<dd><code>listenerManager</code> - Manager that stores and calls any listeners to use during
+          generation. Can be null.</dd>
 </dl>
 </li>
 </ul>
@@ -650,8 +657,8 @@ extends Object</pre>
 <li class="blockList">
 <h4>addTestCheckGenerator</h4>
 <pre>public&nbsp;void&nbsp;addTestCheckGenerator(<a href="../../randoop/test/TestCheckGenerator.html" title="interface in randoop.test">TestCheckGenerator</a>&nbsp;checkGenerator)</pre>
-<div class="block">Registers a visitor with this object to generate checks following
- execution of each generated test sequence.</div>
+<div class="block">Registers a visitor with this object to generate checks following execution
+ of each generated test sequence.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>checkGenerator</code> - the check generating visitor</dd>
@@ -668,10 +675,13 @@ extends Object</pre>
 <div class="block">Tests stopping criteria and determines whether generation should stop.
  Criteria are checked in this order:
  <ul>
- <li>if there is a listener manager, <a href="../../randoop/RandoopListenerManager.html#stopGeneration--"><code>RandoopListenerManager.stopGeneration()</code></a> returns true,
- <li>the elapsed generation time is greater than or equal to the max time in milliseconds,
+ <li>if there is a listener manager,
+ <a href="../../randoop/RandoopListenerManager.html#stopGeneration--"><code>RandoopListenerManager.stopGeneration()</code></a> returns true,
+ <li>the elapsed generation time is greater than or equal to the max time in
+ milliseconds,
  <li>the number of output sequences is equal to the maximum output,
- <li>the number of generated sequences is equal to the maximum generated sequence count, or
+ <li>the number of generated sequences is equal to the maximum generated
+ sequence count, or
  <li>if there is a stopper, <a href="../../randoop/IStopper.html#stop--"><code>IStopper.stop()</code></a> returns true.
  </ul></div>
 <dl>
@@ -704,7 +714,8 @@ extends Object</pre>
 <div class="block">Returns the count of generated sequence currently for output.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>the sum of the number of error and regression test sequences for output</dd>
+<dd>the sum of the number of error and regression test sequences for
+         output</dd>
 </dl>
 </li>
 </ul>
@@ -770,8 +781,8 @@ extends Object</pre>
 <li class="blockList">
 <h4>getRegressionSequences</h4>
 <pre>public&nbsp;List&lt;<a href="../../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt;&nbsp;getRegressionSequences()</pre>
-<div class="block">Returns the generated regression test sequences for output.
- Filters out subsequences, which can be retrieved using <a href="../../randoop/sequence/AbstractGenerator.html#getSubsumedSequences--"><code>getSubsumedSequences()</code></a></div>
+<div class="block">Returns the generated regression test sequences for output. Filters out
+ subsequences, which can be retrieved using <a href="../../randoop/sequence/AbstractGenerator.html#getSubsumedSequences--"><code>getSubsumedSequences()</code></a></div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>regression test sequences that do not occur in a longer sequence</dd>

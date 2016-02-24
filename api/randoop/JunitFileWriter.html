@@ -109,12 +109,12 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">JunitFileWriter</span>
 extends Object</pre>
-<div class="block">JunitFileWriter is a class that for a collection of sequences, outputs
- Java files containing one JUnit4 test method per sequence.
- An object manages the information for a suite of tests (name, package, and directory)
- and is used by first running writeJUnitTestFiles and then writeSuiteFile or 
- writeDriverFile. Alternatively, a single test file can be written using the static
- method writeJUnitTestFile.</div>
+<div class="block">JunitFileWriter is a class that for a collection of sequences, outputs Java
+ files containing one JUnit4 test method per sequence. An object manages the
+ information for a suite of tests (name, package, and directory) and is used
+ by first running writeJUnitTestFiles and then writeSuiteFile or
+ writeDriverFile. Alternatively, a single test file can be written using the
+ static method writeJUnitTestFile.</div>
 </li>
 </ul>
 </div>
@@ -167,8 +167,8 @@ extends Object</pre>
 <td class="colOne"><code><span class="memberNameLink"><a href="../randoop/JunitFileWriter.html#JunitFileWriter-java.lang.String-java.lang.String-java.lang.String-">JunitFileWriter</a></span>(String&nbsp;junitDirName,
                String&nbsp;packageName,
                String&nbsp;masterTestClassName)</code>
-<div class="block">JunitFileWriter creates an instance of class holding information needed to write
- a test suite.</div>
+<div class="block">JunitFileWriter creates an instance of class holding information needed to
+ write a test suite.</div>
 </td>
 </tr>
 </table>
@@ -202,8 +202,8 @@ extends Object</pre>
                   String&nbsp;packageName,
                   <a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;es,
                   String&nbsp;className)</code>
-<div class="block">writeJUnitTestFile is a static method that writes a single test class to the
- specified directory and with the specified class name.</div>
+<div class="block">writeJUnitTestFile is a static method that writes a single test class to
+ the specified directory and with the specified class name.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
@@ -216,8 +216,8 @@ extends Object</pre>
 <tr id="i4" class="altColor">
 <td class="colFirst"><code>File</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../randoop/JunitFileWriter.html#writeSuiteFile-java.util.List-">writeSuiteFile</a></span>(List&lt;String&gt;&nbsp;additionalTestClassNames)</code>
-<div class="block">Writes a JUnit4 suite consisting of test classes
- from <a href="../randoop/JunitFileWriter.html#writeJUnitTestFiles-java.util.List-"><code>writeJUnitTestFiles(List)</code></a> and additional classes provided as a
+<div class="block">Writes a JUnit4 suite consisting of test classes from
+ <a href="../randoop/JunitFileWriter.html#writeJUnitTestFiles-java.util.List-"><code>writeJUnitTestFiles(List)</code></a> and additional classes provided as a
  parameter.</div>
 </td>
 </tr>
@@ -296,8 +296,8 @@ extends Object</pre>
 <pre>public&nbsp;JunitFileWriter(String&nbsp;junitDirName,
                        String&nbsp;packageName,
                        String&nbsp;masterTestClassName)</pre>
-<div class="block">JunitFileWriter creates an instance of class holding information needed to write
- a test suite.</div>
+<div class="block">JunitFileWriter creates an instance of class holding information needed to
+ write a test suite.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>junitDirName</code> - directory where files are to be written</dd>
@@ -324,8 +324,8 @@ extends Object</pre>
                                       String&nbsp;packageName,
                                       <a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&nbsp;es,
                                       String&nbsp;className)</pre>
-<div class="block">writeJUnitTestFile is a static method that writes a single test class to the
- specified directory and with the specified class name.</div>
+<div class="block">writeJUnitTestFile is a static method that writes a single test class to
+ the specified directory and with the specified class name.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>junitOutputDir</code> - directory where files are to be written.</dd>
@@ -345,9 +345,9 @@ extends Object</pre>
 <h4>writeJUnitTestFiles</h4>
 <pre>public&nbsp;List&lt;File&gt;&nbsp;writeJUnitTestFiles(List&lt;List&lt;<a href="../randoop/sequence/ExecutableSequence.html" title="class in randoop.sequence">ExecutableSequence</a>&gt;&gt;&nbsp;seqPartition)</pre>
 <div class="block">writeJUnitTestFiles writes a suite of test class files from a list of lists
- of executable sequences. Each executable sequence corresponds to a test method, a
- list of executable sequences corresponds to a test class, and the list of lists to a
- test suite.</div>
+ of executable sequences. Each executable sequence corresponds to a test
+ method, a list of executable sequences corresponds to a test class, and the
+ list of lists to a test suite.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>seqPartition</code> - suite of test classes as a list of lists of executable sequences</dd>
@@ -366,10 +366,9 @@ extends Object</pre>
 <li class="blockList">
 <h4>writeSuiteFile</h4>
 <pre>public&nbsp;File&nbsp;writeSuiteFile(List&lt;String&gt;&nbsp;additionalTestClassNames)</pre>
-<div class="block">Writes a JUnit4 suite consisting of test classes
- from <a href="../randoop/JunitFileWriter.html#writeJUnitTestFiles-java.util.List-"><code>writeJUnitTestFiles(List)</code></a> and additional classes provided as a
- parameter.
- The file is written to the directory pointed to by writer object 
+<div class="block">Writes a JUnit4 suite consisting of test classes from
+ <a href="../randoop/JunitFileWriter.html#writeJUnitTestFiles-java.util.List-"><code>writeJUnitTestFiles(List)</code></a> and additional classes provided as a
+ parameter. The file is written to the directory pointed to by writer object
  in a class whose name is the <a href="../randoop/JunitFileWriter.html#masterTestClassName"><code>masterTestClassName</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -386,9 +385,9 @@ extends Object</pre>
 <li class="blockList">
 <h4>writeDriverFile</h4>
 <pre>public&nbsp;File&nbsp;writeDriverFile()</pre>
-<div class="block">writeDriverFile writes non-reflective driver for tests as a main class.
- The file is written to the directory pointed to by writer object 
- in a class whose name is the <a href="../randoop/JunitFileWriter.html#masterTestClassName"><code>masterTestClassName</code></a>.</div>
+<div class="block">writeDriverFile writes non-reflective driver for tests as a main class. The
+ file is written to the directory pointed to by writer object in a class
+ whose name is the <a href="../randoop/JunitFileWriter.html#masterTestClassName"><code>masterTestClassName</code></a>.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd><code>File</code> object for generated Java file.</dd>

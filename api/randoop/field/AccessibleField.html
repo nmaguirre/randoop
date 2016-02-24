@@ -118,11 +118,11 @@ var activeTableTab = "activeTableTab";
 <pre>public abstract class <span class="typeNameLabel">AccessibleField</span>
 extends Object
 implements Serializable</pre>
-<div class="block">PublicField is an abstract class representing a public field of a class object,
- which can be an instance field, a static field, or a static final field.
- Each is implemented as a separate class.
- Meant to be adapted by either <a href="../../randoop/operation/FieldSet.html" title="class in randoop.operation"><code>FieldSet</code></a> or
- <a href="../../randoop/operation/FieldGet.html" title="class in randoop.operation"><code>FieldGet</code></a> for use as a 
+<div class="block">PublicField is an abstract class representing a public field of a class
+ object, which can be an instance field, a static field, or a static final
+ field. Each is implemented as a separate class. Meant to be adapted by either
+ <a href="../../randoop/operation/FieldSet.html" title="class in randoop.operation"><code>FieldSet</code></a> or
+ <a href="../../randoop/operation/FieldGet.html" title="class in randoop.operation"><code>FieldGet</code></a> for use as a
  <a href="../../randoop/operation/Operation.html" title="interface in randoop.operation"><code>Operation</code></a>.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
@@ -221,8 +221,8 @@ implements Serializable</pre>
 <tr id="i9" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/field/AccessibleField.html#satisfies-randoop.reflection.ReflectionPredicate-">satisfies</a></span>(<a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection">ReflectionPredicate</a>&nbsp;predicate)</code>
-<div class="block">satisfies checks whether the enclosed <code>Field</code> object satisfies
- the given predicate.</div>
+<div class="block">satisfies checks whether the enclosed <code>Field</code> object satisfies the
+ given predicate.</div>
 </td>
 </tr>
 <tr id="i10" class="altColor">
@@ -235,8 +235,7 @@ implements Serializable</pre>
 <tr id="i11" class="rowColor">
 <td class="colFirst"><code>abstract String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/field/AccessibleField.html#toCode-java.util.List-">toCode</a></span>(List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputVars)</code>
-<div class="block">Translates field into a string representing fully qualified
- name.</div>
+<div class="block">Translates field into a string representing fully qualified name.</div>
 </td>
 </tr>
 <tr id="i12" class="altColor">
@@ -249,7 +248,8 @@ implements Serializable</pre>
 <tr id="i13" class="rowColor">
 <td class="colFirst"><code>String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/field/AccessibleField.html#toString--">toString</a></span>()</code>
-<div class="block">Uses <a href="../../randoop/field/AccessibleField.html#toParseableString--"><code>toParseableString()</code></a> to create string representation.</div>
+<div class="block">Uses <a href="../../randoop/field/AccessibleField.html#toParseableString--"><code>toParseableString()</code></a> to create string
+ representation.</div>
 </td>
 </tr>
 <tr id="i14" class="altColor">
@@ -309,8 +309,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>getSetTypes</h4>
 <pre>public abstract&nbsp;List&lt;Class&lt;?&gt;&gt;&nbsp;getSetTypes()</pre>
-<div class="block">Returns a list of types needed to set a field.
- What is returned depends on the implementing class.</div>
+<div class="block">Returns a list of types needed to set a field. What is returned depends on
+ the implementing class.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>list of types needed to set the field.</dd>
@@ -380,8 +380,7 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>toCode</h4>
 <pre>public abstract&nbsp;String&nbsp;toCode(List&lt;<a href="../../randoop/sequence/Variable.html" title="class in randoop.sequence">Variable</a>&gt;&nbsp;inputVars)</pre>
-<div class="block">Translates field into a string representing fully qualified
- name.</div>
+<div class="block">Translates field into a string representing fully qualified name.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>inputVars</code> - list of input variables</dd>
@@ -412,7 +411,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>toString</h4>
 <pre>public&nbsp;String&nbsp;toString()</pre>
-<div class="block">Uses <a href="../../randoop/field/AccessibleField.html#toParseableString--"><code>toParseableString()</code></a> to create string representation.</div>
+<div class="block">Uses <a href="../../randoop/field/AccessibleField.html#toParseableString--"><code>toParseableString()</code></a> to create string
+ representation.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
 <dd><code>toString</code>&nbsp;in class&nbsp;<code>Object</code></dd>
@@ -453,14 +453,16 @@ implements Serializable</pre>
 <h4>getValue</h4>
 <pre>public&nbsp;Object&nbsp;getValue(Object&nbsp;object)</pre>
 <div class="block">Uses reflection to return the value of the field for the given object.
- Suppresses exceptions that occur because PublicField was not correctly initialized.</div>
+ Suppresses exceptions that occur because PublicField was not correctly
+ initialized.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>object</code> - - instance to which field belongs, or null if field is static.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>reference to value of field.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../randoop/BugInRandoopException.html" title="class in randoop">BugInRandoopException</a></code> - if field access throws <code>IllegalArgumentException</code> or <code>IllegalAccessException</code>.</dd>
+<dd><code><a href="../../randoop/BugInRandoopException.html" title="class in randoop">BugInRandoopException</a></code> - if field access throws <code>IllegalArgumentException</code> or
+           <code>IllegalAccessException</code>.</dd>
 </dl>
 </li>
 </ul>
@@ -479,7 +481,8 @@ implements Serializable</pre>
 <dd><code>object</code> - - instance to which field belongs, or null if static.</dd>
 <dd><code>value</code> - - new value to assign to field</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../randoop/BugInRandoopException.html" title="class in randoop">BugInRandoopException</a></code> - if field access throws <code>IllegalArgumentException</code> or <code>IllegalAccessException</code>.</dd>
+<dd><code><a href="../../randoop/BugInRandoopException.html" title="class in randoop">BugInRandoopException</a></code> - if field access throws <code>IllegalArgumentException</code> or
+           <code>IllegalAccessException</code>.</dd>
 </dl>
 </li>
 </ul>
@@ -523,8 +526,8 @@ implements Serializable</pre>
 <li class="blockList">
 <h4>satisfies</h4>
 <pre>public&nbsp;boolean&nbsp;satisfies(<a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection">ReflectionPredicate</a>&nbsp;predicate)</pre>
-<div class="block">satisfies checks whether the enclosed <code>Field</code> object satisfies
- the given predicate.</div>
+<div class="block">satisfies checks whether the enclosed <code>Field</code> object satisfies the
+ given predicate.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>predicate</code> - the <a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection"><code>ReflectionPredicate</code></a> to check this.field against.</dd>

@@ -117,9 +117,8 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <div class="block">Returns true for public members, with some exceptions (see
  doNotUseSpecialCase method).
  <p>
- If a method has the @CheckRep annotation, returns false
- (the method will be used as a contract checker, not
-  as a method under test).</div>
+ If a method has the @CheckRep annotation, returns false (the method will be
+ used as a contract checker, not as a method under test).</div>
 </li>
 </ul>
 </div>
@@ -153,8 +152,8 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <td class="colOne"><code><span class="memberNameLink"><a href="../../randoop/reflection/DefaultReflectionPredicate.html#DefaultReflectionPredicate-java.util.regex.Pattern-java.util.Set-randoop.reflection.VisibilityPredicate-">DefaultReflectionPredicate</a></span>(Pattern&nbsp;omitMethods,
                           Set&lt;String&gt;&nbsp;omitFields,
                           <a href="../../randoop/reflection/VisibilityPredicate.html" title="interface in randoop.reflection">VisibilityPredicate</a>&nbsp;visibility)</code>
-<div class="block">DefaultReflectionFilter creates a filter object that uses default
- criteria for inclusion of reflection objects.</div>
+<div class="block">DefaultReflectionFilter creates a filter object that uses default criteria
+ for inclusion of reflection objects.</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -190,8 +189,8 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../randoop/reflection/DefaultReflectionPredicate.html#test-java.lang.reflect.Field-">test</a></span>(Field&nbsp;f)</code>
-<div class="block">Determines whether the name of a field is included among the
- omitted field names.</div>
+<div class="block">Determines whether the name of a field is included among the omitted field
+ names.</div>
 </td>
 </tr>
 <tr id="i3" class="rowColor">
@@ -269,14 +268,15 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <pre>public&nbsp;DefaultReflectionPredicate(Pattern&nbsp;omitMethods,
                                   Set&lt;String&gt;&nbsp;omitFields,
                                   <a href="../../randoop/reflection/VisibilityPredicate.html" title="interface in randoop.reflection">VisibilityPredicate</a>&nbsp;visibility)</pre>
-<div class="block">DefaultReflectionFilter creates a filter object that uses default
- criteria for inclusion of reflection objects.</div>
+<div class="block">DefaultReflectionFilter creates a filter object that uses default criteria
+ for inclusion of reflection objects.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>omitMethods</code> - pattern for methods to omit, if null then no methods omitted.</dd>
 <dd><code>visibility</code> - the predicate for testing visibility expectations for members</dd>
 <dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="../../randoop/reflection/OperationExtractor.html#getOperations-java.util.Collection-randoop.reflection.ReflectionPredicate-"><code>OperationExtractor.getOperations(java.util.Collection, ReflectionPredicate)</code></a></dd>
+<dd><a href="../../randoop/reflection/OperationExtractor.html#getOperations-java.util.Collection-randoop.reflection.ReflectionPredicate-"><code>OperationExtractor.getOperations(java.util.Collection,
+      ReflectionPredicate)</code></a></dd>
 </dl>
 </li>
 </ul>
@@ -314,8 +314,7 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <li class="blockList">
 <h4>test</h4>
 <pre>public&nbsp;boolean&nbsp;test(Method&nbsp;m)</pre>
-<div class="block">Indicate whether Randoop should use a method.
- Does checks for the following cases:
+<div class="block">Indicate whether Randoop should use a method. Does checks for the following cases:
  <ul>
  <li>Main methods
  <li>Methods matching omission pattern
@@ -349,7 +348,8 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>c</code> - the constructor to test.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if the constructor meets the predicate criteria, false otherwise.</dd>
+<dd>true if the constructor meets the predicate criteria, false
+         otherwise.</dd>
 </dl>
 </li>
 </ul>
@@ -360,15 +360,16 @@ implements <a href="../../randoop/reflection/ReflectionPredicate.html" title="in
 <li class="blockList">
 <h4>test</h4>
 <pre>public&nbsp;boolean&nbsp;test(Field&nbsp;f)</pre>
-<div class="block">Determines whether the name of a field is included among the
- omitted field names.</div>
+<div class="block">Determines whether the name of a field is included among the omitted field
+ names.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../randoop/reflection/ReflectionPredicate.html#test-java.lang.reflect.Field-">test</a></code>&nbsp;in interface&nbsp;<code><a href="../../randoop/reflection/ReflectionPredicate.html" title="interface in randoop.reflection">ReflectionPredicate</a></code></dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>f</code> - field to test</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>true if field name does not occur in omitFields pattern, and false if it does.</dd>
+<dd>true if field name does not occur in omitFields pattern, and false
+         if it does.</dd>
 </dl>
 </li>
 </ul>
