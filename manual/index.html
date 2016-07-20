@@ -13,7 +13,7 @@
 <h1>Randoop Manual</h1> <!-- omit from toc -->
 
 <p>
-This is the manual for Randoop version 3.0.1, released June 16, 2016.
+This is the manual for Randoop version 3.0.2, released July 20, 2016.
 The Randoop homepage is
 <a href="http://randoop.github.io/randoop/">http://randoop.github.io/randoop/</a>.
 </p>
@@ -350,16 +350,12 @@ a "method under test".
 
 <li>
   Do not include methods that side-effect global state.
-  (Methods that side-effect the state of their argument or receiver are fine.)
+  (Methods that side-effect the state of their receiver or other arguments are fine.)
   The reason is that such methods create dependent tests that cannot be run
   in isolation or reordered.
   For example, if test A side-effects global state and test B reads global
   state, then whether test B fails depends on whether test A is run before
   test B.
-  If you wish to test different settings of the global variable, run
-  Randoop multiple times specifying different
-  <a href="#option:init-routine"><code>--init-routine</code></a> arguments that
-  set the global variable to different values.
 </li>
 
 </ul>
@@ -887,8 +883,6 @@ Randoop about your application, and that is how we recommend using Randoop.
   </li>
   <li id="optiongroup:Varying-the-nature-of-generated-tests">Varying the nature of generated tests
     <ul>
-      <li id="option:init-routine"><b>--init-routine=</b><i>string</i>.
- Specifies initialization routine (class.method)</li>
       <li id="option:alias-ratio"><b>--alias-ratio=</b><i>double</i>.
  Try to reuse values from a sequence with the given frequency. If an alias
  ratio is given, it should be between 0 and 1.
