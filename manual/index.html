@@ -1377,8 +1377,20 @@ Cannot find or load randoop.main.Main
 </pre>
 <p>
 then Randoop is not properly included in the classpath.
-Both Randoop and the classes under test must be included as the argument to
-the <code>-classpath</code> option to the <code>java</code> command.
+One possibility is that you have included the Randoop jar file in the path
+specified by the <code>CLASSPATH</code> variable, but have given the location of
+the classes-under-test with the <code>-classpath</code> option at the command line.
+In this case, the <code>java</code> command will only use the classpath from
+<code>-classpath</code>.
+</p>
+
+<p>
+It is recommended that both Randoop and the classes under test be included as
+the argument to the <code>-classpath</code> option to the <code>java</code> command.
+It only makes sense to set <code>CLASSPATH</code> to run Randoop if the location
+of classes-under-test will be the same each time you run it.
+See the Java Tutorial on
+<a href="https://docs.oracle.com/javase/tutorial/essential/environment/paths.html">path and classpaths</a>.
 </p>
 
 <h4 id="no-class-found">Randoop cannot find class-under-test</h4>
@@ -1391,8 +1403,14 @@ No class found for type name "example.ExampleClass"
 </pre>
 <p>
   then the classes under test are not in the classpath.
-  Both Randoop and the classes under test must be included as the argument to
-  the <code>-classpath</code> option to the <code>java</code> command.
+  The most likely case is that you have not included the path to these classes.
+  Otherwise, the classpath is not given properly.
+  In particular, if you are running Randoop on Windows, parts of the classpath should be
+  separated by a semi-colon ";" instead of the colon ":" shown in the examples
+  in this document.
+  See the Java Tutorial on
+  <a href="https://docs.oracle.com/javase/tutorial/essential/environment/paths.html">paths and classpaths</a>
+  for platform specific information on paths.
 </p>
 
 <h4 id="no-tests-created">Randoop does not create tests</h4>
