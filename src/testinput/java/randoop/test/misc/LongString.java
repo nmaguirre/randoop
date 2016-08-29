@@ -1,4 +1,4 @@
-package randoop.test;
+package randoop.test.misc;
 
 /**
  * Test helper class for Randoop's long-string option that lets the

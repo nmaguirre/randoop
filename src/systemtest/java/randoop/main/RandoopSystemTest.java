@@ -457,7 +457,7 @@ public class RandoopSystemTest {
     options.setErrorBasename("");
 
     options.setOption("timelimit", "1");
-    options.addTestClass("randoop.test.LongString");
+    options.addTestClass("randoop.test.misc.LongString");
 
     ExpectedTests expectedRegressionTests = ExpectedTests.SOME;
     ExpectedTests expectedErrorTests = ExpectedTests.NONE;
@@ -525,8 +525,8 @@ public class RandoopSystemTest {
     options.setPackageName("");
     options.setRegressionBasename("InnerClassRegression");
     options.setErrorBasename("InnerClassError");
-    options.addTestClass("randoop.test.ClassWithInnerClass");
-    options.addTestClass("randoop.test.ClassWithInnerClass$A");
+    options.addTestClass("randoop.test.misc.ClassWithInnerClass");
+    options.addTestClass("randoop.test.misc.ClassWithInnerClass$A");
     options.setOption("inputlimit", "20");
     options.setFlag("silently-ignore-bad-class-names");
     options.setOption("unchecked-exception", "ERROR");

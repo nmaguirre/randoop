@@ -1,4 +1,4 @@
-package randoop.test;
+package randoop.test.misc;
 
 /**
  * Input class 
