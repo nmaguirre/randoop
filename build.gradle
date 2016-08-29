@@ -107,6 +107,7 @@ configurations {
 dependencies {
   /* Randoop uses local copy of Plume */
   compile files('lib/plume.jar')
+  compile files('lib/jgrapht-core-0.9.2.jar')
 
   /* sourceSet test uses JUnit and some use testInput source set */
   testCompile group: 'junit', name: 'junit', version: '4.+'
