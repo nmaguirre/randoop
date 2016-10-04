@@ -1,4 +1,4 @@
-package randoop.util.fieldExhaustiveControl;
+package randoop.util.fieldexhuastive.structures;
 
 /**
  * A node within the linked list.
@@ -6,7 +6,7 @@ package randoop.util.fieldExhaustiveControl;
  * From Commons Collections 3.1, all access to the <code>value</code> property
  * is via the methods on this class.
  */
-class LinkedListNode {
+public class LinkedListNode {
 
     /** A pointer to the node before this node */
     public /*@ nullable @*/LinkedListNode previous;

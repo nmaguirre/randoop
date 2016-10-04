@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package randoop.util.fieldExhaustiveControl;
+package randoop.util.fieldexhuastive.structures;
 
 //@ model import org.jmlspecs.models.*;
 
@@ -54,8 +54,6 @@ public class LinkedList {
 	public/*@ nullable @*/transient LinkedListNode header;
 	/** The size of the list */
 	public transient int size;
-	/** Modification count for iterators */
-	public transient int modCount;
 
 	/*@
 	  @ invariant this.header!=null && 
@@ -356,7 +354,6 @@ public class LinkedList {
 		insertBeforeNode.previous.next = nodeToInsert;
 		insertBeforeNode.previous = nodeToInsert;
 		size++;
-		modCount++;
 	}
 
 	/**
@@ -369,7 +366,6 @@ public class LinkedList {
 		node.previous.next = node.next;
 		node.next.previous = node.previous;
 		size--;
-		modCount++;
 	}
 
 	/**
@@ -379,7 +375,6 @@ public class LinkedList {
 		header.next = header;
 		header.previous = header;
 		size = 0;
-		modCount++;
 	}
 
 	/**
