@@ -4,16 +4,17 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import org.jgrapht.graph.*;
+import org.jgrapht.graph.Pseudograph;
 
 /**
  * Produces graph-like representations of heaps originating in given objects, as well as
  * heap representations given as sets of tuples.
  *
- * @author Nazareno Aguirre
+ * @author Nazareno Aguirre and Pablo Ponzio.
  */
 public class HeapDump {
 
@@ -22,9 +23,12 @@ public class HeapDump {
   private int currentIndex = 0;
   private HashMap<String, String> ignoreList = new HashMap<String, String>();
   private HashMap<Object, Integer> visited = new HashMap<Object, Integer>();
-  private LinkedList<Tuple<Object, Integer>> toVisit = new LinkedList<Tuple<Object, Integer>>();
-  private DefaultDirectedGraph<Object, LabeledEdge<Object>> heap =
-      new DefaultDirectedGraph(LabeledEdge.class);
+  private Pseudograph<HeapVertex, HeapVertex> heap =
+      new Pseudograph(LabeledEdge.class);
+  private HeapVertex root;
+  
+  private Set<String> fieldOrder = new LinkedHashSet<String>();
+  
   private HashMap<String, HashMap<Integer, Integer>> objectFieldExtensions =
       new HashMap<String, HashMap<Integer, Integer>>();
 
@@ -37,6 +41,12 @@ public class HeapDump {
     this(o, 0, 0, null);
   }
 
+  
+  public Pseudograph<HeapVertex, HeapVertex> getHeap() {
+	return heap;
+  }
+  
+  
   public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoreList) {
     this.maxDepth = maxDepth;
     this.maxArrayElements = maxArrayElements;
@@ -48,9 +58,9 @@ public class HeapDump {
         this.ignoreList.put(ignoreList[i], ignoreList[i]);
       }
     }
-    this.toVisit.push(new Tuple<Object, Integer>(o, 0));
-    buildHeap();
-    buildExtensions(o);
+
+    buildHeap(o);
+    //buildExtensions(o);
   }
 
   public HashMap<String, HashMap<Integer, Integer>> getObjectFieldExtensions() {
@@ -61,8 +71,10 @@ public class HeapDump {
     return primitiveFieldExtensions;
   }
 
+  /*
   private void buildExtensions(Object root) {
-    DefaultDirectedGraph<Object, LabeledEdge<Object>> heap = this.heap;
+    DefaultDirectedGraph<HeapVertex, HeapVertex> heap = this.heap;
+    heap.vertexSet();
     LinkedList<Object> opened = new LinkedList<Object>();
     if (root != null) opened.offer(root);
     while (!opened.isEmpty()) {
@@ -86,8 +98,12 @@ public class HeapDump {
         }
 
         Set<LabeledEdge<Object>> outgoingEdges = null;
+        // PABLO: is this condition really needed? If current does not belong to the heap it wouldn't 
+        // have belonged to opened in the first place
         if (heap.containsVertex(current)) outgoingEdges = heap.outgoingEdgesOf(current);
         else outgoingEdges = new HashSet<LabeledEdge<Object>>();
+        // PABLO: Is the heap traversed always in the same way? Because otherwise there might be
+        // multiple ways of labeling the same object
         for (LabeledEdge<Object> currEdge : outgoingEdges) {
           Object target = currEdge.getV2();
           String field = currEdge.getLabel();
@@ -135,8 +151,99 @@ public class HeapDump {
       }
     }
   }
+  */
 
+  
+
+  
+  
+  	private void buildHeap(Object o) {
+  		
+  		LinkedList<Tuple<HeapVertex,Integer>> toVisit = new LinkedList<Tuple<HeapVertex,Integer>>();
+  		root = new HeapVertex(o);
+  		toVisit.push(new Tuple<HeapVertex,Integer>(root, 0));
+  		heap.addVertex(root);
+
+  		while (!toVisit.isEmpty()) {
+
+  			Tuple<HeapVertex,Integer> t = toVisit.pop();
+  			HeapVertex currVertex = t.getFirst(); 
+  			Object currObj = currVertex.getObject();
+  			int currDepth = t.getSecond();
+  			if (currDepth < this.maxDepth && currObj != null) {
+  				 				
+  				if (!isPrimitive(currObj)) {
+  					
+  					Class currObjClass = currObj.getClass();
+  					String oSimpleName = getSimpleNameWithoutArrayQualifier(currObjClass);
+  					
+					if (currObjClass.isArray()) {
+						int rowCount = this.maxArrayElements == 0 ? Array.getLength(currObj)
+								: Math.min(this.maxArrayElements, Array.getLength(currObj));
+						for (int i = 0; i < rowCount; i++) {
+							Object value = Array.get(currObj, i);
+							this.heap.addVertex(currObj);
+							this.heap.addVertex(value);
+							LabeledEdge<Object> edge = new LabeledEdge<Object>(o, value, "at(" + i + ")");
+							this.heap.addEdge(currObj, value, edge);
+							if (value != null && !isPrimitive(value))
+								toVisit.push(new HeapVertex(value, currDepth + 1));
+						}
+
+					} 
+					else {
+ 
+						while (currObjClass != null && currObjClass != Object.class) {
+							Field[] fields = currObjClass.getDeclaredFields();
+
+							if (this.ignoreList.get(currObjClass.getSimpleName()) == null) {
+								for (int i = 0; i < fields.length; i++) {
+									
+									String fSimpleName = getSimpleNameWithoutArrayQualifier(fields[i].getType());
+									String fName = fields[i].getName();
+									
+									fields[i].setAccessible(true);
+									if (this.ignoreList.get(":" + fName) == null
+											&& this.ignoreList.get(fSimpleName + ":" + fName) == null
+											&& this.ignoreList.get(fSimpleName + ":") == null) {
+											Object value = fields[i].get(o);
+											this.heap.addVertex(o);
+											this.heap.addVertex(value);
+											LabeledEdge<Object> edge = new LabeledEdge<Object>(o, value, fName);
+											this.heap.addEdge(o, value, edge);
+											if (value != null && !isPrimitive(value))
+												this.toVisit.push(new HeapVertex(value, currDepth + 1));
+
+									} else {
+										Ignored ignored = new Ignored();
+										this.heap.addVertex(ignored);
+										LabeledEdge<Object> edge = new LabeledEdge<Object>(o, ignored, fName);
+										this.heap.addEdge(o, ignored, edge);
+									}
+								}
+								currObjClass = currObjClass.getSuperclass();
+								oSimpleName = currObjClass.getSimpleName();
+							} else {
+								currObjClass = null;
+								oSimpleName = "";
+							}
+						}
+					}
+  				}
+          }
+        }
+      }
+    }
+}
+  
+  
+  
+  
+  
+  
+ /* 
   private void buildHeap() {
+
     while (!this.toVisit.isEmpty()) {
       Tuple<Object, Integer> t = this.toVisit.pop();
       Object o = t.getFirst();
@@ -213,7 +320,7 @@ public class HeapDump {
       }
     }
   }
-
+*/
   public static boolean isPrimitive(Object value) {
     return (value.getClass().isPrimitive()
         || value.getClass() == java.lang.Short.class
