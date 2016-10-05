@@ -10,7 +10,7 @@ import org.junit.Test;
 public class HeapDumpTest {
 
   @Test
-  public void testDefaultDumpOfNullIsEmpty() {
+  public void testDefaultDumpOfNullIsEmpty() throws IllegalArgumentException, IllegalAccessException {
     Object anObject = null;
     HeapDump objectDump = new HeapDump(anObject);
     assertTrue(objectDump.getObjectFieldExtensions().isEmpty());
@@ -18,7 +18,7 @@ public class HeapDumpTest {
   }
 
   @Test
-  public void testDefaultDumpOfNonNullIsEmpty() {
+  public void testDefaultDumpOfNonNullIsEmpty() throws IllegalArgumentException, IllegalAccessException {
     List<Integer> anObject = new ArrayList<Integer>();
     HeapDump objectDump = new HeapDump(anObject);
     assertTrue(objectDump.getObjectFieldExtensions().isEmpty());
@@ -26,7 +26,7 @@ public class HeapDumpTest {
   }
 
   @Test
-  public void testDumpOfNullIsEmpty() {
+  public void testDumpOfNullIsEmpty() throws IllegalArgumentException, IllegalAccessException {
     Object anObject = null;
     int maxDepth = 1000;
     int maxArray = 1000;
@@ -37,7 +37,7 @@ public class HeapDumpTest {
   }
 
   @Test
-  public void testDumpOfNonNullIsNotEmpty() {
+  public void testDumpOfNonNullIsNotEmpty() throws IllegalArgumentException, IllegalAccessException {
     List<Integer> anObject = new ArrayList<Integer>();
     int maxDepth = 1000;
     int maxArray = 1000;

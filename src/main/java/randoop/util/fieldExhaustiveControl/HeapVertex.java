@@ -56,6 +56,10 @@ public class HeapVertex {
 			return false;
 		return true;
 	}
-
+	
+	public String toString() {
+		if (object == null) return "null";
+		return object.toString();
+	}
   
 }

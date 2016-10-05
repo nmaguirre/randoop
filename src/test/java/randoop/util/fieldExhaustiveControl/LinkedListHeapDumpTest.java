@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.Set;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DirectedPseudograph;
 import org.junit.Test;
 
 import randoop.util.fieldexhuastive.structures.LinkedList;
@@ -14,24 +15,26 @@ import randoop.util.fieldexhuastive.structures.LinkedListNode;
 public class LinkedListHeapDumpTest {
 
   @Test
-  public void testGraphHasAllComponentsOneNodeList() {
+  public void testOneNodeListGraphHasAllComponents() throws IllegalArgumentException, IllegalAccessException {
 	LinkedList l = new LinkedList();
 	l.add(3);
     int maxDepth = 1000;
     int maxArray = 1000;
     String[] ignoredClasses = {};
     HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses);
-    DefaultDirectedGraph<Object, LabeledEdge<Object>> g = objectDump.getHeap();
+    DirectedPseudograph<HeapVertex, LabeledEdge> g = objectDump.getHeap();
     
-    Set<Object> vertices = g.vertexSet();
+    Set<HeapVertex> vertices = g.vertexSet();
     // One LinkedList objects, 2 Nodes, 2 Ints (1 for size and 3 for the value of the first node);
-    assertTrue(vertices.size() == 5);
-    for (Object o : vertices) {
+    assertTrue(vertices.size() == 6);
+    for (HeapVertex vertex : vertices) {
+    	Object o = vertex.getObject();
+    	if (o == null) continue;
     	
     	if (o.getClass() == LinkedList.class) {
-    		Set<LabeledEdge<Object>> outEdges = g.outgoingEdgesOf(o);
+    		Set<LabeledEdge> outEdges = g.outgoingEdgesOf(vertex);
     		boolean hasHead = false, hasSize = false;    		
-    		for (LabeledEdge<Object> e: g.outgoingEdgesOf(o)) {
+    		for (LabeledEdge<HeapVertex> e: g.outgoingEdgesOf(vertex)) {
     			assertTrue(e.getLabel().equals("header") || e.getLabel().equals("size"));
     			if (e.getLabel().equals("header")) {
     				hasHead = true;
@@ -46,9 +49,9 @@ public class LinkedListHeapDumpTest {
     	}
     	
     	if (o.getClass() == LinkedListNode.class) {
-    		Set<LabeledEdge<Object>> outEdges = g.outgoingEdgesOf(o);
+    		Set<LabeledEdge> outEdges = g.outgoingEdgesOf(vertex);
     		boolean hasNext = false, hasPrev = false, hasVal = false;    		
-    		for (LabeledEdge<Object> e: g.outgoingEdgesOf(o)) {
+    		for (LabeledEdge<HeapVertex> e: g.outgoingEdgesOf(vertex)) {
     			assertTrue(e.getLabel().equals("next") || e.getLabel().equals("previous") || e.getLabel().equals("value"));
     			if (e.getLabel().equals("next")) {
     				hasNext = true;
@@ -60,20 +63,12 @@ public class LinkedListHeapDumpTest {
     				hasVal = true;
     			}
         	}
-    		// Header has a null value, and hence only two outgoing edges
-    		if (o == l.header) {
-        		assertTrue(hasPrev);
-        		assertTrue(hasNext);
-        		assertTrue(outEdges.size() == 2);    			
-    		}
-    		else {
-    			assertTrue(hasPrev);
-    			assertTrue(hasVal);
-    			assertTrue(hasNext);    		
-    			assertTrue(outEdges.size() == 3);
-    		}
+			assertTrue(hasPrev);
+			assertTrue(hasVal);
+			assertTrue(hasNext);    		
+			assertTrue(outEdges.size() == 3);
     	}
-	
+
     }
 
   }
