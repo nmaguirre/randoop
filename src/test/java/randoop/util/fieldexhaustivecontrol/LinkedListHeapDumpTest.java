@@ -87,6 +87,7 @@ public class LinkedListHeapDumpTest {
 	l.add(3);
 	l.add(214);
 	l.add("hola");
+	l.add("chau");
     int maxDepth = 1000;
     int maxArray = 1000;
     String[] ignoredClasses = {};
@@ -100,10 +101,7 @@ public class LinkedListHeapDumpTest {
     exporter.export(outputWriter, g);
     
     System.out.println(outputWriter.toString());
-    
-    //System.out.println(outputWriter.getBuffer().);
-    
-    
+
   }
   
 }

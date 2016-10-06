@@ -10,7 +10,7 @@ import org.jgrapht.graph.DefaultEdge;
  *
  * @param <V> is the type of the vertices connected by the edge.
  */
-public class LabeledEdge<V> extends DefaultEdge {
+public class LabeledEdge<V> extends DefaultEdge implements Comparable<LabeledEdge> {
 
   private static final long serialVersionUID = 1L;
 
@@ -73,5 +73,10 @@ public class LabeledEdge<V> extends DefaultEdge {
    */
   public String toString() {
     return label;
+  }
+
+  @Override
+  public int compareTo(LabeledEdge o) {
+	return label.compareTo(o.label);
   }
 }
