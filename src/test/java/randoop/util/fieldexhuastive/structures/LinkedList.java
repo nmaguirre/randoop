@@ -422,7 +422,7 @@ public class LinkedList {
 	}
 
     public String toString() {
-    	String res = "LinkedList: size=";
+    	String res = "LinkedList";
     	res += size;
     	return res;
     }

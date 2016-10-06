@@ -109,7 +109,7 @@ public class LinkedListNode {
     }
     
     public String toString() {
-    	String res = "Node: value=";
+    	String res = "Node";
     	if (value == null)
     		res += "null";
     	else

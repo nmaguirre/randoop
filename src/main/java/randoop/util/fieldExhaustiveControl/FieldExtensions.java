@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 public class FieldExtensions {
 
+	/*
   private HashMap<String, HashMap<Integer, Collection<Integer>>> objectFieldExtensions =
       new HashMap<String, HashMap<Integer, Collection<Integer>>>();
   private HashMap<String, HashMap<Integer, Collection<Object>>> primitiveFieldExtensions =
@@ -113,4 +114,5 @@ public class FieldExtensions {
   public void reset() {
     objectFieldExtensions.clear();
   }
+  */
 }
