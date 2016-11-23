@@ -1,6 +1,16 @@
 package randoop.util.fieldexhaustivecontrol;
 
 public class CanonicalRepresentation {
+	
+	public static String getCanonicalName(Object object, int index) {
+		if (object == null) return "null";
+		
+		if (isPrimitive(object.getClass()))
+			return object.toString();
+
+		return object.getClass().getSimpleName() + index;
+	}
+	
   	public static boolean isPrimitive(Class clazz) {
   		return (clazz.isPrimitive()
   				|| clazz == java.lang.Short.class

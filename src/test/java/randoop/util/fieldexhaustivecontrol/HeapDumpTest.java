@@ -33,7 +33,7 @@ public class HeapDumpTest {
     int maxDepth = 1000;
     int maxArray = 1000;
     String[] ignoredClasses = {};
-    HeapDump objectDump = new HeapDump(anObject, maxDepth, maxArray, ignoredClasses);
+    HeapDump objectDump = new HeapDump(anObject, maxDepth, maxArray, ignoredClasses, null);
     assertTrue(objectDump.getObjectFieldExtensions().isEmpty());
     assertTrue(objectDump.getPrimitiveFieldExtensions().isEmpty());
   }
@@ -44,7 +44,7 @@ public class HeapDumpTest {
     int maxDepth = 1000;
     int maxArray = 1000;
     String[] ignoredClasses = {};
-    HeapDump objectDump = new HeapDump(anObject, maxDepth, maxArray, ignoredClasses);
+    HeapDump objectDump = new HeapDump(anObject, maxDepth, maxArray, ignoredClasses, null);
     assertFalse(objectDump.getObjectFieldExtensions().isEmpty());
     assertFalse(objectDump.getPrimitiveFieldExtensions().isEmpty());
     assertTrue(objectDump.getObjectFieldExtensions().containsKey("EMPTY_ELEMENTDATA"));

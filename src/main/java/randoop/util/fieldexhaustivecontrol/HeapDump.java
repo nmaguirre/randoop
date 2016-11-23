@@ -25,7 +25,9 @@ public class HeapDump {
 
 	private int maxDepth = 0;
 	private int maxArrayElements = 0;
-	private HashMap<String, String> ignoreList = new HashMap<String, String>();
+	private HashMap<String, String> ignoredClasses = new HashMap<String, String>();
+	private Set<String> ignoredFields = new HashSet<String>();	
+	
 	private DirectedPseudograph<HeapVertex, LabeledEdge> heap =
 			new DirectedPseudograph<HeapVertex, LabeledEdge>(LabeledEdge.class);
 	private HeapVertex root;
@@ -40,29 +42,37 @@ public class HeapDump {
 
 	
 	public HeapDump(Object o) throws IllegalArgumentException, IllegalAccessException {
-		this(o, 0, 0, null);
+		this(o, 0, 0, null, null);
 	}
 
+	public HeapDump(Object o, int maxDepth, int maxArrayElements) throws IllegalArgumentException, IllegalAccessException {
+		this(o, maxDepth, maxArrayElements, null, null);
+	}
 
 	public DirectedPseudograph<HeapVertex, LabeledEdge> getHeap() {
 		return heap;
 	}
 
 
-	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoreList) throws IllegalArgumentException, IllegalAccessException {
+	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields) throws IllegalArgumentException, IllegalAccessException {
 		this.maxDepth = maxDepth;
 		this.maxArrayElements = maxArrayElements;
 
-		if (ignoreList != null) {
-			for (int i = 0; i < Array.getLength(ignoreList); i++) {
-				int colonIdx = ignoreList[i].indexOf(':');
-				if (colonIdx == -1) ignoreList[i] = ignoreList[i] + ":";
-				this.ignoreList.put(ignoreList[i], ignoreList[i]);
+		if (ignoredClasses != null) {
+			for (int i = 0; i < Array.getLength(ignoredClasses); i++) {
+				int colonIdx = ignoredClasses[i].indexOf(':');
+				if (colonIdx == -1) ignoredClasses[i] = ignoredClasses[i] + ":";
+				this.ignoredClasses.put(ignoredClasses[i], ignoredClasses[i]);
 			}
+		}
+		
+		if (ignoredFields != null) {
+			for (int i = 0; i < Array.getLength(ignoredFields); i++) 
+				this.ignoredFields.add(ignoredFields[i]);
 		}
 
 		buildHeap(o);
-		canonizeBFS();
+		bfsCanonization();
 		
 		//buildExtensions(o);
 	}
@@ -81,7 +91,7 @@ public class HeapDump {
 	}
 
 	
-	private void canonizeBFS() {
+	private void bfsCanonization() {
   		LinkedList<HeapVertex> toVisit = new LinkedList<HeapVertex>();
   		toVisit.push(root);
   		root.setIndex(0);
@@ -90,7 +100,7 @@ public class HeapDump {
 			// if currObj is null or isPrimitive(currObj) there's already a vertex in the graph representing the value; there's nothing left to do  			
   			TreeSet<LabeledEdge> sortedEdges = new TreeSet<LabeledEdge>(heap.outgoingEdgesOf(currVertex));
   			for (LabeledEdge<HeapVertex> currEdge: sortedEdges) {
-  				System.out.println(currEdge.getLabel());
+  				//System.out.println(currEdge.getLabel());
   				HeapVertex vertexToTag = currEdge.getV2();
   				Object objToTag = vertexToTag.getObject();
   				if (objToTag != null && !CanonicalRepresentation.isPrimitive(objToTag) && vertexToTag.getIndex() == -1) {
@@ -101,6 +111,10 @@ public class HeapDump {
   		}
 	}
 
+	
+	
+	
+	
 
 	public HashMap<String, HashMap<Integer, Integer>> getObjectFieldExtensions() {
 		return objectFieldExtensions;
@@ -128,6 +142,9 @@ public class HeapDump {
 					List<Field> fields = getConsideredFields(currObjClass.getDeclaredFields());
 					for (int i = 0; i < fields.size(); i++) {
 						Field currField = fields.get(i);
+						if (ignoredFields.contains(currField.getName())) 
+							continue;
+						
 						String fName = currField.getName();
 						currField.setAccessible(true);										
 						Object value = currField.get(currObj);
@@ -135,7 +152,7 @@ public class HeapDump {
 							/*
 							 * Process an array field: 
 							 * for index i such that value[i] = arrvalue_i, add an edge: 
-							 * 		currObj--field[i]-->arravalue_i  
+							 * 		currObj --field[i]--> arravalue_i  
 							 */
 							int rowCount = maxArrayElements == 0 ? Array.getLength(value) : Math.min(maxArrayElements, Array.getLength(value));
 							for (int j = 0; j < rowCount; j++) {
@@ -188,13 +205,13 @@ public class HeapDump {
   
 
   	private boolean ignoreClass(String className) {
-  		return this.ignoreList.get(className) != null;
+  		return this.ignoredClasses.get(className) != null;
   	}
   	
   	private boolean ignoreField(String fieldName, String fieldType) {
-  		return !(this.ignoreList.get(":" + fieldName) == null
-				&& this.ignoreList.get(fieldType + ":" + fieldName) == null
-				&& this.ignoreList.get(fieldType + ":") == null);  		
+  		return !(this.ignoredClasses.get(":" + fieldName) == null
+				&& this.ignoredClasses.get(fieldType + ":" + fieldName) == null
+				&& this.ignoredClasses.get(fieldType + ":") == null);  		
   	}
   
   	private List<Field> getConsideredFields(Field [] fields) {

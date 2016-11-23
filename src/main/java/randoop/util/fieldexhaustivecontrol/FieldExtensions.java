@@ -1,12 +1,17 @@
 package randoop.util.fieldexhaustivecontrol;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map.Entry;
+import java.util.Map;
 
 public class FieldExtensions {
 
+	private Map<String, FieldExtension> extension = new HashMap<String, FieldExtension>();
+	
+
+	
+	
+	
+	
 	/*
   private HashMap<String, HashMap<Integer, Collection<Integer>>> objectFieldExtensions =
       new HashMap<String, HashMap<Integer, Collection<Integer>>>();

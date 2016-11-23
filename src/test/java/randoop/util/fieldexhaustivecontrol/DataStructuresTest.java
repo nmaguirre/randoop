@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.StringWriter;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.jgrapht.ext.DOTExporter;
 import org.jgrapht.ext.StringEdgeNameProvider;
@@ -19,7 +20,7 @@ import randoop.util.fieldexhuastive.structures.LinkedList;
 import randoop.util.fieldexhuastive.structures.LinkedListNode;
 
 
-public class LinkedListHeapDumpTest {
+public class DataStructuresTest {
 
   @Test
   public void testOneNodeListGraphHasAllComponents() throws IllegalArgumentException, IllegalAccessException {
@@ -28,7 +29,7 @@ public class LinkedListHeapDumpTest {
     int maxDepth = 1000;
     int maxArray = 1000;
     String[] ignoredClasses = {};
-    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses);
+    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
     DirectedPseudograph<HeapVertex, LabeledEdge> g = objectDump.getHeap();
     
     Set<HeapVertex> vertices = g.vertexSet();
@@ -91,7 +92,7 @@ public class LinkedListHeapDumpTest {
     int maxDepth = 1000;
     int maxArray = 1000;
     String[] ignoredClasses = {};
-    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses);
+    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
     DirectedPseudograph<HeapVertex, LabeledEdge> g = objectDump.getHeap();
     
     StringWriter outputWriter = new StringWriter();
@@ -102,6 +103,29 @@ public class LinkedListHeapDumpTest {
     
     System.out.println(outputWriter.toString());
 
+  }
+  
+  
+  @Test
+  public void testTreeSetPrintGraph() throws IllegalArgumentException, IllegalAccessException {
+	TreeSet l = new TreeSet();
+	l.add("a");
+	l.add("b");
+	l.add("c");
+	l.add("d");
+    int maxDepth = 1000;
+    int maxArray = 1000;
+    String[] ignoredClasses = {};
+    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, new String [] {"BLACK", "RED", "parent", "values", "entrySet", "this$0", "MAX_ARRAY_SIZE", "navigableKeySet", "PRESENT","comparator", "descendingMap", "keySet", "modCount", "UNBOUNDED", "serialVersionUID"});
+    DirectedPseudograph<HeapVertex, LabeledEdge> g = objectDump.getHeap();
+    
+    StringWriter outputWriter = new StringWriter();
+    DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
+    //String targetDirectory = "testresults/graph/";
+    //new File(targetDirectory).mkdirs();
+    exporter.export(outputWriter, g);
+    
+    System.out.println(outputWriter.toString());
   }
   
 }

@@ -58,12 +58,7 @@ public class HeapVertex {
 	}
 	
 	public String toString() {
-		if (object == null) return "null";
-		
-		if (CanonicalRepresentation.isPrimitive(object.getClass()))
-			return object.toString();
-
-		return object.getClass().getSimpleName() + index;
+		return CanonicalRepresentation.getCanonicalName(object, index);
 	}
-  
+	
 }
