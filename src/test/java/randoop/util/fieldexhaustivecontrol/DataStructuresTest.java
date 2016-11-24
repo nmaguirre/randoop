@@ -83,7 +83,7 @@ public class DataStructuresTest {
   
   
   @Test
-  public void testOneNodeListPrintGraph() throws IllegalArgumentException, IllegalAccessException {
+  public void testeListPrintGraph() throws IllegalArgumentException, IllegalAccessException {
 	LinkedList l = new LinkedList();
 	l.add(3);
 	l.add(214);
@@ -101,7 +101,10 @@ public class DataStructuresTest {
     //new File(targetDirectory).mkdirs();
     exporter.export(outputWriter, g);
     
+    System.out.println("Graph:");
     System.out.println(outputWriter.toString());
+    System.out.println("\n\nExtensions");
+    System.out.println(objectDump.getFieldExtensions().toString());
 
   }
   
@@ -125,7 +128,11 @@ public class DataStructuresTest {
     //new File(targetDirectory).mkdirs();
     exporter.export(outputWriter, g);
     
+    System.out.println("Graph:");
     System.out.println(outputWriter.toString());
+    System.out.println("\n\nExtensions");
+    System.out.println(objectDump.getFieldExtensions().toString());    
+    
   }
   
 }

@@ -26,20 +26,19 @@ public class HeapDump {
 	private int maxDepth = 0;
 	private int maxArrayElements = 0;
 	private HashMap<String, String> ignoredClasses = new HashMap<String, String>();
-	private Set<String> ignoredFields = new HashSet<String>();	
+	private Set<String> ignoredFields = new HashSet<String>();
 	
 	private DirectedPseudograph<HeapVertex, LabeledEdge> heap =
 			new DirectedPseudograph<HeapVertex, LabeledEdge>(LabeledEdge.class);
 	private HeapVertex root;
 	private HashMap<String, Integer> lastIndex = new HashMap<String, Integer>();
 	
+	private FieldExtensions fieldExtensions;
 	
-	private HashMap<String, HashMap<Integer, Integer>> objectFieldExtensions =
-			new HashMap<String, HashMap<Integer, Integer>>();
-
-	private HashMap<String, HashMap<Integer, Object>> primitiveFieldExtensions =
-			new HashMap<String, HashMap<Integer, Object>>();
-
+	private boolean extensionsExtended = false;
+	
+	// private HashMap<String, HashMap<Integer, Object>> primitiveFieldExtensions =
+			//new HashMap<String, HashMap<Integer, Object>>();
 	
 	public HeapDump(Object o) throws IllegalArgumentException, IllegalAccessException {
 		this(o, 0, 0, null, null);
@@ -53,8 +52,13 @@ public class HeapDump {
 		return heap;
 	}
 
-
 	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields) throws IllegalArgumentException, IllegalAccessException {
+		this(o, maxDepth, maxArrayElements, ignoredClasses, ignoredFields, new FieldExtensions());
+	}
+	
+	
+	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields, FieldExtensions ext) throws IllegalArgumentException, IllegalAccessException {
+
 		this.maxDepth = maxDepth;
 		this.maxArrayElements = maxArrayElements;
 
@@ -70,12 +74,13 @@ public class HeapDump {
 			for (int i = 0; i < Array.getLength(ignoredFields); i++) 
 				this.ignoredFields.add(ignoredFields[i]);
 		}
-
-		buildHeap(o);
-		bfsCanonization();
 		
-		//buildExtensions(o);
+		fieldExtensions = ext;
+		
+		buildHeap(o);
+		extensionsExtended = canonizeBFSAndPopulateExtensions();
 	}
+	
 	
 	
 	private Integer getNextObjectIndex(Object obj) {
@@ -91,38 +96,41 @@ public class HeapDump {
 	}
 
 	
-	private void bfsCanonization() {
+	private boolean canonizeBFSAndPopulateExtensions() {
+		boolean extendedExt = false;
   		LinkedList<HeapVertex> toVisit = new LinkedList<HeapVertex>();
   		toVisit.push(root);
   		root.setIndex(0);
   		while (!toVisit.isEmpty()) {
-  			HeapVertex currVertex = toVisit.pop();
+  			HeapVertex source = toVisit.pop();
 			// if currObj is null or isPrimitive(currObj) there's already a vertex in the graph representing the value; there's nothing left to do  			
-  			TreeSet<LabeledEdge> sortedEdges = new TreeSet<LabeledEdge>(heap.outgoingEdgesOf(currVertex));
+  			TreeSet<LabeledEdge> sortedEdges = new TreeSet<LabeledEdge>(heap.outgoingEdgesOf(source));
   			for (LabeledEdge<HeapVertex> currEdge: sortedEdges) {
   				//System.out.println(currEdge.getLabel());
-  				HeapVertex vertexToTag = currEdge.getV2();
-  				Object objToTag = vertexToTag.getObject();
-  				if (objToTag != null && !CanonicalRepresentation.isPrimitive(objToTag) && vertexToTag.getIndex() == -1) {
-  					vertexToTag.setIndex(getNextObjectIndex(objToTag));
-  					toVisit.add(vertexToTag);
+  				HeapVertex target = currEdge.getV2();
+  				Object objToTag = target.getObject();
+  				if (objToTag != null && !CanonicalRepresentation.isPrimitive(objToTag) && target.getIndex() == -1) {
+  					target.setIndex(getNextObjectIndex(objToTag));
+  					toVisit.add(target);
   				}
+  				
+  				String srcstr = CanonicalRepresentation.getCanonicalName(source.getObject(), source.getIndex());
+  				String tgtstr = CanonicalRepresentation.getCanonicalName(target.getObject(), target.getIndex());
+  				extendedExt = extendedExt || fieldExtensions.addPairToField(currEdge.getLabel(), srcstr, tgtstr);  				
   			}
   		}
+  		
+  		return extendedExt;
+	}
+	
+
+	public FieldExtensions getFieldExtensions() {
+		return fieldExtensions;
 	}
 
-	
-	
-	
-	
-
-	public HashMap<String, HashMap<Integer, Integer>> getObjectFieldExtensions() {
-		return objectFieldExtensions;
-	}
-
-	public HashMap<String, HashMap<Integer, Object>> getPrimitiveFieldExtensions() {
+	/*public HashMap<String, HashMap<Integer, Object>> getPrimitiveFieldExtensions() {
 		return primitiveFieldExtensions;
-	}
+	}*/
 
   
   	private void buildHeap(Object rootObj) throws IllegalArgumentException, IllegalAccessException {
@@ -222,5 +230,11 @@ public class HeapDump {
   		}
   		return res;
   	}
+
+	public boolean extensionsExtended() {
+		return extensionsExtended;
+	}
+
+
 
 }

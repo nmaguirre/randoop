@@ -22,13 +22,11 @@ public class FieldExtension {
 			extension.put(p1, s);
 		}
 		
-		if (s.contains(p2))
-			return false;
-		
-		s.add(p2);
-		return true; 
+		return s.add(p2);
 	}
 	
-
+	public String toString() {
+		return fieldname + ":" + extension.toString();
+	}
 	
 }
