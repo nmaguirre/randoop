@@ -1,5 +1,8 @@
 package randoop.util.fieldexhaustivecontrol;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -11,6 +14,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jgrapht.ext.DOTExporter;
+import org.jgrapht.ext.StringEdgeNameProvider;
+import org.jgrapht.ext.StringNameProvider;
 import org.jgrapht.graph.DirectedPseudograph;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -116,7 +122,8 @@ public class HeapDump {
   				
   				String srcstr = CanonicalRepresentation.getCanonicalName(source.getObject(), source.getIndex());
   				String tgtstr = CanonicalRepresentation.getCanonicalName(target.getObject(), target.getIndex());
-  				extendedExt = extendedExt || fieldExtensions.addPairToField(currEdge.getLabel(), srcstr, tgtstr);  				
+  				if (fieldExtensions.addPairToField(currEdge.getLabel(), srcstr, tgtstr))
+  					extendedExt = true;
   			}
   		}
   		
@@ -235,6 +242,18 @@ public class HeapDump {
 		return extensionsExtended;
 	}
 
+	public String heapToString() {
+		StringWriter outputWriter = new StringWriter();
+	    DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
+	    exporter.export(outputWriter, heap);
 
-
+	    return outputWriter.toString();
+	}
+	
+	public void heapToFile(String filename) throws IOException {
+	    DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
+	    exporter.export(new FileWriter(filename), heap);
+	}
+	
+	
 }

@@ -2,13 +2,11 @@ package randoop.util.fieldexhaustivecontrol;
 
 import static org.junit.Assert.*;
 
-import java.io.StringWriter;
+import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.jgrapht.ext.DOTExporter;
-import org.jgrapht.ext.StringEdgeNameProvider;
-import org.jgrapht.ext.StringNameProvider;
+
 import org.jgrapht.graph.DirectedPseudograph;
 
 import org.junit.Test;
@@ -93,16 +91,10 @@ public class DataStructuresTest {
     int maxArray = 1000;
     String[] ignoredClasses = {};
     HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
-    DirectedPseudograph<HeapVertex, LabeledEdge> g = objectDump.getHeap();
-    
-    StringWriter outputWriter = new StringWriter();
-    DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
-    //String targetDirectory = "testresults/graph/";
-    //new File(targetDirectory).mkdirs();
-    exporter.export(outputWriter, g);
     
     System.out.println("Graph:");
-    System.out.println(outputWriter.toString());
+    System.out.println(objectDump.heapToString());
+    
     System.out.println("\n\nExtensions");
     System.out.println(objectDump.getFieldExtensions().toString());
 
@@ -110,7 +102,7 @@ public class DataStructuresTest {
   
   
   @Test
-  public void testTreeSetPrintGraph() throws IllegalArgumentException, IllegalAccessException {
+  public void testTreeSetPrintGraph() throws IllegalArgumentException, IllegalAccessException, IOException {
 	TreeSet l = new TreeSet();
 	l.add("a");
 	l.add("b");
@@ -120,18 +112,14 @@ public class DataStructuresTest {
     int maxArray = 1000;
     String[] ignoredClasses = {};
     HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, new String [] {"BLACK", "RED", "parent", "values", "entrySet", "this$0", "MAX_ARRAY_SIZE", "navigableKeySet", "PRESENT","comparator", "descendingMap", "keySet", "modCount", "UNBOUNDED", "serialVersionUID"});
-    DirectedPseudograph<HeapVertex, LabeledEdge> g = objectDump.getHeap();
     
-    StringWriter outputWriter = new StringWriter();
-    DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
-    //String targetDirectory = "testresults/graph/";
-    //new File(targetDirectory).mkdirs();
-    exporter.export(outputWriter, g);
+    objectDump.heapToFile("src/test/java/randoop/util/fieldexhaustivecontrol/tsetgraph.dot");
     
     System.out.println("Graph:");
-    System.out.println(outputWriter.toString());
+    System.out.println(objectDump.heapToString());
+    
     System.out.println("\n\nExtensions");
-    System.out.println(objectDump.getFieldExtensions().toString());    
+    System.out.println(objectDump.getFieldExtensions().toString());
     
   }
   
