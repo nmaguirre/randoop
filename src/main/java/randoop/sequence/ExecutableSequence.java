@@ -24,6 +24,9 @@ import randoop.types.Type;
 import randoop.types.ReferenceType;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
+import randoop.util.fieldexhaustivecontrol.CanonicalRepresentation;
+import randoop.util.fieldexhaustivecontrol.FieldExtensions;
+import randoop.util.fieldexhaustivecontrol.HeapDump;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -86,6 +89,10 @@ import randoop.util.ProgressDisplay;
  */
 public class ExecutableSequence {
 
+  // PABLO: fields for field based generation
+  public boolean extensionsExtended = false;
+  public FieldExtensions extensions;
+	
   /** The underlying sequence. */
   public Sequence sequence;
 
@@ -228,6 +235,13 @@ public class ExecutableSequence {
   public void execute(ExecutionVisitor visitor, TestCheckGenerator gen) {
     execute(visitor, gen, true);
   }
+  
+  
+  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, FieldExtensions fe) {
+	    extensions = fe;
+	    execute(visitor, gen, true);
+  }
+  
 
   /**
    * Execute this sequence, invoking the given visitor as the execution unfolds.
@@ -263,6 +277,8 @@ public class ExecutableSequence {
    */
   private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException) {
 
+	extensionsExtended = false;
+	  
     visitor.initialize(this);
 
     // reset execution result values
@@ -281,10 +297,64 @@ public class ExecutableSequence {
       inputVariables = getRuntimeInputs(executionResults.theList, inputs);
 
       visitor.visitBeforeStatement(this, i);
+      // PABLO: Here randoop executes the current statement with inputVariables as inputs
       executeStatement(sequence, executionResults.theList, i, inputVariables);
 
       // make sure statement executed
       ExecutionOutcome statementResult = getResult(i);
+      
+      // inputVariables may have been modified by the method (it includes the method's receiver object). Should use them to cover field values.
+      // this.executionResults[i] has the result of executing the current statement. Should we mark its field values as covered as well? Yes.
+      
+      // For now, we only check if the last statement of the sequence covers new field values. I'm still not sure that this is 100% sound. 
+      if (i == this.sequence.size()-1) {
+
+    	  // Mark the field values of the instances that appear in the execution as covered
+    	  // Cover the field values belonging to the object returned by the current method
+    	  if (statementResult instanceof NormalExecution) {
+    		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+    		  if (!CanonicalRepresentation.isPrimitive(obj)) {
+    			  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
+        		  HeapDump dumper;
+        		  try {
+        			  dumper = new HeapDump(obj, 1000000, 1000000, null, null, extensions);
+        			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+        			  // TODO PABLO: Imprimir las extensiones y el heap retornado
+        			  
+        		  } catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+        		  } catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+        		  }
+    		  }
+
+    	  }
+
+    	  // Cover the field values belonging to the receiving object of the current method
+    	  if (inputVariables.length > 0) {
+    		  HeapDump dumper;
+    		  try {
+				dumper = new HeapDump(inputVariables[0], 1000000, 1000000, null, null, extensions);
+       		  	extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+       		  	// TODO PABLO: Imprimir las extensiones y el heap retornado
+    		  } catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+    		  } catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+    		  }
+
+    		  /*if (inputVariables[0] instanceof SinglyLinkedList) {
+    			  SinglyLinkedList alist = (SinglyLinkedList) inputVariables[0];
+    			  extendsfb = alist.addComponentsToFieldBounds(fb) || extendsfb;
+    			  //System.out.println("size: " + alist.getSize());
+    		  }*/
+    	  }
+      }      
+      
       if (statementResult instanceof NotExecuted) {
         throw new Error("Unexecuted statement in sequence: " + this.toString());
       }

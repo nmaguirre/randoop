@@ -8,7 +8,6 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -19,7 +18,6 @@ import org.jgrapht.ext.StringEdgeNameProvider;
 import org.jgrapht.ext.StringNameProvider;
 import org.jgrapht.graph.DirectedPseudograph;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Produces graph-like representations of heaps originating in given objects, as well as
