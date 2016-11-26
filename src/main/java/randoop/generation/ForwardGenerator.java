@@ -32,11 +32,14 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
+import randoop.util.fieldexhaustivecontrol.FieldExtensions;
 
 /**
  * Randoop's forward, component-based generator.
  */
 public class ForwardGenerator extends AbstractGenerator {
+	
+  FieldExtensions fieldExtensions = new FieldExtensions();
 
   /**
    * The set of ALL sequences ever generated, including sequences that were
@@ -152,7 +155,7 @@ public class ForwardGenerator extends AbstractGenerator {
 
     // TODO PABLO: We assume the field values for the objects up to the size-1 position in seq
     // have been already added to the field extensions (when seq[1:i-1] was built).
-    eSeq.execute(executionVisitor, checkGenerator);
+    eSeq.execute(executionVisitor, checkGenerator, fieldExtensions);
 
     endTime = System.nanoTime();
 

@@ -27,8 +27,8 @@ import org.jgrapht.graph.DirectedPseudograph;
  */
 public class HeapDump {
 
-	private int maxDepth = 0;
-	private int maxArrayElements = 0;
+	private int maxDepth; // = Integer.MAX_VALUE;
+	private int maxArrayElements; // = Integer.MAX_VALUE;
 	private HashMap<String, String> ignoredClasses = new HashMap<String, String>();
 	private Set<String> ignoredFields = new HashSet<String>();
 	
@@ -44,8 +44,14 @@ public class HeapDump {
 	// private HashMap<String, HashMap<Integer, Object>> primitiveFieldExtensions =
 			//new HashMap<String, HashMap<Integer, Object>>();
 	
+	
+	public HeapDump(Object o, FieldExtensions fe) throws IllegalArgumentException, IllegalAccessException {
+		this(o, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null, fe);
+	}
+	
+	
 	public HeapDump(Object o) throws IllegalArgumentException, IllegalAccessException {
-		this(o, 0, 0, null, null);
+		this(o, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null);
 	}
 
 	public HeapDump(Object o, int maxDepth, int maxArrayElements) throws IllegalArgumentException, IllegalAccessException {
@@ -158,7 +164,7 @@ public class HeapDump {
 						if (ignoredFields.contains(currField.getName())) 
 							continue;
 						
-						String fName = currField.getName();
+						String fName = currObjClass.getSimpleName() + "." + currField.getName();
 						currField.setAccessible(true);										
 						Object value = currField.get(currObj);
 						if (value != null && value.getClass().isArray()) {
@@ -253,5 +259,8 @@ public class HeapDump {
 	    exporter.export(new FileWriter(filename), heap);
 	}
 	
+	public void extensionsToFile(String filename) throws IOException {
+	    fieldExtensions.toFile(filename);
+	}
 	
 }

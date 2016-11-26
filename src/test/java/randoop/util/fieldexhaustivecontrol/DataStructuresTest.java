@@ -114,6 +114,8 @@ public class DataStructuresTest {
     HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, new String [] {"BLACK", "RED", "parent", "values", "entrySet", "this$0", "MAX_ARRAY_SIZE", "navigableKeySet", "PRESENT","comparator", "descendingMap", "keySet", "modCount", "UNBOUNDED", "serialVersionUID"});
     
     objectDump.heapToFile("src/test/java/randoop/util/fieldexhaustivecontrol/tsetgraph.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldexhaustivecontrol/tsetextensions.txt");
+    
     
     System.out.println("Graph:");
     System.out.println(objectDump.heapToString());

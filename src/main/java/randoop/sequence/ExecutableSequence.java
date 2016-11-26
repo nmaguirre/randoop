@@ -1,7 +1,11 @@
 package randoop.sequence;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -92,6 +96,9 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
+  private boolean DEBUG = true;
+  private static int seqnum = 0; 
+  private String FILENAME = "logs/seq";
 	
   /** The underlying sequence. */
   public Sequence sequence;
@@ -243,6 +250,13 @@ public class ExecutableSequence {
   }
   
 
+  public void toFile(String filename) throws IOException {
+	try (Writer writer = new BufferedWriter(new FileWriter(filename))) {
+		writer.write(toString());
+	}	
+  }
+  
+  
   /**
    * Execute this sequence, invoking the given visitor as the execution unfolds.
    * After invoking this method, the client can query the outcome of executing
@@ -288,6 +302,15 @@ public class ExecutableSequence {
       executionResults.theList.add(NotExecuted.create());
     }
 
+    if (DEBUG) {
+    	try {
+    		toFile(FILENAME + seqnum + "-s-" + ".txt");
+    	} catch (IOException e1) {
+    		// TODO Auto-generated catch block
+    		e1.printStackTrace();
+    	}
+    }
+    
     for (int i = 0; i < this.sequence.size(); i++) {
 
       // Find and collect the input values to i-th statement.
@@ -313,13 +336,15 @@ public class ExecutableSequence {
     	  // Cover the field values belonging to the object returned by the current method
     	  if (statementResult instanceof NormalExecution) {
     		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
-    		  if (!CanonicalRepresentation.isPrimitive(obj)) {
+    		  if (obj != null && !CanonicalRepresentation.isPrimitive(obj)) {
     			  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
-        		  HeapDump dumper;
         		  try {
-        			  dumper = new HeapDump(obj, 1000000, 1000000, null, null, extensions);
+        			  HeapDump dumper = new HeapDump(obj, extensions);
         			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-        			  // TODO PABLO: Imprimir las extensiones y el heap retornado
+        			  if (DEBUG) {
+        				  dumper.heapToFile(FILENAME + seqnum + "-r" + ".dot");
+        				  dumper.extensionsToFile(FILENAME + seqnum + "-r-" + ".txt");
+        			  }
         			  
         		  } catch (IllegalArgumentException e) {
 					// TODO Auto-generated catch block
@@ -327,25 +352,32 @@ public class ExecutableSequence {
         		  } catch (IllegalAccessException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-        		  }
+        		  } catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
     		  }
-
     	  }
 
     	  // Cover the field values belonging to the receiving object of the current method
     	  if (inputVariables.length > 0) {
-    		  HeapDump dumper;
     		  try {
-				dumper = new HeapDump(inputVariables[0], 1000000, 1000000, null, null, extensions);
+				HeapDump dumper = new HeapDump(inputVariables[0], extensions);
        		  	extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-       		  	// TODO PABLO: Imprimir las extensiones y el heap retornado
+       		  	if (DEBUG) {
+  				  dumper.heapToFile(FILENAME + seqnum + "-o" + ".dot");
+  				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + ".txt");
+       		  	}
     		  } catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
     		  } catch (IllegalAccessException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-    		  }
+    		  } catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
     		  /*if (inputVariables[0] instanceof SinglyLinkedList) {
     			  SinglyLinkedList alist = (SinglyLinkedList) inputVariables[0];
@@ -353,6 +385,7 @@ public class ExecutableSequence {
     			  //System.out.println("size: " + alist.getSize());
     		  }*/
     	  }
+    	  seqnum++;
       }      
       
       if (statementResult instanceof NotExecuted) {
