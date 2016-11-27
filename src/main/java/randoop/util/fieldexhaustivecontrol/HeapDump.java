@@ -175,7 +175,7 @@ public class HeapDump {
 							 */
 							int rowCount = maxArrayElements == 0 ? Array.getLength(value) : Math.min(maxArrayElements, Array.getLength(value));
 							for (int j = 0; j < rowCount; j++) {
-								addFieldValueToHeapGraph(currVertex, Array.get(value, j), fName + '[' + i + ']' , toVisit, currDepth);
+								addFieldValueToHeapGraph(currVertex, Array.get(value, j), fName + '_' + i , toVisit, currDepth);
 							}
 						}
 						else {

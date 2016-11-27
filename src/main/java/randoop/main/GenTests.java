@@ -59,6 +59,7 @@ import randoop.util.ReflectionExecutor;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
+
 public class GenTests extends GenInputsAbstract {
 
   private static final String command = "gentests";

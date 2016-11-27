@@ -96,9 +96,9 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
-  private boolean DEBUG = true;
-  private static int seqnum = 0; 
-  private String FILENAME = "logs/seq";
+  public boolean DEBUG = true;
+  public static int seqnum = 0; 
+  public String FILENAME = "logs/seq";
 	
   /** The underlying sequence. */
   public Sequence sequence;
@@ -291,7 +291,7 @@ public class ExecutableSequence {
    */
   private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException) {
 
-	extensionsExtended = false;
+	seqnum++;
 	  
     visitor.initialize(this);
 
@@ -304,7 +304,7 @@ public class ExecutableSequence {
 
     if (DEBUG) {
     	try {
-    		toFile(FILENAME + seqnum + "-s-" + ".txt");
+    		toFile(FILENAME + seqnum + "-s" + ".txt");
     	} catch (IOException e1) {
     		// TODO Auto-generated catch block
     		e1.printStackTrace();
@@ -342,8 +342,8 @@ public class ExecutableSequence {
         			  HeapDump dumper = new HeapDump(obj, extensions);
         			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
         			  if (DEBUG) {
-        				  dumper.heapToFile(FILENAME + seqnum + "-r" + ".dot");
-        				  dumper.extensionsToFile(FILENAME + seqnum + "-r-" + ".txt");
+        				  dumper.heapToFile(FILENAME + seqnum + "-o0" + ".dot");
+        				  dumper.extensionsToFile(FILENAME + seqnum + "-o0e" + ".txt");
         			  }
         			  
         		  } catch (IllegalArgumentException e) {
@@ -359,15 +359,19 @@ public class ExecutableSequence {
     		  }
     	  }
 
-    	  // Cover the field values belonging to the receiving object of the current method
+    	  // Cover the field values belonging to all the current method's parameters
     	  if (inputVariables.length > 0) {
     		  try {
-				HeapDump dumper = new HeapDump(inputVariables[0], extensions);
-       		  	extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-       		  	if (DEBUG) {
-  				  dumper.heapToFile(FILENAME + seqnum + "-o" + ".dot");
-  				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + ".txt");
-       		  	}
+    			for (int j=0; j<inputVariables.length; j++) {
+    				if (inputVariables[j] != null && !CanonicalRepresentation.isPrimitive(inputVariables[j])) {
+    					HeapDump dumper = new HeapDump(inputVariables[j], extensions);
+    					extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+    					if (DEBUG) {
+    						dumper.heapToFile(FILENAME + seqnum + "-o" + (j+1) + ".dot");
+    						dumper.extensionsToFile(FILENAME + seqnum + "-o" + (j+1) + "e.txt");
+						}
+    				}
+    			}
     		  } catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -379,13 +383,7 @@ public class ExecutableSequence {
 				e.printStackTrace();
 			}
 
-    		  /*if (inputVariables[0] instanceof SinglyLinkedList) {
-    			  SinglyLinkedList alist = (SinglyLinkedList) inputVariables[0];
-    			  extendsfb = alist.addComponentsToFieldBounds(fb) || extendsfb;
-    			  //System.out.println("size: " + alist.getSize());
-    		  }*/
     	  }
-    	  seqnum++;
       }      
       
       if (statementResult instanceof NotExecuted) {

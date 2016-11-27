@@ -1,5 +1,6 @@
 package randoop.generation;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -39,7 +40,8 @@ import randoop.util.fieldexhaustivecontrol.FieldExtensions;
  */
 public class ForwardGenerator extends AbstractGenerator {
 	
-  FieldExtensions fieldExtensions = new FieldExtensions();
+  public FieldExtensions fieldExtensions;
+  public boolean fieldBasedGen = true;
 
   /**
    * The set of ALL sequences ever generated, including sequences that were
@@ -105,7 +107,10 @@ public class ForwardGenerator extends AbstractGenerator {
 
     this.observers = observers;
     this.allSequences = new LinkedHashSet<>();
-
+    
+    // PABLO: Initialized field extensions
+    fieldExtensions = new FieldExtensions();
+    
     initializeRuntimePrimitivesSeen();
   }
 
@@ -163,10 +168,21 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
 
     processSequence(eSeq);
+    /*
+    if (eSeq.sequence.hasActiveFlags()) {
+        if (eSeq.DEBUG) {
+        	try {
+        		eSeq.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+        	} catch (IOException e1) {
+        		// TODO Auto-generated catch block
+        		e1.printStackTrace();
+        	}
+        }
+    }*/
     
     // PABLO: If field extensions have not been enlarged by this sequence, mark seq as not 
     // active so it is not considered for extension anymore.
-    if (!eSeq.extensionsExtended) {
+    if (fieldBasedGen && !eSeq.extensionsExtended) {
  		  for (int j = 0; j < eSeq.sequence.size(); j++)
  			  eSeq.sequence.clearActiveFlag(j);
     }
