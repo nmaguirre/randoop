@@ -143,12 +143,17 @@ public class HeapDump {
 		return primitiveFieldExtensions;
 	}*/
 
-  
+
+	
+	
   	private void buildHeap(Object rootObj) throws IllegalArgumentException, IllegalAccessException {
+
+  		DummyHeapRoot dummyroot = new DummyHeapRoot(rootObj);
   		LinkedList<Tuple<HeapVertex,Integer>> toVisit = new LinkedList<Tuple<HeapVertex,Integer>>();
-  		root = new HeapVertex(rootObj);
+  		root = new HeapVertex(dummyroot);
   		toVisit.push(new Tuple<HeapVertex,Integer>(root, 0));
   		heap.addVertex(root);
+ 		
   		while (!toVisit.isEmpty()) {
   			Tuple<HeapVertex,Integer> t = toVisit.pop();
   			HeapVertex currVertex = t.getFirst(); 
@@ -255,7 +260,8 @@ public class HeapDump {
 	}
 	
 	public void heapToFile(String filename) throws IOException {
-	    DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
+	    //DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
+		DOTExporter exporter = new DOTExporter(new HeapVertexNameProvider(), null, new StringEdgeNameProvider());
 	    exporter.export(new FileWriter(filename), heap);
 	}
 	

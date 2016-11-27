@@ -330,48 +330,31 @@ public class ExecutableSequence {
       // this.executionResults[i] has the result of executing the current statement. Should we mark its field values as covered as well? Yes.
       
       // For now, we only check if the last statement of the sequence covers new field values. I'm still not sure that this is 100% sound. 
-      if (i == this.sequence.size()-1) {
+      // This is not sound. Leave it commented for now
+      //if (i == this.sequence.size()-1) {
 
-    	  // Mark the field values of the instances that appear in the execution as covered
-    	  // Cover the field values belonging to the object returned by the current method
-    	  if (statementResult instanceof NormalExecution) {
-    		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
-    		  if (obj != null && !CanonicalRepresentation.isPrimitive(obj)) {
-    			  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
-        		  try {
-        			  HeapDump dumper = new HeapDump(obj, extensions);
-        			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-        			  if (DEBUG) {
-        				  dumper.heapToFile(FILENAME + seqnum + "-o0" + ".dot");
-        				  dumper.extensionsToFile(FILENAME + seqnum + "-o0e" + ".txt");
-        			  }
-        			  
-        		  } catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-        		  } catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-        		  } catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-    		  }
-    	  }
-
-    	  // Cover the field values belonging to all the current method's parameters
-    	  if (inputVariables.length > 0) {
+      
+      // PABLO: Field based generation: Canonize the objects resulting from the execution
+      // and use their fields to populate field extensions 
+	  // Mark the field values of the instances that appear in the execution as covered
+	  // Cover the field values belonging to the object returned by the current method
+	  if (statementResult instanceof NormalExecution) {
+		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+		  if (obj != null && !CanonicalRepresentation.isPrimitive(obj)) {
+			  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
     		  try {
-    			for (int j=0; j<inputVariables.length; j++) {
-    				if (inputVariables[j] != null && !CanonicalRepresentation.isPrimitive(inputVariables[j])) {
-    					HeapDump dumper = new HeapDump(inputVariables[j], extensions);
-    					extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-    					if (DEBUG) {
-    						dumper.heapToFile(FILENAME + seqnum + "-o" + (j+1) + ".dot");
-    						dumper.extensionsToFile(FILENAME + seqnum + "-o" + (j+1) + "e.txt");
-						}
-    				}
-    			}
+    			  HeapDump dumper = new HeapDump(obj, extensions);
+    			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+    			  if (DEBUG) {
+    				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt"); 
+    				  //try {
+    					  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
+    				  /*} catch (RuntimeException e) {
+    					  System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + i + "-0" + " failed, please check for errors.");
+    				  }*/
+    				  
+    			  }
+    			  
     		  } catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -382,9 +365,40 @@ public class ExecutableSequence {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		  }
+	  }
 
-    	  }
-      }      
+	  // Cover the field values belonging to all the current method's parameters
+	  if (inputVariables.length > 0) {
+		  try {
+			for (int j=0; j<inputVariables.length; j++) {
+				if (inputVariables[j] != null && !CanonicalRepresentation.isPrimitive(inputVariables[j])) {
+					HeapDump dumper = new HeapDump(inputVariables[j], extensions);
+					extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+					if (DEBUG) {
+						dumper.extensionsToFile(FILENAME + seqnum + "-o-" + "-" + (j+1) + "-e.txt");
+						//try {
+							dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + ".dot");
+						/*} catch (RuntimeException e) {
+							System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + + i + "-" + (j+1) + " failed, please check for errors.");
+						}*/
+
+					}
+				}
+			}
+		  } catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		  } catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		  } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	  }
+ 
       
       if (statementResult instanceof NotExecuted) {
         throw new Error("Unexecuted statement in sequence: " + this.toString());
