@@ -96,7 +96,8 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
-  public boolean DEBUG = true;
+  public boolean DEBUG= false;// = true;
+  private boolean fieldBasedGen;
   public static int seqnum = 0; 
   public String FILENAME = "logs/seq";
 	
@@ -244,9 +245,10 @@ public class ExecutableSequence {
   }
   
   
-  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, FieldExtensions fe) {
-	    extensions = fe;
-	    execute(visitor, gen, true);
+  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, FieldExtensions fe, boolean fieldBasedGen) {
+	  this.fieldBasedGen = fieldBasedGen;  
+	  extensions = fe;
+	  execute(visitor, gen, true);
   }
   
 
@@ -302,7 +304,7 @@ public class ExecutableSequence {
       executionResults.theList.add(NotExecuted.create());
     }
 
-    if (DEBUG) {
+    if (fieldBasedGen && DEBUG) {
     	try {
     		toFile(FILENAME + seqnum + "-s" + ".txt");
     	} catch (IOException e1) {
@@ -333,72 +335,72 @@ public class ExecutableSequence {
       // This is not sound. Leave it commented for now
       //if (i == this.sequence.size()-1) {
 
-      
-      // PABLO: Field based generation: Canonize the objects resulting from the execution
-      // and use their fields to populate field extensions 
-	  // Mark the field values of the instances that appear in the execution as covered
-	  // Cover the field values belonging to the object returned by the current method
-	  if (statementResult instanceof NormalExecution) {
-		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
-		  if (obj != null && !CanonicalRepresentation.isPrimitive(obj)) {
-			  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
-    		  try {
-    			  HeapDump dumper = new HeapDump(obj, extensions);
-    			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-    			  if (DEBUG) {
-    				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt"); 
-    				  //try {
-    					  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
-    				  /*} catch (RuntimeException e) {
-    					  System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + i + "-0" + " failed, please check for errors.");
-    				  }*/
-    				  
-    			  }
-    			  
-    		  } catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-    		  } catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-    		  } catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+      if (fieldBasedGen) {
+	      // PABLO: Field based generation: Canonize the objects resulting from the execution
+	      // and use their fields to populate field extensions 
+		  // Mark the field values of the instances that appear in the execution as covered
+		  // Cover the field values belonging to the object returned by the current method
+		  if (statementResult instanceof NormalExecution) {
+			  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+			  if (obj != null && !CanonicalRepresentation.isPrimitive(obj)) {
+				  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
+	    		  try {
+	    			  HeapDump dumper = new HeapDump(obj, extensions);
+	    			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+	    			  if (DEBUG) {
+	    				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt"); 
+	    				  //try {
+	    					  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
+	    				  /*} catch (RuntimeException e) {
+	    					  System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + i + "-0" + " failed, please check for errors.");
+	    				  }*/
+	    				  
+	    			  }
+	    			  
+	    		  } catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+	    		  } catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+	    		  } catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			  }
 		  }
-	  }
-
-	  // Cover the field values belonging to all the current method's parameters
-	  if (inputVariables.length > 0) {
-		  try {
-			for (int j=0; j<inputVariables.length; j++) {
-				if (inputVariables[j] != null && !CanonicalRepresentation.isPrimitive(inputVariables[j])) {
-					HeapDump dumper = new HeapDump(inputVariables[j], extensions);
-					extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-					if (DEBUG) {
-						dumper.extensionsToFile(FILENAME + seqnum + "-o-" + "-" + (j+1) + "-e.txt");
-						//try {
-							dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + ".dot");
-						/*} catch (RuntimeException e) {
-							System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + + i + "-" + (j+1) + " failed, please check for errors.");
-						}*/
-
+	
+		  // Cover the field values belonging to all the current method's parameters
+		  if (inputVariables.length > 0) {
+			  try {
+				for (int j=0; j<inputVariables.length; j++) {
+					if (inputVariables[j] != null && !CanonicalRepresentation.isPrimitive(inputVariables[j])) {
+						HeapDump dumper = new HeapDump(inputVariables[j], extensions);
+						extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+						if (DEBUG) {
+							dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + "-e.txt");
+							//try {
+								dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + ".dot");
+							/*} catch (RuntimeException e) {
+								System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + + i + "-" + (j+1) + " failed, please check for errors.");
+							}*/
+	
+						}
 					}
 				}
+			  } catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			  } catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			  } catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		  } catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		  } catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		  } catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	  }
- 
+	
+		  }
+      }
       
       if (statementResult instanceof NotExecuted) {
         throw new Error("Unexecuted statement in sequence: " + this.toString());
