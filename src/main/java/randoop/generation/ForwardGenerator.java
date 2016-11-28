@@ -159,8 +159,6 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
 
 
-    // TODO PABLO: We assume the field values for the objects up to the size-1 position in seq
-    // have been already added to the field extensions (when seq[1:i-1] was built).
     eSeq.execute(executionVisitor, checkGenerator, fieldExtensions, fieldBasedGen);
 
     endTime = System.nanoTime();
@@ -168,37 +166,31 @@ public class ForwardGenerator extends AbstractGenerator {
     eSeq.exectime = endTime - startTime;
     startTime = endTime; // reset start time.
 
-    processSequence(eSeq);
-    /*
-    if (eSeq.sequence.hasActiveFlags()) {
-        if (eSeq.DEBUG) {
-        	try {
-        		eSeq.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
-        	} catch (IOException e1) {
-        		// TODO Auto-generated catch block
-        		e1.printStackTrace();
-        	}
-        }
-    }*/
-    /*
-    try {
-		fieldExtensions.toFile(eSeq.FILENAME + "extensions-" + ExecutableSequence.seqnum + ".txt");
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-    */
-    // PABLO: If field extensions have not been enlarged by this sequence, mark seq as not 
+    // PABLO: This was here. Check if it is needed in fieldExhaustiveGeneration
+    // processSequence(eSeq);
+    
+
+    // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
     // active so it is not considered for extension anymore.
     if (fieldBasedGen && !eSeq.extensionsExtended) {
- 		  for (int j = 0; j < eSeq.sequence.size(); j++)
- 			  eSeq.sequence.clearActiveFlag(j);
+ 		  /*for (int j = 0; j < eSeq.sequence.size(); j++)
+ 			  eSeq.sequence.clearActiveFlag(j);*/
  		  fieldBasedDroppedSeq++;
+ 		  System.out.println("Sequence number: " + eSeq.seqnum);
  		  System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
-    }
+    } else {
+    	processSequence(eSeq);    	
     
-    if (eSeq.sequence.hasActiveFlags()) {
-      componentManager.addGeneratedSequence(eSeq.sequence);
+	    if (eSeq.sequence.hasActiveFlags()) {
+	      componentManager.addGeneratedSequence(eSeq.sequence);
+	      
+	      try {
+			fieldExtensions.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+	      } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+	      }
+	    }
     }
 
     endTime = System.nanoTime();

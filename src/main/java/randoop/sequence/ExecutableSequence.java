@@ -335,7 +335,7 @@ public class ExecutableSequence {
       // This is not sound. Leave it commented for now
       //if (i == this.sequence.size()-1) {
 
-      if (fieldBasedGen) {
+      if (true /*fieldBasedGen*/) {
 	      // PABLO: Field based generation: Canonize the objects resulting from the execution
 	      // and use their fields to populate field extensions 
 		  // Mark the field values of the instances that appear in the execution as covered
