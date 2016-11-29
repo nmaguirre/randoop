@@ -1,0 +1,36 @@
+digraph G {
+  ArrayList0;
+  8683452581122892189;
+  10;
+  ARR_Object1;
+  ARR_Object0;
+  ARR_Object2;
+  4;
+  2147483639;
+  4;
+  2147483639;
+  3;
+  214;
+  hola;
+  chau;
+  null;
+  ArrayList0 -> 8683452581122892189 [ label="ArrayList.serialVersionUID" ];
+  ArrayList0 -> 10 [ label="ArrayList.DEFAULT_CAPACITY" ];
+  ArrayList0 -> ARR_Object1 [ label="ArrayList.EMPTY_ELEMENTDATA" ];
+  ArrayList0 -> ARR_Object0 [ label="ArrayList.DEFAULTCAPACITY_EMPTY_ELEMENTDATA" ];
+  ArrayList0 -> ARR_Object2 [ label="ArrayList.elementData" ];
+  ArrayList0 -> 4 [ label="ArrayList.size" ];
+  ArrayList0 -> 2147483639 [ label="ArrayList.MAX_ARRAY_SIZE" ];
+  ArrayList0 -> 4 [ label="AbstractList.modCount" ];
+  ArrayList0 -> 2147483639 [ label="AbstractCollection.MAX_ARRAY_SIZE" ];
+  ARR_Object2 -> 3 [ label="ARR_Object.elem0" ];
+  ARR_Object2 -> 214 [ label="ARR_Object.elem1" ];
+  ARR_Object2 -> hola [ label="ARR_Object.elem2" ];
+  ARR_Object2 -> chau [ label="ARR_Object.elem3" ];
+  ARR_Object2 -> null [ label="ARR_Object.elem4" ];
+  ARR_Object2 -> null [ label="ARR_Object.elem5" ];
+  ARR_Object2 -> null [ label="ARR_Object.elem6" ];
+  ARR_Object2 -> null [ label="ARR_Object.elem7" ];
+  ARR_Object2 -> null [ label="ARR_Object.elem8" ];
+  ARR_Object2 -> null [ label="ARR_Object.elem9" ];
+}

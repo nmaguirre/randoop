@@ -1,4 +1,4 @@
-package randoop.util.fieldexhaustivecontrol;
+package randoop.util.fieldbasedcontrol;
 
 import org.jgrapht.ext.StringNameProvider;
 

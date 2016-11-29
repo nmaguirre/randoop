@@ -28,9 +28,9 @@ import randoop.types.Type;
 import randoop.types.ReferenceType;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
-import randoop.util.fieldexhaustivecontrol.CanonicalRepresentation;
-import randoop.util.fieldexhaustivecontrol.FieldExtensions;
-import randoop.util.fieldexhaustivecontrol.HeapDump;
+import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
+import randoop.util.fieldbasedcontrol.FieldExtensions;
+import randoop.util.fieldbasedcontrol.HeapDump;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for

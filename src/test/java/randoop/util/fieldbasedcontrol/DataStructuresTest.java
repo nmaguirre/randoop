@@ -1,4 +1,4 @@
-package randoop.util.fieldexhaustivecontrol;
+package randoop.util.fieldbasedcontrol;
 
 import static org.junit.Assert.*;
 
@@ -12,9 +12,9 @@ import org.jgrapht.graph.DirectedPseudograph;
 
 import org.junit.Test;
 
-import randoop.util.fieldexhaustivecontrol.HeapDump;
-import randoop.util.fieldexhaustivecontrol.HeapVertex;
-import randoop.util.fieldexhaustivecontrol.LabeledEdge;
+import randoop.util.fieldbasedcontrol.HeapDump;
+import randoop.util.fieldbasedcontrol.HeapVertex;
+import randoop.util.fieldbasedcontrol.LabeledEdge;
 import randoop.util.fieldexhuastive.structures.LinkedList;
 import randoop.util.fieldexhuastive.structures.LinkedListNode;
 

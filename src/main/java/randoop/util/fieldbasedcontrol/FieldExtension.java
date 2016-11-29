@@ -1,4 +1,4 @@
-package randoop.util.fieldexhaustivecontrol;
+package randoop.util.fieldbasedcontrol;
 
 import java.util.Map;
 import java.util.HashMap;

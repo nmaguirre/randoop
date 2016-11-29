@@ -1,4 +1,4 @@
-package randoop.util.fieldexhaustivecontrol;
+package randoop.util.fieldbasedcontrol;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

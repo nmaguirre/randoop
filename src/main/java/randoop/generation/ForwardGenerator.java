@@ -33,7 +33,7 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
-import randoop.util.fieldexhaustivecontrol.FieldExtensions;
+import randoop.util.fieldbasedcontrol.FieldExtensions;
 
 /**
  * Randoop's forward, component-based generator.

@@ -1,4 +1,4 @@
-package randoop.util.fieldexhaustivecontrol;
+package randoop.util.fieldbasedcontrol;
 
 /**
  * Dummy class used to represent objects that are ignored, in the construction of a

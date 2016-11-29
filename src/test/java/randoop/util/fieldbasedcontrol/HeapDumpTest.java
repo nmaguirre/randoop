@@ -1,4 +1,4 @@
-package randoop.util.fieldexhaustivecontrol;
+package randoop.util.fieldbasedcontrol;
 
 import static org.junit.Assert.*;
 
@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import randoop.util.fieldexhaustivecontrol.HeapDump;
+import randoop.util.fieldbasedcontrol.HeapDump;
 
 public class HeapDumpTest {
 /*

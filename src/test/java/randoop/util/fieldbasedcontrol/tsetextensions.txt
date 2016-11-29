@@ -1,0 +1,8 @@
+Entry.right:{Entry2=[Entry3], Entry3=[null], Entry0=[Entry2], Entry1=[null]}
+Entry.color:{Entry2=[true], Entry3=[false], Entry0=[true], Entry1=[true]}
+Entry.left:{Entry2=[null], Entry3=[null], Entry0=[Entry1], Entry1=[null]}
+TreeSet.m:{TreeSet0=[TreeMap0]}
+TreeMap.root:{TreeMap0=[Entry0]}
+Entry.key:{Entry2=[c], Entry3=[d], Entry0=[b], Entry1=[a]}
+Entry.value:{Entry2=[Object0], Entry3=[Object0], Entry0=[Object0], Entry1=[Object0]}
+TreeMap.size:{TreeMap0=[4]}
