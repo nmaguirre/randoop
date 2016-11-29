@@ -7,6 +7,9 @@ public class CanonicalRepresentation {
 		
 		if (isPrimitive(object.getClass()))
 			return object.toString();
+		
+/*		if (object.getClass().isArray())
+			return "ARR_" + getSimpleNameWithoutArrayQualifier(object.getClass()) + index;*/			
 
 		return object.getClass().getSimpleName() + index;
 	}

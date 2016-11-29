@@ -96,7 +96,7 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
-  public boolean DEBUG= false;// = true;
+  public boolean DEBUG = false;// = true;
   private boolean fieldBasedGen;
   public static int seqnum = 0; 
   public String FILENAME = "logs/seq";
@@ -335,7 +335,7 @@ public class ExecutableSequence {
       // This is not sound. Leave it commented for now
       //if (i == this.sequence.size()-1) {
 
-      if (true /*fieldBasedGen*/) {
+      if (fieldBasedGen) {
 	      // PABLO: Field based generation: Canonize the objects resulting from the execution
 	      // and use their fields to populate field extensions 
 		  // Mark the field values of the instances that appear in the execution as covered

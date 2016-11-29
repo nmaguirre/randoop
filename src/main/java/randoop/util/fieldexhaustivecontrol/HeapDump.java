@@ -148,9 +148,10 @@ public class HeapDump {
 	
   	private void buildHeap(Object rootObj) throws IllegalArgumentException, IllegalAccessException {
 
-  		DummyHeapRoot dummyroot = new DummyHeapRoot(rootObj);
+  		// DummyHeapRoot dummyroot = new DummyHeapRoot(rootObj);j
   		LinkedList<Tuple<HeapVertex,Integer>> toVisit = new LinkedList<Tuple<HeapVertex,Integer>>();
-  		root = new HeapVertex(dummyroot);
+  		// root = new HeapVertex(dummyroot);
+  		root = new HeapVertex(rootObj);
   		toVisit.push(new Tuple<HeapVertex,Integer>(root, 0));
   		heap.addVertex(root);
  		
@@ -160,42 +161,60 @@ public class HeapDump {
   			Object currObj = currVertex.getObject();
   			int currDepth = t.getSecond();
 			// if currObj is null or isPrimitive(currObj) there's already a vertex in the graph representing the value; there's nothing left to do  			
-  			if (currDepth < maxDepth && currObj != null && !CanonicalRepresentation.isPrimitive(currObj)) {
-				Class currObjClass = currObj.getClass();
-				while (currObjClass != null && currObjClass != Object.class) {
-					List<Field> fields = getConsideredFields(currObjClass.getDeclaredFields());
-					for (int i = 0; i < fields.size(); i++) {
-						Field currField = fields.get(i);
-						if (ignoredFields.contains(currField.getName())) 
-							continue;
-						
-						String fName = currObjClass.getSimpleName() + "." + currField.getName();
-						currField.setAccessible(true);										
-						Object value = currField.get(currObj);
-						if (value != null && value.getClass().isArray()) {
-							/*
-							 * Process an array field: 
-							 * for index i such that value[i] = arrvalue_i, add an edge: 
-							 * 		currObj --field[i]--> arravalue_i  
-							 */
-							int rowCount = maxArrayElements == 0 ? Array.getLength(value) : Math.min(maxArrayElements, Array.getLength(value));
-							for (int j = 0; j < rowCount; j++) {
-								addFieldValueToHeapGraph(currVertex, Array.get(value, j), fName + '_' + i , toVisit, currDepth);
-							}
-						}
-						else {
-							// Process a non-array field
-							addFieldValueToHeapGraph(currVertex, value, fName, toVisit, currDepth);
-						}
+  			if (currDepth < maxDepth && currObj != null &&
+  					!CanonicalRepresentation.isPrimitive(currObj) &&  					
+  					currObj.getClass() != Object.class &&
+  					!ignoreClass(currObj.getClass().getSimpleName())) {
+				
+  				Class currObjClass = currObj.getClass();  			
+				if (currObjClass.isArray()) {
+					/*
+					 * Process an array object currObj: 
+					 * for index i such that currObj[i] = arrvalue_i, add an edge: 
+					 * 		currObj --_array_i--> arravalue_i  
+					 */
+					String fName = "ARR_" + CanonicalRepresentation.getSimpleNameWithoutArrayQualifier(currObjClass) + ".elem";
+					int rowCount = maxArrayElements == 0 ? Array.getLength(currObj) : Math.min(maxArrayElements, Array.getLength(currObj));
+					for (int j = 0; j < rowCount; j++) {
+						addFieldValueToHeapGraph(currVertex, Array.get(currObj, j), fName + j , toVisit, currDepth);
 					}
-					currObjClass = currObjClass.getSuperclass();
-					if (CanonicalRepresentation.isPrimitive(currObjClass) || ignoreClass(currObjClass.getSimpleName())) break;						
+				} 
+				else {
+					// Process a non-array field
+					while (currObjClass != null && 
+							currObjClass != Object.class && 
+							!CanonicalRepresentation.isPrimitive(currObj) && 
+							!ignoreClass(currObjClass.getSimpleName())) {
+						
+						List<Field> fields = getEnabledFields(currObjClass.getDeclaredFields());
+						for (int i = 0; i < fields.size(); i++) {
+							Field currField = fields.get(i);
+							if (ignoredFields.contains(currField.getName())) 
+								continue;
+							
+							String fName = currObjClass.getSimpleName() + "." + currField.getName();
+							currField.setAccessible(true);										
+							Object value = currField.get(currObj);
+							addFieldValueToHeapGraph(currVertex, value, fName, toVisit, currDepth);
+
+						}
+						currObjClass = currObjClass.getSuperclass();					
+					}
+					
 				}
   			}
   		}
   	}
-  	
-  	
+  		
+  		
+  	private Tuple<Boolean, HeapVertex> addFieldValueToHeapGraph(HeapVertex currVertex, Object value, String fName) {
+		Tuple<Boolean, HeapVertex> addVertexRes = addObjectToHeapGraph(value);
+		HeapVertex valueVertex = addVertexRes.getSecond();
+		addEdgeToHeapGraph(currVertex, valueVertex, fName);
+		return addVertexRes;
+  	}
+
+
   	private void addFieldValueToHeapGraph(HeapVertex currVertex, Object value, String fName, LinkedList<Tuple<HeapVertex,Integer>> toVisit, int currDepth) {
 		Tuple<Boolean, HeapVertex> addVertexRes = addObjectToHeapGraph(value);
 		HeapVertex valueVertex = addVertexRes.getSecond();
@@ -238,7 +257,7 @@ public class HeapDump {
 				&& this.ignoredClasses.get(fieldType + ":") == null);  		
   	}
   
-  	private List<Field> getConsideredFields(Field [] fields) {
+  	private List<Field> getEnabledFields(Field [] fields) {
   		List<Field> res = new ArrayList<Field>();
   		for (Field f: fields) {
   			if (!ignoreField(f.getName(), CanonicalRepresentation.getSimpleNameWithoutArrayQualifier(f.getType())))
@@ -253,7 +272,7 @@ public class HeapDump {
 
 	public String heapToString() {
 		StringWriter outputWriter = new StringWriter();
-	    DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
+	    DOTExporter exporter = new DOTExporter(new HeapVertexNameProvider(), null, new StringEdgeNameProvider());
 	    exporter.export(outputWriter, heap);
 
 	    return outputWriter.toString();

@@ -41,7 +41,8 @@ import randoop.util.fieldexhaustivecontrol.FieldExtensions;
 public class ForwardGenerator extends AbstractGenerator {
 	
   public FieldExtensions fieldExtensions;
-  public boolean fieldBasedGen = true; //  = false;//= true;
+  //public boolean fieldBasedGen = false;
+  public boolean fieldBasedGen = true;
   public int fieldBasedDroppedSeq = 0;
 
   /**
@@ -167,31 +168,33 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
 
     // PABLO: This was here. Check if it is needed in fieldExhaustiveGeneration
-    // processSequence(eSeq);
+    processSequence(eSeq);
     
 
     // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
     // active so it is not considered for extension anymore.
-    if (fieldBasedGen && !eSeq.extensionsExtended) {
- 		  /*for (int j = 0; j < eSeq.sequence.size(); j++)
- 			  eSeq.sequence.clearActiveFlag(j);*/
- 		  fieldBasedDroppedSeq++;
- 		  System.out.println("Sequence number: " + eSeq.seqnum);
- 		  System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
-    } else {
-    	processSequence(eSeq);    	
+	if (fieldBasedGen && !eSeq.extensionsExtended) {
+		for (int j = 0; j < eSeq.sequence.size(); j++)
+			eSeq.sequence.clearActiveFlag(j);
+		fieldBasedDroppedSeq++;
+		// System.out.println("Sequence number: " + eSeq.seqnum);
+		// System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
+	} 
     
-	    if (eSeq.sequence.hasActiveFlags()) {
-	      componentManager.addGeneratedSequence(eSeq.sequence);
-	      
-	      try {
-			fieldExtensions.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
-	      } catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-	      }
-	    }
+
+  
+    if (eSeq.sequence.hasActiveFlags()) {
+      componentManager.addGeneratedSequence(eSeq.sequence);
+      
+      /*
+      try {
+		fieldExtensions.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+      } catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+      }*/
     }
+
 
     endTime = System.nanoTime();
     gentime += endTime - startTime;
