@@ -43,7 +43,7 @@ public class ForwardGenerator extends AbstractGenerator {
   public FieldExtensions fieldExtensions;
   //public boolean fieldBasedGen = false;
   public boolean fieldBasedGen = true;
-  public int fieldBasedDroppedSeq = 0;
+
 
   /**
    * The set of ALL sequences ever generated, including sequences that were
@@ -178,20 +178,20 @@ public class ForwardGenerator extends AbstractGenerator {
 			eSeq.sequence.clearActiveFlag(j);
 		fieldBasedDroppedSeq++;
 		//System.out.println("Sequence number: " + eSeq.seqnum);
-		System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
+		//System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
 		//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));
 		
 	} else {
 		processSequence(eSeq);
 	    if (eSeq.sequence.hasActiveFlags()) {
 	      componentManager.addGeneratedSequence(eSeq.sequence);
-	      
+	      /*
 	      try {
 			fieldExtensions.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
 	      } catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-	      }
+	      }*/
 	    }
 	}
 

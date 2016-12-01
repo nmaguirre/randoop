@@ -31,6 +31,9 @@ import java.util.Set;
  * @see ForwardGenerator
  */
 public abstract class AbstractGenerator {
+	
+  public int fieldBasedDroppedSeq = 0;
+	
 
   @OptionGroup(value = "AbstractGenerator unpublicized options", unpublicized = true)
   @Unpublicized
@@ -358,6 +361,9 @@ public abstract class AbstractGenerator {
         Log.logLine("allSequences.size()=" + numGeneratedSequences());
       }
     }
+    
+    System.out.println("Field based dropped secuences: " + fieldBasedDroppedSeq);
+
 
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();

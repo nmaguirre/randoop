@@ -96,8 +96,8 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
-  //public boolean DEBUG = false;// = true;
-  public boolean DEBUG = true;// = true;
+  public boolean DEBUG = false;// = true;
+//  public boolean DEBUG = true;// = true;
   private boolean fieldBasedGen;
   public static int seqnum = 0; 
   public String FILENAME = "logs/seq";

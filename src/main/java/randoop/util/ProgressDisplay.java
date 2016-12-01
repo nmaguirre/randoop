@@ -28,8 +28,8 @@ public class ProgressDisplay extends Thread {
   private static int progresswidth = 170;
 
   // PABLO: Original value changed for debugging reasons
-  //private static int exit_if_no_new_sequences_after_mseconds = 10000;
-  private static int exit_if_no_new_sequences_after_mseconds = 100000000;
+  private static int exit_if_no_new_sequences_after_mseconds = 10000;
+  //private static int exit_if_no_new_sequences_after_mseconds = 100000000;
 
   public enum Mode {
     SINGLE_LINE_OVERWRITE,
@@ -61,6 +61,8 @@ public class ProgressDisplay extends Thread {
   public String message() {
     return "Progress update: test inputs generated="
         + generator.num_sequences_generated
+        + ", field based dropped inputs="
+        + generator.fieldBasedDroppedSeq
         + ", failing inputs="
         + generator.num_failing_sequences
         + "      ("
