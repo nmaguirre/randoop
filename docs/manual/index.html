@@ -13,9 +13,9 @@
 <h1>Randoop Manual</h1> <!-- omit from toc -->
 
 <p>
-This is the manual for Randoop version 3.0.3, released July 20, 2016.
+This is the manual for Randoop version 3.0.5, released October 5, 2016.
 The Randoop homepage is
-<a href="http://randoop.github.io/randoop/">http://randoop.github.io/randoop/</a>.
+<a href="https://randoop.github.io/randoop/">https://randoop.github.io/randoop/</a>.
 </p>
 
 <p>Contents:</p>
@@ -633,7 +633,7 @@ Randoop about your application, and that is how we recommend using Randoop.
 
  In the file, each class under test is specified by its fully-qualified name
  on a separate line. See an <a href=
- "https://raw.githubusercontent.com/randoop/randoop/master/doc/class_list_example.txt">
+ "https://randoop.github.io/randoop/manual/class_list_example.txt">
  example</a>. These classes are tested in addition to any specified using
  <code>--testclass</code>. All classes must be accessible from the package of
  the tests (set with <code>--junit-package-name</code>).</li>
@@ -663,7 +663,7 @@ Randoop about your application, and that is how we recommend using Randoop.
 
  <p>
  See an <a href=
- "https://raw.githubusercontent.com/randoop/randoop/master/doc/method_list_example.txt">
+ "https://randoop.github.io/randoop/manual/method_list_example.txt">
  example</a>.
  </p></li>
       <li id="option:observers"><b>--observers=</b><i>filename</i>.
@@ -1475,6 +1475,12 @@ sequential Java program are:
   <li>
     Mitigate other sources of nondeterminism, such as always calling
     Arrays.sort on the result of File.listFiles.
+  </li>
+  <li>
+    Don't depend on wall-clock or CPU time, either in your program or in
+    Randoop (for example, by using the
+    <a href="#option:timelimit"><code>--timelimit</code></a> command-line
+    option).
   </li>
 </ul>
 

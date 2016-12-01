@@ -13,9 +13,9 @@
 <h1>Randoop Manual</h1> <!-- omit from toc -->
 
 <p>
-This is the manual for Randoop version 3.0.3, released July 20, 2016.
+This is the manual for Randoop version 3.0.6, released October 14, 2016.
 The Randoop homepage is
-<a href="http://randoop.github.io/randoop/">http://randoop.github.io/randoop/</a>.
+<a href="https://randoop.github.io/randoop/">https://randoop.github.io/randoop/</a>.
 </p>
 
 <p>Contents:</p>
@@ -632,9 +632,9 @@ Randoop about your application, and that is how we recommend using Randoop.
  File that lists classes to test.
 
  In the file, each class under test is specified by its fully-qualified name
- on a separate line. See an <a href=
- "https://raw.githubusercontent.com/randoop/randoop/master/doc/class_list_example.txt">
- example</a>. These classes are tested in addition to any specified using
+ on a separate line.
+ See an <a href="class_list_example.txt">example</a>.
+ These classes are tested in addition to any specified using
  <code>--testclass</code>. All classes must be accessible from the package of
  the tests (set with <code>--junit-package-name</code>).</li>
       <li id="option:methodlist"><b>--methodlist=</b><i>filename</i>.
@@ -662,9 +662,7 @@ Randoop about your application, and that is how we recommend using Randoop.
  </p>
 
  <p>
- See an <a href=
- "https://raw.githubusercontent.com/randoop/randoop/master/doc/method_list_example.txt">
- example</a>.
+ See an <a href="method_list_example.txt">example</a>.
  </p></li>
       <li id="option:observers"><b>--observers=</b><i>filename</i>.
  File containing side-effect-free observer methods. These are used to create
@@ -700,7 +698,7 @@ Randoop about your application, and that is how we recommend using Randoop.
       <li id="option:include-if-class-exercised"><b>--include-if-class-exercised=</b><i>filename</i>.
  File containing fully qualified names of classes that the tests must exercise.
  This option only works if Randoop is run using
- <code>-javaagent:exercised-class-<em>X.Y.Z</em>.jar</code>
+ <code>-javaagent:exercised_agent.jar</code>
  to instrument the classes. A test is output only if it exercises at least one
  of the class names in the file. A test exercises a class if it executes any
  constructor or method of the class, directly or indirectly (the constructor
@@ -870,7 +868,7 @@ Randoop about your application, and that is how we recommend using Randoop.
  <p>
  Literals in these files are used in addition to all other constants in the
  pool. For the format of this file, see documentation in class
- <code>randoop.LiteralFileReader</code>. The special value "CLASSES" (with no
+ <code>randoop.reflection.LiteralFileReader</code>. The special value "CLASSES" (with no
  quotes) means to read literals from all classes under test.
  </p></li>
       <li id="option:literals-level"><b>--literals-level=</b><i>enum</i>.
@@ -885,8 +883,6 @@ Randoop about your application, and that is how we recommend using Randoop.
   </li>
   <li id="optiongroup:Varying-the-nature-of-generated-tests">Varying the nature of generated tests
     <ul>
-      <li id="option:init-routine"><b>--init-routine=</b><i>string</i>.
- Specifies initialization routine (class.method)</li>
       <li id="option:alias-ratio"><b>--alias-ratio=</b><i>double</i>.
  Try to reuse values from a sequence with the given frequency. If an alias
  ratio is given, it should be between 0 and 1.
@@ -968,20 +964,6 @@ Randoop about your application, and that is how we recommend using Randoop.
  specify the memory size (in megabytes) for recursive JVM calls [default 1000]</li>
       <li id="option:capture-output"><b>--capture-output=</b><i>boolean</i>.
  Capture all output to stdout and stderr [default false]</li>
-    </ul>
-  </li>
-  <li id="optiongroup:Serialized-input-output-of-generated-tests">Serialized input/output of generated tests
-    <ul>
-      <li id="option:componentfile-ser"><b>--componentfile-ser=</b><i>filename</i> <code>[+]</code>.
- Read serialized test inputs from the given file</li>
-      <li id="option:componentfile-txt"><b>--componentfile-txt=</b><i>filename</i> <code>[+]</code>.
- Read serialized test inputs from the given file (text-based)</li>
-      <li id="option:output-components"><b>--output-components=</b><i>filename</i>.
- Output components (serialized, GZIPPED) to the given file. Suggestion: use
- a .gz suffix in file name.</li>
-      <li id="option:output-tests-serialized"><b>--output-tests-serialized=</b><i>filename</i>.
- Output tests (sequences plus checkers) in serialized form to the given
- file. Suggestion: use a .gz suffix in file name.</li>
     </ul>
   </li>
   <li id="optiongroup:Controlling-randomness">Controlling randomness
@@ -1491,6 +1473,12 @@ sequential Java program are:
   <li>
     Mitigate other sources of nondeterminism, such as always calling
     Arrays.sort on the result of File.listFiles.
+  </li>
+  <li>
+    Don't depend on wall-clock or CPU time, either in your program or in
+    Randoop (for example, by using the
+    <a href="#option:timelimit"><code>--timelimit</code></a> command-line
+    option).
   </li>
 </ul>
 

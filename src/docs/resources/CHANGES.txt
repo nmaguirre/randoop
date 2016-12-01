@@ -1,4 +1,29 @@
-Version 3.0.4, released August ?, 2016
+Version 3.0.6, released October 14, 2016
+
+Randoop uses an approach to selecting instantiations of generic types (including
+type arguments of generic methods/constructors) that is less likely to lead to
+an OutOfMemoryError.
+
+Fixed bug that would lead to failure involving a particular case of a static
+member class.
+
+
+Version 3.0.5, released October 5, 2016
+
+Randoop now ignores generic operations or classes for which it is unable to
+assign a type to a type argument. These are included in log output.
+
+Fixed bugs resulting in runtime failures:
+- a member class of a generic class was being constructed so that type
+  parameters were not tracked.
+- an exception during loading of a class would result in a failure, now ignored.
+- an enum has an override of toString() that returns null.
+
+Fixed bug in which flaky tests could be generated involving NaN. Thanks to
+Naljorpa Chagmed for reporting this issue.
+
+
+Version 3.0.4, released August 29, 2016
 
 Randoop now:
 - collects all member types visible to generated tests (fixes issue #88).
@@ -14,6 +39,9 @@ a generic array was being generated.
 Fixed a bug where test code was being generated that would result in an NPE when
 an inner class constructor is called with the first parameter null. (Due to an
 apparent bug in Java reflection classes.)
+
+Fixed a bug that was preventing contracts over compareTo from being tested.
+Issue thanks to Waylon Huang.
 
 
 Version 3.0.3, released July 28, 2016

@@ -8,19 +8,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import randoop.BugInRandoopException;
-import randoop.contract.EqualsReflexive;
-import randoop.contract.EqualsReturnsNormally;
-import randoop.contract.EqualsSymmetric;
-import randoop.contract.EqualsHashcode;
-import randoop.contract.EqualsToNullRetFalse;
-import randoop.contract.EqualsTransitive;
-import randoop.contract.ObjectContract;
 import randoop.contract.CompareToAntiSymmetric;
 import randoop.contract.CompareToEquals;
 import randoop.contract.CompareToReflexive;
 import randoop.contract.CompareToSubs;
 import randoop.contract.CompareToTransitive;
+import randoop.contract.EqualsHashcode;
+import randoop.contract.EqualsReflexive;
+import randoop.contract.EqualsReturnsNormally;
+import randoop.contract.EqualsSymmetric;
+import randoop.contract.EqualsToNullRetFalse;
+import randoop.contract.EqualsTransitive;
+import randoop.contract.ObjectContract;
 import randoop.generation.ComponentManager;
 import randoop.main.ClassNameErrorHandler;
 import randoop.operation.MethodCall;
@@ -30,13 +29,15 @@ import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
 import randoop.sequence.Sequence;
 import randoop.test.ContractSet;
+import randoop.types.ClassOrInterfaceType;
 import randoop.types.JavaTypes;
 import randoop.types.ParameterBound;
-import randoop.types.Type;
-import randoop.types.TypeVariable;
-import randoop.types.ClassOrInterfaceType;
 import randoop.types.ReferenceType;
 import randoop.types.Substitution;
+import randoop.types.Type;
+import randoop.types.TypeCheck;
+import randoop.types.TypeVariable;
+import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 
@@ -290,7 +291,7 @@ public class OperationModel {
       List<String> literalsFileList) {
     ReflectionManager mgr = new ReflectionManager(visibility);
     mgr.add(new DeclarationExtractor(this.classDeclarationTypes, reflectionPredicate));
-    mgr.add(new TypeExtractor(this.inputTypes));
+    mgr.add(new TypeExtractor(this.inputTypes, visibility));
     mgr.add(new TestValueExtractor(this.annotatedTestValues));
     mgr.add(new CheckRepExtractor(this.contracts));
     if (literalsFileList.contains("CLASSES")) {
@@ -305,6 +306,8 @@ public class OperationModel {
         c = TypeNames.getTypeForName(classname);
       } catch (ClassNotFoundException e) {
         errorHandler.handle(classname);
+      } catch (Throwable e) {
+        errorHandler.handle(classname, e.getCause());
       }
       // Note that c could be null if errorHandler just warns on bad names
       if (c != null && !visitedClasses.contains(c)) {
@@ -338,16 +341,19 @@ public class OperationModel {
           c = TypeNames.getTypeForName(classname);
         } catch (ClassNotFoundException e) {
           errorHandler.handle(classname);
+        } catch (Throwable e) {
+          errorHandler.handle(classname, e.getCause());
         }
-        assert c != null;
-
-        if (!visibility.isVisible(c)) {
-          System.out.println(
-              "Ignoring non-visible " + c + " specified as include-if-class-exercised target");
-        } else if (c.isInterface()) {
-          System.out.println("Ignoring " + c + " specified as include-if-class-exercised target.");
-        } else {
-          exercisedClasses.add(c);
+        if (c != null) {
+          if (!visibility.isVisible(c)) {
+            System.out.println(
+                "Ignoring non-visible " + c + " specified as include-if-class-exercised target");
+          } else if (c.isInterface()) {
+            System.out.println(
+                "Ignoring " + c + " specified as include-if-class-exercised target.");
+          } else {
+            exercisedClasses.add(c);
+          }
         }
       }
     }
@@ -361,12 +367,16 @@ public class OperationModel {
     for (ClassOrInterfaceType classType : classDeclarationTypes) {
       if (classType.isGeneric()) {
         List<TypeVariable> typeParameters = classType.getTypeParameters();
-        List<Substitution<ReferenceType>> substitutions = getSubstitutions(typeParameters);
-        assert substitutions.size() > 0 : "didn't find types to satisfy bounds on generic";
-        Substitution<ReferenceType> substitution = Randomness.randomMember(substitutions);
-        ClassOrInterfaceType refinedClassType = classType.apply(substitution);
-        if (!refinedClassType.isGeneric()) {
-          concreteClassTypes.add(refinedClassType);
+        Substitution<ReferenceType> substitution = selectSubstitution(typeParameters);
+        if (substitution != null) {
+          ClassOrInterfaceType refinedClassType = classType.apply(substitution);
+          if (!refinedClassType.isGeneric()) {
+            concreteClassTypes.add(refinedClassType);
+          } else {
+            if (Log.isLoggingOn()) {
+              Log.logLine("Didn't find types to satisfy bounds on generic type: " + classType);
+            }
+          }
         }
       } else {
         concreteClassTypes.add(classType);
@@ -375,19 +385,209 @@ public class OperationModel {
   }
 
   /**
-   * Constructs substitutions for the given list of type parameters that are candidates for
-   * instantiating a generic class type.
+   * Selects an instantiating substitution for the given list of type variables.
+   * @see #selectSubstitution(List, Substitution)
    *
-   * @param typeParameters  the type parameters to be instantiated
-   * @return candidate substitutions for the given type parameters
+   * @param typeParameters  the type variables to be instantiated
+   * @return a substitution instantiating the type variables; null if a variable has no
+   *         instantiating types
    */
-  private List<Substitution<ReferenceType>> getSubstitutions(List<TypeVariable> typeParameters) {
-    TypeTupleSet candidateSet = new TypeTupleSet();
-    for (TypeVariable typeArgument : typeParameters) {
-      List<ReferenceType> candidateTypes = selectCandidates(typeArgument);
-      candidateSet.extend(candidateTypes);
+  private Substitution<ReferenceType> selectSubstitution(List<TypeVariable> typeParameters) {
+    Substitution<ReferenceType> substitution = new Substitution<>();
+    return selectSubstitution(typeParameters, substitution);
+  }
+
+  /**
+   * Extends the given substitution by instantiations for the given list of type variables.
+   * If any of the type variables has a generic bound, assumes there are dependencies and
+   * enumerates all possible substitutions and tests them.
+   * Otherwise, independently selects an instantiating type for each variable.
+   *
+   * @param typeParameters  the type variables to be instantiated
+   * @param substitution  the substitution to extend
+   * @return the substitution extended by instantiating type variables; null if a variable has no
+   *         instantiating types
+   */
+  private Substitution<ReferenceType> selectSubstitution(
+      List<TypeVariable> typeParameters, Substitution<ReferenceType> substitution) {
+    List<Substitution<ReferenceType>> substitutionList;
+    substitutionList = collectSubstitutions(typeParameters, substitution);
+    if (substitutionList.isEmpty()) {
+      return null;
     }
-    return candidateSet.filter(typeParameters);
+    return Randomness.randomMember(substitutionList);
+  }
+
+  private List<Substitution<ReferenceType>> collectSubstitutions(
+      List<TypeVariable> typeParameters, Substitution<ReferenceType> substitution) {
+    /*
+     * partition parameters based on whether might have independent bounds:
+     * - parameters with generic bounds may be dependent on other parameters
+     */
+    List<TypeVariable> genericParameters = new ArrayList<>();
+    /*
+     * - parameters with nongeneric bounds can be selected independently, but may be used by
+     *   generic bounds of other parameters.
+     */
+    List<TypeVariable> nongenericParameters = new ArrayList<>();
+    /*
+     * - wildcard capture variables without generic bounds can be selected independently, and
+     *   may not be used in the bounds of another parameter.
+     */
+    List<TypeVariable> captureParameters = new ArrayList<>();
+
+    for (TypeVariable variable : typeParameters) {
+      if (variable.hasGenericBound()) {
+        genericParameters.add(variable);
+      } else {
+        if (variable.isCaptureVariable()) {
+          captureParameters.add(variable);
+        } else {
+          nongenericParameters.add(variable);
+        }
+      }
+    }
+
+    List<Substitution<ReferenceType>> substitutionList = new ArrayList<>();
+    if (!genericParameters.isEmpty()) {
+      // if there are type parameters with generic bounds
+      TypeCheck typeCheck = TypeCheck.forParameters(genericParameters);
+      if (!nongenericParameters.isEmpty()) {
+        // if there are type parameters with non-generic bounds, these may be variables in
+        // generic-bounded parameters
+        List<List<ReferenceType>> nonGenCandidates = getCandidateTypeLists(nongenericParameters);
+        if (nonGenCandidates.isEmpty()) {
+          return new ArrayList<>();
+        }
+        ListEnumerator<ReferenceType> enumerator = new ListEnumerator<>(nonGenCandidates);
+        while (enumerator.hasNext()) {
+          // choose instantiating substitution for non-generic bounded parameters
+          Substitution<ReferenceType> initialSubstitution =
+              substitution.extend(Substitution.forArgs(nongenericParameters, enumerator.next()));
+          // apply selected substitution to all generic-bounded parameters
+          List<TypeVariable> parameters = new ArrayList<>();
+          for (TypeVariable variable : genericParameters) {
+            TypeVariable param = (TypeVariable) variable.apply(initialSubstitution);
+            parameters.add(param);
+          }
+          // choose instantiation for parameters with generic-bounds
+          substitutionList.addAll(collectSubstitutions(parameters, initialSubstitution));
+        }
+      } else {
+        // if no parameters with non-generic bounds, choose instantiation for parameters
+        // with generic bounds
+        substitutionList = getInstantiations(genericParameters, substitution, typeCheck);
+      }
+      if (substitutionList.isEmpty()) {
+        return substitutionList;
+      }
+    } else if (!nongenericParameters.isEmpty()) {
+      // if there are no type parameters with generic bounds, can select others independently
+      substitution = selectAndExtend(nongenericParameters, substitution);
+      if (substitution == null) {
+        return new ArrayList<>();
+      }
+      substitutionList.add(substitution);
+    }
+
+    // Can always select captured wildcards independently
+    if (!captureParameters.isEmpty()) {
+      List<Substitution<ReferenceType>> substList = new ArrayList<>();
+      if (substitutionList.isEmpty()) {
+        substList.add(selectAndExtend(captureParameters, substitution));
+      } else {
+        for (Substitution<ReferenceType> s : substitutionList) {
+          substList.add(selectAndExtend(captureParameters, s));
+        }
+      }
+      substitutionList = substList;
+    }
+
+    return substitutionList;
+  }
+
+  /**
+   * Selects types independently for a list of type parameters, and extends the given
+   * substitution by the substitution of the selected types for the parameters.
+   *
+   * IMPORTANT: Should only be used for parameters that have non-generic bounds.
+   *
+   * @param parameters  a list of independent type parameters
+   * @param substitution  the substitution to extend
+   * @return the substitution extended by mapping given parameters to selected types;
+   *         null, if there are no candidate types for any parameter
+   */
+  private Substitution<ReferenceType> selectAndExtend(
+      List<TypeVariable> parameters, Substitution<ReferenceType> substitution) {
+    List<ReferenceType> selectedTypes = new ArrayList<>();
+    for (TypeVariable typeArgument : parameters) {
+      List<ReferenceType> candidates = selectCandidates(typeArgument);
+      if (candidates.isEmpty()) {
+        if (Log.isLoggingOn()) {
+          Log.logLine("No candidate types for " + typeArgument);
+        }
+        return null;
+      }
+      selectedTypes.add(Randomness.randomMember(candidates));
+    }
+    return substitution.extend(Substitution.forArgs(parameters, selectedTypes));
+  }
+
+  /**
+   * Adds instantiating substitutions for the given parameters to the list if satisfies the given
+   * type check predicate.
+   * Each constructed substitution extends the given initial substitution.
+   * Assumes that the parameters are or are refinements of the set of parameters check by the
+   * type check predicate.
+   *
+   * @param parameters the list of parameters to instantiate
+   * @param initialSubstitution the substitution to be extended by new substitutions
+   * @param typeCheck the predicate to type check a substitution
+   * @return the list of instantiating substitutions
+   */
+  private List<Substitution<ReferenceType>> getInstantiations(
+      List<TypeVariable> parameters,
+      Substitution<ReferenceType> initialSubstitution,
+      TypeCheck typeCheck) {
+    List<Substitution<ReferenceType>> substitutionList = new ArrayList<>();
+    List<List<ReferenceType>> candidateTypes = getCandidateTypeLists(parameters);
+    if (candidateTypes.isEmpty()) {
+      return new ArrayList<>();
+    }
+    ListEnumerator<ReferenceType> enumerator = new ListEnumerator<>(candidateTypes);
+    while (enumerator.hasNext()) {
+      List<ReferenceType> tuple = enumerator.next();
+      Substitution<ReferenceType> partialSubstitution = Substitution.forArgs(parameters, tuple);
+      Substitution<ReferenceType> substitution = initialSubstitution.extend(partialSubstitution);
+      if (typeCheck.test(tuple, substitution)) {
+        substitutionList.add(substitution);
+      }
+    }
+    return substitutionList;
+  }
+
+  /**
+   * Constructs the list of lists of candidate types for the given type parameters.
+   * Each list is the list of candidates for the parameter in the corresponding position of
+   * the given list as determined by {@link #selectCandidates(TypeVariable)}.
+   *
+   * @param parameters  the list of type parameters
+   * @return  the list of candidate lists for the parameters; returns the empty list if any
+   *          parameter has no candidates
+   */
+  private List<List<ReferenceType>> getCandidateTypeLists(List<TypeVariable> parameters) {
+    List<List<ReferenceType>> candidateTypes = new ArrayList<>();
+    for (TypeVariable typeArgument : parameters) {
+      List<ReferenceType> candidates = selectCandidates(typeArgument);
+      if (candidates.isEmpty()) {
+        if (Log.isLoggingOn()) {
+          Log.logLine("No candidate types for " + typeArgument);
+        }
+        return new ArrayList<>();
+      }
+      candidateTypes.add(candidates);
+    }
+    return candidateTypes;
   }
 
   /**
@@ -502,7 +702,7 @@ public class OperationModel {
     try {
       objectConstructor = Object.class.getConstructor();
     } catch (NoSuchMethodException e) {
-      System.out.println("Something is wrong. Please report: unable to load Object()");
+      System.err.println("Something is wrong. Please report: unable to load Object()");
       System.exit(1);
     }
     TypedClassOperation operation = TypedOperation.forConstructor(objectConstructor);
@@ -523,8 +723,11 @@ public class OperationModel {
     operation = instantiateOperationTypes(operation);
 
     // Note: capture conversion needs all type variables to be instantiated first
-    if (operation.hasWildcardTypes()) {
+    if (operation != null && operation.hasWildcardTypes()) {
       operation = instantiateOperationTypes(operation.applyCaptureConversion());
+    }
+    if (operation == null) {
+      return;
     }
 
     operations.add(operation);
@@ -542,11 +745,11 @@ public class OperationModel {
     if (typeParameters.isEmpty()) {
       return operation;
     }
-    List<Substitution<ReferenceType>> substitutions = getSubstitutions(typeParameters);
-    if (substitutions.isEmpty()) {
-      throw new BugInRandoopException("Unable to instantiate types for operation " + operation);
+
+    Substitution<ReferenceType> substitution = selectSubstitution(typeParameters);
+    if (substitution == null) {
+      return null;
     }
-    Substitution<ReferenceType> substitution = Randomness.randomMember(substitutions);
     return operation.apply(substitution);
   }
 
@@ -561,15 +764,19 @@ public class OperationModel {
   TypedClassOperation instantiateOperationTypes(
       TypedClassOperation operation, Substitution<ReferenceType> substitution) {
     List<TypeVariable> typeParameters = operation.getTypeParameters();
-    typeParameters.removeAll(substitution.getVariables());
+    if (substitution != null) {
+      typeParameters.removeAll(substitution.getVariables());
+    } else {
+      substitution = new Substitution<>();
+    }
     if (!typeParameters.isEmpty()) {
-      List<Substitution<ReferenceType>> substitutions = getSubstitutions(typeParameters);
-      if (substitutions.isEmpty()) {
-        throw new BugInRandoopException("Unable to instantiate types for operation " + operation);
+      substitution = selectSubstitution(typeParameters, substitution);
+      if (substitution == null) {
+        if (Log.isLoggingOn()) {
+          Log.logLine("Unable to instantiate types for operation " + operation);
+        }
+        return null;
       }
-      Substitution<ReferenceType> operationTypeSubstitution =
-          Randomness.randomMember(substitutions);
-      substitution = substitution.extend(operationTypeSubstitution);
     }
     return operation.apply(substitution);
   }

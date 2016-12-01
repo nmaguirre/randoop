@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import plume.UtilMDE;
 import randoop.sequence.Variable;
-import randoop.types.ParameterizedType;
-import randoop.types.Type;
-import randoop.types.TypeVariable;
 import randoop.types.ClassOrInterfaceType;
 import randoop.types.ReferenceType;
 import randoop.types.Substitution;
+import randoop.types.Type;
 import randoop.types.TypeTuple;
+import randoop.types.TypeVariable;
 
 /**
  * Represents a type decoration for an operation that has a declaring class.
@@ -24,6 +24,15 @@ public class TypedClassOperation extends TypedOperation {
    */
   private final ClassOrInterfaceType declaringType;
 
+  /**
+   * Creates a {@link TypedClassOperation} for a given {@link CallableOperation} indicating the
+   * signature of the operation.
+   *
+   * @param operation  the {@link CallableOperation}
+   * @param declaringType  the declaring class type for this operation
+   * @param inputTypes  the input types for the operation
+   * @param outputType  the output types for the operation
+   */
   public TypedClassOperation(
       CallableOperation operation,
       ClassOrInterfaceType declaringType,
@@ -106,14 +115,20 @@ public class TypedClassOperation extends TypedOperation {
 
   @Override
   public String toString() {
-    return declaringType + "." + super.toString();
+    StringBuilder b = new StringBuilder();
+    if (this.isGeneric()) {
+      b.append("<");
+      b.append(UtilMDE.join(this.getTypeParameters(), ","));
+      b.append(">").append(" ");
+    }
+    return b.toString() + declaringType + "." + super.toString();
   }
 
   @Override
   public boolean hasWildcardTypes() {
     return getInputTypes().hasWildcard()
         || (getOutputType().isParameterized()
-            && ((ParameterizedType) getOutputType()).hasWildcard());
+            && ((ClassOrInterfaceType) getOutputType()).hasWildcard());
   }
 
   @Override

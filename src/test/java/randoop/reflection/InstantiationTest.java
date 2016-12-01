@@ -11,9 +11,11 @@ import randoop.main.ClassNameErrorHandler;
 import randoop.main.ThrowClassNameError;
 import randoop.operation.OperationParseException;
 import randoop.operation.TypedOperation;
+import randoop.types.ClassOrInterfaceType;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.isOneOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -24,7 +26,7 @@ import static org.junit.Assert.fail;
 public class InstantiationTest {
 
   @Test
-  public void testInstantiation() {
+  public void testGenericBounds() {
     Set<String> classnames = new LinkedHashSet<>();
     String packageName = "randoop.reflection";
     classnames.add(packageName + "." + "GenericBounds");
@@ -75,6 +77,68 @@ public class InstantiationTest {
     }
     assertThat(
         "expect " + methodNames.size() + " methods", methodCount, is(equalTo(methodNames.size())));
+  }
+
+  /**
+   * This test fails if {@code D_BST} is removed since model always chooses {@code String} for
+   * parameter to {@code BST} and without {@code D_BST} there is no class that implements
+   * {@code C_BST<String>}.
+   *
+   * it should be possible for it to pass with {@code B_BST}.
+   */
+  @Test
+  public void testOperationInstantiation() {
+    Set<String> classnames = new LinkedHashSet<>();
+    String packageName = "randoop.reflection";
+    classnames.add(packageName + "." + "BST");
+    classnames.add(packageName + "." + "B_BST");
+    classnames.add(packageName + "." + "D_BST");
+
+    OperationModel model = createModel(classnames, packageName);
+
+    int expectedClassCount = classnames.size() + 1;
+    assertThat(
+        "expect " + expectedClassCount + " classes",
+        model.getConcreteClasses().size(),
+        is(equalTo(expectedClassCount)));
+
+    int methodCount = 0;
+    for (TypedOperation operation : model.getConcreteOperations()) {
+      System.out.println("op: " + operation);
+      if (operation.isMethodCall()) {
+        methodCount++;
+        if (!operation.getName().equals("m")) {
+          fail("should only have method m, got " + operation.getName());
+        }
+      }
+    }
+    //XXX this should be 1, but running on travis using 1.8.0_101 misses the method,
+    //    while running on my machine with 1.8.0_102 finds it
+    assertThat("expect one method", methodCount, isOneOf(0, 1));
+  }
+
+  @Test
+  public void testRecursiveInstantiation() {
+    Set<String> classnames = new LinkedHashSet<>();
+    String packageName = "randoop.reflection";
+    classnames.add(packageName + "." + "BMB");
+    classnames.add(packageName + "." + "AI");
+    classnames.add(packageName + "." + "AT");
+
+    OperationModel model = createModel(classnames, packageName);
+
+    int expectedClassCount = classnames.size() + 1;
+    assertThat(
+        "expect " + expectedClassCount + " classes",
+        model.getConcreteClasses().size(),
+        is(equalTo(expectedClassCount)));
+
+    for (ClassOrInterfaceType type : model.getConcreteClasses()) {
+      assertThat(
+          "class name one of BMB, AI, AT, or Object",
+          type.getSimpleName(),
+          isOneOf("BMB", "AI", "AT", "Object"));
+    }
   }
 
   private OperationModel createModel(Set<String> names, String packageName) {

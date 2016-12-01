@@ -13,7 +13,6 @@ import randoop.operation.Operation;
 import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
 import randoop.types.ClassOrInterfaceType;
-import randoop.types.GenericClassType;
 import randoop.types.InstantiatedType;
 import randoop.types.NonParameterizedType;
 import randoop.types.ReferenceType;
@@ -67,24 +66,24 @@ public class OperationExtractor extends DefaultClassVisitor {
    * Adds an operation to the collection of this extractor.
    * If the declaring class type is an {@link InstantiatedType}, then the substitution for that
    * class is applied to the types of the operation, and this instantiated operation is returned.
+   * Instantiation of a generic operation is handled in
+   * {@link OperationModel#instantiateOperationTypes(TypedOperation)}.
    *
-   * @param operation  the {@link TypedOperation}
+   * @param operation  the {@link TypedClassOperation}
    */
   private void addOperation(TypedClassOperation operation) {
     if (operation != null) {
-      if (operation.getDeclaringType().isGeneric()) { // need to apply a substitution
-        Substitution<ReferenceType> substitution = new Substitution<>();
-        GenericClassType declaringType = (GenericClassType) operation.getDeclaringType();
-        if (classType.isParameterized()
-            && declaringType.hasRuntimeClass(classType.getRuntimeClass())) {
-          substitution = ((InstantiatedType) classType).getTypeSubstitution();
-        } else if (!classType.isGeneric()) {
-          InstantiatedType supertype =
-              (InstantiatedType) classType.getMatchingSupertype(declaringType);
-          substitution = supertype.getTypeSubstitution();
+      if (operation.getDeclaringType().isGeneric()) {
+        // if the declaring class is generic, then need substitution to instantiate type arguments
+        Substitution<ReferenceType> substitution =
+            classType.getInstantiatingSubstitution(operation.getDeclaringType());
+        if (substitution == null) { //no unifying substitution found
+          return;
         }
-        // XXX if operation is generic, then substitution will not be sufficient, have to instantiate any missing variables
         operation = model.instantiateOperationTypes(operation, substitution);
+        if (operation == null) { //will be null if instantiation failed
+          return;
+        }
       }
       operations.add(operation);
     }
@@ -93,9 +92,8 @@ public class OperationExtractor extends DefaultClassVisitor {
   /**
    * Creates a {@link ConstructorCall} object for the {@link Constructor}.
    *
-   * @param c
-   *          a {@link Constructor} object to be represented as an
-   *          {@link Operation}.
+   * @param c  a {@link Constructor} object to be represented as an
+   *           {@link Operation}.
    */
   @Override
   public void visit(Constructor<?> c) {
@@ -108,7 +106,6 @@ public class OperationExtractor extends DefaultClassVisitor {
     if (!predicate.test(c)) {
       return;
     }
-
     addOperation(TypedOperation.forConstructor(c));
   }
 
@@ -144,8 +141,7 @@ public class OperationExtractor extends DefaultClassVisitor {
       return;
     }
     ClassOrInterfaceType declaringType = ClassOrInterfaceType.forClass(field.getDeclaringClass());
-    if (!(declaringType.isGeneric()
-        && classType.isInstantiationOf((GenericClassType) declaringType))) {
+    if (!(declaringType.isGeneric() && classType.isInstantiationOf(declaringType))) {
       declaringType = classType;
     }
     addOperation(TypedOperation.createGetterForField(field, declaringType));

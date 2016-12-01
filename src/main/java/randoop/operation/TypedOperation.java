@@ -313,8 +313,7 @@ public abstract class TypedOperation implements Operation {
             ClassOrInterfaceType.forClass(m.getDeclaringClass());
         if (methodDeclaringType.isGeneric()) {
           GenericClassType genDeclaringType = (GenericClassType) methodDeclaringType;
-          InstantiatedType superType =
-              (InstantiatedType) enumType.getMatchingSupertype(genDeclaringType);
+          InstantiatedType superType = enumType.getMatchingSupertype(genDeclaringType);
           assert superType != null
               : "should exist a super type of enum instantiating " + genDeclaringType;
           Substitution<ReferenceType> substitution = superType.getTypeSubstitution();
@@ -431,13 +430,27 @@ public abstract class TypedOperation implements Operation {
    * @param size  the size of the created array
    * @return the array creation operation
    */
-  public static TypedOperation createArrayCreation(ArrayType arrayType, int size) {
+  public static TypedOperation createInitializedArrayCreation(ArrayType arrayType, int size) {
     List<Type> typeList = new ArrayList<>();
     for (int i = 0; i < size; i++) {
       typeList.add(arrayType.getElementType());
     }
     TypeTuple inputTypes = new TypeTuple(typeList);
-    return new TypedTermOperation(new ArrayCreation(arrayType, size), inputTypes, arrayType);
+    return new TypedTermOperation(
+        new InitializedArrayCreation(arrayType, size), inputTypes, arrayType);
+  }
+
+  /**
+   * Creates a simple array creation operation for the given type.
+   *
+   * @param arrayType  the desired array type
+   * @return An operation to create an array of the given type
+   */
+  public static TypedOperation createArrayCreation(ArrayType arrayType) {
+    List<Type> typeList = new ArrayList<>();
+    typeList.add(JavaTypes.INT_TYPE);
+    TypeTuple inputTypes = new TypeTuple(typeList);
+    return new TypedTermOperation(new ArrayCreation(arrayType), inputTypes, arrayType);
   }
 
   /**

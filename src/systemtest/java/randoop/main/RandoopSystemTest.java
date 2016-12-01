@@ -373,22 +373,26 @@ public class RandoopSystemTest {
     ExpectedTests expectedRegressionTests = ExpectedTests.NONE;
     ExpectedTests expectedErrorTests = ExpectedTests.SOME;
 
-    // TODO check which of these should actually not be expected
     CoverageChecker coverageChecker = new CoverageChecker(options);
-    coverageChecker.exclude("examples.Buggy.BuggyCompareToSubs.compareTo(java.lang.Object)");
-    coverageChecker.exclude("examples.Buggy.BuggyCompareToSubs.hashCode()");
-    coverageChecker.exclude("examples.Buggy.BuggyEqualsTransitive.hashCode()");
-    coverageChecker.exclude("examples.Buggy.BuggyCompareToReflexive.compareTo(java.lang.Object)");
-    coverageChecker.exclude("examples.Buggy.BuggyCompareToReflexive.hashCode()");
+    coverageChecker.ignore("examples.Buggy.hashCode()");
+    coverageChecker.ignore("examples.Buggy.toString()");
+    /* don't care about hashCode for compareTo input classes */
+    coverageChecker.ignore("examples.Buggy.BuggyCompareToAntiSymmetric.hashCode()");
+    coverageChecker.ignore("examples.Buggy.BuggyCompareToEquals.hashCode()");
+    coverageChecker.ignore("examples.Buggy.BuggyCompareToTransitive.hashCode()");
+    coverageChecker.ignore("examples.Buggy.BuggyCompareToReflexive.hashCode()");
+    coverageChecker.ignore("examples.Buggy.BuggyCompareToSubs.hashCode()");
+    coverageChecker.ignore("examples.Buggy.BuggyEqualsTransitive.hashCode()");
+
+    /* these should be covered, but are in failing assertions and wont show up in JaCoCo results */
     coverageChecker.exclude(
         "examples.Buggy.BuggyCompareToAntiSymmetric.compareTo(java.lang.Object)");
-    coverageChecker.exclude("examples.Buggy.BuggyCompareToAntiSymmetric.hashCode()");
     coverageChecker.exclude("examples.Buggy.BuggyCompareToEquals.compareTo(java.lang.Object)");
-    coverageChecker.exclude("examples.Buggy.BuggyCompareToEquals.hashCode()");
+    coverageChecker.exclude("examples.Buggy.BuggyCompareToEquals.equals(java.lang.Object)");
+    coverageChecker.exclude("examples.Buggy.BuggyCompareToReflexive.compareTo(java.lang.Object)");
+    coverageChecker.exclude("examples.Buggy.BuggyCompareToReflexive.equals(java.lang.Object)");
+    coverageChecker.exclude("examples.Buggy.BuggyCompareToSubs.compareTo(java.lang.Object)");
     coverageChecker.exclude("examples.Buggy.BuggyCompareToTransitive.compareTo(java.lang.Object)");
-    coverageChecker.exclude("examples.Buggy.BuggyCompareToTransitive.hashCode()");
-    coverageChecker.exclude("examples.Buggy.hashCode()");
-    coverageChecker.exclude("examples.Buggy.toString()");
 
     generateAndTestWithCoverage(
         testEnvironment, options, expectedRegressionTests, expectedErrorTests, coverageChecker);
@@ -627,6 +631,11 @@ public class RandoopSystemTest {
    * as long as method input type is a test class.  This will include the enum Day and
    * the class AnInputClass, but exclude the enum Season and the class ANonInputClass.
    *
+   * Note: if this test is failing coverage for a generic method (the message says a parameter is
+   * Object), make sure that there are no overloads of the generic method with more specific
+   * arguments in InputClass. If there are, method resolution rules may lead to a call that Randoop
+   * thinks is to the generic method turning into a call to a more specific method, leading to
+   * coverage issues.
    */
   @Test
   public void runCollectionGenerationTest() {
@@ -694,6 +703,26 @@ public class RandoopSystemTest {
       line = it.next();
     }
     assertTrue("should fail to find class names in file", line.contains("No classes to test"));
+  }
+
+  /**
+   * Test for flaky NaN: the value Double.NaN and the computed NaN value are distinct.
+   * This means that the same computation over each can have different outcomes, but both are
+   * printed as Double.NaN so when run may have a different result from test during generation.
+   */
+  @Test
+  public void runFlakyNaNTest() {
+    TestEnvironment testEnvironment = systemTestEnvironment.createTestEnvironment("flaky-nan");
+    RandoopOptions options = RandoopOptions.createOptions(testEnvironment);
+    options.addTestClass("examples.NaNBadness");
+    options.setRegressionBasename("NaNRegression");
+    options.setErrorBasename("NaNError");
+    options.setOption("inputlimit", "200");
+
+    ExpectedTests expectedRegressionTests = ExpectedTests.SOME;
+    ExpectedTests expectedErrorTests = ExpectedTests.NONE;
+    generateAndTestWithCoverage(
+        testEnvironment, options, expectedRegressionTests, expectedErrorTests);
   }
 
   /* ------------------------------ utility methods ---------------------------------- */
