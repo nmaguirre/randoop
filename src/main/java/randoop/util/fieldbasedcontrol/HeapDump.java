@@ -113,22 +113,48 @@ public class HeapDump {
   		root.setIndex(0);
   		while (!toVisit.isEmpty()) {
   			HeapVertex source = toVisit.pop();
-			// if currObj is null or isPrimitive(currObj) there's already a vertex in the graph representing the value; there's nothing left to do  			
-  			TreeSet<LabeledEdge> sortedEdges = new TreeSet<LabeledEdge>(heap.outgoingEdgesOf(source));
-  			for (LabeledEdge<HeapVertex> currEdge: sortedEdges) {
-  				//System.out.println(currEdge.getLabel());
-  				HeapVertex target = currEdge.getV2();
-  				Object objToTag = target.getObject();
-  				if (objToTag != null && !CanonicalRepresentation.isPrimitive(objToTag) && target.getIndex() == -1) {
-  					target.setIndex(getNextObjectIndex(objToTag));
-  					toVisit.add(target);
-  				}
-  				
-  				String srcstr = CanonicalRepresentation.getCanonicalName(source.getObject(), source.getIndex());
-  				String tgtstr = CanonicalRepresentation.getCanonicalName(target.getObject(), target.getIndex());
-  				if (fieldExtensions.addPairToField(currEdge.getLabel(), srcstr, tgtstr))
-  					extendedExt = true;
-  			}
+  			Object sourceObj = source.getObject();
+
+  			String srcstr = CanonicalRepresentation.getCanonicalName(source.getObject(), source.getIndex());
+  			// Add the values of primitive objects to the extensions 
+			if (CanonicalRepresentation.isPrimitive(sourceObj)) {
+				/*if (source.getIndex() == -1) 
+					source.setIndex(getNextObjectIndex(sourceObj));*/
+/*				try {
+					Field currField;
+		  			if (CanonicalRepresentation.isEnum(sourceObj)) 
+						currField = sourceObj.getClass().getField("name");
+					else 				
+						currField = sourceObj.getClass().getField("value");
+					currField.setAccessible(true);*/
+					String fname = sourceObj.getClass().getSimpleName() + ".value";
+					if (fieldExtensions.addPairToField(fname, srcstr, sourceObj.toString()))
+						extendedExt = true;
+				/*}
+	  			catch (Exception e) {
+	  				System.out.println(sourceObj.getClass().getName() + "" + "" + sourceObj.toString());
+	  				System.exit(1);
+	  				// Should never happen.
+	  				//e.printStackTrace();
+	  			}*/
+			}
+			else {
+				// if currObj is null there's already a vertex in the graph representing the value; there's nothing left to do  			
+				TreeSet<LabeledEdge> sortedEdges = new TreeSet<LabeledEdge>(heap.outgoingEdgesOf(source));
+				for (LabeledEdge<HeapVertex> currEdge: sortedEdges) {
+					//System.out.println(currEdge.getLabel());
+					HeapVertex target = currEdge.getV2();
+					Object objToTag = target.getObject();
+					if (objToTag != null && /* !CanonicalRepresentation.isPrimitive(objToTag) &&*/ target.getIndex() == -1) {
+						target.setIndex(getNextObjectIndex(objToTag));
+						toVisit.add(target);
+					}
+					//String srcstr = CanonicalRepresentation.getCanonicalName(source.getObject(), source.getIndex());
+					String tgtstr = CanonicalRepresentation.getCanonicalName(target.getObject(), target.getIndex());
+					if (fieldExtensions.addPairToField(currEdge.getLabel(), srcstr, tgtstr))
+						extendedExt = true;
+				}
+			}
   		}
   		
   		return extendedExt;
@@ -148,7 +174,7 @@ public class HeapDump {
 	
   	private void buildHeap(Object rootObj) throws IllegalArgumentException, IllegalAccessException {
 
-  		// DummyHeapRoot dummyroot = new DummyHeapRoot(rootObj);j
+  		// DummyHeapRoot dummyroot = new DummyHeapRoot(rootObj);
   		LinkedList<Tuple<HeapVertex,Integer>> toVisit = new LinkedList<Tuple<HeapVertex,Integer>>();
   		// root = new HeapVertex(dummyroot);
   		root = new HeapVertex(rootObj);
@@ -166,8 +192,8 @@ public class HeapDump {
   					currObj.getClass() != Object.class &&
   					!ignoreClass(currObj.getClass().getSimpleName())) {
 				
-  				Class currObjClass = currObj.getClass();  			
-				if (currObjClass.isArray()) {
+  				Class currObjClass = currObj.getClass();
+  				if (currObjClass.isArray()) {
 					/*
 					 * Process an array object currObj: 
 					 * for index i such that currObj[i] = arrvalue_i, add an edge: 
@@ -198,7 +224,7 @@ public class HeapDump {
 							addFieldValueToHeapGraph(currVertex, value, fName, toVisit, currDepth);
 
 						}
-						currObjClass = currObjClass.getSuperclass();					
+						currObjClass = currObjClass.getSuperclass();	
 					}
 					
 				}

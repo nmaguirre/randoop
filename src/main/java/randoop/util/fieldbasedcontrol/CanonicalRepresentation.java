@@ -5,8 +5,8 @@ public class CanonicalRepresentation {
 	public static String getCanonicalName(Object object, int index) {
 		if (object == null) return "null";
 		
-		if (isPrimitive(object.getClass()))
-			return object.toString();
+/*		if (isPrimitive(object.getClass()))
+			return object.toString(); */
 		
 /*		if (object.getClass().isArray())
 			return "ARR_" + getSimpleNameWithoutArrayQualifier(object.getClass()) + index;*/			
@@ -29,6 +29,9 @@ public class CanonicalRepresentation {
   				|| clazz.isEnum());
   	}
   	
+  	public static boolean isEnum(Object value) {
+  		return value.getClass().isEnum();
+  	}
   	
   	public static boolean isPrimitive(Object value) {
   		return (value.getClass().isPrimitive()

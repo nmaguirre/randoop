@@ -96,7 +96,8 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
-  public boolean DEBUG = false;// = true;
+  //public boolean DEBUG = false;// = true;
+  public boolean DEBUG = true;// = true;
   private boolean fieldBasedGen;
   public static int seqnum = 0; 
   public String FILENAME = "logs/seq";
@@ -342,7 +343,7 @@ public class ExecutableSequence {
 		  // Cover the field values belonging to the object returned by the current method
 		  if (statementResult instanceof NormalExecution) {
 			  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
-			  if (obj != null && !CanonicalRepresentation.isPrimitive(obj)) {
+			  if (obj != null /*&& !CanonicalRepresentation.isPrimitive(obj)*/) {
 				  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
 	    		  try {
 	    			  HeapDump dumper = new HeapDump(obj, extensions);
@@ -374,7 +375,7 @@ public class ExecutableSequence {
 		  if (inputVariables.length > 0) {
 			  try {
 				for (int j=0; j<inputVariables.length; j++) {
-					if (inputVariables[j] != null && !CanonicalRepresentation.isPrimitive(inputVariables[j])) {
+					if (inputVariables[j] != null/* && !CanonicalRepresentation.isPrimitive(inputVariables[j])*/) {
 						HeapDump dumper = new HeapDump(inputVariables[j], extensions);
 						extensionsExtended = extensionsExtended || dumper.extensionsExtended();
 						if (DEBUG) {

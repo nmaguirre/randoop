@@ -3,7 +3,9 @@ package randoop.util.fieldbasedcontrol;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -81,7 +83,7 @@ public class DataStructuresTest {
   
   
   @Test
-  public void testLinkedListPrintGraph() throws IllegalArgumentException, IllegalAccessException {
+  public void testLinkedListPrintGraph() throws IllegalArgumentException, IllegalAccessException, IOException {
 	LinkedList l = new LinkedList();
 	l.add(3);
 	l.add(214);
@@ -91,6 +93,9 @@ public class DataStructuresTest {
     int maxArray = 1000;
     String[] ignoredClasses = {};
     HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
+
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/llistgraph.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensions.txt");
     
     System.out.println("Graph:");
     System.out.println(objectDump.heapToString());
@@ -103,10 +108,12 @@ public class DataStructuresTest {
   @Test
   public void testArrayListPrintGraph() throws IllegalArgumentException, IllegalAccessException, IOException {
 	ArrayList l = new ArrayList();
-	l.add("3");
+	String s = "3";
+	l.add(s);
 	l.add("214");
 	l.add("hola");
 	l.add("chau");
+	l.add(s);
     int maxDepth = 1000;
     int maxArray = 1000;
     String[] ignoredClasses = {};
@@ -150,5 +157,73 @@ public class DataStructuresTest {
     System.out.println(objectDump.getFieldExtensions().toString());
     
   }
+
   
+  @Test
+  public void testStringPrintGraph() throws IllegalArgumentException, IllegalAccessException, IOException {
+	String l = "abc";
+    int maxDepth = 1000;
+    int maxArray = 1000;
+    String[] ignoredClasses = {};
+    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
+    
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/astring.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/astringextensions.txt");
+
+  }
+  
+  
+  
+  private String objectFieldsToString(Object o) throws IllegalArgumentException, IllegalAccessException {
+	  String res = "";
+	  Class currObjClass = o.getClass();
+	  while (currObjClass != null && 
+			currObjClass != Object.class) {
+		res += "> Class: " + currObjClass.getSimpleName() + "\n";
+		for (Field f: currObjClass.getDeclaredFields()) {
+			f.setAccessible(true);
+			res += "   " + o.toString() + "." + f.getName() + " = " + f.get(o).toString() + "\n";
+		}
+		currObjClass = currObjClass.getSuperclass();
+	  }
+	  return res;
+  }
+  
+  /*
+	return (clazz.isPrimitive()
+				|| clazz == java.lang.Short.class
+				|| clazz == java.lang.Long.class
+				|| clazz == java.lang.String.class
+				|| clazz == java.lang.Integer.class
+				|| clazz == java.lang.Float.class
+				|| clazz == java.lang.Byte.class
+				|| clazz == java.lang.Character.class
+				|| clazz == java.lang.Double.class
+				|| clazz == java.lang.Boolean.class
+				|| clazz == java.util.Date.class
+				|| clazz.isEnum());
+  */
+
+ 
+  private enum Hola { A, B ,C };
+
+  @Test
+  public void testBasicTypes() throws IllegalArgumentException, IllegalAccessException {
+	Integer i1 = new Integer(3);  
+	System.out.println(objectFieldsToString(i1));
+	System.out.println(objectFieldsToString(3));
+	Integer i2 = new Integer(24179379);
+	System.out.println(objectFieldsToString(i2));
+
+	System.out.println(objectFieldsToString("hola"));
+	System.out.println(objectFieldsToString("hola mundo"));
+	
+	System.out.println(objectFieldsToString(new Byte((byte) 3)));
+	System.out.println(objectFieldsToString('a'));
+	
+	System.out.println(objectFieldsToString(Hola.A));
+	  // A.name = A
+	  // A.ordinal = 0
+  }
+
 }

@@ -1,8 +1,11 @@
 Entry.right:{Entry2=[Entry3], Entry3=[null], Entry0=[Entry2], Entry1=[null]}
-Entry.color:{Entry2=[true], Entry3=[false], Entry0=[true], Entry1=[true]}
+Entry.color:{Entry2=[Boolean2], Entry3=[Boolean3], Entry0=[Boolean0], Entry1=[Boolean1]}
 Entry.left:{Entry2=[null], Entry3=[null], Entry0=[Entry1], Entry1=[null]}
+Boolean.value:{Boolean0=[true], Boolean1=[true], Boolean2=[true], Boolean3=[false]}
 TreeSet.m:{TreeSet0=[TreeMap0]}
+String.value:{String0=[b], String3=[d], String2=[c], String1=[a]}
 TreeMap.root:{TreeMap0=[Entry0]}
-Entry.key:{Entry2=[c], Entry3=[d], Entry0=[b], Entry1=[a]}
+Integer.value:{Integer0=[4]}
+Entry.key:{Entry2=[String2], Entry3=[String3], Entry0=[String0], Entry1=[String1]}
 Entry.value:{Entry2=[Object0], Entry3=[Object0], Entry0=[Object0], Entry1=[Object0]}
-TreeMap.size:{TreeMap0=[4]}
+TreeMap.size:{TreeMap0=[Integer0]}

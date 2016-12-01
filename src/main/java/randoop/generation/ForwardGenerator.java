@@ -168,7 +168,7 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
 
     // PABLO: This was here. Check if it is needed in fieldExhaustiveGeneration
-    processSequence(eSeq);
+    // processSequence(eSeq);
     
 
     // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
@@ -177,24 +177,23 @@ public class ForwardGenerator extends AbstractGenerator {
 		for (int j = 0; j < eSeq.sequence.size(); j++)
 			eSeq.sequence.clearActiveFlag(j);
 		fieldBasedDroppedSeq++;
-		// System.out.println("Sequence number: " + eSeq.seqnum);
-		// System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
-	} 
-    
-
-  
-    if (eSeq.sequence.hasActiveFlags()) {
-      componentManager.addGeneratedSequence(eSeq.sequence);
-      
-      /*
-      try {
-		fieldExtensions.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
-      } catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-      }*/
-    }
-
+		//System.out.println("Sequence number: " + eSeq.seqnum);
+		System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
+		//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));
+		
+	} else {
+		processSequence(eSeq);
+	    if (eSeq.sequence.hasActiveFlags()) {
+	      componentManager.addGeneratedSequence(eSeq.sequence);
+	      
+	      try {
+			fieldExtensions.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+	      } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+	      }
+	    }
+	}
 
     endTime = System.nanoTime();
     gentime += endTime - startTime;
