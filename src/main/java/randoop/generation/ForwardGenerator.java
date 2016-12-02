@@ -173,10 +173,13 @@ public class ForwardGenerator extends AbstractGenerator {
 
     // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
     // active so it is not considered for extension anymore.
-	if (fieldBasedGen && !eSeq.extensionsExtended) {
-		for (int j = 0; j < eSeq.sequence.size(); j++)
-			eSeq.sequence.clearActiveFlag(j);
-		fieldBasedDroppedSeq++;
+    if (fieldBasedGen && !eSeq.extensionsExtended) {
+    	
+		if (eSeq.isNormalExecution())
+			fieldBasedDroppedSeq++;
+		
+		eSeq.sequence.clearAllActiveFlags();
+
 		//System.out.println("Sequence number: " + eSeq.seqnum);
 		//System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
 		//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));

@@ -96,8 +96,8 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
+  // public boolean DEBUG = true;// = true;
   public boolean DEBUG = false;// = true;
-//  public boolean DEBUG = true;// = true;
   private boolean fieldBasedGen;
   public static int seqnum = 0; 
   public String FILENAME = "logs/seq";
@@ -323,19 +323,12 @@ public class ExecutableSequence {
       inputVariables = getRuntimeInputs(executionResults.theList, inputs);
 
       visitor.visitBeforeStatement(this, i);
-      // PABLO: Here randoop executes the current statement with inputVariables as inputs
+
       executeStatement(sequence, executionResults.theList, i, inputVariables);
 
       // make sure statement executed
       ExecutionOutcome statementResult = getResult(i);
       
-      // inputVariables may have been modified by the method (it includes the method's receiver object). Should use them to cover field values.
-      // this.executionResults[i] has the result of executing the current statement. Should we mark its field values as covered as well? Yes.
-      
-      // For now, we only check if the last statement of the sequence covers new field values. I'm still not sure that this is 100% sound. 
-      // This is not sound. Leave it commented for now
-      //if (i == this.sequence.size()-1) {
-
       if (statementResult instanceof NotExecuted) {
           throw new Error("Unexecuted statement in sequence: " + this.toString());
       }
@@ -354,43 +347,59 @@ public class ExecutableSequence {
                 msg + ((ExceptionalExecution) statementResult).getException().getMessage());
           }
       }
-      
-      
-      if (fieldBasedGen) {
+    
+      visitor.visitAfterStatement(this, i);
+    }
+
+    
+    if (fieldBasedGen && isNormalExecution()) {
+    
+    	for (int i = 0; i < this.sequence.size(); i++) {
+    	
+	      // Find and collect the input values to i-th statement.
+	      List<Variable> inputs = sequence.getInputs(i);
+	      Object[] inputVariables;
+
+	      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+
+	      //visitor.visitBeforeStatement(this, i);
+
+	      // executeStatement(sequence, executionResults.theList, i, inputVariables);
+
+	      // make sure statement executed
+	      ExecutionOutcome statementResult = getResult(i);
+  		  if (!(statementResult instanceof NormalExecution)) {
+  			System.out.println("ERROR: augmenting field extensions using exceptional behaviour.");
+  			System.exit(1);
+  		  }
+    		
 	      // PABLO: Field based generation: Canonize the objects resulting from the execution
 	      // and use their fields to populate field extensions 
 		  // Mark the field values of the instances that appear in the execution as covered
 		  // Cover the field values belonging to the object returned by the current method
-		  if (statementResult instanceof NormalExecution) {
-			  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
-			  if (obj != null /*&& !CanonicalRepresentation.isPrimitive(obj)*/) {
-				  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
-	    		  try {
-	    			  HeapDump dumper = new HeapDump(obj, extensions);
-	    			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-	    			  if (DEBUG) {
-	    				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt"); 
-	    				  //try {
-	    					  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
-	    				  /*} catch (RuntimeException e) {
-	    					  System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + i + "-0" + " failed, please check for errors.");
-	    				  }*/
-	    				  
-	    			  }
-	    			  
-	    		  } catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-	    		  } catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-	    		  } catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			  }
+    	  // For now only augment the field extensions with tests that run normally
+		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+		  if (obj != null /*&& !CanonicalRepresentation.isPrimitive(obj)*/) {
+			  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
+    		  try {
+    			  HeapDump dumper = new HeapDump(obj, extensions);
+    			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+    			  if (DEBUG) {
+    				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
+    				  //try {
+    					  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
+    				  /*} catch (RuntimeException e) {
+    					  System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + i + "-0" + " failed, please check for errors.");
+    				  }*/
+    				  
+    			  }
+    			  
+    		  } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+    		  }
 		  }
-	
+
 		  // Cover the field values belonging to all the current method's parameters
 		  if (inputVariables.length > 0) {
 			  try {
@@ -409,24 +418,17 @@ public class ExecutableSequence {
 						}
 					}
 				}
-			  } catch (IllegalArgumentException e) {
+			  } catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			  } catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			  } catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	
+			  }
 		  }
-		  
-      }
-      
+		
 
-      visitor.visitAfterStatement(this, i);
+    	}
+    	
     }
+      
 
     visitor.visitAfterSequence(this);
 
