@@ -336,6 +336,26 @@ public class ExecutableSequence {
       // This is not sound. Leave it commented for now
       //if (i == this.sequence.size()-1) {
 
+      if (statementResult instanceof NotExecuted) {
+          throw new Error("Unexecuted statement in sequence: " + this.toString());
+      }
+      // make sure no exception before final statement of sequence
+      if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
+          if (ignoreException) {
+            // this preserves previous behavior, which was simply to return if
+            // exception occurred
+            break;
+          } else {
+            String msg =
+                "Encountered exception before final statement of error-revealing test (statement "
+                    + i
+                    + "): ";
+            throw new Error(
+                msg + ((ExceptionalExecution) statementResult).getException().getMessage());
+          }
+      }
+      
+      
       if (fieldBasedGen) {
 	      // PABLO: Field based generation: Canonize the objects resulting from the execution
 	      // and use their fields to populate field extensions 
@@ -401,26 +421,9 @@ public class ExecutableSequence {
 			}
 	
 		  }
+		  
       }
       
-      if (statementResult instanceof NotExecuted) {
-        throw new Error("Unexecuted statement in sequence: " + this.toString());
-      }
-      // make sure no exception before final statement of sequence
-      if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
-        if (ignoreException) {
-          // this preserves previous behavior, which was simply to return if
-          // exception occurred
-          break;
-        } else {
-          String msg =
-              "Encountered exception before final statement of error-revealing test (statement "
-                  + i
-                  + "): ";
-          throw new Error(
-              msg + ((ExceptionalExecution) statementResult).getException().getMessage());
-        }
-      }
 
       visitor.visitAfterStatement(this, i);
     }
