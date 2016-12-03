@@ -30,7 +30,7 @@ public class HeapDump {
 
 	private int maxDepth; // = Integer.MAX_VALUE;
 	private int maxArrayElements; // = Integer.MAX_VALUE;
-	private HashMap<String, String> ignoredClasses = new HashMap<String, String>();
+	private Set<String> ignoredClasses = new HashSet<String>();
 	private Set<String> ignoredFields = new HashSet<String>();
 	
 	private DirectedPseudograph<HeapVertex, LabeledEdge> heap =
@@ -77,7 +77,7 @@ public class HeapDump {
 			for (int i = 0; i < Array.getLength(ignoredClasses); i++) {
 				/*int colonIdx = ignoredClasses[i].indexOf(':');
 				if (colonIdx == -1) ignoredClasses[i] = ignoredClasses[i] + ":";*/
-				this.ignoredClasses.put(ignoredClasses[i], ignoredClasses[i]);
+				this.ignoredClasses.add(ignoredClasses[i]);
 			}
 		}
 		
@@ -95,7 +95,7 @@ public class HeapDump {
 	
 	
 	private Integer getNextObjectIndex(Object obj) {
-		String className = obj.getClass().getSimpleName();
+		String className = CanonicalRepresentation.getClassCanonicalName(obj.getClass());
 		Integer c;
 		if ((c = lastIndex.get(className)) != null) {
 			lastIndex.put(className, ++c);
@@ -116,7 +116,7 @@ public class HeapDump {
   			HeapVertex source = toVisit.pop();
   			Object sourceObj = source.getObject();
 
-  			String srcstr = CanonicalRepresentation.getCanonicalName(source.getObject(), source.getIndex());
+  			String srcstr = CanonicalRepresentation.getVertexCanonicalName(source);
   			// Add the values of primitive objects to the extensions 
 			if (CanonicalRepresentation.isPrimitive(sourceObj)) {
 				/*if (source.getIndex() == -1) 
@@ -128,7 +128,7 @@ public class HeapDump {
 					else 				
 						currField = sourceObj.getClass().getField("value");
 					currField.setAccessible(true);*/
-					String fname = sourceObj.getClass().getSimpleName() + ".value";
+					String fname = CanonicalRepresentation.getClassCanonicalName(sourceObj.getClass()) + ".value";
 					if (fieldExtensions.addPairToField(fname, srcstr, sourceObj.toString()))
 						extendedExt = true;
 				/*}
@@ -151,7 +151,7 @@ public class HeapDump {
 						toVisit.add(target);
 					}
 					//String srcstr = CanonicalRepresentation.getCanonicalName(source.getObject(), source.getIndex());
-					String tgtstr = CanonicalRepresentation.getCanonicalName(target.getObject(), target.getIndex());
+					String tgtstr = CanonicalRepresentation.getVertexCanonicalName(target);
 					if (fieldExtensions.addPairToField(currEdge.getLabel(), srcstr, tgtstr))
 						extendedExt = true;
 				}
@@ -172,7 +172,6 @@ public class HeapDump {
 
 
 	
-	
   	private void buildHeap(Object rootObj) throws IllegalArgumentException, IllegalAccessException {
 
   		// DummyHeapRoot dummyroot = new DummyHeapRoot(rootObj);
@@ -186,12 +185,13 @@ public class HeapDump {
   			Tuple<HeapVertex,Integer> t = toVisit.pop();
   			HeapVertex currVertex = t.getFirst(); 
   			Object currObj = currVertex.getObject();
+  			
   			int currDepth = t.getSecond();
 			// if currObj is null or isPrimitive(currObj) there's already a vertex in the graph representing the value; there's nothing left to do  			
   			if (currDepth < maxDepth && currObj != null &&
   					!CanonicalRepresentation.isPrimitive(currObj) &&  					
   					currObj.getClass() != Object.class &&
-  					!ignoreClass(currObj.getClass().getSimpleName())) {
+  					!ignoreClass(CanonicalRepresentation.getClassCanonicalName(currObj.getClass()))) {
 				
   				Class currObjClass = currObj.getClass();
   				if (currObjClass.isArray()) {
@@ -200,12 +200,12 @@ public class HeapDump {
 					 * for index i such that currObj[i] = arrvalue_i, add an edge: 
 					 * 		currObj --_array_i--> arravalue_i  
 					 */
-					String fName = "ARR_" + CanonicalRepresentation.getSimpleNameWithoutArrayQualifier(currObjClass) + ".elem";
+					String fName = CanonicalRepresentation.getClassCanonicalName(currObjClass) + ".elem";
 					int rowCount = maxArrayElements == 0 ? Array.getLength(currObj) : Math.min(maxArrayElements, Array.getLength(currObj));
 					for (int j = 0; j < rowCount; j++) {
 						Object arrObj = Array.get(currObj, j);
 						
-						if (arrObj != null && ignoreClass(arrObj.getClass().getSimpleName())) 
+						if (arrObj != null && ignoreClass(CanonicalRepresentation.getClassCanonicalName(arrObj.getClass()))) 
 							break;
 						
 						addFieldValueToHeapGraph(currVertex, arrObj, fName + j , toVisit, currDepth);
@@ -216,20 +216,20 @@ public class HeapDump {
 					while (currObjClass != null && 
 							currObjClass != Object.class && 
 							!CanonicalRepresentation.isPrimitive(currObj) && 
-							!ignoreClass(currObjClass.getSimpleName())) {
+							!ignoreClass(CanonicalRepresentation.getClassCanonicalName(currObjClass))) {
 						
 						List<Field> fields = getEnabledFields(currObjClass.getDeclaredFields());
 						for (int i = 0; i < fields.size(); i++) {
 							Field currField = fields.get(i);
 							
-							if (ignoredFields.contains(currField.getName()) || Modifier.isTransient(currField.getModifiers())) 
+							String fName = CanonicalRepresentation.getFieldCanonicalName(currField);
+							if (ignoredFields.contains(fName) /*|| Modifier.isTransient(currField.getModifiers())*/)
 								continue;
 							
-							String fName = currObjClass.getSimpleName() + "." + currField.getName();
 							currField.setAccessible(true);										
 							Object value = currField.get(currObj);
 							
-							if (value != null && ignoreClass(value.getClass().getSimpleName())) 
+							if (value != null && ignoreClass(CanonicalRepresentation.getClassCanonicalName(value.getClass()))) 
 								continue;
 							
 							addFieldValueToHeapGraph(currVertex, value, fName, toVisit, currDepth);
@@ -244,12 +244,13 @@ public class HeapDump {
   	}
   		
   		
+  	/*
   	private Tuple<Boolean, HeapVertex> addFieldValueToHeapGraph(HeapVertex currVertex, Object value, String fName) {
 		Tuple<Boolean, HeapVertex> addVertexRes = addObjectToHeapGraph(value);
 		HeapVertex valueVertex = addVertexRes.getSecond();
 		addEdgeToHeapGraph(currVertex, valueVertex, fName);
 		return addVertexRes;
-  	}
+  	}*/
 
 
   	private void addFieldValueToHeapGraph(HeapVertex currVertex, Object value, String fName, LinkedList<Tuple<HeapVertex,Integer>> toVisit, int currDepth) {
@@ -292,23 +293,25 @@ public class HeapDump {
   
 
   	private boolean ignoreClass(String className) {
-  		System.out.println(className);
-  		System.out.println(ignoredClasses);
-  		System.out.println(this.ignoredClasses.get(className));
+//  		System.out.println(className);
+//  		className = className.substring(className.lastIndexOf(".")+1, className.length());
+//  		System.out.println(className);
+//  		System.out.println(ignoredClasses);
+//  		System.out.println(this.ignoredClasses.contains(className));
   		
-  		return this.ignoredClasses.get(className) != null;
+  		return this.ignoredClasses.contains(className);
   	}
   	
-  	private boolean ignoreField(String fieldName, String fieldType) {
-  		return !(this.ignoredClasses.get(":" + fieldName) == null
-				&& this.ignoredClasses.get(fieldType + ":" + fieldName) == null
-				&& this.ignoredClasses.get(fieldType + ":") == null);  		
+  	private boolean ignoreField(String fieldName) {
+  		return this.ignoredFields.contains(fieldName);  		
   	}
   
   	private List<Field> getEnabledFields(Field [] fields) {
   		List<Field> res = new ArrayList<Field>();
   		for (Field f: fields) {
-  			if (!ignoreField(f.getName(), CanonicalRepresentation.getSimpleNameWithoutArrayQualifier(f.getType())))
+  			String fname = CanonicalRepresentation.getFieldCanonicalName(f);
+  			//if (!ignoreField(fname.substring(fname.lastIndexOf(".")+1, fname.length())))
+  			if (!ignoreField(fname))
   				res.add(f);
   		}
   		return res;

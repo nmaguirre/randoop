@@ -1,20 +1,28 @@
 package randoop.util.fieldbasedcontrol;
 
+import java.lang.reflect.Field;
+
 public class CanonicalRepresentation {
 	
-	public static String getCanonicalName(Object object, int index) {
-		if (object == null) return "null";
-		
-/*		if (isPrimitive(object.getClass()))
-			return object.toString(); */
-		
-/*		if (object.getClass().isArray())
-			return "ARR_" + getSimpleNameWithoutArrayQualifier(object.getClass()) + index;*/			
+	
+	
+	public static String getFieldCanonicalName(Field f) {
+		return getClassCanonicalName(f.getDeclaringClass()) + "." + f.getName();
+	}
 
-		return object.getClass().getSimpleName() + index;
+	
+	public static String getClassCanonicalName(Class c) {
+		return c.getCanonicalName();
 	}
 	
-  	public static boolean isPrimitive(Class clazz) {
+	
+	public static String getVertexCanonicalName(HeapVertex v) {
+		Object object = v.getObject();
+		if (object == null) return "null";
+		return getClassCanonicalName(object.getClass()) + v.getIndex();
+	}
+	
+  	private static boolean isPrimitive(Class clazz) {
   		return (clazz.isPrimitive()
   				|| clazz == java.lang.Short.class
   				|| clazz == java.lang.Long.class
@@ -26,7 +34,9 @@ public class CanonicalRepresentation {
   				|| clazz == java.lang.Double.class
   				|| clazz == java.lang.Boolean.class
   				|| clazz == java.util.Date.class
-  				|| clazz == java.util.Locale.class
+  				// FIXME: Not sure if this is the best place to put these classes.
+  				/*|| clazz. == java.util.Locale.class
+  				|| clazz == java.util.ResourceBundle.class*/
   				|| clazz.isEnum());
   	}
   	
@@ -35,13 +45,18 @@ public class CanonicalRepresentation {
   	}
   	
   	public static boolean isPrimitive(Object value) {
+  		if (value instanceof java.util.Locale || value instanceof java.util.ResourceBundle)
+  			return true;
+  		
   		return isPrimitive(value.getClass());
   	}
 
+  	/*
   	public static String getSimpleNameWithoutArrayQualifier(Class clazz) {
   		String simpleName = clazz.getSimpleName();
   		int indexOfBracket = simpleName.indexOf('[');
   		if (indexOfBracket != -1) return simpleName.substring(0, indexOfBracket);
   		return simpleName;
   	}
+  	*/
 }

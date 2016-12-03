@@ -58,7 +58,7 @@ public class HeapVertex {
 	}
 	
 	public String toString() {
-		return CanonicalRepresentation.getCanonicalName(object, index);
+		return CanonicalRepresentation.getVertexCanonicalName(this);
 	}
 	
 }

@@ -6,10 +6,13 @@ public class HeapVertexNameProvider<V> extends StringNameProvider<V> {
 
 	public String getVertexName(V vertex) {
 		HeapVertex v = (HeapVertex) vertex;
+		String name;
 		if (v.getObject() == null) 
 			return vertex.toString();
 		else if (v.getObject() instanceof String) {
-			String name = vertex.toString();
+			name = vertex.toString();
+			name = name.replace("$", "");
+			name = name.replace(".", "_");		
 			name = name.replace("!", "");		
 			name = name.replace("[", "");
 			name = name.replace("]", "");
@@ -21,7 +24,9 @@ public class HeapVertexNameProvider<V> extends StringNameProvider<V> {
 			return name;
 		}
 		else if (v.getObject().getClass().isArray()) {
-			String name = vertex.toString();
+			name = vertex.toString();
+			name = name.replace("$", "");
+			name = name.replace(".", "_");
 			name = name.replace("[", "");
 			name = name.replace("]", "");
 			return "ARR_" + name;		
@@ -32,8 +37,12 @@ public class HeapVertexNameProvider<V> extends StringNameProvider<V> {
 			name = name.replace("]", "");
 			return "VEC_" + name;		
 		}*/		
-		else
-			return vertex.toString();
+		else {
+			name = vertex.toString();
+			name = name.replace("$", "");
+			name = name.replace(".", "_");
+			return name;
+		}
 	}
 	
 	
