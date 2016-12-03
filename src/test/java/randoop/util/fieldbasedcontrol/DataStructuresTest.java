@@ -4,11 +4,14 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.text.AttributedCharacterIterator;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
+import java.util.Vector;
 
 import org.jgrapht.graph.DirectedPseudograph;
 
@@ -35,7 +38,7 @@ public class DataStructuresTest {
     
     Set<HeapVertex> vertices = g.vertexSet();
     // One LinkedList objects, 2 Nodes, 2 Ints (1 for size and 3 for the value of the first node);
-    assertTrue(vertices.size() == 6);/*
+    /*assertTrue(vertices.size() == 6);
     for (HeapVertex vertex : vertices) {
     	Object o = vertex.getObject();
     	if (o == null) continue;
@@ -120,8 +123,8 @@ public class DataStructuresTest {
     HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
    
     
-    objectDump.heapToFile("src/test/java/randoop/util/fieldexhaustivecontrol/arrlistgraph.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldexhaustivecontrol/arrlistextensions.txt");
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistgraph.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistextensions.txt");
     
     System.out.println("Graph:");
     System.out.println(objectDump.heapToString());
@@ -146,8 +149,8 @@ public class DataStructuresTest {
     String[] ignoredClasses = {};
     HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, new String [] {"BLACK", "RED", "parent", "values", "entrySet", "this$0", "MAX_ARRAY_SIZE", "navigableKeySet", "PRESENT","comparator", "descendingMap", "keySet", "modCount", "UNBOUNDED", "serialVersionUID"});
     
-    objectDump.heapToFile("src/test/java/randoop/util/fieldexhaustivecontrol/tsetgraph.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldexhaustivecontrol/tsetextensions.txt");
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetgraph.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensions.txt");
     
     
     System.out.println("Graph:");
@@ -189,21 +192,6 @@ public class DataStructuresTest {
 	  return res;
   }
   
-  /*
-	return (clazz.isPrimitive()
-				|| clazz == java.lang.Short.class
-				|| clazz == java.lang.Long.class
-				|| clazz == java.lang.String.class
-				|| clazz == java.lang.Integer.class
-				|| clazz == java.lang.Float.class
-				|| clazz == java.lang.Byte.class
-				|| clazz == java.lang.Character.class
-				|| clazz == java.lang.Double.class
-				|| clazz == java.lang.Boolean.class
-				|| clazz == java.util.Date.class
-				|| clazz.isEnum());
-  */
-
  
   private enum Hola { A, B ,C };
 
@@ -226,4 +214,113 @@ public class DataStructuresTest {
 	  // A.ordinal = 0
   }
 
+  /*
+  @Test
+  public void decimalFormatFields() throws IllegalArgumentException, IllegalAccessException {
+	  for (Field f: java.text.DecimalFormat.class.getDeclaredFields()) {
+			System.out.println(f.getName() + " " + Modifier.toString(f.getModifiers()));
+
+	  }
+  }*/
+  
+  @Test
+  public void testArrays() throws IllegalArgumentException, IllegalAccessException, IOException {
+	String [] l = { "abc", "a", "abc" };
+    int maxDepth = 1000;
+    int maxArray = 1000;
+    String[] ignoredClasses = {};
+    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
+    
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/strarr.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/strarrext.txt");
+
+	int [] i = { 2, 3, 3, 4, 3 };
+    objectDump = new HeapDump(i, maxDepth, maxArray, ignoredClasses, null);
+    
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/intarr.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/intarrext.txt");
+
+    
+	Integer [] I = { 2, 3, 3, 4, 3 };
+    objectDump = new HeapDump(I, maxDepth, maxArray, ignoredClasses, null);
+    
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarr.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext.txt");
+    
+
+
+  } 
+  
+  @Test
+  public void testVectors() throws IllegalArgumentException, IllegalAccessException, IOException {
+	  
+    Vector v = new Vector();
+    v.addElement(3);
+    v.addElement(5);
+    v.addElement(7);
+
+    Vector v2 = new Vector();
+    v.addElement(3);
+    
+    int maxDepth = 1000;
+    int maxArray = 1000;
+    String[] ignoredClasses = {};
+    HeapDump objectDump = new HeapDump(v, maxDepth, maxArray, ignoredClasses, null);
+    
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vector.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext.txt");
+    
+    Vector [] va = new Vector [3];
+    va[0] = v;
+    va[1] = v;
+    va[2] = v2;
+    
+    objectDump = new HeapDump(va, maxDepth, maxArray, ignoredClasses, null);
+    
+    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarr.dot");
+    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext.txt");    
+
+  }
+  
+  
+  @Test
+  public void testNumberFormat() throws IllegalArgumentException, IllegalAccessException, IOException {
+	  NumberFormat numberFormat0 = NumberFormat.getCurrencyInstance();
+	  AttributedCharacterIterator attributedCharacterIterator2 = numberFormat0.formatToCharacterIterator((java.lang.Object)10.0d);
+
+	  int maxDepth = 1000;
+	  int maxArray = 1000;
+	  String[] ignoredClasses = {"AbstractMap", "AbstractCollection", "AbstractList", "HashMap", "Attribute"};
+	  String [] ignoredFields = {"text", "capacityIncrement", "elementCount", "MAX_ARRAY_SIZE", "currentRunIndex", "relevantAttributes",
+			  "currentRunLimit",
+			  "currentRunStart",
+			  "endIndex",
+			  "currentIndex",
+			  "beginIndex",
+			  "runCount",
+			  "runAttributeValues",
+			  "ARRAY_SIZE_INCREMENT",
+			  "runArraySize",
+			  //"runAttributes",
+			  "runStarts",
+			  "EXPONENT_SIGN",
+			  "DECIMAL_SEPARATOR",
+			  "EXPONENT_SYMBOL",
+			  "GROUPING_SEPARATOR",
+			  "SIGN",
+			  "PERCENT",
+			  "FRACTION",
+			  "INTEGER",
+			  "EXPONENT",
+			  "CURRENCY",
+			  "PERMILLE"
+	  }; //{"serialVersionUID"}; 
+	  HeapDump objectDump = new HeapDump(attributedCharacterIterator2, maxDepth, maxArray, ignoredClasses, ignoredFields);
+	  
+	  objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/numberformatext.txt");
+	  objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/numberformat.dot");
+	      
+  }
+  
+  
 }

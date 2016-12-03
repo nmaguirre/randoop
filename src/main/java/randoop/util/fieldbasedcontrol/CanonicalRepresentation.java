@@ -26,6 +26,7 @@ public class CanonicalRepresentation {
   				|| clazz == java.lang.Double.class
   				|| clazz == java.lang.Boolean.class
   				|| clazz == java.util.Date.class
+  				|| clazz == java.util.Locale.class
   				|| clazz.isEnum());
   	}
   	
@@ -34,18 +35,7 @@ public class CanonicalRepresentation {
   	}
   	
   	public static boolean isPrimitive(Object value) {
-  		return (value.getClass().isPrimitive()
-  				|| value.getClass() == java.lang.Short.class
-  				|| value.getClass() == java.lang.Long.class
-  				|| value.getClass() == java.lang.String.class
-  				|| value.getClass() == java.lang.Integer.class
-  				|| value.getClass() == java.lang.Float.class
-  				|| value.getClass() == java.lang.Byte.class
-  				|| value.getClass() == java.lang.Character.class
-  				|| value.getClass() == java.lang.Double.class
-  				|| value.getClass() == java.lang.Boolean.class
-  				|| value.getClass() == java.util.Date.class
-  				|| value.getClass().isEnum());
+  		return isPrimitive(value.getClass());
   	}
 
   	public static String getSimpleNameWithoutArrayQualifier(Class clazz) {

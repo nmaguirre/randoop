@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,8 +75,8 @@ public class HeapDump {
 
 		if (ignoredClasses != null) {
 			for (int i = 0; i < Array.getLength(ignoredClasses); i++) {
-				int colonIdx = ignoredClasses[i].indexOf(':');
-				if (colonIdx == -1) ignoredClasses[i] = ignoredClasses[i] + ":";
+				/*int colonIdx = ignoredClasses[i].indexOf(':');
+				if (colonIdx == -1) ignoredClasses[i] = ignoredClasses[i] + ":";*/
 				this.ignoredClasses.put(ignoredClasses[i], ignoredClasses[i]);
 			}
 		}
@@ -202,7 +203,12 @@ public class HeapDump {
 					String fName = "ARR_" + CanonicalRepresentation.getSimpleNameWithoutArrayQualifier(currObjClass) + ".elem";
 					int rowCount = maxArrayElements == 0 ? Array.getLength(currObj) : Math.min(maxArrayElements, Array.getLength(currObj));
 					for (int j = 0; j < rowCount; j++) {
-						addFieldValueToHeapGraph(currVertex, Array.get(currObj, j), fName + j , toVisit, currDepth);
+						Object arrObj = Array.get(currObj, j);
+						
+						if (arrObj != null && ignoreClass(arrObj.getClass().getSimpleName())) 
+							break;
+						
+						addFieldValueToHeapGraph(currVertex, arrObj, fName + j , toVisit, currDepth);
 					}
 				} 
 				else {
@@ -215,12 +221,17 @@ public class HeapDump {
 						List<Field> fields = getEnabledFields(currObjClass.getDeclaredFields());
 						for (int i = 0; i < fields.size(); i++) {
 							Field currField = fields.get(i);
-							if (ignoredFields.contains(currField.getName())) 
+							
+							if (ignoredFields.contains(currField.getName()) || Modifier.isTransient(currField.getModifiers())) 
 								continue;
 							
 							String fName = currObjClass.getSimpleName() + "." + currField.getName();
 							currField.setAccessible(true);										
 							Object value = currField.get(currObj);
+							
+							if (value != null && ignoreClass(value.getClass().getSimpleName())) 
+								continue;
+							
 							addFieldValueToHeapGraph(currVertex, value, fName, toVisit, currDepth);
 
 						}
@@ -266,7 +277,14 @@ public class HeapDump {
   	
   	private HeapVertex getVertexContainingObject(Object o) {
   		for (HeapVertex v: heap.vertexSet()) {
-  			if (v.getObject() == o)
+  			Object vertexObj = v.getObject();
+  			/* FIXME: Different objects must have different representations in our heap?
+  			if (o != null && CanonicalRepresentation.isPrimitive(o)) {
+  				if (o.getClass() == vertexObj.getClass() && o.equals(vertexObj)) 
+  					return v;
+  			}
+  			else*/ 
+  			if (vertexObj == o)
   				return v;
   		}
   		return null;
@@ -274,6 +292,10 @@ public class HeapDump {
   
 
   	private boolean ignoreClass(String className) {
+  		System.out.println(className);
+  		System.out.println(ignoredClasses);
+  		System.out.println(this.ignoredClasses.get(className));
+  		
   		return this.ignoredClasses.get(className) != null;
   	}
   	
