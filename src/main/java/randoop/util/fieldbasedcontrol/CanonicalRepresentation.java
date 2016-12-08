@@ -7,6 +7,7 @@ public class CanonicalRepresentation {
 	
 	
 	public static String getFieldCanonicalName(Field f) {
+		//return f.getName();
 		return getClassCanonicalName(f.getDeclaringClass()) + "." + f.getName();
 	}
 

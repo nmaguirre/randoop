@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FieldExtensions {
+	
+	int size = 0;
 
 	private Map<String, FieldExtension> extensions = new HashMap<String, FieldExtension>();
 
@@ -17,7 +19,11 @@ public class FieldExtensions {
 			fe = new FieldExtension(field);
 			extensions.put(field, fe);
 		}
-		return fe.addPair(src, tgt);
+		boolean added = fe.addPair(src, tgt);
+		if (added)
+			size++;
+		
+		return added; 
 	}
 	
 	public String toString() {
@@ -31,6 +37,10 @@ public class FieldExtensions {
 		try (Writer writer = new BufferedWriter(new FileWriter(filename))) {
 			writer.write(toString());
 		}	
+	}
+
+	public int size() {
+		return size;
 	}
 
 }

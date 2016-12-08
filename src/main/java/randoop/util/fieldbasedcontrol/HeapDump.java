@@ -28,6 +28,7 @@ import org.jgrapht.graph.DirectedPseudograph;
  */
 public class HeapDump {
 
+	private int maxStringSize = 50;
 	private int maxDepth; // = Integer.MAX_VALUE;
 	private int maxArrayElements; // = Integer.MAX_VALUE;
 	private Set<String> ignoredClasses = new HashSet<String>();
@@ -46,16 +47,16 @@ public class HeapDump {
 			//new HashMap<String, HashMap<Integer, Object>>();
 	
 	
-	public HeapDump(Object o, FieldExtensions fe) throws IllegalArgumentException, IllegalAccessException {
+	public HeapDump(Object o, FieldExtensions fe) {
 		this(o, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null, fe);
 	}
 	
 	
-	public HeapDump(Object o) throws IllegalArgumentException, IllegalAccessException {
+	public HeapDump(Object o) {
 		this(o, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null);
 	}
 
-	public HeapDump(Object o, int maxDepth, int maxArrayElements) throws IllegalArgumentException, IllegalAccessException {
+	public HeapDump(Object o, int maxDepth, int maxArrayElements) {
 		this(o, maxDepth, maxArrayElements, null, null);
 	}
 
@@ -63,12 +64,12 @@ public class HeapDump {
 		return heap;
 	}
 
-	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields) throws IllegalArgumentException, IllegalAccessException {
+	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields) {
 		this(o, maxDepth, maxArrayElements, ignoredClasses, ignoredFields, new FieldExtensions());
 	}
 	
 	
-	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields, FieldExtensions ext) throws IllegalArgumentException, IllegalAccessException {
+	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields, FieldExtensions ext) {
 
 		this.maxDepth = maxDepth;
 		this.maxArrayElements = maxArrayElements;
@@ -89,7 +90,9 @@ public class HeapDump {
 		fieldExtensions = ext;
 		
 		buildHeap(o);
+		//System.out.println(heap.vertexSet().size());
 		extensionsExtended = canonizeBFSAndPopulateExtensions();
+		//System.out.println(fieldExtensions.size());
 	}
 	
 	
@@ -108,6 +111,9 @@ public class HeapDump {
 
 	
 	private boolean canonizeBFSAndPopulateExtensions() {
+		// a null root does not add anything to field extensions
+		if (root.getObject() == null) return false;
+		
 		boolean extendedExt = false;
   		LinkedList<HeapVertex> toVisit = new LinkedList<HeapVertex>();
   		toVisit.push(root);
@@ -128,8 +134,14 @@ public class HeapDump {
 					else 				
 						currField = sourceObj.getClass().getField("value");
 					currField.setAccessible(true);*/
-					String fname = CanonicalRepresentation.getClassCanonicalName(sourceObj.getClass()) + ".value";
-					if (fieldExtensions.addPairToField(fname, srcstr, sourceObj.toString()))
+					String fname = /*sourceObj.getClass().getSimpleName() + ".value";*/ CanonicalRepresentation.getClassCanonicalName(sourceObj.getClass()) + ".value";
+					String tgtname = sourceObj.toString();
+					// trim string values to length maxStringSize
+					if (sourceObj.getClass() == String.class && tgtname.length() > maxStringSize) {
+						tgtname = tgtname.substring(0, maxStringSize);
+					}
+					
+					if (fieldExtensions.addPairToField(fname, srcstr, tgtname))
 						extendedExt = true;
 				/*}
 	  			catch (Exception e) {
@@ -172,7 +184,7 @@ public class HeapDump {
 
 
 	
-  	private void buildHeap(Object rootObj) throws IllegalArgumentException, IllegalAccessException {
+  	private void buildHeap(Object rootObj) {
 
   		// DummyHeapRoot dummyroot = new DummyHeapRoot(rootObj);
   		LinkedList<Tuple<HeapVertex,Integer>> toVisit = new LinkedList<Tuple<HeapVertex,Integer>>();
@@ -200,7 +212,7 @@ public class HeapDump {
 					 * for index i such that currObj[i] = arrvalue_i, add an edge: 
 					 * 		currObj --_array_i--> arravalue_i  
 					 */
-					String fName = CanonicalRepresentation.getClassCanonicalName(currObjClass) + ".elem";
+					String fName = /*currObjClass.getSimpleName() + ".elem";*/ CanonicalRepresentation.getClassCanonicalName(currObjClass) + ".elem";
 					int rowCount = maxArrayElements == 0 ? Array.getLength(currObj) : Math.min(maxArrayElements, Array.getLength(currObj));
 					for (int j = 0; j < rowCount; j++) {
 						Object arrObj = Array.get(currObj, j);
@@ -218,6 +230,14 @@ public class HeapDump {
 							!CanonicalRepresentation.isPrimitive(currObj) && 
 							!ignoreClass(CanonicalRepresentation.getClassCanonicalName(currObjClass))) {
 						
+						
+						if (currObjClass == org.jfree.chart.ui.ProjectInfo.class) {
+							int wer =1;
+							wer++;
+							
+						}
+							
+						
 						List<Field> fields = getEnabledFields(currObjClass.getDeclaredFields());
 						for (int i = 0; i < fields.size(); i++) {
 							Field currField = fields.get(i);
@@ -227,7 +247,16 @@ public class HeapDump {
 								continue;
 							
 							currField.setAccessible(true);										
-							Object value = currField.get(currObj);
+							Object value = null;
+							try {
+								value = currField.get(currObj);
+							} catch (IllegalArgumentException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 							
 							if (value != null && ignoreClass(CanonicalRepresentation.getClassCanonicalName(value.getClass()))) 
 								continue;
@@ -277,17 +306,19 @@ public class HeapDump {
   	}
   	
   	private HeapVertex getVertexContainingObject(Object o) {
+  		//System.out.println("entre " + heap.vertexSet().size());
   		for (HeapVertex v: heap.vertexSet()) {
-  			Object vertexObj = v.getObject();
-  			/* FIXME: Different objects must have different representations in our heap?
-  			if (o != null && CanonicalRepresentation.isPrimitive(o)) {
-  				if (o.getClass() == vertexObj.getClass() && o.equals(vertexObj)) 
-  					return v;
-  			}
-  			else*/ 
+  			/*Object vertexObj = v.getObject();
+  			// FIXME: Different objects must have different representations in our heap?
   			if (vertexObj == o)
+  				return v;  			
+  			else if (o != null && CanonicalRepresentation.isPrimitive(o) &&
+  					o.getClass() == vertexObj.getClass() && o.equals(vertexObj)) 
+  				return v;*/
+  			if (v.getObject() != null && v.getObject().equals(o))
   				return v;
   		}
+  		
   		return null;
   	}
   
@@ -329,14 +360,24 @@ public class HeapDump {
 	    return outputWriter.toString();
 	}
 	
-	public void heapToFile(String filename) throws IOException {
+	public void heapToFile(String filename) {
 	    //DOTExporter exporter = new DOTExporter(new StringNameProvider(), null, new StringEdgeNameProvider());
 		DOTExporter exporter = new DOTExporter(new HeapVertexNameProvider(), null, new StringEdgeNameProvider());
-	    exporter.export(new FileWriter(filename), heap);
+	    try {
+			exporter.export(new FileWriter(filename), heap);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public void extensionsToFile(String filename) throws IOException {
-	    fieldExtensions.toFile(filename);
+	public void extensionsToFile(String filename) {
+	    try {
+			fieldExtensions.toFile(filename);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

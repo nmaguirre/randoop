@@ -31,7 +31,6 @@ public class HeapVertex {
 		this.index = index;
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -39,7 +38,7 @@ public class HeapVertex {
 		result = prime * result + ((object == null) ? 0 : object.hashCode());
 		return result;
 	}
-
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -48,13 +47,7 @@ public class HeapVertex {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		HeapVertex other = (HeapVertex) obj;
-		if (object == null) {
-			if (other.object != null)
-				return false;
-		} else if (object != other.object)
-			return false;
-		return true;
+		return obj.equals(((HeapVertex)obj).getObject());
 	}
 	
 	public String toString() {
