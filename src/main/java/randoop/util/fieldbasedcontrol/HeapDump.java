@@ -34,6 +34,8 @@ public class HeapDump {
 	private Set<String> ignoredClasses = new HashSet<String>();
 	private Set<String> ignoredFields = new HashSet<String>();
 	
+	//private HashSet<HeapVertex> vertices = new HashSet<HeapVertex>();
+	
 	private DirectedPseudograph<HeapVertex, LabeledEdge> heap =
 			new DirectedPseudograph<HeapVertex, LabeledEdge>(LabeledEdge.class);
 	private HeapVertex root;
@@ -230,14 +232,6 @@ public class HeapDump {
 							!CanonicalRepresentation.isPrimitive(currObj) && 
 							!ignoreClass(CanonicalRepresentation.getClassCanonicalName(currObjClass))) {
 						
-						
-						if (currObjClass == org.jfree.chart.ui.ProjectInfo.class) {
-							int wer =1;
-							wer++;
-							
-						}
-							
-						
 						List<Field> fields = getEnabledFields(currObjClass.getDeclaredFields());
 						for (int i = 0; i < fields.size(); i++) {
 							Field currField = fields.get(i);
@@ -308,15 +302,29 @@ public class HeapDump {
   	private HeapVertex getVertexContainingObject(Object o) {
   		//System.out.println("entre " + heap.vertexSet().size());
   		for (HeapVertex v: heap.vertexSet()) {
-  			/*Object vertexObj = v.getObject();
+  			Object vertexObj = v.getObject();
+  			/* 
   			// FIXME: Different objects must have different representations in our heap?
   			if (vertexObj == o)
   				return v;  			
   			else if (o != null && CanonicalRepresentation.isPrimitive(o) &&
   					o.getClass() == vertexObj.getClass() && o.equals(vertexObj)) 
   				return v;*/
-  			if (v.getObject() != null && v.getObject().equals(o))
+  			if (vertexObj == null && o == null)
   				return v;
+  			
+  			if (v.getObject() != null && vertexObj.equals(o)) {
+  				if (vertexObj.hashCode() != o.hashCode()) {
+  					System.out.println("en grafo:");
+  					System.out.println(vertexObj.getClass());
+  					System.out.println(vertexObj.toString());
+  					System.out.println("otro:");
+  					System.out.println(o.getClass());
+  					System.out.println(o.toString());
+  					throw new RuntimeException("JAVA Contract Violation: Two equal objects must have the same hash code.");
+  				}
+  				return v;
+  			}
   		}
   		
   		return null;

@@ -96,10 +96,12 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
-  //public boolean DEBUG = true;// = true;
-  public boolean DEBUG = false;// = true;
+  //public boolean DEBUG = true;
+  public boolean DEBUG = false;
   private boolean fieldBasedGen;
-  public static int seqnum = 0; 
+  public static int seqnum = 0;
+  public static int brokenEqualsNum = 0;
+  public static boolean brokenEquals = false;
   public String FILENAME = "logs/seq";
 	
   /** The underlying sequence. */
@@ -294,6 +296,7 @@ public class ExecutableSequence {
    */
   private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException) {
 
+	brokenEquals = false;
 	seqnum++;
 	  
     visitor.initialize(this);
@@ -369,9 +372,10 @@ public class ExecutableSequence {
 	      ExecutionOutcome statementResult = getResult(i);
   		  if (!(statementResult instanceof NormalExecution)) {
   			System.out.println("ERROR: augmenting field extensions using exceptional behaviour.");
-  			System.exit(1);
+  			throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
   		  }
     		
+  		  try {
 	      // PABLO: Field based generation: Canonize the objects resulting from the execution
 	      // and use their fields to populate field extensions 
 		  // Mark the field values of the instances that appear in the execution as covered
@@ -380,9 +384,9 @@ public class ExecutableSequence {
 		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
 		  if (obj != null /*&& !CanonicalRepresentation.isPrimitive(obj)*/) {
 			  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
-    		  try {
     			  HeapDump dumper = new HeapDump(obj, extensions);
     			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+    			  //dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
     			  if (DEBUG) {
     				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
     				  //try {
@@ -392,21 +396,16 @@ public class ExecutableSequence {
     				  }*/
     				  
     			  }
-    			  
-    		  } catch (Exception e) {
-				// TODO Auto-generated catch block
-    			System.out.println("ERROR in seq num:" + seqnum);
-				e.printStackTrace();
-    		  }
+
 		  }
 
 		  // Cover the field values belonging to all the current method's parameters
 		  if (inputVariables.length > 0) {
-			  try {
 				for (int j=0; j<inputVariables.length; j++) {
 					if (inputVariables[j] != null/* && !CanonicalRepresentation.isPrimitive(inputVariables[j])*/) {
 						HeapDump dumper = new HeapDump(inputVariables[j], extensions);
 						extensionsExtended = extensionsExtended || dumper.extensionsExtended();
+						//dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + "-e.txt");
 						if (DEBUG) {
 							dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + "-e.txt");
 							//try {
@@ -418,18 +417,25 @@ public class ExecutableSequence {
 						}
 					}
 				}
-			  } catch (Exception e) {
-				// TODO Auto-generated catch block
-				System.out.println("ERROR in seq num:" + seqnum);
-				e.printStackTrace();
-			  }
+
 		  }
+
+  		  } catch (RuntimeException e) {
+  			  brokenEquals = true;
+  			  break;
+  		  }
+		
 		
 
     	}
     	
     }
-      
+    /*
+    if (extensionsExtended) 
+    	System.out.println("extended");
+    else
+    	System.out.println("not extended");
+    */
 
     visitor.visitAfterSequence(this);
 

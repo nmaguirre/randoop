@@ -29,7 +29,7 @@ public class ProgressDisplay extends Thread {
 
   // PABLO: Original value changed for debugging reasons
   private static int exit_if_no_new_sequences_after_mseconds = 10000;
-  //private static int exit_if_no_new_sequences_after_mseconds = 100000000;
+  //private static int exit_if_no_new_sequences_after_mseconds = 100000;
 
   public enum Mode {
     SINGLE_LINE_OVERWRITE,
