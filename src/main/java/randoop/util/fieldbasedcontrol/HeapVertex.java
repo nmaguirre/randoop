@@ -1,5 +1,7 @@
 package randoop.util.fieldbasedcontrol;
 
+import java.util.Objects;
+
 public class HeapVertex {
 
 	private Object object;
@@ -33,21 +35,12 @@ public class HeapVertex {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((object == null) ? 0 : object.hashCode());
-		return result;
+		return Objects.hashCode(object);
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		return obj.equals(((HeapVertex)obj).getObject());
+		return Objects.equals(object, obj);
 	}
 	
 	public String toString() {

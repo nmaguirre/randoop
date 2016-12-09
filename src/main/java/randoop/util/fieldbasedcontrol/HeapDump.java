@@ -136,7 +136,8 @@ public class HeapDump {
 					else 				
 						currField = sourceObj.getClass().getField("value");
 					currField.setAccessible(true);*/
-					String fname = /*sourceObj.getClass().getSimpleName() + ".value";*/ CanonicalRepresentation.getClassCanonicalName(sourceObj.getClass()) + ".value";
+					/*
+					String fname = CanonicalRepresentation.getClassCanonicalName(sourceObj.getClass()) + ".value";
 					String tgtname = sourceObj.toString();
 					// trim string values to length maxStringSize
 					if (sourceObj.getClass() == String.class && tgtname.length() > maxStringSize) {
@@ -145,6 +146,7 @@ public class HeapDump {
 					
 					if (fieldExtensions.addPairToField(fname, srcstr, tgtname))
 						extendedExt = true;
+					*/
 				/*}
 	  			catch (Exception e) {
 	  				System.out.println(sourceObj.getClass().getName() + "" + "" + sourceObj.toString());
@@ -346,6 +348,7 @@ public class HeapDump {
   	}
   
   	private List<Field> getEnabledFields(Field [] fields) {
+  		
   		List<Field> res = new ArrayList<Field>();
   		for (Field f: fields) {
   			String fname = CanonicalRepresentation.getFieldCanonicalName(f);

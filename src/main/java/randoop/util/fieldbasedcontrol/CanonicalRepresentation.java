@@ -1,10 +1,13 @@
 package randoop.util.fieldbasedcontrol;
 
 import java.lang.reflect.Field;
+import java.util.Map;
+
+import java.util.HashMap;
 
 public class CanonicalRepresentation {
 	
-	
+	private static Map<Class, String> classNames = new HashMap<Class, String> (); 
 	
 	public static String getFieldCanonicalName(Field f) {
 		//return f.getName();
@@ -13,7 +16,13 @@ public class CanonicalRepresentation {
 
 	
 	public static String getClassCanonicalName(Class c) {
-		return c.getCanonicalName();
+		String name = classNames.get(c);
+		if (name == null) {
+			name = c.getCanonicalName();
+			classNames.put(c, name);
+		}
+
+		return name;
 	}
 	
 	
@@ -22,6 +31,7 @@ public class CanonicalRepresentation {
 		if (object == null) return "null";
 		return getClassCanonicalName(object.getClass()) + v.getIndex();
 	}
+
 	
   	private static boolean isPrimitive(Class clazz) {
   		return (clazz.isPrimitive()
