@@ -231,7 +231,7 @@ public class HeapDump {
 					// Process a non-array field
 					while (currObjClass != null && 
 							currObjClass != Object.class && 
-							!CanonicalRepresentation.isPrimitive(currObj) && 
+							!CanonicalRepresentation.isPrimitive(currObjClass) && 
 							!ignoreClass(CanonicalRepresentation.getClassCanonicalName(currObjClass))) {
 						
 						List<Field> fields = getEnabledFields(currObjClass.getDeclaredFields());
@@ -239,6 +239,9 @@ public class HeapDump {
 							Field currField = fields.get(i);
 							
 							String fName = CanonicalRepresentation.getFieldCanonicalName(currField);
+							
+							//System.out.println(CanonicalRepresentation.getFieldCanonicalName(currField));
+							
 							if (ignoredFields.contains(fName) /*|| Modifier.isTransient(currField.getModifiers())*/)
 								continue;
 							

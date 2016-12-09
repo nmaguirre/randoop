@@ -61,36 +61,27 @@ public class HeapCanonizer {
 		return res;
 	}
 	
-	// src is already in the store (and has an assigned index), tgt might or not be 
-	// in the store (and might or not be assigned an index, respectively)
-	// Returns a tuple (a,b) with: 
-	//		a iff tgt is already in the store 
-	//		b iff the extensions were extended
-	private Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, String fieldname) {
+	
+	private boolean addToExtensions(Object src, Object tgt, String fieldname) {
 		String srccls = CanonicalRepresentation.getClassCanonicalName(src.getClass());
 		Integer srcInd = getObjectIndex(src);
 		String srcString = srccls + srcInd;
 		
-		boolean tgtInStore;
 		String tgtString;
 		if (tgt != null) {
 			String tgtcls = CanonicalRepresentation.getClassCanonicalName(tgt.getClass());
 			// Assign indexes to the objects
-			Integer oldTgtInd = getObjectIndex(tgt);
-			tgtInStore = oldTgtInd != -1; 
 			Integer tgtInd = assignIndexToObject(tgt);
 			tgtString = tgtcls + tgtInd;
 		}
 		else {
 			// return true as if null was present in the store, so it is never added to it
-			tgtInStore = true;
 			tgtString = CanonicalRepresentation.getNullRepresentation();
 		}
 		
-		boolean extensionsExtended = extensions.addPairToField(fieldname, srcString, tgtString);
-		// Enlarge the extensions
-		return new Tuple<Boolean, Boolean>(tgtInStore, extensionsExtended);
+		return extensions.addPairToField(fieldname, srcString, tgtString);
 	}
+	
 
 	private Integer getObjectIndex(Object o) {
 		String classname = CanonicalRepresentation.getClassCanonicalName(o.getClass());	
@@ -108,27 +99,32 @@ public class HeapCanonizer {
 		
 		boolean extendedExtensions = false;
   		LinkedList<Object> toVisit = new LinkedList<Object>();
-  		toVisit.push(root);
+  		toVisit.addLast(root);
   		assignIndexToObject(root);
 
   		while (!toVisit.isEmpty()) {
-  			Object obj = toVisit.pop();
+  			Object obj = toVisit.removeFirst();
   			Class objClass = obj.getClass();
   			// FIXME: Should assign ids to objects when it gets them out of the queue
   			// for real BFS tagging?
   			
   			// Do nothing with objects of primitve type
-			if (!CanonicalRepresentation.isPrimitive(obj)) {
+			if (objClass != java.lang.Object.class && !CanonicalRepresentation.isPrimitive(obj)) {
   				if (objClass.isArray()) {
 					// Process an array object. Add a dummy field for each of its elements
 					for (int i = 0; i < Array.getLength(obj); i++) {
-						Object objInArray = Array.get(obj, i);
-						Tuple<Boolean, Boolean> addRes = addToExtensions(obj, 
-								objInArray, 
-								CanonicalRepresentation.getArrayFieldCanonicalName(objClass, i)); 
-						if (!addRes.getFirst())
-							toVisit.push(objInArray);
-						extendedExtensions = extendedExtensions || addRes.getSecond();
+						Object target = Array.get(obj, i);
+						
+						// If target does not belong to the store add it and assign an index to it
+						if (target != null && getObjectIndex(target) == -1) {
+							assignIndexToObject(target);
+							toVisit.addLast(target);
+						}
+							
+						if (addToExtensions(obj, 
+								target, 
+								CanonicalRepresentation.getArrayFieldCanonicalName(objClass, i)))
+							extendedExtensions = true;							
 					}
   				}
   				else {
@@ -137,19 +133,26 @@ public class HeapCanonizer {
   					// FIXME: Go back to the unsorted version for better performance
   					for (Field fld: getAllClassFieldsSortedByName(objClass)) {
   						fld.setAccessible(true);
-  						Object fieldTarget;
+  						Object target;
 						try {
-							fieldTarget = fld.get(obj);
+							target = fld.get(obj);
 						} catch (Exception e) {
 							// Cannot happen
 							throw new RuntimeException("ERROR: Illegal access to an object field during canonization");
 						}
-						Tuple<Boolean, Boolean> addRes = addToExtensions(obj, 
-								fieldTarget, 
-								CanonicalRepresentation.getFieldCanonicalName(fld));
-						if (!addRes.getFirst())
-							toVisit.push(fieldTarget);
-						extendedExtensions = extendedExtensions || addRes.getSecond();							
+						
+						// If target does not belong to the store add it and assign an index to it
+						if (target != null && getObjectIndex(target) == -1) {
+							assignIndexToObject(target);
+							toVisit.addLast(target);
+						}
+						
+						// System.out.println(CanonicalRepresentation.getFieldCanonicalName(fld));
+							
+						if (addToExtensions(obj, 
+								target, 
+								CanonicalRepresentation.getFieldCanonicalName(fld)))
+							extendedExtensions = true;							
   					}
   				}
 			}
@@ -201,10 +204,9 @@ public class HeapCanonizer {
 			cls = cls.getSuperclass();	
 		}
 
-		System.out.println(clsFields);
+		//System.out.println(clsFields);
 		clsFields.sort(new FieldByNameComp());
-		System.out.println(clsFields);
-		
+		//System.out.println(clsFields);
 		
 		classFields.put(classname, clsFields);
 		return clsFields;
