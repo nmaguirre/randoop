@@ -92,19 +92,18 @@ public class DataStructuresTest {
 	l.add(214);
 	l.add("hola");
 	l.add("chau");
-    int maxDepth = 1000;
-    int maxArray = 1000;
-    String[] ignoredClasses = {};
-    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
-
+	
+	FieldExtensions fe1 = new FieldExtensions();	
+    HeapDump objectDump = new HeapDump(l, fe1);
     objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/llistgraph.dot");
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensions.txt");
     
-    System.out.println("Graph:");
-    System.out.println(objectDump.heapToString());
+    FieldExtensions fe2 = new FieldExtensions();
+    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+    canonizer.canonizeAndEnlargeExtensions(l);
+    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensionsnew.txt");
     
-    System.out.println("\n\nExtensions");
-    System.out.println(objectDump.getFieldExtensions().toString());
+    assertTrue(fe1.equals(fe2));
   }
   
   
@@ -151,14 +150,7 @@ public class DataStructuresTest {
     
     objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetgraph.dot");
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensions.txt");
-    
-    
-    System.out.println("Graph:");
-    System.out.println(objectDump.heapToString());
-    
-    System.out.println("\n\nExtensions");
-    System.out.println(objectDump.getFieldExtensions().toString());
-    
+
   }
 
   
@@ -176,7 +168,7 @@ public class DataStructuresTest {
   }
   
   
-  
+ /* 
   private String objectFieldsToString(Object o) throws IllegalArgumentException, IllegalAccessException {
 	  String res = "";
 	  Class currObjClass = o.getClass();
@@ -213,7 +205,7 @@ public class DataStructuresTest {
 	  // A.name = A
 	  // A.ordinal = 0
   }
-
+*/
   /*
   @Test
   public void decimalFormatFields() throws IllegalArgumentException, IllegalAccessException {
@@ -223,64 +215,105 @@ public class DataStructuresTest {
 	  }
   }*/
   
-  @Test
-  public void testArrays() throws IllegalArgumentException, IllegalAccessException, IOException {
-	String [] l = { "abc", "a", "abc" };
-    int maxDepth = 1000;
-    int maxArray = 1000;
-    String[] ignoredClasses = {};
-    HeapDump objectDump = new HeapDump(l, maxDepth, maxArray, ignoredClasses, null);
-    
-    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/strarr.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/strarrext.txt");
-
-	int [] i = { 2, 3, 3, 4, 3 };
-    objectDump = new HeapDump(i, maxDepth, maxArray, ignoredClasses, null);
-    
-    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/intarr.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/intarrext.txt");
-
-    
-	Integer [] I = { 2, 3, 3, 4, 3 };
-    objectDump = new HeapDump(I, maxDepth, maxArray, ignoredClasses, null);
-    
-    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarr.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext.txt");
-    
-
-
-  } 
-  
-  @Test
-  public void testVectors() throws IllegalArgumentException, IllegalAccessException, IOException {
+	  @Test
+	  public void testArrays1() throws IllegalArgumentException, IllegalAccessException, IOException {
+		String [] l = { "abc", "a", "abc" };
+		FieldExtensions fe1 = new FieldExtensions();
+	    HeapDump objectDump = new HeapDump(l, fe1);
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/strarr.dot");
+	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/strarrext.txt");
+	
+	    FieldExtensions fe2 = new FieldExtensions();
+	    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+	    canonizer.canonizeAndEnlargeExtensions(l);
+	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/strarrextnew.txt");
+	        
+	    assertTrue(fe1.equals(fe2));
+	  }
+	    
+	    
+	  @Test
+	  public void testArrays2() throws IllegalArgumentException, IllegalAccessException, IOException {
+		int [] l = { 2, 3, 3, 4, 3 };
+		FieldExtensions fe1 = new FieldExtensions();
+	    HeapDump objectDump = new HeapDump(l, fe1);
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/intarr.dot");
+	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/intarrext.txt");
+	
+	    FieldExtensions fe2 = new FieldExtensions();
+	    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+	    canonizer.canonizeAndEnlargeExtensions(l);
+	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/intarrextnew.txt");
+	        
+	    assertTrue(fe1.equals(fe2));
+	  }
 	  
-    Vector v = new Vector();
-    v.addElement(3);
-    v.addElement(5);
-    v.addElement(7);
+	  @Test
+	  public void testArrays3() throws IllegalArgumentException, IllegalAccessException, IOException {
+		Integer [] l = { 2, 3, 3, 4, 3 };
+		FieldExtensions fe1 = new FieldExtensions();
+	    HeapDump objectDump = new HeapDump(l, fe1);
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarr.dot");
+	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext.txt");
+	
+	    FieldExtensions fe2 = new FieldExtensions();
+	    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+	    canonizer.canonizeAndEnlargeExtensions(l);
+	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrextnew.txt");
+	        
+	    assertTrue(fe1.equals(fe2));
+	  }
 
-    Vector v2 = new Vector();
-    v.addElement(3);
-    
-    int maxDepth = 1000;
-    int maxArray = 1000;
-    String[] ignoredClasses = {};
-    HeapDump objectDump = new HeapDump(v, maxDepth, maxArray, ignoredClasses, null);
-    
-    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vector.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext.txt");
-    
-    Vector [] va = new Vector [3];
-    va[0] = v;
-    va[1] = v;
-    va[2] = v2;
-    
-    objectDump = new HeapDump(va, maxDepth, maxArray, ignoredClasses, null);
-    
-    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarr.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext.txt");    
+  
+  	@Test
+  	public void testVectors1() throws IOException {
+	    Vector v = new Vector();
+	    v.addElement(3);
+	    v.addElement(5);
+	    v.addElement(7);
+	
+		FieldExtensions fe1 = new FieldExtensions();
+	    HeapDump objectDump = new HeapDump(v, fe1);
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vector.dot");
+	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext.txt");
+	
+	    FieldExtensions fe2 = new FieldExtensions();
+	    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+	    canonizer.canonizeAndEnlargeExtensions(v);
+	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorextnew.txt");
+	        
+	    assertTrue(fe1.equals(fe2));
+  	}    
 
-  }
+    
+    
+    @Test
+    public void testVectors2() throws IOException {
+        Vector v = new Vector();
+        v.addElement(3);
+        v.addElement(5);
+        v.addElement(7);
+
+        Vector v2 = new Vector();
+        v2.addElement(3);
+
+        Vector [] va = new Vector [3];
+        va[0] = v;
+        va[1] = v;
+        va[2] = v2;
+    
+		FieldExtensions fe1 = new FieldExtensions();
+	    HeapDump objectDump = new HeapDump(v, fe1);
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarr.dot");
+	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext.txt");   
+	
+	    FieldExtensions fe2 = new FieldExtensions();
+	    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+	    canonizer.canonizeAndEnlargeExtensions(v);
+	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrextnew.txt");
+	    assertTrue(fe1.equals(fe2));
+   
+    }
   
   
   @Test

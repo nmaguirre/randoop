@@ -43,4 +43,33 @@ public class FieldExtensions {
 		return size;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
+		result = prime * result + size;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FieldExtensions other = (FieldExtensions) obj;
+		if (size != other.size)
+			return false;
+		if (extensions == null) {
+			if (other.extensions != null)
+				return false;
+		} else if (!extensions.equals(other.extensions))
+			return false;
+		return true;
+	}
+	
+
 }

@@ -10,8 +10,16 @@ public class CanonicalRepresentation {
 	private static Map<Class, String> classNames = new HashMap<Class, String> (); 
 	
 	public static String getFieldCanonicalName(Field f) {
-		//return f.getName();
 		return getClassCanonicalName(f.getDeclaringClass()) + "." + f.getName();
+	}
+
+	/*
+	public static String getFieldCanonicalName(Field f, Class c) {
+		return getClassCanonicalName(c) + "." + f.getName();
+	}*/
+	
+	public static String getArrayFieldCanonicalName(Class c, Integer pos) {
+		return getClassCanonicalName(c) + ".elem" + pos;
 	}
 
 	
@@ -61,6 +69,10 @@ public class CanonicalRepresentation {
   		
   		return isPrimitive(value.getClass());
   	}
+
+	public static String getNullRepresentation() {
+		return "null";
+	}
 
   	/*
   	public static String getSimpleNameWithoutArrayQualifier(Class clazz) {

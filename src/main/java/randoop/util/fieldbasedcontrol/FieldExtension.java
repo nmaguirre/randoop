@@ -25,6 +25,37 @@ public class FieldExtension {
 		return s.add(p2);
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((extension == null) ? 0 : extension.hashCode());
+		result = prime * result + ((fieldname == null) ? 0 : fieldname.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FieldExtension other = (FieldExtension) obj;
+		if (fieldname == null) {
+			if (other.fieldname != null)
+				return false;
+		} else if (!fieldname.equals(other.fieldname))
+			return false;
+		if (extension == null) {
+			if (other.extension != null)
+				return false;
+		} else if (!extension.equals(other.extension))
+			return false;
+		return true;
+	}
+
 	public String toString() {
 		return fieldname + ":" + extension.toString();
 	}
