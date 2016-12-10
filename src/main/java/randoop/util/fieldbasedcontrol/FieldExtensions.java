@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class FieldExtensions {
 	
-	int size = 0;
+	private int size = 0;
 
 	private Map<String, FieldExtension> extensions = new HashMap<String, FieldExtension>();
 

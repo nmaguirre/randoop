@@ -132,6 +132,10 @@ public class JChartOldTests {
 		  
 		  objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/chartext.txt");
 		  objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/chart.dot");
+		  
+		  System.out.println("Extensions1 size: " + ext.size());
+		  // System.out.println("Extensions2 size: " + fe2.size());
+		  
 	 }
 	  
 	

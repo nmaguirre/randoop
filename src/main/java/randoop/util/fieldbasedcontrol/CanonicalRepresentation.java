@@ -70,7 +70,11 @@ public class CanonicalRepresentation {
   	}
   	
   	public static boolean isPrimitive(Object value) {
-  		if (value instanceof java.util.Locale || value instanceof java.util.ResourceBundle)
+  		if (//value instanceof java.util.Locale || 
+  				value instanceof java.util.ResourceBundle /*||
+  				value instanceof java.util.TimeZone ||
+  				value instanceof java.util.Calendar*/)
+  			
   			return true;
   		
   		return isPrimitive(value.getClass());

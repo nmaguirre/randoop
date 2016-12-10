@@ -75,10 +75,10 @@ public class DataStructuresDiferentialTests {
   @Test
   public void testTreeSetPrintGraph() throws IllegalArgumentException, IllegalAccessException, IOException {
 	TreeSet l = new TreeSet();
-	//l.add("a");
-	//l.add("b");
-	//l.add("c");
-	//l.add("d");
+	l.add("a");
+	l.add("b");
+	l.add("c");
+	l.add("d");
 
     FieldExtensions fe1 = new FieldExtensions();	
     HeapDump objectDump = new HeapDump(l, fe1);
@@ -95,6 +95,10 @@ public class DataStructuresDiferentialTests {
     // object in the graph, and hence there will be only one node in the graph for 
     // different objects o1 and o2 such that o1.equals(o2) (because of a bug in equals, for example).
     // This is clearly unwanted behaviour. Randoop is not good detecting this kind of behaviour.
+    
+    System.out.println("Extensions1 size: " + fe1.size());
+    System.out.println("Extensions2 size: " + fe2.size());
+    
     assertFalse(fe1.equals(fe2));
   }
 

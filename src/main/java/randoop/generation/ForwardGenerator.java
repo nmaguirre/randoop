@@ -44,7 +44,7 @@ public class ForwardGenerator extends AbstractGenerator {
   public FieldExtensions fieldExtensions;
   public FieldExtensions fieldExtensionsCanonizer;
   public HeapCanonizer canonizer;
-  //public boolean fieldBasedGen = false;
+  // public boolean fieldBasedGen = false;
   public boolean fieldBasedGen = true;
 
 
@@ -189,18 +189,23 @@ public class ForwardGenerator extends AbstractGenerator {
 		//System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
 		//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));
 		
+
 	} else {
 		processSequence(eSeq);
 	    if (eSeq.sequence.hasActiveFlags()) {
 	      componentManager.addGeneratedSequence(eSeq.sequence);
-	      /*
+
+	    }
+	      
+	    //System.out.println("Extensions size:" + canonizer.getExtensions().size());
+	    
+	    /*
 	      try {
-			fieldExtensions.toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+			canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
 	      } catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 	      }*/
-	    }
 	}
 
     endTime = System.nanoTime();

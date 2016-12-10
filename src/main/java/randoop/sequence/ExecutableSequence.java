@@ -466,8 +466,8 @@ public class ExecutableSequence {
     */
     /*
     if (extensions != null && extensionsExtended)
-    	System.out.println("Extensions size:" + canonizer.getExtensions().size());
-    */
+    	System.out.println("Extensions size:" + canonizer.getExtensions().size());*/
+    
     visitor.visitAfterSequence(this);
 
     checks = gen.visit(this);

@@ -2,11 +2,15 @@ package randoop.util.fieldbasedcontrol;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+
 
 /* 
  * class HeapCanonizer
@@ -130,11 +134,11 @@ public class HeapCanonizer {
   			// for real BFS tagging?
   			
   			// Do nothing with objects of Object type
-			if (objClass == java.lang.Object.class) continue;
+			if (objClass == Object.class) continue;
 				
 			if (CanonicalRepresentation.isPrimitive(obj)) {
 				if (addPrimitiveValueToExtensions(obj, CanonicalRepresentation.getPrimitiveFieldCanonicalName(objClass)))
-					extendedExtensions = true;
+					extendedExtensions = true; 
 			}
 			else {
   				if (objClass.isArray()) {
@@ -159,13 +163,14 @@ public class HeapCanonizer {
   					// Use its field values to enlarge the extensions
   					// FIXME: Go back to the unsorted version for better performance
   					for (Field fld: getAllClassFieldsSortedByName(objClass)) {
+  					//for (Field fld: getAllClassFields(objClass)) {
   						fld.setAccessible(true);
   						Object target;
 						try {
 							target = fld.get(obj);
 						} catch (Exception e) {
 							// Cannot happen
-							throw new RuntimeException("ERROR: Illegal access to an object field during canonization");
+							throw new Error("ERROR: Illegal access to an object field during canonization");
 						}
 						
 						// If target does not belong to the store add it and assign an index to it
@@ -238,7 +243,8 @@ public class HeapCanonizer {
 		}
 
 		//System.out.println(clsFields);
-		clsFields.sort(new FieldByNameComp());
+		Collections.sort(clsFields, new FieldByNameComp());
+		//clsFields.sort(new FieldByNameComp());
 		//System.out.println(clsFields);
 		
 		classFields.put(classname, clsFields);

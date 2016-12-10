@@ -10,7 +10,7 @@ public class FieldExtension {
 	
 	private String fieldname;
 	private Map<String, Set<String>> extension = new HashMap<String, Set<String>>();
-	
+
 	public FieldExtension(String name) {
 		fieldname = name;
 	}
