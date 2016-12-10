@@ -25,6 +25,7 @@ public class FieldExtension {
 		return s.add(p2);
 	}
 	
+	/*
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -33,7 +34,8 @@ public class FieldExtension {
 		result = prime * result + ((fieldname == null) ? 0 : fieldname.hashCode());
 		return result;
 	}
-
+	 */
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

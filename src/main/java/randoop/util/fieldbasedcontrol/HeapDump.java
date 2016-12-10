@@ -28,7 +28,6 @@ import org.jgrapht.graph.DirectedPseudograph;
  */
 public class HeapDump {
 
-	private int maxStringSize = 50;
 	private int maxDepth; // = Integer.MAX_VALUE;
 	private int maxArrayElements; // = Integer.MAX_VALUE;
 	private Set<String> ignoredClasses = new HashSet<String>();
@@ -136,17 +135,17 @@ public class HeapDump {
 					else 				
 						currField = sourceObj.getClass().getField("value");
 					currField.setAccessible(true);*/
-					/*
-					String fname = CanonicalRepresentation.getClassCanonicalName(sourceObj.getClass()) + ".value";
+					
+					String fname = CanonicalRepresentation.getPrimitiveFieldCanonicalName(sourceObj.getClass());
 					String tgtname = sourceObj.toString();
 					// trim string values to length maxStringSize
-					if (sourceObj.getClass() == String.class && tgtname.length() > maxStringSize) {
-						tgtname = tgtname.substring(0, maxStringSize);
+					if (sourceObj.getClass() == String.class && tgtname.length() > CanonicalRepresentation.MAX_STRING_SIZE) {
+						tgtname = tgtname.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
 					}
 					
 					if (fieldExtensions.addPairToField(fname, srcstr, tgtname))
 						extendedExt = true;
-					*/
+					
 				/*}
 	  			catch (Exception e) {
 	  				System.out.println(sourceObj.getClass().getName() + "" + "" + sourceObj.toString());

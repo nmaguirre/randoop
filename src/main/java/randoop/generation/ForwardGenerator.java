@@ -34,6 +34,7 @@ import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
+import randoop.util.fieldbasedcontrol.HeapCanonizer;
 
 /**
  * Randoop's forward, component-based generator.
@@ -41,6 +42,8 @@ import randoop.util.fieldbasedcontrol.FieldExtensions;
 public class ForwardGenerator extends AbstractGenerator {
 	
   public FieldExtensions fieldExtensions;
+  public FieldExtensions fieldExtensionsCanonizer;
+  public HeapCanonizer canonizer;
   //public boolean fieldBasedGen = false;
   public boolean fieldBasedGen = true;
 
@@ -112,6 +115,8 @@ public class ForwardGenerator extends AbstractGenerator {
     
     // PABLO: Initialized field extensions
     fieldExtensions = new FieldExtensions();
+    fieldExtensionsCanonizer = new FieldExtensions();
+    canonizer = new HeapCanonizer(fieldExtensionsCanonizer);
     
     initializeRuntimePrimitivesSeen();
   }
@@ -160,7 +165,7 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
 
 
-    eSeq.execute(executionVisitor, checkGenerator, fieldExtensions, fieldBasedGen);
+    eSeq.execute(executionVisitor, checkGenerator, fieldExtensions, fieldBasedGen, canonizer);
 
     endTime = System.nanoTime();
 
@@ -640,7 +645,7 @@ public class ForwardGenerator extends AbstractGenerator {
       // case below
       // is by far the most common.
 
-      /*if (inputType.isArray()) {
+      if (inputType.isArray()) {
 
         // 1. If T=inputTypes[i] is an array type, ask the component manager for
         // all sequences
@@ -672,7 +677,7 @@ public class ForwardGenerator extends AbstractGenerator {
         }
         l = new ListOfLists<>(l1, l2);
 
-      } else {*/
+      } else {
 
         // 2. COMMON CASE: ask the component manager for all sequences that
         // yield the required type.
@@ -680,7 +685,7 @@ public class ForwardGenerator extends AbstractGenerator {
           Log.logLine("Will query component set for objects of type" + inputType);
         }
         l = componentManager.getSequencesForType(operation, i);
-      //}
+      }
       assert l != null;
 
       if (Log.isLoggingOn()) {

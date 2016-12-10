@@ -30,6 +30,7 @@ import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
+import randoop.util.fieldbasedcontrol.HeapCanonizer;
 import randoop.util.fieldbasedcontrol.HeapDump;
 
 /**
@@ -96,8 +97,11 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public boolean extensionsExtended = false;
   public FieldExtensions extensions;
+  public HeapCanonizer canonizer;
   //public boolean DEBUG = true;
   public boolean DEBUG = false;
+  //public boolean DIFFERENTIAL = true;
+  public boolean DIFFERENTIAL = false;
   private boolean fieldBasedGen;
   public static int seqnum = 0;
   public static int brokenEqualsNum = 0;
@@ -134,7 +138,7 @@ public class ExecutableSequence {
 
   /**
    * Flag to record whether execution of sequence has a null input. [this is
-   * wonky really belongs to execution]
+   * wonky really belongs to execution
    */
   private boolean hasNullInput;
 
@@ -143,6 +147,7 @@ public class ExecutableSequence {
   private static PrintStream ps_output_buffer = new PrintStream(output_buffer);
 
   private IdentityMultiMap<Object, Variable> variableMap;
+
 
   /**
    * Create an executable sequence that executes the given sequence.
@@ -248,9 +253,10 @@ public class ExecutableSequence {
   }
   
   
-  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, FieldExtensions fe, boolean fieldBasedGen) {
+  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, FieldExtensions fe, boolean fieldBasedGen, HeapCanonizer cn) {
 	  this.fieldBasedGen = fieldBasedGen;  
 	  extensions = fe;
+	  canonizer = cn;
 	  execute(visitor, gen, true);
   }
   
@@ -308,7 +314,7 @@ public class ExecutableSequence {
       executionResults.theList.add(NotExecuted.create());
     }
 
-    if (fieldBasedGen && DEBUG) {
+    if (fieldBasedGen && (DEBUG)) {
     	try {
     		toFile(FILENAME + seqnum + "-s" + ".txt");
     	} catch (IOException e1) {
@@ -375,7 +381,7 @@ public class ExecutableSequence {
   			throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
   		  }
     		
-  		  try {
+  		  //try {
 	      // PABLO: Field based generation: Canonize the objects resulting from the execution
 	      // and use their fields to populate field extensions 
 		  // Mark the field values of the instances that appear in the execution as covered
@@ -383,47 +389,69 @@ public class ExecutableSequence {
     	  // For now only augment the field extensions with tests that run normally
 		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
 		  if (obj != null /*&& !CanonicalRepresentation.isPrimitive(obj)*/) {
-			  // TODO PABLO: Hacer un dumper que tome varios objetos como raices y canonice el heap completo?
-    			  HeapDump dumper = new HeapDump(obj, extensions);
-    			  extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-    			  //dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
-    			  if (DEBUG) {
-    				  dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
-    				  //try {
-    					  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
-    				  /*} catch (RuntimeException e) {
-    					  System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + i + "-0" + " failed, please check for errors.");
-    				  }*/
-    				  
-    			  }
 
+			  	  if (canonizer.canonizeAndEnlargeExtensions(obj))
+			  		  extensionsExtended = true;
+
+        		  if (DIFFERENTIAL) {
+        			  HeapDump dumper = new HeapDump(obj, extensions);
+        			  /*
+        			  if (!extensions.equals(canonizer.getExtensions())) 
+        				  throw new RuntimeException("Differential Testing Failed");*/
+        			  
+        		  
+	        		  if (DEBUG) {
+	    				  //dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
+	        			  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
+	        			  
+	        			  try {
+	            			extensions.toFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");        				  
+							canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
+						  } catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						  }        			  
+	        			  
+	    			  }
+        		  }
 		  }
 
 		  // Cover the field values belonging to all the current method's parameters
 		  if (inputVariables.length > 0) {
 				for (int j=0; j<inputVariables.length; j++) {
 					if (inputVariables[j] != null/* && !CanonicalRepresentation.isPrimitive(inputVariables[j])*/) {
-						HeapDump dumper = new HeapDump(inputVariables[j], extensions);
-						extensionsExtended = extensionsExtended || dumper.extensionsExtended();
-						//dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + "-e.txt");
-						if (DEBUG) {
-							dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + "-e.txt");
-							//try {
-								dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + ".dot");
-							/*} catch (RuntimeException e) {
-								System.out.println("ERROR: Write DOT file " + FILENAME + seqnum + "-o-" + + i + "-" + (j+1) + " failed, please check for errors.");
-							}*/
-	
-						}
-					}
-				}
+	        	    	if (canonizer.canonizeAndEnlargeExtensions(inputVariables[j]))
+	        	    		extensionsExtended = true;
 
+		        	    if (DIFFERENTIAL) {
+		        	    	HeapDump dumper = new HeapDump(inputVariables[j], extensions);
+		        	    	/*
+		        			if (!extensions.equals(canonizer.getExtensions())) 
+		        				throw new RuntimeException("Differential Testing Failed");*/
+
+							if (DEBUG) {
+				        		//dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + "-e.txt");
+								dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + ".dot");
+								
+								try {
+				        			extensions.toFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
+									canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
+								  } catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								  }
+								}
+			        	    }
+						}
+				}
 		  }
 
+		  /*
   		  } catch (RuntimeException e) {
   			  brokenEquals = true;
   			  break;
   		  }
+  		  */
 		
 		
 
@@ -436,7 +464,10 @@ public class ExecutableSequence {
     else
     	System.out.println("not extended");
     */
-
+    /*
+    if (extensions != null && extensionsExtended)
+    	System.out.println("Extensions size:" + canonizer.getExtensions().size());
+    */
     visitor.visitAfterSequence(this);
 
     checks = gen.visit(this);

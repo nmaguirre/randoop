@@ -7,6 +7,8 @@ import java.util.HashMap;
 
 public class CanonicalRepresentation {
 	
+	public final static Integer MAX_STRING_SIZE = 50;
+	
 	private static Map<Class, String> classNames = new HashMap<Class, String> (); 
 	
 	public static String getFieldCanonicalName(Field f) {
@@ -22,6 +24,10 @@ public class CanonicalRepresentation {
 		return getClassCanonicalName(c) + ".elem" + pos;
 	}
 
+	public static String getPrimitiveFieldCanonicalName(Class c) {
+		return getClassCanonicalName(c) + ".value";
+	}
+	
 	
 	public static String getClassCanonicalName(Class c) {
 		String name = classNames.get(c);

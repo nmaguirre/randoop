@@ -19,17 +19,15 @@ import java.util.TreeSet;
  */
 
 public class HeapCanonizer {
-	
 	// For each class name stores a map of objects with its corresponding indexes in the canonization
 	private Map<String, Map<Object, Integer>> store;
 	// For each class name stores the last index assigned to an object of the class
 	private Map<String, Integer> lastIndex;
 	private Map<String, List<Field>> classFields;
 	private FieldExtensions extensions;
+	private boolean extendedExtensions;
 	
 	public HeapCanonizer(FieldExtensions ext) {
-		store = new HashMap<String, Map<Object, Integer>>();
-		lastIndex = new HashMap<String, Integer>();
 		classFields = new HashMap<String, List<Field>>();
 		extensions = ext;
 	}
@@ -82,6 +80,21 @@ public class HeapCanonizer {
 		return extensions.addPairToField(fieldname, srcString, tgtString);
 	}
 	
+	
+	private boolean addPrimitiveValueToExtensions(Object obj, String fieldname) {
+		Class objClass = obj.getClass();
+		String srccls = CanonicalRepresentation.getClassCanonicalName(objClass);
+		Integer srcInd = getObjectIndex(obj);
+		String srcString = srccls + srcInd;
+		
+		String value = obj.toString();
+		// trim string values to length maxStringSize
+		if (obj.getClass() == String.class && value.length() > CanonicalRepresentation.MAX_STRING_SIZE) {
+			value = value.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
+		}
+		
+		return extensions.addPairToField(fieldname, srcString, value);
+	}
 
 	private Integer getObjectIndex(Object o) {
 		String classname = CanonicalRepresentation.getClassCanonicalName(o.getClass());	
@@ -90,14 +103,22 @@ public class HeapCanonizer {
 		return m.get(o);
 	}
 	
+	private void clearStructures() {
+		store = new HashMap<String, Map<Object, Integer>>();
+		lastIndex = new HashMap<String, Integer>();
+	}
+	
 	
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
 	public boolean canonizeAndEnlargeExtensions(Object root) {
+
+		clearStructures();
+		extendedExtensions = false;
+		
 		if (root == null) return false;
 		
-		boolean extendedExtensions = false;
   		LinkedList<Object> toVisit = new LinkedList<Object>();
   		toVisit.addLast(root);
   		assignIndexToObject(root);
@@ -108,8 +129,14 @@ public class HeapCanonizer {
   			// FIXME: Should assign ids to objects when it gets them out of the queue
   			// for real BFS tagging?
   			
-  			// Do nothing with objects of primitve type
-			if (objClass != java.lang.Object.class && !CanonicalRepresentation.isPrimitive(obj)) {
+  			// Do nothing with objects of Object type
+			if (objClass == java.lang.Object.class) continue;
+				
+			if (CanonicalRepresentation.isPrimitive(obj)) {
+				if (addPrimitiveValueToExtensions(obj, CanonicalRepresentation.getPrimitiveFieldCanonicalName(objClass)))
+					extendedExtensions = true;
+			}
+			else {
   				if (objClass.isArray()) {
 					// Process an array object. Add a dummy field for each of its elements
 					for (int i = 0; i < Array.getLength(obj); i++) {
@@ -161,13 +188,19 @@ public class HeapCanonizer {
 	}
 	
 	
+	// Returns true iff the last canonization enlarged the extensions
+	public boolean extensionsExtended() {
+		return extendedExtensions;
+	}
+	
+	
 	// Returns the list with cls' fields. It stores the fields 
 	// the first time to return them in the same order later.
 	private List<Field> getAllClassFields(Class cls) {
-		List<Field> clsFields = classFields.get(cls);
-		if (clsFields != null) return clsFields;
-
 		String classname = CanonicalRepresentation.getClassCanonicalName(cls);
+		List<Field> clsFields = classFields.get(classname);
+		if (clsFields != null) return clsFields;
+		
 		clsFields = new LinkedList<Field>();
 		while (cls != null && 
 				cls != Object.class && 
@@ -188,10 +221,10 @@ public class HeapCanonizer {
 	// Returns the list with cls' fields. It stores the fields 
 	// the first time to return them in the same order later.
 	private List<Field> getAllClassFieldsSortedByName(Class cls) {
-		List<Field> clsFields = classFields.get(cls);
+		String classname = CanonicalRepresentation.getClassCanonicalName(cls);
+		List<Field> clsFields = classFields.get(classname);
 		if (clsFields != null) return clsFields;
 
-		String classname = CanonicalRepresentation.getClassCanonicalName(cls);
 		clsFields = new LinkedList<Field>();
 		while (cls != null && 
 				cls != Object.class && 
