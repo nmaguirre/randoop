@@ -104,8 +104,8 @@ public class ExecutableSequence {
   public boolean DIFFERENTIAL = false;
   private boolean fieldBasedGen;
   public static int seqnum = 0;
-  public static int brokenEqualsNum = 0;
-  public static boolean brokenEquals = false;
+  public static int canonizationErrorNum = 0;
+  public static boolean canonizationError = false;
   public String FILENAME = "logs/seq";
 	
   /** The underlying sequence. */
@@ -302,7 +302,7 @@ public class ExecutableSequence {
    */
   private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException) {
 
-	brokenEquals = false;
+	canonizationError = false;
 	seqnum++;
 	  
     visitor.initialize(this);
@@ -381,7 +381,7 @@ public class ExecutableSequence {
   			throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
   		  }
     		
-  		  //try {
+  		  try {
 	      // PABLO: Field based generation: Canonize the objects resulting from the execution
 	      // and use their fields to populate field extensions 
 		  // Mark the field values of the instances that appear in the execution as covered
@@ -446,12 +446,13 @@ public class ExecutableSequence {
 				}
 		  }
 
-		  /*
-  		  } catch (RuntimeException e) {
-  			  brokenEquals = true;
+		  
+  		  } catch (RuntimeException | StackOverflowError e) {
+  			  e.printStackTrace();
+  			  canonizationError = true;
   			  break;
-  		  }
-  		  */
+  		  } 
+  		  
 		
 		
 

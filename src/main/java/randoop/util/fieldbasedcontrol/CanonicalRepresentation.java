@@ -33,6 +33,14 @@ public class CanonicalRepresentation {
 		String name = classNames.get(c);
 		if (name == null) {
 			name = c.getCanonicalName();
+			
+			// To handle anonymous classes correctly
+			if (name == null) {
+				name = c.getName();
+			}
+			
+			//System.out.println("NEW CLASS NAME FOUND: " + name);
+			
 			classNames.put(c, name);
 		}
 
@@ -48,6 +56,53 @@ public class CanonicalRepresentation {
 
 	
   	public static boolean isClassPrimitive(Class clazz) {
+  		if (clazz.isPrimitive()
+   				|| clazz == Short.class
+  				|| clazz == Long.class
+  				|| clazz == String.class
+  				|| clazz == Integer.class
+  				|| clazz == Float.class
+  				|| clazz == Byte.class
+  				|| clazz == Character.class
+  				|| clazz == Double.class
+  				|| clazz == Boolean.class
+  				|| clazz == Date.class
+		  		|| clazz.isEnum()
+				// FIXME: Not sure if this is the best place to put these classes.
+				//|| clazz == java.util.ResourceBundle.class
+				//|| clazz == java.lang.ClassLoader.class
+				// This class shows a bug during canonization only
+				//|| clazz == java.awt.color.ICC_Profile.class
+				)  			
+  			return true;
+
+  		String canonicalName = CanonicalRepresentation.getClassCanonicalName(clazz);
+  		// Anonymous classes have a null canonicalName, and are considered primitive
+  		// for the moment
+  		if (canonicalName == null) 
+  			throw new RuntimeException("ERROR: Class " + clazz.getName() + "has null name, and this should never happen.");
+  		
+  		if (canonicalName.startsWith("java.io.") ||
+  				canonicalName.startsWith("java.nio.") ||
+  				canonicalName.startsWith("java.lang.reflect") ||
+  				canonicalName.startsWith("java.net.") ||
+  				canonicalName.startsWith("java.security.") ||
+  				//canonicalName.startsWith("java.lang.") ||
+  				canonicalName.startsWith("java.awt.") ||
+  				canonicalName.startsWith("java.beans.") ||
+  				//canonicalName.startsWith("java.util.concurrent") ||
+  				//canonicalName.startsWith("java") ||
+  				canonicalName.startsWith("sun.") ||
+  				canonicalName.startsWith("com.sun.")
+  				) {
+  			//System.out.println("WARNING: Ignored class: " + canonicalName);
+  			return true;
+  		}
+  		
+  		return false;
+  	}
+  	
+  	private static boolean isPrimitive(Class clazz) {
   		return (clazz.isPrimitive()
   				/*
   				|| clazz == short.class
@@ -68,14 +123,10 @@ public class CanonicalRepresentation {
   				|| clazz == Double.class
   				|| clazz == Boolean.class
   				|| clazz == Date.class
-  				// FIXME: Not sure if this is the best place to put these classes.
-  				|| clazz == java.util.ResourceBundle.class
-				|| clazz == java.lang.ClassLoader.class
-				|| clazz == java.awt.color.ICC_Profile.class
-				|| clazz == java.net.ServerSocket.class
-  				//|| clazz. == java.util.Locale.class
-  				|| clazz.isEnum());
+		  		|| clazz.isEnum()
+		  		);
   	}
+  	
   	
   	public static boolean isEnum(Object value) {
   		return value.getClass().isEnum();
@@ -84,21 +135,17 @@ public class CanonicalRepresentation {
   	public static boolean isObjectPrimitive(Object value) {
   		// FIXME: ResourceBundle has a cache that expires and breaks field based generation.
   		// For now we will consider ResourceBundle as primitive to avoid canonization of its objects.
-  		// We do not want to deal with ClassLoader, ICC_Profile for the same reason.
-  		if (value instanceof java.util.ResourceBundle 
-  				|| value instanceof java.lang.ClassLoader
-  				|| value instanceof java.awt.color.ICC_Profile
-  				|| value instanceof java.net.ServerSocket
+  		// We do not want to deal with ClassLoader
+  		/*if (value instanceof java.util.ResourceBundle 
+  				//|| value instanceof java.lang.ClassLoader
+  				// FIXME: There is a bug with this class that only occurs during canonization
+  				//|| value instanceof java.awt.color.ICC_Profile
   				// Locales are huge and do not help 
 //  				|| value instanceof java.util.Locale
   				) 
-  			return true;
-  	/*	if (value instanceof java.util.ResourceBundle)
-  				//|| value instanceof java.util.Locale ||
-  				//value instanceof java.util.TimeZone ||
-  				//value instanceof java.util.Calendar)
-  			return true;
-  		*/
+  			return true;*/
+  		
+
   		return isClassPrimitive(value.getClass());
   	}
 

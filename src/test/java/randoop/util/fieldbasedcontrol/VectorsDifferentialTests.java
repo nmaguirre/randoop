@@ -45,13 +45,13 @@ public class VectorsDifferentialTests {
         va[2] = v2;
     
 		FieldExtensions fe1 = new FieldExtensions();
-	    HeapDump objectDump = new HeapDump(v, fe1);
+	    HeapDump objectDump = new HeapDump(va, fe1);
 	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarr.dot");
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext.txt");   
 	
 	    FieldExtensions fe2 = new FieldExtensions();
 	    HeapCanonizer canonizer = new HeapCanonizer(fe2);
-	    canonizer.canonizeAndEnlargeExtensions(v);
+	    canonizer.canonizeAndEnlargeExtensions(va);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrextnew.txt");
 	    assertTrue(fe1.equals(fe2));
    

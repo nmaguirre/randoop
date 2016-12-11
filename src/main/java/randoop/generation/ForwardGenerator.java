@@ -175,10 +175,11 @@ public class ForwardGenerator extends AbstractGenerator {
     // PABLO: This was here. Check if it is needed in fieldExhaustiveGeneration
     // processSequence(eSeq);
     
-    if (eSeq.brokenEquals) {
-    	eSeq.brokenEqualsNum++;
+    if (eSeq.canonizationError) {
+    	eSeq.canonizationErrorNum++;
     	eSeq.sequence.clearAllActiveFlags();
-    	System.out.println("ERROR: Number of broken equals found: " + eSeq.brokenEqualsNum);
+    	System.out.println(eSeq.toCodeString());
+    	System.out.println("ERROR: Number of canonization errors: " + eSeq.canonizationErrorNum);
     }
     // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
     // active so it is not considered for extension anymore.

@@ -219,4 +219,124 @@ public class JChartNewTests {
 		  
 		  System.out.println("Extensions size: " + fe.size());
 	  }	  
+	  
+	  
+	  
+	  @Test(expected=NullPointerException.class)
+	  public void testAnotherNullPointer() throws IllegalArgumentException, IllegalAccessException, IOException {
+
+		  FieldExtensions fe = new FieldExtensions();
+		  HeapCanonizer canonizer = new HeapCanonizer(fe);
+	  
+		  org.jfree.chart.axis.NumberAxis numberAxis0 = null;
+		  canonizer.canonizeAndEnlargeExtensions(numberAxis0);
+		  java.awt.Font font5 = null;
+		  canonizer.canonizeAndEnlargeExtensions(font5);
+		  org.jfree.chart.axis.MarkerAxisBand markerAxisBand6 = new org.jfree.chart.axis.MarkerAxisBand(numberAxis0, (double)12, Double.NEGATIVE_INFINITY, (double)132, Double.NaN, font5);
+		  canonizer.canonizeAndEnlargeExtensions(markerAxisBand6);
+	 
+		  System.out.println("Extensions size: " + fe.size());
+	  }	  
+	
+	  @Test
+	  public void testYetAnotherStackOverflow() throws IllegalArgumentException, IllegalAccessException, IOException {
+
+		  FieldExtensions fe = new FieldExtensions();
+		  HeapCanonizer canonizer = new HeapCanonizer(fe);
+
+	  
+	  org.jfree.chart.renderer.xy.XYStepAreaRenderer xYStepAreaRenderer0 = new org.jfree.chart.renderer.xy.XYStepAreaRenderer();
+	  java.awt.Font font2 = null;
+	  xYStepAreaRenderer0.setLegendTextFont((int)'#', font2);
+	  java.awt.Graphics2D graphics2D4 = null;
+	  java.awt.geom.Rectangle2D rectangle2D5 = null;
+	  org.jfree.chart.plot.XYPlot xYPlot6 = null;
+	  org.jfree.data.xy.XYDataset xYDataset7 = null;
+	  org.jfree.chart.plot.PlotRenderingInfo plotRenderingInfo8 = null;
+	  org.jfree.chart.renderer.xy.XYItemRendererState xYItemRendererState9 = xYStepAreaRenderer0.initialise(graphics2D4, rectangle2D5, xYPlot6, xYDataset7, plotRenderingInfo8);
+	  java.awt.Font font11 = null;
+	  xYStepAreaRenderer0.setSeriesItemLabelFont((int)'4', font11, false);
+	  org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator16 = null;
+	  org.jfree.chart.urls.XYURLGenerator xYURLGenerator17 = null;
+	  org.jfree.chart.renderer.xy.XYAreaRenderer xYAreaRenderer18 = new org.jfree.chart.renderer.xy.XYAreaRenderer((int)(byte)0, xYToolTipGenerator16, xYURLGenerator17);
+	  canonizer.canonizeAndEnlargeExtensions(xYAreaRenderer18);
+	  java.awt.Font font20 = null;
+	  xYAreaRenderer18.setSeriesItemLabelFont((int)'a', font20);
+	  java.awt.Shape shape22 = xYAreaRenderer18.getLegendArea();
+	  java.awt.Graphics2D graphics2D23 = null;
+	  org.jfree.chart.plot.XYPlot xYPlot24 = null;
+	  org.jfree.chart.axis.NumberAxis numberAxis25 = new org.jfree.chart.axis.NumberAxis();
+	  boolean b26 = numberAxis25.isInverted();
+	  double d27 = numberAxis25.getUpperMargin();
+	  numberAxis25.setTickMarkInsideLength((float)0);
+	  numberAxis25.setAutoTickUnitSelection(false, true);
+	  org.jfree.chart.util.LogFormat logFormat37 = new org.jfree.chart.util.LogFormat(10.0d, "hi!", true);
+	  org.jfree.chart.util.LogFormat logFormat41 = new org.jfree.chart.util.LogFormat(10.0d, "hi!", true);
+	  canonizer.canonizeAndEnlargeExtensions(logFormat41);
+	  org.jfree.chart.labels.StandardPieToolTipGenerator standardPieToolTipGenerator42 = new org.jfree.chart.labels.StandardPieToolTipGenerator("hi!", (java.text.NumberFormat)logFormat37, (java.text.NumberFormat)logFormat41);
+	  canonizer.canonizeAndEnlargeExtensions(standardPieToolTipGenerator42);
+	  numberAxis25.setNumberFormatOverride((java.text.NumberFormat)logFormat41);
+	  canonizer.canonizeAndEnlargeExtensions(numberAxis25);
+	  java.awt.geom.Rectangle2D rectangle2D44 = null;
+	  java.awt.Color color46 = org.jfree.chart.ChartColor.GREEN;
+	  org.jfree.chart.axis.NumberAxis numberAxis47 = new org.jfree.chart.axis.NumberAxis();
+	  canonizer.canonizeAndEnlargeExtensions(numberAxis47);
+	  org.jfree.chart.axis.MarkerAxisBand markerAxisBand48 = numberAxis47.getMarkerBand();
+	  canonizer.canonizeAndEnlargeExtensions(markerAxisBand48);
+	  java.awt.Stroke stroke49 = numberAxis47.getAxisLineStroke();
+	  xYAreaRenderer18.drawDomainLine(graphics2D23, xYPlot24, (org.jfree.chart.axis.ValueAxis)numberAxis25, rectangle2D44, (double)(byte)-1, (java.awt.Paint)color46, stroke49);
+	  xYStepAreaRenderer0.setSeriesStroke((int)(short)0, stroke49, true);
+	  canonizer.canonizeAndEnlargeExtensions(xYStepAreaRenderer0);
+	  canonizer.canonizeAndEnlargeExtensions(stroke49);
+		 
+	  System.out.println("Extensions size: " + fe.size());
+	  }
+	  
+	  
+	  @Test
+	  public void testRevealsBugInICC_Profile() throws IllegalArgumentException, IllegalAccessException, IOException {
+
+		  FieldExtensions fe = new FieldExtensions();
+		  HeapCanonizer canonizer = new HeapCanonizer(fe);
+
+	  
+	  
+	  java.awt.Color color0 = org.jfree.chart.ChartColor.VERY_LIGHT_MAGENTA;
+	  canonizer.canonizeAndEnlargeExtensions(color0);
+	  java.awt.color.ColorSpace colorSpace1 = color0.getColorSpace();
+	  canonizer.canonizeAndEnlargeExtensions(colorSpace1);
+	  canonizer.canonizeAndEnlargeExtensions(color0);
+		 
+	  System.out.println("Extensions size: " + fe.size());
+	  }
+	  
+	  @Test
+	  public void testNull() throws IllegalArgumentException, IllegalAccessException, IOException {
+
+		  FieldExtensions fe = new FieldExtensions();
+		  HeapCanonizer canonizer = new HeapCanonizer(fe);
+
+	  org.jfree.chart.plot.PolarPlot polarPlot1 = new org.jfree.chart.plot.PolarPlot();
+	  canonizer.canonizeAndEnlargeExtensions(polarPlot1);
+	  org.jfree.chart.JFreeChart jFreeChart2 = new org.jfree.chart.JFreeChart("null", (org.jfree.chart.plot.Plot)polarPlot1);
+	  canonizer.canonizeAndEnlargeExtensions(jFreeChart2);
+	  canonizer.canonizeAndEnlargeExtensions(polarPlot1);
+	  org.jfree.data.time.TimeSeries timeSeries3 = null;
+	  canonizer.canonizeAndEnlargeExtensions(timeSeries3);
+	  java.util.TimeZone timeZone4 = null;
+	  canonizer.canonizeAndEnlargeExtensions(timeZone4);
+	  org.jfree.data.time.TimeSeriesCollection timeSeriesCollection5 = new org.jfree.data.time.TimeSeriesCollection(timeSeries3, timeZone4);
+	  canonizer.canonizeAndEnlargeExtensions(timeZone4);
+	  canonizer.canonizeAndEnlargeExtensions(timeSeries3);
+	  canonizer.canonizeAndEnlargeExtensions(timeSeriesCollection5);
+	  java.util.List list6 = timeSeriesCollection5.getSeries();
+	  canonizer.canonizeAndEnlargeExtensions(timeSeriesCollection5);
+	  canonizer.canonizeAndEnlargeExtensions(list6);
+	  jFreeChart2.setSubtitles(list6);
+	  canonizer.canonizeAndEnlargeExtensions(list6);
+	  canonizer.canonizeAndEnlargeExtensions(jFreeChart2);
+		 
+	  System.out.println("Extensions size: " + fe.size());
+	  }
+	  
 }

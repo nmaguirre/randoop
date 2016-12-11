@@ -160,23 +160,29 @@ public class HeapCanonizer {
 					// If ignorePrimitive do not store primitive objects
   					if (ignorePrimitive && 
   							length > 0 &&
-  							CanonicalRepresentation.isObjectPrimitive(obj.getClass().getComponentType())) 
+  							CanonicalRepresentation.isClassPrimitive(obj.getClass().getComponentType())) 
   						continue;
 
   					
 					for (int i = 0; i < length; i++) {
 						Object target = Array.get(obj, i);
+						// Don't store null values
+						if (target == null) continue;
+						
+						// If ignorePrimitive do not store primitive objects
+						if (ignorePrimitive && target != null && CanonicalRepresentation.isObjectPrimitive(target)) 
+							continue;
 						
 						// If target does not belong to the store add it and assign an index to it
 						if (target != null && getObjectIndex(target) == -1) {
 							assignIndexToObject(target);
 							toVisit.addLast(target);
 						}
-							
+						
 						if (addToExtensions(obj, 
 								target, 
 								CanonicalRepresentation.getArrayFieldCanonicalName(objClass, i)))
-							extendedExtensions = true;							
+							extendedExtensions = true;
 					}
   				}
   				else {
@@ -193,25 +199,30 @@ public class HeapCanonizer {
 							//e.printStackTrace();
 							System.out.println("FAILURE in field: " + fld.toString());
 							// Cannot happen
-							throw new Error("ERROR: Illegal access to an object field during canonization");
+							throw new RuntimeException("ERROR: Illegal access to an object field during canonization");
 						}
-						
+
+						// Don't store null values
+						if (target == null) continue;
+		
 						// If ignorePrimitive do not store primitive objects
 						if (ignorePrimitive && target != null && CanonicalRepresentation.isObjectPrimitive(target)) 
 							continue;
 						
 						// If target does not belong to the store add it and assign an index to it
+						// Don't store null values
 						if (target != null && getObjectIndex(target) == -1) {
 							assignIndexToObject(target);
 							toVisit.addLast(target);
 						}
 						
-						// System.out.println(CanonicalRepresentation.getFieldCanonicalName(fld));
-							
 						if (addToExtensions(obj, 
 								target, 
 								CanonicalRepresentation.getFieldCanonicalName(fld)))
-							extendedExtensions = true;							
+							extendedExtensions = true;
+
+						// System.out.println(CanonicalRepresentation.getFieldCanonicalName(fld));
+							
   					}
   				}
 			}
@@ -260,7 +271,7 @@ public class HeapCanonizer {
 		clsFields = new LinkedList<Field>();
 		while (cls != null && 
 				cls != Object.class && 
-				!CanonicalRepresentation.isObjectPrimitive(cls)) {
+				!CanonicalRepresentation.isClassPrimitive(cls)) {
 					
 						
 			Field [] fieldsArray = cls.getDeclaredFields();
@@ -270,11 +281,12 @@ public class HeapCanonizer {
 				
 				// FIXME: Cache fields in the ResourceBundle java class break the 
 				// field exhaustive generation. Find a better way to detect these fields.
+				/*
 				if (f.getName().toLowerCase().contains("cache")) {
 					System.out.println("WARNING: Ignored cache field: "  + CanonicalRepresentation.getFieldCanonicalName(f));
 					continue;
 				}
-				
+				*/
 				//System.out.println(f.toString());
 				//System.out.println(f.getType());
 				// If ignorePrimitive do not consider primitive fields
