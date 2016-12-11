@@ -2,7 +2,7 @@ package randoop.util.fieldbasedcontrol;
 
 import java.lang.reflect.Field;
 import java.util.Map;
-
+import java.util.Date;
 import java.util.HashMap;
 
 public class CanonicalRepresentation {
@@ -47,21 +47,33 @@ public class CanonicalRepresentation {
 	}
 
 	
-  	private static boolean isPrimitive(Class clazz) {
+  	public static boolean isClassPrimitive(Class clazz) {
   		return (clazz.isPrimitive()
-  				|| clazz == java.lang.Short.class
-  				|| clazz == java.lang.Long.class
-  				|| clazz == java.lang.String.class
-  				|| clazz == java.lang.Integer.class
-  				|| clazz == java.lang.Float.class
-  				|| clazz == java.lang.Byte.class
-  				|| clazz == java.lang.Character.class
-  				|| clazz == java.lang.Double.class
-  				|| clazz == java.lang.Boolean.class
-  				|| clazz == java.util.Date.class
+  				/*
+  				|| clazz == short.class
+  				|| clazz == long.class
+  				|| clazz == int.class
+  				|| clazz == float.class
+  				|| clazz == byte.class
+  				|| clazz == char.class
+  				|| clazz == double.class
+  				|| clazz == boolean.class*/
+   				|| clazz == Short.class
+  				|| clazz == Long.class
+  				|| clazz == String.class
+  				|| clazz == Integer.class
+  				|| clazz == Float.class
+  				|| clazz == Byte.class
+  				|| clazz == Character.class
+  				|| clazz == Double.class
+  				|| clazz == Boolean.class
+  				|| clazz == Date.class
   				// FIXME: Not sure if this is the best place to put these classes.
-  				/*|| clazz. == java.util.Locale.class
-  				|| clazz == java.util.ResourceBundle.class*/
+  				|| clazz == java.util.ResourceBundle.class
+				|| clazz == java.lang.ClassLoader.class
+				|| clazz == java.awt.color.ICC_Profile.class
+				|| clazz == java.net.ServerSocket.class
+  				//|| clazz. == java.util.Locale.class
   				|| clazz.isEnum());
   	}
   	
@@ -69,15 +81,25 @@ public class CanonicalRepresentation {
   		return value.getClass().isEnum();
   	}
   	
-  	public static boolean isPrimitive(Object value) {
-  		if (//value instanceof java.util.Locale || 
-  				value instanceof java.util.ResourceBundle /*||
-  				value instanceof java.util.TimeZone ||
-  				value instanceof java.util.Calendar*/)
-  			
+  	public static boolean isObjectPrimitive(Object value) {
+  		// FIXME: ResourceBundle has a cache that expires and breaks field based generation.
+  		// For now we will consider ResourceBundle as primitive to avoid canonization of its objects.
+  		// We do not want to deal with ClassLoader, ICC_Profile for the same reason.
+  		if (value instanceof java.util.ResourceBundle 
+  				|| value instanceof java.lang.ClassLoader
+  				|| value instanceof java.awt.color.ICC_Profile
+  				|| value instanceof java.net.ServerSocket
+  				// Locales are huge and do not help 
+//  				|| value instanceof java.util.Locale
+  				) 
   			return true;
-  		
-  		return isPrimitive(value.getClass());
+  	/*	if (value instanceof java.util.ResourceBundle)
+  				//|| value instanceof java.util.Locale ||
+  				//value instanceof java.util.TimeZone ||
+  				//value instanceof java.util.Calendar)
+  			return true;
+  		*/
+  		return isClassPrimitive(value.getClass());
   	}
 
 	public static String getNullRepresentation() {

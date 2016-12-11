@@ -159,4 +159,64 @@ public class JChartNewTests {
 
 		  System.out.println("Extensions size: " + fe.size());
 	  }
+	  
+	  @Test
+	  public void testNullPointer() throws IllegalArgumentException, IllegalAccessException, IOException {
+		  FieldExtensions fe = new FieldExtensions();
+		  HeapCanonizer canonizer = new HeapCanonizer(fe);
+		  
+		  org.jfree.chart.axis.SegmentedTimeline segmentedTimeline3 = new org.jfree.chart.axis.SegmentedTimeline((long)(byte)1, 10, 500);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline3);
+		  org.jfree.chart.axis.SegmentedTimeline segmentedTimeline4 = null;
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline4);
+		  segmentedTimeline3.setBaseTimeline(segmentedTimeline4);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline3);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline4);
+		  org.jfree.chart.axis.SegmentedTimeline segmentedTimeline9 = new org.jfree.chart.axis.SegmentedTimeline((long)(byte)1, 10, 500);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline9);
+		  canonizer.canonizeAndEnlargeExtensions((long)(byte)1);
+		  int i10 = segmentedTimeline9.getSegmentsExcluded();
+		  canonizer.canonizeAndEnlargeExtensions(i10);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline9);
+		  long long12 = segmentedTimeline9.toMillisecond(0L);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline9);
+		  canonizer.canonizeAndEnlargeExtensions(0L);
+		  segmentedTimeline3.setBaseTimeline(segmentedTimeline9);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline3);
+		  long long15 = segmentedTimeline9.getTimeFromLong(900000L);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline9);
+		  java.util.List list16 = null;
+		  canonizer.canonizeAndEnlargeExtensions(list16);
+		  segmentedTimeline9.setExceptionSegments(list16);
+		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline9);
+		  canonizer.canonizeAndEnlargeExtensions(list16);
+		  
+		  System.out.println("Extensions size: " + fe.size());
+	  }
+	  
+	  @Test
+	  public void testClassLoader() throws IllegalArgumentException, IllegalAccessException, IOException {
+
+		  FieldExtensions fe = new FieldExtensions();
+		  HeapCanonizer canonizer = new HeapCanonizer(fe);
+		  java.lang.Class class0 = Integer.class;
+		  canonizer.canonizeAndEnlargeExtensions(class0);
+		  java.lang.ClassLoader classLoader1 = org.jfree.chart.util.ObjectUtilities.getClassLoader(class0);
+		  canonizer.canonizeAndEnlargeExtensions(classLoader1);
+		  canonizer.canonizeAndEnlargeExtensions(class0);
+	  
+		  System.out.println("Extensions size: " + fe.size());
+	  }
+	  
+	  @Test
+	  public void testAnotherStackOverflow() throws IllegalArgumentException, IllegalAccessException, IOException {
+
+		  FieldExtensions fe = new FieldExtensions();
+		  HeapCanonizer canonizer = new HeapCanonizer(fe);
+	  
+		  org.jfree.chart.axis.PeriodAxis periodAxis1 = new org.jfree.chart.axis.PeriodAxis("Multiple Pie Plot");
+		  canonizer.canonizeAndEnlargeExtensions(periodAxis1);
+		  
+		  System.out.println("Extensions size: " + fe.size());
+	  }	  
 }

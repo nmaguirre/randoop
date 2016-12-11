@@ -30,10 +30,17 @@ public class HeapCanonizer {
 	private Map<String, List<Field>> classFields;
 	private FieldExtensions extensions;
 	private boolean extendedExtensions;
+	private boolean ignorePrimitive;
 	
-	public HeapCanonizer(FieldExtensions ext) {
+	
+	public HeapCanonizer(FieldExtensions extensions) {
+		this(extensions, true);
+	}
+	
+	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive) {
 		classFields = new HashMap<String, List<Field>>();
-		extensions = ext;
+		this.extensions = extensions;
+		this.ignorePrimitive = ignorePrimitive;
 	}
 	
 	public FieldExtensions getExtensions() {
@@ -121,7 +128,7 @@ public class HeapCanonizer {
 		clearStructures();
 		extendedExtensions = false;
 		
-		if (root == null) return false;
+		if (root == null) return extendedExtensions;
 		
   		LinkedList<Object> toVisit = new LinkedList<Object>();
   		toVisit.addLast(root);
@@ -130,20 +137,34 @@ public class HeapCanonizer {
   		while (!toVisit.isEmpty()) {
   			Object obj = toVisit.removeFirst();
   			Class objClass = obj.getClass();
+  			
+  			
   			// FIXME: Should assign ids to objects when it gets them out of the queue
   			// for real BFS tagging?
   			
   			// Do nothing with objects of Object type
 			if (objClass == Object.class) continue;
-				
-			if (CanonicalRepresentation.isPrimitive(obj)) {
+			
+			if (CanonicalRepresentation.isObjectPrimitive(obj)) {
+				// If ignorePrimitive do not store primitive objects
+				if (ignorePrimitive) continue;
+
 				if (addPrimitiveValueToExtensions(obj, CanonicalRepresentation.getPrimitiveFieldCanonicalName(objClass)))
 					extendedExtensions = true; 
 			}
 			else {
   				if (objClass.isArray()) {
 					// Process an array object. Add a dummy field for each of its elements
-					for (int i = 0; i < Array.getLength(obj); i++) {
+  					int length = Array.getLength(obj);
+
+					// If ignorePrimitive do not store primitive objects
+  					if (ignorePrimitive && 
+  							length > 0 &&
+  							CanonicalRepresentation.isObjectPrimitive(obj.getClass().getComponentType())) 
+  						continue;
+
+  					
+					for (int i = 0; i < length; i++) {
 						Object target = Array.get(obj, i);
 						
 						// If target does not belong to the store add it and assign an index to it
@@ -169,9 +190,15 @@ public class HeapCanonizer {
 						try {
 							target = fld.get(obj);
 						} catch (Exception e) {
+							//e.printStackTrace();
+							System.out.println("FAILURE in field: " + fld.toString());
 							// Cannot happen
 							throw new Error("ERROR: Illegal access to an object field during canonization");
 						}
+						
+						// If ignorePrimitive do not store primitive objects
+						if (ignorePrimitive && target != null && CanonicalRepresentation.isObjectPrimitive(target)) 
+							continue;
 						
 						// If target does not belong to the store add it and assign an index to it
 						if (target != null && getObjectIndex(target) == -1) {
@@ -198,7 +225,7 @@ public class HeapCanonizer {
 		return extendedExtensions;
 	}
 	
-	
+	/*
 	// Returns the list with cls' fields. It stores the fields 
 	// the first time to return them in the same order later.
 	private List<Field> getAllClassFields(Class cls) {
@@ -220,7 +247,7 @@ public class HeapCanonizer {
 
 		classFields.put(classname, clsFields);
 		return clsFields;
-	}
+	}*/
 	
 	
 	// Returns the list with cls' fields. It stores the fields 
@@ -233,14 +260,38 @@ public class HeapCanonizer {
 		clsFields = new LinkedList<Field>();
 		while (cls != null && 
 				cls != Object.class && 
-				!CanonicalRepresentation.isPrimitive(cls)) {
+				!CanonicalRepresentation.isObjectPrimitive(cls)) {
+					
 						
 			Field [] fieldsArray = cls.getDeclaredFields();
-			for (int i = 0; i < fieldsArray.length; i++) 
-				clsFields.add(fieldsArray[i]);
+			
+			for (int i = 0; i < fieldsArray.length; i++) {
+				Field f = fieldsArray[i];
+				
+				// FIXME: Cache fields in the ResourceBundle java class break the 
+				// field exhaustive generation. Find a better way to detect these fields.
+				if (f.getName().toLowerCase().contains("cache")) {
+					System.out.println("WARNING: Ignored cache field: "  + CanonicalRepresentation.getFieldCanonicalName(f));
+					continue;
+				}
+				
+				//System.out.println(f.toString());
+				//System.out.println(f.getType());
+				// If ignorePrimitive do not consider primitive fields
+				
+				
+				if (ignorePrimitive && CanonicalRepresentation.isClassPrimitive(f.getType()))
+					continue;
 
-			cls = cls.getSuperclass();	
+
+				
+				clsFields.add(f);
+			}
+				
+			cls = cls.getSuperclass();
 		}
+		
+		// System.out.println(">>Result: " + clsFields);
 
 		//System.out.println(clsFields);
 		Collections.sort(clsFields, new FieldByNameComp());

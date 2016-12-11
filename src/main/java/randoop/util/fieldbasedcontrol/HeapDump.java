@@ -125,7 +125,7 @@ public class HeapDump {
 
   			String srcstr = CanonicalRepresentation.getVertexCanonicalName(source);
   			// Add the values of primitive objects to the extensions 
-			if (CanonicalRepresentation.isPrimitive(sourceObj)) {
+			if (CanonicalRepresentation.isObjectPrimitive(sourceObj)) {
 				/*if (source.getIndex() == -1) 
 					source.setIndex(getNextObjectIndex(sourceObj));*/
 /*				try {
@@ -204,7 +204,7 @@ public class HeapDump {
   			int currDepth = t.getSecond();
 			// if currObj is null or isPrimitive(currObj) there's already a vertex in the graph representing the value; there's nothing left to do  			
   			if (currDepth < maxDepth && currObj != null &&
-  					!CanonicalRepresentation.isPrimitive(currObj) &&  					
+  					!CanonicalRepresentation.isObjectPrimitive(currObj) &&  					
   					currObj.getClass() != Object.class &&
   					!ignoreClass(CanonicalRepresentation.getClassCanonicalName(currObj.getClass()))) {
 				
@@ -230,7 +230,7 @@ public class HeapDump {
 					// Process a non-array field
 					while (currObjClass != null && 
 							currObjClass != Object.class && 
-							!CanonicalRepresentation.isPrimitive(currObjClass) && 
+							!CanonicalRepresentation.isObjectPrimitive(currObjClass) && 
 							!ignoreClass(CanonicalRepresentation.getClassCanonicalName(currObjClass))) {
 						
 						List<Field> fields = getEnabledFields(currObjClass.getDeclaredFields());

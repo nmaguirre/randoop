@@ -89,20 +89,20 @@ public class DataStructuresDiferentialTests {
     HeapCanonizer canonizer = new HeapCanonizer(fe2);
     canonizer.canonizeAndEnlargeExtensions(l);
     fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensionsnew.txt");
+        
+    System.out.println("Extensions1 size: " + fe1.size());
+    System.out.println("Extensions2 size: " + fe2.size());
     
     // This reveals a bug with the old implementation. 
     // The problem is that jgrapht uses equals to decide whether to create a new node for an   
     // object in the graph, and hence there will be only one node in the graph for 
     // different objects o1 and o2 such that o1.equals(o2) (because of a bug in equals, for example).
     // This is clearly unwanted behaviour. Randoop is not good detecting this kind of behaviour.
-    
-    System.out.println("Extensions1 size: " + fe1.size());
-    System.out.println("Extensions2 size: " + fe2.size());
-    
     assertFalse(fe1.equals(fe2));
   }
 
   
+  /*
   @Test
   public void testStringPrintGraph() throws IllegalArgumentException, IllegalAccessException, IOException {
 	String l = "abc";
@@ -115,7 +115,7 @@ public class DataStructuresDiferentialTests {
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/astringextensions.txt");
 
   }
-  
+  */
   
  /* 
   private String objectFieldsToString(Object o) throws IllegalArgumentException, IllegalAccessException {
