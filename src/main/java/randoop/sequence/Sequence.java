@@ -3,9 +3,12 @@ package randoop.sequence;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import randoop.Globals;
@@ -181,6 +184,29 @@ public final class Sequence implements WeightedElement {
    * of the existing one.
    */
   private BitSet activeFlags;
+  
+  
+  // PABLO: statement i -> list active variables in statement i   
+  private Map<Integer, List<Integer>> activeVars;
+  
+  
+  public void addActiveVar(int stmtIndex, int varIndex) {
+	  List<Integer> l = activeVars.get(stmtIndex); 
+	  if (l == null) {
+		  l = new LinkedList<Integer>();
+		  activeVars.put(stmtIndex, l);
+	  }
+	  l.add(varIndex);
+  }
+  
+  public List<Integer> getActiveVars(int stmtIndex) {
+	  return activeVars.get(stmtIndex);
+  }
+  
+  public Set<Integer> getActiveStatements() {
+	  return activeVars.keySet();
+  }
+  
 
   public boolean hasActiveFlags() {
     return !activeFlags.isEmpty();
@@ -456,6 +482,11 @@ public final class Sequence implements WeightedElement {
     computeLastStatementInfo();
     this.activeFlags = new BitSet(this.size());
     setAllActiveFlags();
+    
+    this.activeVars = new HashMap<Integer, List<Integer>>();
+    /*for (int i = 0; i < this.size(); i++) 
+    	this.activeVars.put(i, new LinkedList<Integer>());*/
+    
     checkRep();
   }
 

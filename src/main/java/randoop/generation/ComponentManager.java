@@ -141,6 +141,13 @@ public class ComponentManager {
   public void addGeneratedSequence(Sequence sequence) {
     gralComponents.add(sequence);
   }
+  
+  
+  // PABLO: Store as many subsequences of sequences as indicated by the extensions  
+  public void addFieldBasedActiveSequences(Sequence sequence) {
+	    gralComponents.addActiveSubsequencies(sequence);
+  }
+  
 
   /**
    * Removes any components sequences added so far, except for seed sequences,

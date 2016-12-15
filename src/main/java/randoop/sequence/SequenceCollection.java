@@ -165,7 +165,40 @@ public class SequenceCollection {
     }
     checkRep();
   }
+  
+  
+  // PABLO: Add as many sequences as indicated by the extensions  
+  public void addActiveSubsequencies(Sequence sequence) {
+	  
+	  System.out.println("> Current sequence:");
+	  System.out.println(sequence.toCodeString());
+	  
+	  for (Integer stmtIndex: sequence.getActiveStatements()) {
+		
+		  
+		Sequence newSubseq = sequence.getSubsequence(stmtIndex);
+		
+		System.out.println("  > Adding subsequence for index " + stmtIndex);
+		System.out.println(newSubseq.toCodeString());
 
+		List<Type> formalTypes = newSubseq.getTypesForLastStatement();
+		List<Variable> arguments = newSubseq.getVariablesOfLastStatement();
+		assert formalTypes.size() == arguments.size();
+		for (Integer i: sequence.getActiveVars(stmtIndex)) {
+		  Variable argument = arguments.get(i);
+		  assert formalTypes.get(i).isAssignableFrom(argument.getType())
+		      : formalTypes.get(i).getName()
+		          + " should be assignable from "
+		          + argument.getType().getName();
+		    Type type = formalTypes.get(i);
+		    typeSet.add(type);
+		    updateCompatibleMap(newSubseq, type);
+		}
+		checkRep();
+	  }
+  }
+  
+  
   /**
    * Add an entry from the given type to the sequence to the map.
    *

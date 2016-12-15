@@ -29,6 +29,7 @@ import randoop.types.ReferenceType;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
+import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 import randoop.util.fieldbasedcontrol.HeapDump;
@@ -95,17 +96,7 @@ import randoop.util.fieldbasedcontrol.HeapDump;
 public class ExecutableSequence {
 
   // PABLO: fields for field based generation
-  public boolean extensionsExtended = false;
-  public FieldExtensions extensions;
-  public HeapCanonizer canonizer;
-  //public boolean DEBUG = true;
-  public boolean DEBUG = false;
-  //public boolean DIFFERENTIAL = true;
-  public boolean DIFFERENTIAL = false;
-  private boolean fieldBasedGen;
   public static int seqnum = 0;
-  public static int canonizationErrorNum = 0;
-  public static boolean canonizationError = false;
   public String FILENAME = "logs/seq";
 	
   /** The underlying sequence. */
@@ -252,13 +243,15 @@ public class ExecutableSequence {
     execute(visitor, gen, true);
   }
   
-  
-  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, FieldExtensions fe, boolean fieldBasedGen, HeapCanonizer cn) {
+  // PABLO: Delete this method when finished with the new version
+  /*
+  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen) {
 	  this.fieldBasedGen = fieldBasedGen;  
 	  extensions = fe;
-	  canonizer = cn;
+	  canonizer = cn; 
 	  execute(visitor, gen, true);
   }
+  */
   
 
   public void toFile(String filename) throws IOException {
@@ -302,9 +295,7 @@ public class ExecutableSequence {
    */
   private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException) {
 
-	canonizationError = false;
-	seqnum++;
-	  
+  
     visitor.initialize(this);
 
     // reset execution result values
@@ -314,14 +305,6 @@ public class ExecutableSequence {
       executionResults.theList.add(NotExecuted.create());
     }
 
-    if (fieldBasedGen && (DEBUG)) {
-    	try {
-    		toFile(FILENAME + seqnum + "-s" + ".txt");
-    	} catch (IOException e1) {
-    		// TODO Auto-generated catch block
-    		e1.printStackTrace();
-    	}
-    }
     
     for (int i = 0; i < this.sequence.size(); i++) {
 
@@ -360,105 +343,7 @@ public class ExecutableSequence {
       visitor.visitAfterStatement(this, i);
     }
 
-    if (fieldBasedGen && isNormalExecution()) {
-    
-    	for (int i = 0; i < this.sequence.size(); i++) {
-    	
-	      // Find and collect the input values to i-th statement.
-	      List<Variable> inputs = sequence.getInputs(i);
-	      Object[] inputVariables;
-
-	      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
-
-	      //visitor.visitBeforeStatement(this, i);
-
-	      // executeStatement(sequence, executionResults.theList, i, inputVariables);
-
-	      // make sure statement executed
-	      ExecutionOutcome statementResult = getResult(i);
-  		  if (!(statementResult instanceof NormalExecution)) {
-  			System.out.println("ERROR: augmenting field extensions using exceptional behaviour.");
-  			throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
-  		  }
-    		
-  		  try {
-	      // PABLO: Field based generation: Canonize the objects resulting from the execution
-	      // and use their fields to populate field extensions 
-		  // Mark the field values of the instances that appear in the execution as covered
-		  // Cover the field values belonging to the object returned by the current method
-    	  // For now only augment the field extensions with tests that run normally
-		  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
-		  if (obj != null /*&& !CanonicalRepresentation.isPrimitive(obj)*/) {
-
-			  	  if (canonizer.canonizeAndEnlargeExtensions(obj))
-			  		  extensionsExtended = true;
-
-        		  if (DIFFERENTIAL) {
-        			  HeapDump dumper = new HeapDump(obj, extensions);
-        			  /*
-        			  if (!extensions.equals(canonizer.getExtensions())) 
-        				  throw new RuntimeException("Differential Testing Failed");*/
-        			  
-        		  
-	        		  if (DEBUG) {
-	    				  //dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
-	        			  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
-	        			  
-	        			  try {
-	            			extensions.toFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");        				  
-							canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
-						  } catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						  }        			  
-	        			  
-	    			  }
-        		  }
-		  }
-
-		  // Cover the field values belonging to all the current method's parameters
-		  if (inputVariables.length > 0) {
-				for (int j=0; j<inputVariables.length; j++) {
-					if (inputVariables[j] != null/* && !CanonicalRepresentation.isPrimitive(inputVariables[j])*/) {
-	        	    	if (canonizer.canonizeAndEnlargeExtensions(inputVariables[j]))
-	        	    		extensionsExtended = true;
-
-		        	    if (DIFFERENTIAL) {
-		        	    	HeapDump dumper = new HeapDump(inputVariables[j], extensions);
-		        	    	/*
-		        			if (!extensions.equals(canonizer.getExtensions())) 
-		        				throw new RuntimeException("Differential Testing Failed");*/
-
-							if (DEBUG) {
-				        		//dumper.extensionsToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + "-e.txt");
-								dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + ".dot");
-								
-								try {
-				        			extensions.toFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
-									canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
-								  } catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								  }
-								}
-			        	    }
-						}
-				}
-		  }
-
-		  
-  		  } catch (RuntimeException | StackOverflowError e) {
-  			  e.printStackTrace();
-  			  canonizationError = true;
-  			  break;
-  		  } 
-  		  
-		
-		
-
-    	}
-    	
-    }
+   	
     /*
     if (extensionsExtended) 
     	System.out.println("extended");
@@ -474,6 +359,143 @@ public class ExecutableSequence {
     checks = gen.visit(this);
   }
 
+  
+  
+  public boolean enlargeExtensions(HeapCanonizer canonizer) throws CanonizationErrorException {
+	  return enlargeExtensions(canonizer, null, false, false);
+  }
+
+  
+  
+  public boolean enlargeExtensions(HeapCanonizer canonizer, FieldExtensions extensions, boolean DEBUG, boolean DIFFERENTIAL) throws CanonizationErrorException {
+
+	  if (DEBUG) {
+    	try {
+    		toFile(FILENAME + seqnum + "-s" + ".txt");
+    	} catch (IOException e1) {
+    		// TODO Auto-generated catch block
+    		e1.printStackTrace();
+    	}
+    }
+
+	seqnum++;
+	
+   	
+	
+	boolean extensionsExtended = false;
+
+    if (isNormalExecution()) {
+    	
+    	// FIXME: Figure out how to do this more efficiently.
+        // Now that we know that the execution has completed normally reset execution result values
+    	// and attempt to enlarge the extensions. Otherwise we would add field values to the extensions
+    	// based on objects already modified by all the executed statements.
+        hasNullInput = false;
+        executionResults.theList.clear();
+        for (int i = 0; i < sequence.size(); i++) {
+          executionResults.theList.add(NotExecuted.create());
+        }
+    	
+    	
+ 		System.out.println("Extended variables:\n");
+
+    	for (int i = 0; i < this.sequence.size(); i++) {
+    	  List<Variable> inputs = sequence.getInputs(i);
+    	  Object[] inputVariables;
+    	  inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+
+    	  executeStatement(sequence, executionResults.theList, i, inputVariables);
+
+    	  // make sure statement executed
+    	  ExecutionOutcome statementResult = getResult(i);
+
+    	  if (!(statementResult instanceof NormalExecution)) {
+    		System.out.println("ERROR: augmenting field extensions using exceptional behaviour.");
+    		throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
+  		  }
+    		
+  		  // PABLO: get the current statement
+  		  Statement stmt = sequence.getStatement(i);
+  		  int varIndex = 0;
+  		  try {
+		      // PABLO: Field based generation: Canonize the objects resulting from the execution
+		      // and use their fields to populate field extensions 
+			  // Mark the field values of the instances that appear in the execution as covered
+			  // Cover the field values belonging to the object returned by the current method
+	    	  // For now only augment the field extensions with tests that run normally
+  			  if (!stmt.getOutputType().isVoid()) {
+				  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+				  if (obj != null && !CanonicalRepresentation.isObjectPrimitive(obj)) {
+						  System.out.println(obj.toString());
+					  	  if (canonizer.canonizeAndEnlargeExtensions(obj)) {
+					  		  sequence.addActiveVar(i, varIndex);
+					  		  System.out.println("Statement " + i + ", active variable " + varIndex);
+					  		  extensionsExtended = true;
+					  	  }
+		        		  if (DIFFERENTIAL) {
+		        			  HeapDump dumper = new HeapDump(obj, extensions);
+		        			  if (!extensions.equals(canonizer.getExtensions())) 
+		        				  throw new RuntimeException("Differential Testing Failed");
+			        		  if (DEBUG) {
+			        			  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
+			        			  try {
+			            			extensions.toFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");        				  
+									canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
+								  } catch (IOException e) {
+									e.printStackTrace();
+								  }        			  
+			        			  
+			    			  }
+		        		  }
+				  }
+				  varIndex++;
+  			  }
+	
+			  // Cover the field values belonging to all the current method's parameters
+			  if (inputVariables.length > 0) {
+					for (int j=0; j<inputVariables.length; j++) {
+						if (inputVariables[j] != null && !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])) {
+							System.out.println(inputVariables[j].toString());
+							
+		        	    	if (canonizer.canonizeAndEnlargeExtensions(inputVariables[j])) {
+		        	    		sequence.addActiveVar(i, varIndex);
+						  		System.out.println("Statement " + i + ", active variable " + varIndex);		        	    		
+		        	    		extensionsExtended = true;
+		        	    	}
+
+	
+			        	    if (DIFFERENTIAL) {
+			        	    	HeapDump dumper = new HeapDump(inputVariables[j], extensions);
+			        			if (!extensions.equals(canonizer.getExtensions())) 
+			        				throw new RuntimeException("Differential Testing Failed");
+								if (DEBUG) {
+									dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + ".dot");
+									
+									try {
+					        			extensions.toFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
+										canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
+				            }
+						}
+						varIndex++;	
+					}
+			  }
+
+		  
+  		  } catch (RuntimeException | StackOverflowError e) {
+  			  e.printStackTrace();
+  			  throw new CanonizationErrorException();
+  		  } 
+    	}
+    	
+    } 	  
+	  return extensionsExtended;
+  }
+  
+  
   private Object[] getRuntimeInputs(List<ExecutionOutcome> outcome, List<Variable> inputs) {
     Object[] ros = getRuntimeValuesForVars(inputs, outcome);
     for (Object ro : ros) {

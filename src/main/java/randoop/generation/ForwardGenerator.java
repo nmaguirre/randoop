@@ -33,6 +33,7 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
+import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 
@@ -44,9 +45,10 @@ public class ForwardGenerator extends AbstractGenerator {
   public FieldExtensions fieldExtensions;
   public FieldExtensions fieldExtensionsCanonizer;
   public HeapCanonizer canonizer;
-  // public boolean fieldBasedGen = false;
   public boolean fieldBasedGen = true;
-
+  // public boolean fieldBasedGen = true;
+  private int canonizationErrorNum = 0;
+  
 
   /**
    * The set of ALL sequences ever generated, including sequences that were
@@ -71,6 +73,8 @@ public class ForwardGenerator extends AbstractGenerator {
   // of sequences. This set is used to tell if a new primitive value has
   // been generated, to add the value to the components.
   private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
+  
+
 
   public ForwardGenerator(
       List<TypedOperation> operations,
@@ -165,7 +169,7 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
 
 
-    eSeq.execute(executionVisitor, checkGenerator, fieldExtensions, fieldBasedGen, canonizer);
+    eSeq.execute(executionVisitor, checkGenerator/*, fieldExtensions, fieldBasedGen, canonizer*/);
 
     endTime = System.nanoTime();
 
@@ -175,39 +179,52 @@ public class ForwardGenerator extends AbstractGenerator {
     // PABLO: This was here. Check if it is needed in fieldExhaustiveGeneration
     // processSequence(eSeq);
     
-    if (eSeq.canonizationError) {
-    	eSeq.canonizationErrorNum++;
-    	eSeq.sequence.clearAllActiveFlags();
-    	System.out.println(eSeq.toCodeString());
-    	System.out.println("ERROR: Number of canonization errors: " + eSeq.canonizationErrorNum);
-    }
-    // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
-    // active so it is not considered for extension anymore.
-    else if (fieldBasedGen && eSeq.isNormalExecution() && !eSeq.extensionsExtended) {
-    	fieldBasedDroppedSeq++;
-		eSeq.sequence.clearAllActiveFlags();
-		//System.out.println("Sequence number: " + eSeq.seqnum);
-		//System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
-		//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));
-		
+    boolean extendedExtensions;
+    if (fieldBasedGen) {
+    	
+    	try {
+    		extendedExtensions = eSeq.enlargeExtensions(canonizer);
+    	    // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
+    	    // active so it is not considered for extension anymore.
+    	    if (!extendedExtensions) {
+    	    	fieldBasedDroppedSeq++;
+    			eSeq.sequence.clearAllActiveFlags();
+    			//System.out.println("Sequence number: " + eSeq.seqnum);
+    			//System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
+    			//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));
+    	    } else {
+    			processSequence(eSeq);
+    		
+   		        componentManager.addFieldBasedActiveSequences(eSeq.sequence);
 
-	} else {
+
+    		    //System.out.println("Extensions size:" + canonizer.getExtensions().size());
+    		    /*
+    		      try {
+    				canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+    		      } catch (IOException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    		      }*/
+    		}
+    	
+    	}
+    	catch (CanonizationErrorException e) {
+        	canonizationErrorNum++;
+        	eSeq.sequence.clearAllActiveFlags();
+        	System.out.println(eSeq.toCodeString());
+        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
+    	}
+    }
+    else {
 		processSequence(eSeq);
+		
 	    if (eSeq.sequence.hasActiveFlags()) {
 	      componentManager.addGeneratedSequence(eSeq.sequence);
 
 	    }
-	      
-	    //System.out.println("Extensions size:" + canonizer.getExtensions().size());
-	    
-	    /*
-	      try {
-			canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
-	      } catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-	      }*/
-	}
+    }
+
 
     endTime = System.nanoTime();
     gentime += endTime - startTime;
