@@ -47,6 +47,9 @@ public abstract class AbstractGenerator {
   @RandoopStat("Number of sequences generated.")
   public int num_sequences_generated = 0;
 
+  // PABLO: The number of sequences generated changes with fb generation 
+  public int num_sequences_generated_fb = 0;
+
   @RandoopStat("Number of sequences generated that reveal a failure.")
   public int num_failing_sequences = 0;
 
@@ -335,8 +338,14 @@ public abstract class AbstractGenerator {
         continue;
       }
 
-      num_sequences_generated++;
-
+      //num_sequences_generated++;
+      
+      if (num_sequences_generated_fb == -1)
+    	  num_sequences_generated++;
+      else 
+    	  num_sequences_generated += num_sequences_generated_fb;
+       
+      
       if (eSeq.hasFailure()) {
         num_failing_sequences++;
       }

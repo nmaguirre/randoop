@@ -9,7 +9,8 @@ public class CanonicalRepresentation {
 	
 	public final static Integer MAX_STRING_SIZE = 50;
 	
-	private static Map<Class, String> classNames = new HashMap<Class, String> (); 
+	private static Map<Class, String> classNames = new HashMap<Class, String> ();
+	//private static Map<Field, String> fieldNames = new HashMap<Field, String> ();
 	
 	public static String getFieldCanonicalName(Field f) {
 		return getClassCanonicalName(f.getDeclaringClass()) + "." + f.getName();
@@ -75,7 +76,8 @@ public class CanonicalRepresentation {
 				//|| clazz == java.awt.color.ICC_Profile.class
 				)  			
   			return true;
-
+  		
+  		/*
   		String canonicalName = CanonicalRepresentation.getClassCanonicalName(clazz);
   		// Anonymous classes have a null canonicalName, and are considered primitive
   		// for the moment
@@ -98,9 +100,17 @@ public class CanonicalRepresentation {
   			//System.out.println("WARNING: Ignored class: " + canonicalName);
   			return true;
   		}
+  		*/
   		
   		return false;
   	}
+  	
+  	
+  	
+  	
+  	
+  	
+  	
   	
   	private static boolean isPrimitive(Class clazz) {
   		return (clazz.isPrimitive()
@@ -151,6 +161,10 @@ public class CanonicalRepresentation {
 
 	public static String getNullRepresentation() {
 		return "null";
+	}
+
+	public static String getDummyObjectRepresentation() {
+		return "_DUMMY_";
 	}
 
   	/*

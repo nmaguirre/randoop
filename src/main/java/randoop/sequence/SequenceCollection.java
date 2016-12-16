@@ -167,20 +167,22 @@ public class SequenceCollection {
   }
   
   
-  // PABLO: Add as many sequences as indicated by the extensions  
-  public void addActiveSubsequencies(Sequence sequence) {
+  // PABLO: Save the subsequences that were active according to the extensions
+  public Integer addActiveSubsequences(Sequence sequence) {
 	  
+	  /*
+	  System.out.println("*************************");
 	  System.out.println("> Current sequence:");
-	  System.out.println(sequence.toCodeString());
-	  
+	  System.out.println(sequence.toCodeString()); 
+	   */
+	  int seqsNum = 0;
 	  for (Integer stmtIndex: sequence.getActiveStatements()) {
-		
 		  
 		Sequence newSubseq = sequence.getSubsequence(stmtIndex);
-		
+		/*
 		System.out.println("  > Adding subsequence for index " + stmtIndex);
 		System.out.println(newSubseq.toCodeString());
-
+		 */
 		List<Type> formalTypes = newSubseq.getTypesForLastStatement();
 		List<Variable> arguments = newSubseq.getVariablesOfLastStatement();
 		assert formalTypes.size() == arguments.size();
@@ -195,7 +197,12 @@ public class SequenceCollection {
 		    updateCompatibleMap(newSubseq, type);
 		}
 		checkRep();
+		seqsNum++;
 	  }
+	  
+	  // FIXME: Comment to improve performance
+	  assert seqsNum == sequence.getActiveStatements().size();
+	  return seqsNum;
   }
   
   

@@ -343,17 +343,6 @@ public class ExecutableSequence {
       visitor.visitAfterStatement(this, i);
     }
 
-   	
-    /*
-    if (extensionsExtended) 
-    	System.out.println("extended");
-    else
-    	System.out.println("not extended");
-    */
-    /*
-    if (extensions != null && extensionsExtended)
-    	System.out.println("Extensions size:" + canonizer.getExtensions().size());*/
-    
     visitor.visitAfterSequence(this);
 
     checks = gen.visit(this);
@@ -369,7 +358,7 @@ public class ExecutableSequence {
   
   public boolean enlargeExtensions(HeapCanonizer canonizer, FieldExtensions extensions, boolean DEBUG, boolean DIFFERENTIAL) throws CanonizationErrorException {
 
-	  if (DEBUG) {
+	if (DEBUG) {
     	try {
     		toFile(FILENAME + seqnum + "-s" + ".txt");
     	} catch (IOException e1) {
@@ -377,10 +366,8 @@ public class ExecutableSequence {
     		e1.printStackTrace();
     	}
     }
-
+	  
 	seqnum++;
-	
-   	
 	
 	boolean extensionsExtended = false;
 
@@ -395,9 +382,6 @@ public class ExecutableSequence {
         for (int i = 0; i < sequence.size(); i++) {
           executionResults.theList.add(NotExecuted.create());
         }
-    	
-    	
- 		System.out.println("Extended variables:\n");
 
     	for (int i = 0; i < this.sequence.size(); i++) {
     	  List<Variable> inputs = sequence.getInputs(i);
@@ -426,10 +410,10 @@ public class ExecutableSequence {
   			  if (!stmt.getOutputType().isVoid()) {
 				  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
 				  if (obj != null && !CanonicalRepresentation.isObjectPrimitive(obj)) {
-						  System.out.println(obj.toString());
+						  // System.out.println(obj.toString());
 					  	  if (canonizer.canonizeAndEnlargeExtensions(obj)) {
 					  		  sequence.addActiveVar(i, varIndex);
-					  		  System.out.println("Statement " + i + ", active variable " + varIndex);
+					  		  // System.out.println("Statement " + i + ", active variable " + varIndex);
 					  		  extensionsExtended = true;
 					  	  }
 		        		  if (DIFFERENTIAL) {
@@ -455,11 +439,10 @@ public class ExecutableSequence {
 			  if (inputVariables.length > 0) {
 					for (int j=0; j<inputVariables.length; j++) {
 						if (inputVariables[j] != null && !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])) {
-							System.out.println(inputVariables[j].toString());
-							
+							// System.out.println(inputVariables[j].toString());
 		        	    	if (canonizer.canonizeAndEnlargeExtensions(inputVariables[j])) {
 		        	    		sequence.addActiveVar(i, varIndex);
-						  		System.out.println("Statement " + i + ", active variable " + varIndex);		        	    		
+						  		// System.out.println("Statement " + i + ", active variable " + varIndex);		        	    		
 		        	    		extensionsExtended = true;
 		        	    	}
 

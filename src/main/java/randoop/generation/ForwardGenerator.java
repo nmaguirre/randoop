@@ -46,7 +46,7 @@ public class ForwardGenerator extends AbstractGenerator {
   public FieldExtensions fieldExtensionsCanonizer;
   public HeapCanonizer canonizer;
   public boolean fieldBasedGen = true;
-  // public boolean fieldBasedGen = true;
+  //public boolean fieldBasedGen = false;
   private int canonizationErrorNum = 0;
   
 
@@ -179,11 +179,12 @@ public class ForwardGenerator extends AbstractGenerator {
     // PABLO: This was here. Check if it is needed in fieldExhaustiveGeneration
     // processSequence(eSeq);
     
-    boolean extendedExtensions;
+    num_sequences_generated_fb = -1;
     if (fieldBasedGen) {
+    	// Field based randoop behaviour
     	
     	try {
-    		extendedExtensions = eSeq.enlargeExtensions(canonizer);
+    		boolean extendedExtensions = eSeq.enlargeExtensions(canonizer);
     	    // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
     	    // active so it is not considered for extension anymore.
     	    if (!extendedExtensions) {
@@ -194,18 +195,18 @@ public class ForwardGenerator extends AbstractGenerator {
     			//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));
     	    } else {
     			processSequence(eSeq);
-    		
-   		        componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+   		        num_sequences_generated_fb = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
 
+   		        /*
+    		    System.out.println("> Extensions size:" + canonizer.getExtensions().size());
 
-    		    //System.out.println("Extensions size:" + canonizer.getExtensions().size());
-    		    /*
-    		      try {
-    				canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
-    		      } catch (IOException e) {
-    				// TODO Auto-generated catch block
-    				e.printStackTrace();
-    		      }*/
+				try {
+					canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				*/
     		}
     	
     	}
@@ -217,6 +218,7 @@ public class ForwardGenerator extends AbstractGenerator {
     	}
     }
     else {
+    	// Original randoop behaviour
 		processSequence(eSeq);
 		
 	    if (eSeq.sequence.hasActiveFlags()) {
