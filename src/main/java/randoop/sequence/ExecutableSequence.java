@@ -20,7 +20,9 @@ import randoop.ExecutionVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.NotExecuted;
+import randoop.generation.ForwardGenerator;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.TypedOperation;
 import randoop.test.Check;
 import randoop.test.TestCheckGenerator;
 import randoop.test.TestChecks;
@@ -350,13 +352,32 @@ public class ExecutableSequence {
 
   
   
-  public boolean enlargeExtensions(HeapCanonizer canonizer) throws CanonizationErrorException {
-	  return enlargeExtensions(canonizer, null, false, false);
+  // FIXME: We need generator to update the weights of the executed operations. Think of a better way of implementing this. 
+  public boolean enlargeExtensions(HeapCanonizer canonizer, ForwardGenerator generator) throws CanonizationErrorException {
+	  return enlargeExtensions(canonizer, generator, null, false, false);
+  }
+  
+  
+  private void increaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
+	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
+		  TypedOperation op = stmt.getOperation();
+		  //System.out.println("Weight before increment: " + generator.getWeight(op));
+		  generator.increaseWeight(stmt.getOperation());
+		  //System.out.println("Weight after: " + generator.getWeight(op));
+  	  }
+  }
+
+  private void decreaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
+	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
+		  TypedOperation op = stmt.getOperation();
+		  //System.out.println("Weight before decrement: " + generator.getWeight(op));
+		  generator.decreaseWeight(stmt.getOperation());
+		  //System.out.println("Weight after: " + generator.getWeight(op));
+	  }
   }
 
   
-  
-  public boolean enlargeExtensions(HeapCanonizer canonizer, FieldExtensions extensions, boolean DEBUG, boolean DIFFERENTIAL) throws CanonizationErrorException {
+  public boolean enlargeExtensions(HeapCanonizer canonizer, ForwardGenerator generator, FieldExtensions extensions, boolean DEBUG, boolean DIFFERENTIAL) throws CanonizationErrorException {
 
 	if (DEBUG) {
     	try {
@@ -379,10 +400,15 @@ public class ExecutableSequence {
     	// based on objects already modified by all the executed statements.
         hasNullInput = false;
         executionResults.theList.clear();
+        int lastIndex = sequence.size()-1;
+        boolean opExtendsExtensions = false;
+        
         for (int i = 0; i < sequence.size(); i++) {
           executionResults.theList.add(NotExecuted.create());
         }
-
+        
+        
+        Statement stmt = null;
     	for (int i = 0; i < this.sequence.size(); i++) {
     	  List<Variable> inputs = sequence.getInputs(i);
     	  Object[] inputVariables;
@@ -399,8 +425,9 @@ public class ExecutableSequence {
   		  }
     		
   		  // PABLO: get the current statement
-  		  Statement stmt = sequence.getStatement(i);
+  		  stmt = sequence.getStatement(i);
   		  int varIndex = 0;
+  		  
   		  try {
 		      // PABLO: Field based generation: Canonize the objects resulting from the execution
 		      // and use their fields to populate field extensions 
@@ -415,7 +442,10 @@ public class ExecutableSequence {
 					  		  sequence.addActiveVar(i, varIndex);
 					  		  // System.out.println("Statement " + i + ", active variable " + varIndex);
 					  		  extensionsExtended = true;
-					  	  }
+					  		  if (i == lastIndex) 
+					  			  opExtendsExtensions = true;
+					  	  }					  		  
+					  	  
 		        		  if (DIFFERENTIAL) {
 		        			  HeapDump dumper = new HeapDump(obj, extensions);
 		        			  if (!extensions.equals(canonizer.getExtensions())) 
@@ -444,6 +474,8 @@ public class ExecutableSequence {
 		        	    		sequence.addActiveVar(i, varIndex);
 						  		// System.out.println("Statement " + i + ", active variable " + varIndex);		        	    		
 		        	    		extensionsExtended = true;
+					  		  	if (i == lastIndex) 
+					  		  		opExtendsExtensions = true;
 		        	    	}
 
 	
@@ -473,9 +505,17 @@ public class ExecutableSequence {
   			  throw new CanonizationErrorException();
   		  } 
     	}
+
     	
-    } 	  
-	  return extensionsExtended;
+        if (opExtendsExtensions)
+        	increaseOpearationWeight(stmt, generator);
+      	else
+   			decreaseOpearationWeight(stmt, generator);
+    	
+    } 	
+
+    
+	return extensionsExtended;
   }
   
   

@@ -33,6 +33,7 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
+import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
@@ -41,13 +42,16 @@ import randoop.util.fieldbasedcontrol.HeapCanonizer;
  * Randoop's forward, component-based generator.
  */
 public class ForwardGenerator extends AbstractGenerator {
-	
+
+  // PABLO: Fields for field based generation
   public FieldExtensions fieldExtensions;
   public FieldExtensions fieldExtensionsCanonizer;
   public HeapCanonizer canonizer;
   public boolean fieldBasedGen = true;
   //public boolean fieldBasedGen = false;
   private int canonizationErrorNum = 0;
+  private boolean weightedRandomSelection = true;
+//  private boolean weightedRandomSelection = false;
   
 
   /**
@@ -122,6 +126,9 @@ public class ForwardGenerator extends AbstractGenerator {
     fieldExtensionsCanonizer = new FieldExtensions();
     canonizer = new HeapCanonizer(fieldExtensionsCanonizer);
     
+    // PABLO: Initialized operation weights for random selection
+    setInitialOperationWeights();
+    
     initializeRuntimePrimitivesSeen();
   }
 
@@ -184,7 +191,7 @@ public class ForwardGenerator extends AbstractGenerator {
     	// Field based randoop behaviour
     	
     	try {
-    		boolean extendedExtensions = eSeq.enlargeExtensions(canonizer);
+    		boolean extendedExtensions = eSeq.enlargeExtensions(canonizer, this);
     	    // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
     	    // active so it is not considered for extension anymore.
     	    if (!extendedExtensions) {
@@ -197,9 +204,10 @@ public class ForwardGenerator extends AbstractGenerator {
     			processSequence(eSeq);
    		        num_sequences_generated_fb = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
 
-   		        /*
-    		    System.out.println("> Extensions size:" + canonizer.getExtensions().size());
+    		    // System.out.println("> Extensions size:" + canonizer.getExtensions().size());
 
+    		    
+   		        /*
 				try {
 					canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
 				} catch (IOException e) {
@@ -361,6 +369,8 @@ public class ForwardGenerator extends AbstractGenerator {
     
   }
 
+ 
+  
   /**
    * Tries to create and execute a new sequence. If the sequence is new (not
    * already in the specified component manager), then it is executed and added
@@ -380,7 +390,16 @@ public class ForwardGenerator extends AbstractGenerator {
     }
 
     // Select a StatementInfo
-    TypedOperation operation = Randomness.randomMember(this.operations);
+    TypedOperation operation;
+    
+    if (weightedRandomSelection) {
+    	// PABLO: Perform a weighted random selection
+      operation = selectWeightedRandomOperation();
+//  	  System.out.println("Selected: " + operation);
+    }
+    else
+    	operation = Randomness.randomMember(this.operations);
+    
     if (Log.isLoggingOn()) {
       Log.logLine("Selected operation: " + operation.toString());
     }
@@ -670,6 +689,7 @@ public class ForwardGenerator extends AbstractGenerator {
       // case below
       // is by far the most common.
 
+      /*
       if (inputType.isArray()) {
 
         // 1. If T=inputTypes[i] is an array type, ask the component manager for
@@ -702,7 +722,7 @@ public class ForwardGenerator extends AbstractGenerator {
         }
         l = new ListOfLists<>(l1, l2);
 
-      } else {
+      } else {*/
 
         // 2. COMMON CASE: ask the component manager for all sequences that
         // yield the required type.
@@ -710,7 +730,7 @@ public class ForwardGenerator extends AbstractGenerator {
           Log.logLine("Will query component set for objects of type" + inputType);
         }
         l = componentManager.getSequencesForType(operation, i);
-      }
+//      }
       assert l != null;
 
       if (Log.isLoggingOn()) {

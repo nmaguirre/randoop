@@ -11,13 +11,18 @@ import randoop.sequence.Sequence;
 import randoop.test.TestCheckGenerator;
 import randoop.util.Log;
 import randoop.util.ProgressDisplay;
+import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
+import randoop.util.SimpleList;
 import randoop.util.Timer;
+import randoop.util.WeightedElement;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -83,6 +88,80 @@ public abstract class AbstractGenerator {
    * specifies the universe of operations from which sequences are generated.
    */
   public List<TypedOperation> operations;
+  
+  // PABLO: Structures to add more weight to operations more frequently used
+  // in random selection.
+  public LinkedHashMap<TypedOperation, Integer> operationsWeight;
+  
+  public int sumOfWeights;
+
+  // Parameters for the user
+  public int smallerWeight = 1;
+  //public int startingDiffFactor = 10; // max difference between operations = (diffFactor * 2) - 1 
+  public int weightInc = 5;
+  public int weightDec = 2;
+  
+  // Calculated from the parameters, do not modify!
+  public int startingWeight = 10; //smallerWeight * startingDiffFactor;
+  public int largerWeight = 50;  //startingWeight * 2;
+
+  public void setInitialOperationWeights() {
+	  sumOfWeights = 0;
+	  operationsWeight = new LinkedHashMap<>();
+	  for (TypedOperation t: operations) {
+		  operationsWeight.put(t, startingWeight);
+	  }
+	  sumOfWeights = startingWeight * operations.size();	  
+  }
+  
+  public void increaseWeight(TypedOperation t) {
+	Integer currValue = operationsWeight.get(t);
+	if (currValue + weightInc <= largerWeight) {
+		operationsWeight.put(t, currValue + weightInc);
+		sumOfWeights += weightInc;
+	}
+	else {
+		int diff = largerWeight - currValue;
+		if (diff > 0) {		
+			operationsWeight.put(t, largerWeight);
+			sumOfWeights += diff;		
+		}
+	}
+
+	
+  }
+  
+  public void decreaseWeight(TypedOperation t) {
+	Integer currValue = operationsWeight.get(t);
+	if (currValue - weightDec >= smallerWeight) {
+		operationsWeight.put(t, currValue - weightDec);
+		sumOfWeights -= weightDec;	
+	}
+	else {
+		int diff = currValue - smallerWeight;
+		if (diff > 0) {		
+			operationsWeight.put(t, smallerWeight);
+			sumOfWeights -= diff;		
+		}
+	}
+  }
+  
+  public int getWeight(TypedOperation t) {
+	  return operationsWeight.get(t);
+  } 
+
+  public TypedOperation selectWeightedRandomOperation() {
+	int randomPoint = Randomness.nextRandomInt(sumOfWeights);
+    int currentPoint = 1;
+    for (TypedOperation o: operationsWeight.keySet()) {
+      currentPoint += operationsWeight.get(o);
+      if (currentPoint >= randomPoint) {
+        return o;
+      }
+    }
+    throw new BugInRandoopException();
+  }
+  
 
   /**
    * Container for execution visitors used during execution of sequences.
