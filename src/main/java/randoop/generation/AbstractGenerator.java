@@ -98,12 +98,11 @@ public abstract class AbstractGenerator {
   // Parameters for the user
   public int smallerWeight = 1;
   //public int startingDiffFactor = 10; // max difference between operations = (diffFactor * 2) - 1 
-  public int weightInc = 5;
-  public int weightDec = 2;
+  public int weightInc = 10;
+  public int weightDec = 3;
   
-  // Calculated from the parameters, do not modify!
   public int startingWeight = 10; //smallerWeight * startingDiffFactor;
-  public int largerWeight = 50;  //startingWeight * 2;
+  public int largerWeight = 75;  //startingWeight * 2;
 
   public void setInitialOperationWeights() {
 	  sumOfWeights = 0;
@@ -220,6 +219,9 @@ public abstract class AbstractGenerator {
    * Visitor to generate checks for a sequence.
    */
   protected TestCheckGenerator checkGenerator;
+
+
+  protected List<Sequence> fbSeq;
 
   /**
    * Constructs a generator with the given parameters.
@@ -417,13 +419,14 @@ public abstract class AbstractGenerator {
         continue;
       }
 
-      //num_sequences_generated++;
+      num_sequences_generated++;
       
+      /*
       if (num_sequences_generated_fb == -1)
     	  num_sequences_generated++;
       else 
     	  num_sequences_generated += num_sequences_generated_fb;
-       
+      */
       
       if (eSeq.hasFailure()) {
         num_failing_sequences++;
@@ -540,5 +543,10 @@ public abstract class AbstractGenerator {
    */
   protected void setCurrentSequence(Sequence s) {
     currSeq = s;
+  }
+  
+  
+  protected void setFieldBasedSequences(List<Sequence> s) {
+	fbSeq = s;
   }
 }

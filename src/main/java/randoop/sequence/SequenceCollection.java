@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -166,16 +167,44 @@ public class SequenceCollection {
     checkRep();
   }
   
+  public void addFieldBased(Sequence sequence) {
+    List<Type> formalTypes = sequence.getTypesForLastStatement();
+    List<Variable> arguments = sequence.getVariablesOfLastStatement();
+    assert formalTypes.size() == arguments.size();
+    /*
+    System.out.println("> Sequence");
+	System.out.println(sequence.toCodeString());
+    */
+	for (Integer i: sequence.getLastStmtActiveVars()) {
+		Variable argument = arguments.get(i);
+		/*
+		System.out.println("  > Adding subsequence for index: " + i);
+		System.out.println("  > Variable: " + argument.toString());
+		*/
+		assert formalTypes.get(i).isAssignableFrom(argument.getType())
+		      : formalTypes.get(i).getName()
+		          + " should be assignable from "
+		          + argument.getType().getName();
+	    Type type = formalTypes.get(i);
+	    typeSet.add(type);
+	    updateCompatibleMap(sequence, type);
+	}
+    
+    checkRep();
+  }
+
+  
+  
   
   // PABLO: Save the subsequences that were active according to the extensions
-  public Integer addActiveSubsequences(Sequence sequence) {
+  public List<Sequence> addActiveSubsequences(Sequence sequence) {
 	  
 	  /*
 	  System.out.println("*************************");
 	  System.out.println("> Current sequence:");
 	  System.out.println(sequence.toCodeString()); 
 	   */
-	  int seqsNum = 0;
+	  List<Sequence> res = new LinkedList<Sequence>();
 	  for (Integer stmtIndex: sequence.getActiveStatements()) {
 		  
 		Sequence newSubseq = sequence.getSubsequence(stmtIndex);
@@ -196,13 +225,13 @@ public class SequenceCollection {
 		    typeSet.add(type);
 		    updateCompatibleMap(newSubseq, type);
 		}
+	    res.add(newSubseq);		
 		checkRep();
-		seqsNum++;
 	  }
 	  
 	  // FIXME: Comment to improve performance
-	  assert seqsNum == sequence.getActiveStatements().size();
-	  return seqsNum;
+	  assert res.size() == sequence.getActiveStatements().size();
+	  return res;
   }
   
   

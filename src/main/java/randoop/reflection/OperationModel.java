@@ -107,7 +107,6 @@ public class OperationModel {
     contracts.add(CompareToEquals.getInstance());
     contracts.add(CompareToSubs.getInstance());
     contracts.add(CompareToTransitive.getInstance());
-
     exercisedClasses = new LinkedHashSet<>();
     operations = new TreeSet<>();
   }

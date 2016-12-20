@@ -100,6 +100,9 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public static int seqnum = 0;
   public String FILENAME = "logs/seq";
+  public boolean extendedExtensions;
+  public boolean canonizationError;
+  public boolean normalExecution;
 	
   /** The underlying sequence. */
   public Sequence sequence;
@@ -242,7 +245,12 @@ public class ExecutableSequence {
    *          the check generator for tests
    */
   public void execute(ExecutionVisitor visitor, TestCheckGenerator gen) {
-    execute(visitor, gen, true);
+	  execute(visitor, gen, true, null, null, null, false, false);
+  }
+		  
+  
+  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, ForwardGenerator generator, HeapCanonizer canonizer) {
+    execute(visitor, gen, true, generator, null, canonizer, false, false);
   }
   
   // PABLO: Delete this method when finished with the new version
@@ -294,9 +302,12 @@ public class ExecutableSequence {
    *          the check generator
    * @param ignoreException
    *          the flag to indicate exceptions should be ignored
+ * @throws CanonizationErrorException 
    */
-  private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException) {
+  private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, ForwardGenerator generator, FieldExtensions extensions, HeapCanonizer canonizer, boolean DEBUG, boolean DIFFERENTIAL) {
 
+	extendedExtensions = false;
+	canonizationError = false;
   
     visitor.initialize(this);
 
@@ -307,7 +318,8 @@ public class ExecutableSequence {
       executionResults.theList.add(NotExecuted.create());
     }
 
-    
+    normalExecution = true;
+    int lastStmtIndex = this.sequence.size()-1;
     for (int i = 0; i < this.sequence.size(); i++) {
 
       // Find and collect the input values to i-th statement.
@@ -324,10 +336,12 @@ public class ExecutableSequence {
       ExecutionOutcome statementResult = getResult(i);
       
       if (statementResult instanceof NotExecuted) {
+    	  normalExecution = false;
           throw new Error("Unexecuted statement in sequence: " + this.toString());
       }
       // make sure no exception before final statement of sequence
-      if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
+      if ((statementResult instanceof ExceptionalExecution) /*&& i < sequence.size() - 1*/) {
+    	  normalExecution = false;
           if (ignoreException) {
             // this preserves previous behavior, which was simply to return if
             // exception occurred
@@ -342,12 +356,99 @@ public class ExecutableSequence {
           }
       }
     
+      // PABLO: For efficiency, only consider the last statement for attempting to enlarge field extensions
+      Statement stmt = null;
+      if (generator != null && normalExecution && i == lastStmtIndex) {
+    	  try {
+	    	  // PABLO: get the current statement
+    		  stmt = sequence.getStatement(i);
+    		  int varIndex = 0;
+			  if (!stmt.getOutputType().isVoid()) {
+				  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+				  
+				  if (obj != null && !CanonicalRepresentation.isObjectPrimitive(obj)) {
+					  // System.out.println(obj.toString());
+				  	  if (canonizer.canonizeAndEnlargeExtensions(obj)) {
+				  		  // System.out.println("Statement " + i + ", active variable " + varIndex);
+				  		  // sequence.addActiveVar(i, varIndex);
+				  		  sequence.addLastStmtActiveVar(varIndex);
+				  		  extendedExtensions = true;
+				  	  }
+	        		  if (DIFFERENTIAL) {
+	        			  HeapDump dumper = new HeapDump(obj, extensions);
+	        			  if (!extensions.equals(canonizer.getExtensions())) 
+	        				  throw new RuntimeException("Differential Testing Failed");
+		        		  if (DEBUG) {
+		        			  dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-0" + ".dot");
+		        			  try {
+		            			extensions.toFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");        				  
+								canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
+							  } catch (IOException e) {
+								e.printStackTrace();
+							  }        			  
+		        		  }
+	        		  }
+				  }
+				  varIndex++;
+			  }
+	
+			  // Cover the field values belonging to all the current method's parameters
+			  if (inputVariables.length > 0) {
+					for (int j=0; j<inputVariables.length; j++) {
+						if (inputVariables[j] != null && !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])) {
+							// System.out.println(inputVariables[j].toString());
+		        	    	if (canonizer.canonizeAndEnlargeExtensions(inputVariables[j])) {
+						  		// System.out.println("Statement " + i + ", active variable " + varIndex);
+		        	    		// sequence.addActiveVar(i, varIndex);		        	    		
+		        	    		sequence.addLastStmtActiveVar(varIndex);
+		        	    		extendedExtensions = true;
+		        	    	}
+			        	    if (DIFFERENTIAL) {
+			        	    	HeapDump dumper = new HeapDump(inputVariables[j], extensions);
+			        			if (!extensions.equals(canonizer.getExtensions())) 
+			        				throw new RuntimeException("Differential Testing Failed");
+								if (DEBUG) {
+									dumper.heapToFile(FILENAME + seqnum + "-o-" + i + "-" + (j+1) + ".dot");
+									try {
+					        			extensions.toFile(FILENAME + seqnum + "-o-" + i + "-0e" + ".txt");
+										canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
+				            }
+						}
+						varIndex++;
+					}
+			  }
+			  
+	    	  if (extendedExtensions)
+	    		  increaseOpearationWeight(stmt, generator);
+	    	  else
+	    		  decreaseOpearationWeight(stmt, generator);
+	  
+		  } catch (RuntimeException | StackOverflowError e) {
+			  e.printStackTrace();
+			  canonizationError = true;
+		  }
+
+    	  
+      }
+
+      
       visitor.visitAfterStatement(this, i);
     }
+    
+
+    
 
     visitor.visitAfterSequence(this);
 
     checks = gen.visit(this);
+    
+    
+    
+    
   }
 
   
@@ -361,7 +462,7 @@ public class ExecutableSequence {
   private void increaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
 	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
 		  TypedOperation op = stmt.getOperation();
-		  //System.out.println("Weight before increment: " + generator.getWeight(op));
+		  //System.out.println("Operator :" + op.toString() + "\nWeight before increment: " + generator.getWeight(op));
 		  generator.increaseWeight(stmt.getOperation());
 		  //System.out.println("Weight after: " + generator.getWeight(op));
   	  }
@@ -370,7 +471,7 @@ public class ExecutableSequence {
   private void decreaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
 	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
 		  TypedOperation op = stmt.getOperation();
-		  //System.out.println("Weight before decrement: " + generator.getWeight(op));
+		  //System.out.println("Operator :" + op.toString() + "\nWeight before decrement: " + generator.getWeight(op));
 		  generator.decreaseWeight(stmt.getOperation());
 		  //System.out.println("Weight after: " + generator.getWeight(op));
 	  }
@@ -410,6 +511,9 @@ public class ExecutableSequence {
         
         Statement stmt = null;
     	for (int i = 0; i < this.sequence.size(); i++) {
+    		
+    	  
+    		
     	  List<Variable> inputs = sequence.getInputs(i);
     	  Object[] inputVariables;
     	  inputVariables = getRuntimeInputs(executionResults.theList, inputs);
@@ -442,7 +546,11 @@ public class ExecutableSequence {
 					  		  sequence.addActiveVar(i, varIndex);
 					  		  // System.out.println("Statement " + i + ", active variable " + varIndex);
 					  		  extensionsExtended = true;
-					  		  if (i == lastIndex) 
+					  		  if (i!= lastIndex && extensionsExtended) {
+					  			  System.out.println("Esto no deberia suceder");
+					  		  }
+					  		  
+					  		  if (i == lastIndex)
 					  			  opExtendsExtensions = true;
 					  	  }					  		  
 					  	  
@@ -474,6 +582,9 @@ public class ExecutableSequence {
 		        	    		sequence.addActiveVar(i, varIndex);
 						  		// System.out.println("Statement " + i + ", active variable " + varIndex);		        	    		
 		        	    		extensionsExtended = true;
+						  		  if (i!= lastIndex && extensionsExtended) {
+						  			  System.out.println("Esto no deberia suceder");
+						  		  }
 					  		  	if (i == lastIndex) 
 					  		  		opExtendsExtensions = true;
 		        	    	}

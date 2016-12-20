@@ -50,8 +50,8 @@ public class ForwardGenerator extends AbstractGenerator {
   public boolean fieldBasedGen = true;
   //public boolean fieldBasedGen = false;
   private int canonizationErrorNum = 0;
-  private boolean weightedRandomSelection = true;
-//  private boolean weightedRandomSelection = false;
+  //private boolean weightedRandomSelection = true;
+  private boolean weightedRandomSelection = false;
   
 
   /**
@@ -149,6 +149,127 @@ public class ForwardGenerator extends AbstractGenerator {
     }
   }
 
+  
+  @Override
+  public ExecutableSequence step() {
+
+    long startTime = System.nanoTime();
+
+    if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
+      componentManager.clearGeneratedSequences();
+    }
+
+    ExecutableSequence eSeq = createNewUniqueSequence();
+
+    if (eSeq == null) {
+      return null;
+    }
+
+    if (GenInputsAbstract.dontexecute) {
+      this.componentManager.addGeneratedSequence(eSeq.sequence);
+      return null;
+    }
+
+    setCurrentSequence(eSeq.sequence);
+
+    long endTime = System.nanoTime();
+    long gentime = endTime - startTime;
+    startTime = endTime; // reset start time.
+
+    eSeq.execute(executionVisitor, checkGenerator, this, canonizer);
+
+    // PABLO: This was here. Check if it is needed in fieldExhaustiveGeneration
+    // processSequence(eSeq);
+    
+    if (eSeq.canonizationError) {
+    	canonizationErrorNum++;
+    	eSeq.sequence.clearAllActiveFlags();
+    	System.out.println(eSeq.toCodeString());
+    	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
+    }
+    else if (eSeq.normalExecution && !eSeq.extendedExtensions) {
+	    fieldBasedDroppedSeq++;
+		eSeq.sequence.clearAllActiveFlags();
+	}
+	else {
+        processSequence(eSeq);
+	    if (eSeq.sequence.hasActiveFlags()) {
+	    	componentManager.addFieldBasedGeneratedSequence(eSeq.sequence);
+	    	/*
+			try {
+				canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    	*/
+	    }
+    }
+    
+
+    /*
+    num_sequences_generated_fb = -1;
+    if (fieldBasedGen) {
+    	// Field based randoop behaviour
+
+    	try {
+    		boolean extendedExtensions = eSeq.enlargeExtensions(canonizer, this);
+    	    // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
+    	    // active so it is not considered for extension anymore.
+    	    if (!extendedExtensions) {
+    	    	fieldBasedDroppedSeq++;
+    			eSeq.sequence.clearAllActiveFlags();
+    			//System.out.println("Sequence number: " + eSeq.seqnum);
+    			//System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
+    			//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));
+    	    } else {
+    	    	
+		        processSequence(eSeq);    	    	
+    	    	List<Sequence> fbSequences = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+   		        num_sequences_generated_fb = fbSequences.size(); 
+
+    		    System.out.println("> Extensions size:" + canonizer.getExtensions().size());
+
+    		    
+   		        /*
+				try {
+					canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				*//*
+    		}
+    	
+    	}
+    	catch (CanonizationErrorException e) {
+        	canonizationErrorNum++;
+        	eSeq.sequence.clearAllActiveFlags();
+        	System.out.println(eSeq.toCodeString());
+        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
+    	}
+    }
+    else {
+    	// Original randoop behaviour
+		processSequence(eSeq);
+		
+	    if (eSeq.sequence.hasActiveFlags()) {
+	      componentManager.addGeneratedSequence(eSeq.sequence);
+
+	    }
+    }*/
+
+
+    endTime = System.nanoTime();
+    gentime += endTime - startTime;
+    eSeq.gentime = gentime;
+
+    return eSeq;
+  }
+  
+  
+  
+  /*
   @Override
   public ExecutableSequence step() {
 
@@ -176,7 +297,7 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
 
 
-    eSeq.execute(executionVisitor, checkGenerator/*, fieldExtensions, fieldBasedGen, canonizer*/);
+    eSeq.execute(executionVisitor, checkGenerator/*, fieldExtensions, fieldBasedGen, canonizer*/ /*);
 
     endTime = System.nanoTime();
 
@@ -189,7 +310,7 @@ public class ForwardGenerator extends AbstractGenerator {
     num_sequences_generated_fb = -1;
     if (fieldBasedGen) {
     	// Field based randoop behaviour
-    	
+
     	try {
     		boolean extendedExtensions = eSeq.enlargeExtensions(canonizer, this);
     	    // PABLO: If field extensions have not been augmented by this sequence, mark seq as not 
@@ -201,10 +322,12 @@ public class ForwardGenerator extends AbstractGenerator {
     			//System.out.println("Field based dropped sequences: " + fieldBasedDroppedSeq);
     			//System.out.println("Sequences - dropped: " + (eSeq.seqnum - fieldBasedDroppedSeq));
     	    } else {
-    			processSequence(eSeq);
-   		        num_sequences_generated_fb = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+    	    	
+		        processSequence(eSeq);    	    	
+    	    	List<Sequence> fbSequences = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+   		        num_sequences_generated_fb = fbSequences.size(); 
 
-    		    // System.out.println("> Extensions size:" + canonizer.getExtensions().size());
+    		    System.out.println("> Extensions size:" + canonizer.getExtensions().size());
 
     		    
    		        /*
@@ -214,7 +337,7 @@ public class ForwardGenerator extends AbstractGenerator {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				*/
+				*//*
     		}
     	
     	}
@@ -242,6 +365,8 @@ public class ForwardGenerator extends AbstractGenerator {
 
     return eSeq;
   }
+*/
+
 
   @Override
   public Set<Sequence> getAllSequences() {
@@ -451,6 +576,7 @@ public class ForwardGenerator extends AbstractGenerator {
 
     randoopConsistencyTests(newSequence);
 
+    
     if (this.allSequences.contains(newSequence)) {
       if (Log.isLoggingOn()) {
         Log.logLine("Sequence discarded because the same sequence was previously created.");
@@ -464,6 +590,8 @@ public class ForwardGenerator extends AbstractGenerator {
       s.lastTimeUsed = java.lang.System.currentTimeMillis();
     }
 
+    
+    
     randoopConsistencyTest2(newSequence);
 
     if (Log.isLoggingOn()) {
@@ -475,6 +603,7 @@ public class ForwardGenerator extends AbstractGenerator {
 
     // Keep track of any input sequences that are used in this sequence.
     // Tests that contain only these sequences are probably redundant.
+    
     for (Sequence is : sequences.sequences) {
       subsumed_sequences.add(is);
     }

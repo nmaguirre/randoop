@@ -3,6 +3,7 @@ package randoop.generation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import randoop.operation.TypedClassOperation;
@@ -142,11 +143,17 @@ public class ComponentManager {
     gralComponents.add(sequence);
   }
   
+   public void addFieldBasedGeneratedSequence(Sequence sequence) {
+    gralComponents.addFieldBased(sequence);
+  }
   
   // PABLO: Store as many subsequences of sequences as indicated by the extensions  
-  public Integer addFieldBasedActiveSequences(Sequence sequence) {
+  public List<Sequence> addFieldBasedActiveSequences(Sequence sequence) {
 	    return gralComponents.addActiveSubsequences(sequence);
   }
+  
+  
+  
   
 
   /**

@@ -199,6 +199,19 @@ public final class Sequence implements WeightedElement {
 	  l.add(varIndex);
   }
   
+  
+  //PABLO: list of active variables in the last statement  
+  private List<Integer> lastStmtActiveVars;
+ 
+ 
+  public void addLastStmtActiveVar(int varIndex) {
+	  lastStmtActiveVars.add(varIndex);
+  }
+
+  public List<Integer> getLastStmtActiveVars() {
+	  return lastStmtActiveVars;
+  }
+  
   public List<Integer> getActiveVars(int stmtIndex) {
 	  return activeVars.get(stmtIndex);
   }
@@ -483,7 +496,9 @@ public final class Sequence implements WeightedElement {
     this.activeFlags = new BitSet(this.size());
     setAllActiveFlags();
     
-    this.activeVars = new HashMap<Integer, List<Integer>>();
+    //this.activeVars = new HashMap<Integer, List<Integer>>();
+    this.lastStmtActiveVars = new LinkedList<Integer>();
+    
     /*for (int i = 0; i < this.size(); i++) 
     	this.activeVars.put(i, new LinkedList<Integer>());*/
     
@@ -1158,4 +1173,6 @@ public final class Sequence implements WeightedElement {
 
     return new Sequence().extend(TypedOperation.createPrimitiveInitialization(type, value));
   }
+
+
 }
