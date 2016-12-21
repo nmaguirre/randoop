@@ -354,6 +354,13 @@ public class HeapCanonizer {
 				if (isIgnoredClass(ftype))
 					continue;
 				
+				// Avoid following objects of the outer class
+				if (f.getName().equals("this$0")) {
+					//System.out.println(f.getName());
+					continue;
+				}
+				
+				
 				clsFields.add(f);
 			}
 				

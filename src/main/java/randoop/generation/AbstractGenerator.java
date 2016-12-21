@@ -37,9 +37,50 @@ import java.util.Set;
  */
 public abstract class AbstractGenerator {
 	
+ 
   public int fieldBasedDroppedSeq = 0;
 	
+  public enum FieldBasedGenType {
+	    /** Field based generation is disabled */
+	    DISABLED,
+	    /** Fast but not very precise field based generation */
+	    FAST,
+	    /** Field based generation with test miminization. Slower but very precise */
+	    MIN
+	  }
+  
+  
+  @OptionGroup("Field based generation")  
+  @Option("Choose a field based generation approach. Field based generation can be done "
+  		+ "considering only the last sentence of each test (value: FAST), or taking into"
+  		+ "account all the sentences of each test (value: MIN). The latter is slower but"
+  		+ "normally produces fewer tests cases with similar or better coverage levels."
+  		+ "Field based generation can also be disabled (value: DISABLED)."
+  		+ "")
+  public static FieldBasedGenType field_based_gen = FieldBasedGenType.DISABLED;
+  
+  @Option("Ignore primitive values in the construction of field extensions")
+  public static boolean field_based_ignore_primitive = true;
+  
+  @Option("Increase the probabilities of randomly selecting methods that contribute more frequently to the field extensions")
+  public static boolean field_based_weighted_selection = false; 
+  @Option("Increment the weight of an action by this ammount each time it contributes to the extensions")
+  public static int weight_increment = 10;
+  @Option("Decrement the weight of an action by this ammount each time it does not contribute to the extensions")
+  public static int weight_decrement = 3;
+  @Option("Starting weight of all actions in weighted selection")
+  public static int starting_weight = 30; //smallerWeight * startingDiffFactor;
+  @Option("Smaller weight for an action in weighted selection")
+  public static int smaller_weight = 10;
+  @Option("Larger weight for an action in weighted selection")
+  public static int larger_weight = 100;  //startingWeight * 2;
 
+
+  
+  
+  
+  
+  
   @OptionGroup(value = "AbstractGenerator unpublicized options", unpublicized = true)
   @Unpublicized
   @Option("Dump each sequence to the log file")
@@ -95,34 +136,35 @@ public abstract class AbstractGenerator {
   
   public int sumOfWeights;
 
-  // Parameters for the user
-  public int smallerWeight = 1;
+/*
+  public int smallerWeight = 10;
   //public int startingDiffFactor = 10; // max difference between operations = (diffFactor * 2) - 1 
   public int weightInc = 10;
-  public int weightDec = 3;
+  public int weightDec = 5;
   
-  public int startingWeight = 10; //smallerWeight * startingDiffFactor;
-  public int largerWeight = 75;  //startingWeight * 2;
+  public int startingWeight = 30; //smallerWeight * startingDiffFactor;
+  public int largerWeight = 100;  //startingWeight * 2;
+*/
 
   public void setInitialOperationWeights() {
 	  sumOfWeights = 0;
 	  operationsWeight = new LinkedHashMap<>();
 	  for (TypedOperation t: operations) {
-		  operationsWeight.put(t, startingWeight);
+		  operationsWeight.put(t, starting_weight);
 	  }
-	  sumOfWeights = startingWeight * operations.size();	  
+	  sumOfWeights = starting_weight * operations.size();	  
   }
   
   public void increaseWeight(TypedOperation t) {
 	Integer currValue = operationsWeight.get(t);
-	if (currValue + weightInc <= largerWeight) {
-		operationsWeight.put(t, currValue + weightInc);
-		sumOfWeights += weightInc;
+	if (currValue + weight_increment <= larger_weight) {
+		operationsWeight.put(t, currValue + weight_increment);
+		sumOfWeights += weight_increment;
 	}
 	else {
-		int diff = largerWeight - currValue;
+		int diff = larger_weight - currValue;
 		if (diff > 0) {		
-			operationsWeight.put(t, largerWeight);
+			operationsWeight.put(t, larger_weight);
 			sumOfWeights += diff;		
 		}
 	}
@@ -132,14 +174,14 @@ public abstract class AbstractGenerator {
   
   public void decreaseWeight(TypedOperation t) {
 	Integer currValue = operationsWeight.get(t);
-	if (currValue - weightDec >= smallerWeight) {
-		operationsWeight.put(t, currValue - weightDec);
-		sumOfWeights -= weightDec;	
+	if (currValue - weight_decrement >= smaller_weight) {
+		operationsWeight.put(t, currValue - weight_decrement);
+		sumOfWeights -= weight_decrement;	
 	}
 	else {
-		int diff = currValue - smallerWeight;
+		int diff = currValue - smaller_weight;
 		if (diff > 0) {		
-			operationsWeight.put(t, smallerWeight);
+			operationsWeight.put(t, smaller_weight);
 			sumOfWeights -= diff;		
 		}
 	}
@@ -506,13 +548,19 @@ public abstract class AbstractGenerator {
    */
   // TODO replace this with filtering during generation
   public List<ExecutableSequence> getRegressionSequences() {
+
     List<ExecutableSequence> unique_seqs = new ArrayList<>();
     Set<Sequence> subsumed_seqs = this.getSubsumedSequences();
+    System.out.println(">>>> Subsumed: " + subsumed_seqs.size());
+    System.out.println(">>>> Output seqs: " + outRegressionSeqs.size());
     for (ExecutableSequence es : outRegressionSeqs) {
       if (!subsumed_seqs.contains(es.sequence)) {
         unique_seqs.add(es);
       }
     }
+    
+    System.out.println(">>>> Unique: " + unique_seqs.size());
+    
     return unique_seqs;
   }
 

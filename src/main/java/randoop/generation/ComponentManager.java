@@ -143,7 +143,7 @@ public class ComponentManager {
     gralComponents.add(sequence);
   }
   
-   public void addFieldBasedGeneratedSequence(Sequence sequence) {
+  public void addFieldBasedGeneratedSequence(Sequence sequence) {
     gralComponents.addFieldBased(sequence);
   }
   

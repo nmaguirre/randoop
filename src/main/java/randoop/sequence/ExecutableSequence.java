@@ -308,6 +308,7 @@ public class ExecutableSequence {
 
 	extendedExtensions = false;
 	canonizationError = false;
+	seqnum++;
   
     visitor.initialize(this);
 
@@ -373,6 +374,7 @@ public class ExecutableSequence {
 				  		  // sequence.addActiveVar(i, varIndex);
 				  		  sequence.addLastStmtActiveVar(varIndex);
 				  		  extendedExtensions = true;
+						  //canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-0enew" + ".txt");
 				  	  }
 	        		  if (DIFFERENTIAL) {
 	        			  HeapDump dumper = new HeapDump(obj, extensions);
@@ -402,6 +404,7 @@ public class ExecutableSequence {
 		        	    		// sequence.addActiveVar(i, varIndex);		        	    		
 		        	    		sequence.addLastStmtActiveVar(varIndex);
 		        	    		extendedExtensions = true;
+		    					//canonizer.getExtensions().toFile(FILENAME + seqnum + "-o-" + i + "-" + j + "enew" + ".txt");
 		        	    	}
 			        	    if (DIFFERENTIAL) {
 			        	    	HeapDump dumper = new HeapDump(inputVariables[j], extensions);
@@ -420,14 +423,17 @@ public class ExecutableSequence {
 						}
 						varIndex++;
 					}
+
 			  }
 			  
-	    	  if (extendedExtensions)
-	    		  increaseOpearationWeight(stmt, generator);
-	    	  else
-	    		  decreaseOpearationWeight(stmt, generator);
-	  
-		  } catch (RuntimeException | StackOverflowError e) {
+			  if (generator.weightedRandomSelection) {
+		    	  if (extendedExtensions)
+		    		  increaseOpearationWeight(stmt, generator);
+		    	  else
+		    		  decreaseOpearationWeight(stmt, generator);
+			  }
+	  			
+		  } catch (/*RuntimeException | StackOverflowError*/ Exception e) {
 			  e.printStackTrace();
 			  canonizationError = true;
 		  }
@@ -462,18 +468,18 @@ public class ExecutableSequence {
   private void increaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
 	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
 		  TypedOperation op = stmt.getOperation();
-		  //System.out.println("Operator :" + op.toString() + "\nWeight before increment: " + generator.getWeight(op));
+		  System.out.println("Operator :" + op.toString() + "\nWeight before increment: " + generator.getWeight(op));
 		  generator.increaseWeight(stmt.getOperation());
-		  //System.out.println("Weight after: " + generator.getWeight(op));
+		  System.out.println("Weight after: " + generator.getWeight(op));
   	  }
   }
 
   private void decreaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
 	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
 		  TypedOperation op = stmt.getOperation();
-		  //System.out.println("Operator :" + op.toString() + "\nWeight before decrement: " + generator.getWeight(op));
+		  System.out.println("Operator :" + op.toString() + "\nWeight before decrement: " + generator.getWeight(op));
 		  generator.decreaseWeight(stmt.getOperation());
-		  //System.out.println("Weight after: " + generator.getWeight(op));
+		  System.out.println("Weight after: " + generator.getWeight(op));
 	  }
   }
 

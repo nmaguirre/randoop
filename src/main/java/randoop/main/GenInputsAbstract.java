@@ -44,6 +44,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
    * accessible from the package of the tests (set with
    * <code>--junit-package-name</code>).
    */
+  
+
+  
   ///////////////////////////////////////////////////////////////////
   @OptionGroup("Code under test")
   @Option("The fully-qualified name of a class under test")
