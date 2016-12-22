@@ -69,16 +69,12 @@ public abstract class AbstractGenerator {
   @Option("Decrement the weight of an action by this ammount each time it does not contribute to the extensions")
   public static int weight_decrement = 3;
   @Option("Starting weight of all actions in weighted selection")
-  public static int starting_weight = 30; //smallerWeight * startingDiffFactor;
+  public static int starting_weight = 30; 
   @Option("Smaller weight for an action in weighted selection")
   public static int smaller_weight = 10;
   @Option("Larger weight for an action in weighted selection")
-  public static int larger_weight = 100;  //startingWeight * 2;
+  public static int larger_weight = 100;  
 
-
-  
-  
-  
   
   
   @OptionGroup(value = "AbstractGenerator unpublicized options", unpublicized = true)
@@ -462,13 +458,6 @@ public abstract class AbstractGenerator {
       }
 
       num_sequences_generated++;
-      
-      /*
-      if (num_sequences_generated_fb == -1)
-    	  num_sequences_generated++;
-      else 
-    	  num_sequences_generated += num_sequences_generated_fb;
-      */
       
       if (eSeq.hasFailure()) {
         num_failing_sequences++;

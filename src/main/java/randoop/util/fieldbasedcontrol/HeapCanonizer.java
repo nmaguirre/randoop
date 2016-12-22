@@ -55,12 +55,12 @@ public class HeapCanonizer {
 	}
 	
 	
-	
+	/*
 	public HeapCanonizer(FieldExtensions extensions) {
 		//this(extensions, false);
 		this(extensions, true);
 	}
-	
+	*/
 	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive) {
 		classFields = new HashMap<String, List<Field>>();
 		this.extensions = extensions;

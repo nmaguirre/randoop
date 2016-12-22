@@ -44,13 +44,13 @@ import randoop.util.fieldbasedcontrol.HeapCanonizer;
 public class ForwardGenerator extends AbstractGenerator {
 
   // PABLO: Fields for field based generation
-  public FieldExtensions fieldExtensions;
-  public FieldExtensions fieldExtensionsCanonizer;
+  // public FieldExtensions fieldExtensions;
+  // public FieldExtensions fieldExtensionsCanonizer;
   public HeapCanonizer canonizer;
-  public boolean fieldBasedGen = true;
+  // public boolean fieldBasedGen = true;
   //public boolean fieldBasedGen = false;
   private int canonizationErrorNum = 0;
-  public boolean weightedRandomSelection = true;
+  //	public boolean weightedRandomSelection = true;
   // public boolean weightedRandomSelection = false;
   
 
@@ -125,9 +125,9 @@ public class ForwardGenerator extends AbstractGenerator {
     this.allSequences = new LinkedHashSet<>();
     
     // PABLO: Initialized field extensions
-    fieldExtensions = new FieldExtensions();
-    fieldExtensionsCanonizer = new FieldExtensions();
-    canonizer = new HeapCanonizer(fieldExtensionsCanonizer);
+    //fieldExtensions = new FieldExtensions();
+    //fieldExtensionsCanonizer = new FieldExtensions();
+    canonizer = new HeapCanonizer(new FieldExtensions(), field_based_ignore_primitive);
     
     // PABLO: Initialized operation weights for random selection
     setInitialOperationWeights();
@@ -151,7 +151,99 @@ public class ForwardGenerator extends AbstractGenerator {
       runtimePrimitivesSeen.add(runtimeValue);
     }
   }
+  
+  
+  @Override
+  public ExecutableSequence step() {
 
+    long startTime = System.nanoTime();
+
+    if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
+      componentManager.clearGeneratedSequences();
+    }
+
+    ExecutableSequence eSeq = createNewUniqueSequence();
+
+    if (eSeq == null) {
+      return null;
+    }
+
+    if (GenInputsAbstract.dontexecute) {
+      this.componentManager.addGeneratedSequence(eSeq.sequence);
+      return null;
+    }
+
+    setCurrentSequence(eSeq.sequence);
+
+    long endTime = System.nanoTime();
+    long gentime = endTime - startTime;
+    startTime = endTime; // reset start time.
+    
+    if (field_based_gen == FieldBasedGenType.DISABLED) {    
+    	// Original randoop behaviour
+    	eSeq.execute(executionVisitor, checkGenerator);
+
+    	endTime = System.nanoTime();
+    	eSeq.exectime = endTime - startTime;
+    	startTime = endTime; // reset start time.
+    
+	    processSequence(eSeq);
+	
+	    if (eSeq.sequence.hasActiveFlags()) {
+	      componentManager.addGeneratedSequence(eSeq.sequence);
+	    }
+    }
+    else if (field_based_gen == FieldBasedGenType.FAST) {
+    	// Fast field based generation
+    	eSeq.fastFieldBasedExecute(executionVisitor, checkGenerator, this, canonizer);
+    	endTime = System.nanoTime();
+    	eSeq.exectime = endTime - startTime;
+    	startTime = endTime; // reset start time.
+    
+        if (eSeq.canonizationError) {
+        	canonizationErrorNum++;
+        	eSeq.sequence.clearAllActiveFlags();
+        	System.out.println(eSeq.toCodeString());
+        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
+        }
+        else if (eSeq.normalExecution && !eSeq.extendedExtensions) {
+    	    fieldBasedDroppedSeq++;
+    		eSeq.sequence.clearAllActiveFlags();
+    	}
+    	else {
+            processSequence(eSeq);
+    	    if (eSeq.sequence.hasActiveFlags()) {
+    	    	componentManager.addGeneratedSequence(eSeq.sequence);
+    	    	//componentManager.addFieldBasedGeneratedSequence(eSeq.sequence);
+    	    }
+        }
+    }
+    else {
+    	// field_based_gen == FieldBasedGenType.MIN
+    	// Run field based generation with minimization
+    	
+    	
+    	
+    	
+    }
+
+	/*
+	try {
+		canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	*/
+    
+    
+    endTime = System.nanoTime();
+    gentime += endTime - startTime;
+    eSeq.gentime = gentime;
+
+    return eSeq;
+  }
+/*
   
   @Override
   public ExecutableSequence step() {
@@ -207,7 +299,7 @@ public class ForwardGenerator extends AbstractGenerator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-	    	*/
+	    	*//*
 
     }
     
@@ -263,7 +355,7 @@ public class ForwardGenerator extends AbstractGenerator {
 
 	    }
     }*/
-
+/*
 
     endTime = System.nanoTime();
     gentime += endTime - startTime;
@@ -271,7 +363,7 @@ public class ForwardGenerator extends AbstractGenerator {
 
     return eSeq;
   }
-  
+  */
   
   
   /*
@@ -522,7 +614,7 @@ public class ForwardGenerator extends AbstractGenerator {
     // Select a StatementInfo
     TypedOperation operation;
     
-    if (weightedRandomSelection) {
+    if (field_based_weighted_selection) {
     	// PABLO: Perform a weighted random selection
       operation = selectWeightedRandomOperation();
 //  	  System.out.println("Selected: " + operation);

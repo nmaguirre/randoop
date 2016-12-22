@@ -496,7 +496,7 @@ public final class Sequence implements WeightedElement {
     this.activeFlags = new BitSet(this.size());
     setAllActiveFlags();
     
-    //this.activeVars = new HashMap<Integer, List<Integer>>();
+    this.activeVars = new HashMap<Integer, List<Integer>>();
     this.lastStmtActiveVars = new LinkedList<Integer>();
     
     /*for (int i = 0; i < this.size(); i++) 
