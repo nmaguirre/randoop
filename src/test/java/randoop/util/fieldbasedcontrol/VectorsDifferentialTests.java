@@ -22,7 +22,7 @@ public class VectorsDifferentialTests {
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext.txt");
 	
 	    FieldExtensions fe2 = new FieldExtensions();
-	    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+	    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
 	    canonizer.canonizeAndEnlargeExtensions(v);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorextnew.txt");
 	        
@@ -50,7 +50,7 @@ public class VectorsDifferentialTests {
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext.txt");   
 	
 	    FieldExtensions fe2 = new FieldExtensions();
-	    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+	    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
 	    canonizer.canonizeAndEnlargeExtensions(va);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrextnew.txt");
 	    assertTrue(fe1.equals(fe2));

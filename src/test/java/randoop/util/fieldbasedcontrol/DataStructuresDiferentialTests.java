@@ -41,7 +41,7 @@ public class DataStructuresDiferentialTests {
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensions.txt");
     
     FieldExtensions fe2 = new FieldExtensions();
-    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
     canonizer.canonizeAndEnlargeExtensions(l);
     fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensionsnew.txt");
     
@@ -65,7 +65,7 @@ public class DataStructuresDiferentialTests {
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistextensions.txt");
     
     FieldExtensions fe2 = new FieldExtensions();
-    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
     canonizer.canonizeAndEnlargeExtensions(l);
     fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistextensionsnew.txt");
     
@@ -86,7 +86,7 @@ public class DataStructuresDiferentialTests {
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensions.txt");
     
     FieldExtensions fe2 = new FieldExtensions();
-    HeapCanonizer canonizer = new HeapCanonizer(fe2);
+    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
     canonizer.canonizeAndEnlargeExtensions(l);
     fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensionsnew.txt");
         

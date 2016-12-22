@@ -32,6 +32,7 @@ import randoop.types.ReferenceType;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
+import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 
 /**
@@ -98,9 +99,9 @@ public class ExecutableSequence {
   // PABLO: fields for field based generation
   public static int seqnum = 0;
   public String FILENAME = "logs/seq";
-  public boolean extendedExtensions;
-  public boolean canonizationError;
-  public boolean normalExecution;
+  // public boolean extendedExtensions;
+  // public boolean canonizationError;
+  // public boolean normalExecution;
 //  private boolean DIFFERENTIAL = false;
 //  private boolean DEBUG = false;
 	
@@ -239,6 +240,10 @@ public class ExecutableSequence {
   }
   
   
+  
+  
+  
+  
   /**
    * Executes sequence, stopping on exceptions.
    *
@@ -334,13 +339,14 @@ public class ExecutableSequence {
     checks = gen.visit(this);
   }
   
-
+  
   public void toFile(String filename) throws IOException {
 	try (Writer writer = new BufferedWriter(new FileWriter(filename))) {
 		writer.write(toString());
 	}	
   }
   
+  /*
   public void fastFieldBasedExecute(ExecutionVisitor visitor, TestCheckGenerator gen, ForwardGenerator generator, HeapCanonizer canonizer) {
 	  fastFieldBasedExecute(visitor, gen, true, generator, canonizer);
   }
@@ -384,7 +390,7 @@ public class ExecutableSequence {
           throw new Error("Unexecuted statement in sequence: " + this.toString());
       }
       // make sure no exception before final statement of sequence
-      if ((statementResult instanceof ExceptionalExecution) /*&& i < sequence.size() - 1*/) {
+      if ((statementResult instanceof ExceptionalExecution) /*&& i < sequence.size() - 1*//*) {
     	  normalExecution = false;
           if (ignoreException) {
             // this preserves previous behavior, which was simply to return if
@@ -406,7 +412,7 @@ public class ExecutableSequence {
     if (normalExecution) {
         // PABLO: Fast field based generation: For efficiency, only consider the last statement 
         // for attempting to enlarge field extensions
-    	if (enlargeExtensions(sequence, lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
+    	if (enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
    			extendedExtensions = true;
     	
 		// Update last method's weight
@@ -422,13 +428,44 @@ public class ExecutableSequence {
     visitor.visitAfterSequence(this);
 
     checks = gen.visit(this);
+  }*/
+  
+  
+  
+  public boolean enlargeExtensionsFast(HeapCanonizer canonizer, ForwardGenerator generator) throws CanonizationErrorException {
+	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
+	// for attempting to enlarge field extensions
+	int lastStmtIndex = this.sequence.size()-1;
+	List<Variable> inputs = sequence.getInputs(lastStmtIndex);
+	Object[] inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+
+    // make sure statement executed
+	ExecutionOutcome statementResult = getResult(lastStmtIndex);
+	
+	boolean extendedExtensions = false;
+
+	
+	if (enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
+		extendedExtensions = true;
+	
+	// Update last method's weight
+	if (AbstractGenerator.field_based_weighted_selection) {
+	    Statement stmt = sequence.getStatement(lastStmtIndex);		
+		if (extendedExtensions)
+			increaseOpearationWeight(stmt, generator);
+		else
+			decreaseOpearationWeight(stmt, generator);
+	}
+	
+	return extendedExtensions;
   }
+  
+  
 
   
   
-  private boolean enlargeExtensions(Sequence sequence, int i, Object statementResult, Object[] inputVariables, HeapCanonizer canonizer) {
+  private boolean enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizer canonizer) throws CanonizationErrorException {
 	  boolean extendedExtensions = false;	
-	  canonizationError = false;
 	  
 	  try {
 		  Statement stmt = sequence.getStatement(i);
@@ -462,8 +499,7 @@ public class ExecutableSequence {
 		  }
 	  }	catch (Exception e) {
 		  e.printStackTrace();
-		  canonizationError = true;
-		  return false;
+		  throw new CanonizationErrorException();
 	  }
 	  
 	  return extendedExtensions;
@@ -490,13 +526,10 @@ public class ExecutableSequence {
   }
 
   
-  public void enlargeExtensions(HeapCanonizer canonizer, ForwardGenerator generator) {
+  public boolean enlargeExtensionsMin(HeapCanonizer canonizer, ForwardGenerator generator) throws CanonizationErrorException {
 
-	extendedExtensions = false;
+	boolean extendedExtensions = false;
 	seqnum++;
-	
-	normalExecution = isNormalExecution();
-	if (!normalExecution) return;
 	
 	// FIXME: Figure out how to do this more efficiently.
     // Now that we know that the execution has completed normally reset execution result values
@@ -525,14 +558,9 @@ public class ExecutableSequence {
 		throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
   	  }
     		
-  		  if (enlargeExtensions(sequence, i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
-   			extendedExtensions = true;
+  	  if (enlargeExtensions(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
+  	    extendedExtensions = true;
 
-  		  if (canonizationError) {
-  			  extendedExtensions = false;
-  			  return;
-  		  }
- 
     }
     	
     if (AbstractGenerator.field_based_weighted_selection) {
@@ -547,6 +575,7 @@ public class ExecutableSequence {
     	}
     }
     
+    return extendedExtensions;
   }
   
   

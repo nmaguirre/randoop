@@ -179,79 +179,63 @@ public class ForwardGenerator extends AbstractGenerator {
     long gentime = endTime - startTime;
     startTime = endTime; // reset start time.
     
-    if (field_based_gen == FieldBasedGenType.DISABLED) {    
-    	// Original randoop behaviour
-    	eSeq.execute(executionVisitor, checkGenerator);
+	eSeq.execute(executionVisitor, checkGenerator);
 
-    	endTime = System.nanoTime();
-    	eSeq.exectime = endTime - startTime;
-    	startTime = endTime; // reset start time.
+	endTime = System.nanoTime();
+	eSeq.exectime = endTime - startTime;
+	startTime = endTime; // reset start time.
     
+
+   	if (field_based_gen != FieldBasedGenType.DISABLED && eSeq.isNormalExecution()) {
+		// Field based filtering is only done on non error sequences
+		try {
+
+			boolean extensionsExtended = false;
+	    	if (field_based_gen == FieldBasedGenType.FAST) 
+	    		extensionsExtended = eSeq.enlargeExtensionsFast(canonizer, this);
+	    	else
+	    		extensionsExtended = eSeq.enlargeExtensionsMin(canonizer, this);
+	    		
+    		if (!extensionsExtended) {
+        	    fieldBasedDroppedSeq++;
+        		eSeq.sequence.clearAllActiveFlags();
+        	}
+        	else {
+        		
+    	    	if (field_based_gen == FieldBasedGenType.FAST) {
+    	    		processSequence(eSeq);
+
+    	    		if (eSeq.sequence.hasActiveFlags())
+    	    			componentManager.addGeneratedSequence(eSeq.sequence);
+    	    	}
+    	    	else {
+    	    		// FIXME: This method should only consider indexes belonging to the minimized sequences. 
+    	            processSequence(eSeq);
+
+    		    	List<Sequence> minSeq = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+    		    	// The minimized sequences recently generated are subsumed by the whole test
+    	            for (Sequence s: minSeq)
+    	            	subsumed_sequences.add(s);
+    	    	}
+    	    	
+            }
+    		
+		}
+		catch (CanonizationErrorException e) {
+        	canonizationErrorNum++;
+        	eSeq.sequence.clearAllActiveFlags();
+        	System.out.println(eSeq.toCodeString());
+        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);    			
+		}
+	}
+	else {
+    	// Original randoop behaviour when field_based_gen is disabled, or the current sequence produced an error
 	    processSequence(eSeq);
 	
 	    if (eSeq.sequence.hasActiveFlags()) {
 	      componentManager.addGeneratedSequence(eSeq.sequence);
 	    }
-    }
-    else if (field_based_gen == FieldBasedGenType.FAST) {
-    	// Fast field based generation
-    	eSeq.fastFieldBasedExecute(executionVisitor, checkGenerator, this, canonizer);
-    	endTime = System.nanoTime();
-    	eSeq.exectime = endTime - startTime;
-    	startTime = endTime; // reset start time.
-    
-        if (eSeq.canonizationError) {
-        	canonizationErrorNum++;
-        	eSeq.sequence.clearAllActiveFlags();
-        	System.out.println(eSeq.toCodeString());
-        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
-        }
-        else if (eSeq.normalExecution && !eSeq.extendedExtensions) {
-    	    fieldBasedDroppedSeq++;
-    		eSeq.sequence.clearAllActiveFlags();
-    	}
-    	else {
-            processSequence(eSeq);
-    	    if (eSeq.sequence.hasActiveFlags()) {
-    	    	componentManager.addGeneratedSequence(eSeq.sequence);
-    	    	//componentManager.addFieldBasedGeneratedSequence(eSeq.sequence);
-    	    }
-        }
-    }
-    else {
-    	// field_based_gen == FieldBasedGenType.MIN
-    	// Run field based generation with minimization
-    	eSeq.execute(executionVisitor, checkGenerator);
-    	
-    	endTime = System.nanoTime();
-    	eSeq.exectime = endTime - startTime;
-    	startTime = endTime; // reset start time.
-    
-		eSeq.enlargeExtensions(canonizer, this);
-
-		if (eSeq.canonizationError) {
-        	canonizationErrorNum++;
-        	eSeq.sequence.clearAllActiveFlags();
-        	System.out.println(eSeq.toCodeString());
-        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
-        }
-        else if (eSeq.normalExecution && !eSeq.extendedExtensions) {
-    	    fieldBasedDroppedSeq++;
-    		eSeq.sequence.clearAllActiveFlags();
-    	}
-    	else {
-    		// FIXME: This method should only consider indexes belonging to the minimized sequences. 
-            processSequence(eSeq);
-            
-	    	List<Sequence> minSeq = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
-	    	// The minimized sequences recently generated are subsumed by the whole test
-            for (Sequence s: minSeq)
-            	subsumed_sequences.add(s);
-
-        }
-
-    }
-
+	}
 	/*
 	try {
 		canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
@@ -260,7 +244,6 @@ public class ForwardGenerator extends AbstractGenerator {
 		e.printStackTrace();
 	}
 	*/
-    
     
     endTime = System.nanoTime();
     gentime += endTime - startTime;
