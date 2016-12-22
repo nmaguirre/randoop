@@ -11,6 +11,7 @@ import java.util.Set;
 
 import randoop.Globals;
 import randoop.SubTypeSet;
+import randoop.generation.ForwardGenerator;
 import randoop.main.GenInputsAbstract;
 import randoop.types.Type;
 import randoop.util.ArrayListSimpleList;
@@ -225,7 +226,7 @@ public class SequenceCollection {
 		    typeSet.add(type);
 		    updateCompatibleMap(newSubseq, type);
 		}
-	    res.add(newSubseq);		
+	    res.add(newSubseq);
 		checkRep();
 	  }
 	  

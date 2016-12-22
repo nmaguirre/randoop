@@ -221,10 +221,35 @@ public class ForwardGenerator extends AbstractGenerator {
     else {
     	// field_based_gen == FieldBasedGenType.MIN
     	// Run field based generation with minimization
+    	eSeq.execute(executionVisitor, checkGenerator);
     	
-    	
-    	
-    	
+    	endTime = System.nanoTime();
+    	eSeq.exectime = endTime - startTime;
+    	startTime = endTime; // reset start time.
+    
+		eSeq.enlargeExtensions(canonizer, this);
+
+		if (eSeq.canonizationError) {
+        	canonizationErrorNum++;
+        	eSeq.sequence.clearAllActiveFlags();
+        	System.out.println(eSeq.toCodeString());
+        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
+        }
+        else if (eSeq.normalExecution && !eSeq.extendedExtensions) {
+    	    fieldBasedDroppedSeq++;
+    		eSeq.sequence.clearAllActiveFlags();
+    	}
+    	else {
+    		// FIXME: This method should only consider indexes belonging to the minimized sequences. 
+            processSequence(eSeq);
+            
+	    	List<Sequence> minSeq = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+	    	// The minimized sequences recently generated are subsumed by the whole test
+            for (Sequence s: minSeq)
+            	subsumed_sequences.add(s);
+
+        }
+
     }
 
 	/*
@@ -591,6 +616,10 @@ public class ForwardGenerator extends AbstractGenerator {
     
   }
 
+  
+  
+  
+  
  
   
   /**
@@ -1071,6 +1100,10 @@ public class ForwardGenerator extends AbstractGenerator {
   @Override
   public Set<Sequence> getSubsumedSequences() {
     return subsumed_sequences;
+  }
+  
+  public void addSubsumedSequence(Sequence s) {
+	  subsumed_sequences.add(s);
   }
 
   @Override

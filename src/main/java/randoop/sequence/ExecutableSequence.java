@@ -20,6 +20,7 @@ import randoop.ExecutionVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.NotExecuted;
+import randoop.generation.AbstractGenerator;
 import randoop.generation.ForwardGenerator;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
@@ -31,10 +32,7 @@ import randoop.types.ReferenceType;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
-import randoop.util.fieldbasedcontrol.CanonizationErrorException;
-import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
-import randoop.util.fieldbasedcontrol.HeapDump;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -103,8 +101,8 @@ public class ExecutableSequence {
   public boolean extendedExtensions;
   public boolean canonizationError;
   public boolean normalExecution;
-  private boolean DIFFERENTIAL = false;
-  private boolean DEBUG = false;
+//  private boolean DIFFERENTIAL = false;
+//  private boolean DEBUG = false;
 	
   /** The underlying sequence. */
   public Sequence sequence;
@@ -412,7 +410,7 @@ public class ExecutableSequence {
    			extendedExtensions = true;
     	
 		// Update last method's weight
-		if (!canonizationError && generator.field_based_weighted_selection) {
+		if (!canonizationError && AbstractGenerator.field_based_weighted_selection) {
 		    Statement stmt = sequence.getStatement(lastStmtIndex);		
 			if (extendedExtensions)
 				increaseOpearationWeight(stmt, generator);
@@ -492,63 +490,63 @@ public class ExecutableSequence {
   }
 
   
-  public boolean enlargeExtensions(HeapCanonizer canonizer, ForwardGenerator generator, FieldExtensions extensions) {
+  public void enlargeExtensions(HeapCanonizer canonizer, ForwardGenerator generator) {
 
 	extendedExtensions = false;
 	seqnum++;
 	
-    if (isNormalExecution()) {
-    	// FIXME: Figure out how to do this more efficiently.
-        // Now that we know that the execution has completed normally reset execution result values
-    	// and attempt to enlarge the extensions. Otherwise we would add field values to the extensions
-    	// based on objects already modified by all the executed statements.
-        hasNullInput = false;
-        executionResults.theList.clear();
-        
-        for (int i = 0; i < sequence.size(); i++) {
-          executionResults.theList.add(NotExecuted.create());
-        }
-        
-    	for (int i = 0; i < this.sequence.size(); i++) {
-    		
-    	  List<Variable> inputs = sequence.getInputs(i);
-    	  Object[] inputVariables;
-    	  inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+	normalExecution = isNormalExecution();
+	if (!normalExecution) return;
+	
+	// FIXME: Figure out how to do this more efficiently.
+    // Now that we know that the execution has completed normally reset execution result values
+	// and attempt to enlarge the extensions. Otherwise we would add field values to the extensions
+	// based on objects already modified by all the executed statements.
+    hasNullInput = false;
+    executionResults.theList.clear();
+    
+    for (int i = 0; i < sequence.size(); i++) {
+      executionResults.theList.add(NotExecuted.create());
+    }
+    
+	for (int i = 0; i < this.sequence.size(); i++) {
+		
+	  List<Variable> inputs = sequence.getInputs(i);
+	  Object[] inputVariables;
+	  inputVariables = getRuntimeInputs(executionResults.theList, inputs);
 
-    	  executeStatement(sequence, executionResults.theList, i, inputVariables);
+	  executeStatement(sequence, executionResults.theList, i, inputVariables);
 
-    	  // make sure statement executed
-    	  ExecutionOutcome statementResult = getResult(i);
+	  // make sure statement executed
+	  ExecutionOutcome statementResult = getResult(i);
 
-    	  if (!(statementResult instanceof NormalExecution)) {
-    		System.out.println("ERROR: augmenting field extensions using exceptional behaviour.");
-    		throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
-  		  }
+	  if (!(statementResult instanceof NormalExecution)) {
+		System.out.println("ERROR: augmenting field extensions using exceptional behaviour.");
+		throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
+  	  }
     		
   		  if (enlargeExtensions(sequence, i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
    			extendedExtensions = true;
 
-  		  if (canonizationError)
-  			  break;
+  		  if (canonizationError) {
+  			  extendedExtensions = false;
+  			  return;
+  		  }
  
-    	}
-    	
     }
-    
-	
-    if (!canonizationError) {
+    	
+    if (AbstractGenerator.field_based_weighted_selection) {
     	// Figure out how to update weights
-    	
-	  /*if (generator.field_based_weighted_selection) {
-	  if (extendedExtensions)
-		  increaseOpearationWeight(stmt, generator);
-	  else
-		  decreaseOpearationWeight(stmt, generator);
-	  }*/
+    	Set<Integer> activeIndexes = sequence.getActiveStatements();
+    	for (int i = 0; i < this.sequence.size(); i++) {
+    		Statement stmt = sequence.getStatement(i);
+    		if (activeIndexes.contains(i))
+    			increaseOpearationWeight(stmt, generator);
+    		else
+    			decreaseOpearationWeight(stmt, generator);
+    	}
     }
-
     
-	return extendedExtensions;
   }
   
   
