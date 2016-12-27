@@ -52,6 +52,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("The fully-qualified name of a class under test")
   public static List<String> testclass = new ArrayList<>();
 
+  @Option("File that lists classes regarded for field based generation")
+  public static File field_based_gen_classlist = null;
+
   /**
    * File that lists classes to test.
    *
@@ -649,6 +652,13 @@ public abstract class GenInputsAbstract extends CommandHandler {
       throw new RuntimeException(
           "Invalid parameter combination: specified a class literal file but --use-class-literals=NONE");
     }
+  }
+
+  public static Set<String> getFieldBasedGenClassnamesFromArgs() {
+    String errMessage = "ERROR while reading list of classes to test";
+    Set<String> classnames = getStringSetFromFile(field_based_gen_classlist, errMessage);
+    classnames.addAll(testclass);
+    return classnames;
   }
 
   public static Set<String> getClassnamesFromArgs() {

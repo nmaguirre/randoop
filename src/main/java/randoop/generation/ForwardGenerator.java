@@ -127,14 +127,25 @@ public class ForwardGenerator extends AbstractGenerator {
     // PABLO: Initialized field extensions
     //fieldExtensions = new FieldExtensions();
     //fieldExtensionsCanonizer = new FieldExtensions();
-    canonizer = new HeapCanonizer(new FieldExtensions(), field_based_ignore_primitive);
+    
     
     // PABLO: Initialized operation weights for random selection
     setInitialOperationWeights();
     
     initializeRuntimePrimitivesSeen();
   }
-
+  
+  
+  public void initCanonizer() {
+	  canonizer = new HeapCanonizer(new FieldExtensions(), field_based_ignore_primitive);  
+  }
+  
+  public void initCanonizer(Set<String> fieldBasedGenClassnames) {
+	  canonizer = new HeapCanonizer(new FieldExtensions(), field_based_ignore_primitive, fieldBasedGenClassnames);  
+  }
+  
+  
+  
   /**
    * The runtimePrimitivesSeen set contains primitive values seen during
    * generation/execution and is used to determine new values that should be
@@ -1093,4 +1104,6 @@ public class ForwardGenerator extends AbstractGenerator {
   public int numGeneratedSequences() {
     return allSequences.size();
   }
+
+
 }

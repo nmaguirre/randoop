@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 
@@ -34,10 +35,22 @@ public class HeapCanonizer {
 	
 	private List<String> ignoredClasses;
 	
+	private Set<String> fieldBasedGenClassnames;
+	
+	private boolean fieldBasedGenByClasses;
+
+	
+	private boolean belongsToFieldBasedClasses(Class clazz) {
+		String canonicalName = CanonicalRepresentation.getClassCanonicalName(clazz);
+		// Allow primitive fields and arrays to contribute to the extensions
+		if (CanonicalRepresentation.isClassPrimitive(clazz) || clazz.isArray())
+			return true;
+		
+		return fieldBasedGenClassnames.contains(canonicalName);
+	}
 	
 	
 	private boolean isIgnoredClass(Class clazz) {
-	
 		String canonicalName = CanonicalRepresentation.getClassCanonicalName(clazz);
 		// Anonymous classes have a null canonicalName, and are considered primitive
 		// for the moment
@@ -78,8 +91,21 @@ public class HeapCanonizer {
 		ignoredClasses.add("com.sun.");
 		// ignoredFields.add("java.util.concurrent.");
 		
+		fieldBasedGenByClasses = false;
 	}
 	
+	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive,
+			Set<String> fieldBasedGenClassnames) {
+		classFields = new HashMap<String, List<Field>>();
+		this.extensions = extensions;
+		this.ignorePrimitive = ignorePrimitive;
+		ignoredClasses = new LinkedList<String>();
+
+		this.fieldBasedGenClassnames = fieldBasedGenClassnames;
+		fieldBasedGenByClasses = true;
+	}
+
+
 	public FieldExtensions getExtensions() {
 		return extensions; 
 	}
@@ -182,10 +208,11 @@ public class HeapCanonizer {
 		clearStructures();
 		extendedExtensions = false;
 		
-		if (root == null ||
+		if ( root == null ||
 				root.getClass() == Object.class ||	
 				isIgnoredClass(root.getClass()) || 
-				CanonicalRepresentation.isClassPrimitive(root.getClass()))
+				CanonicalRepresentation.isClassPrimitive(root.getClass()) ||
+				(fieldBasedGenByClasses && !belongsToFieldBasedClasses(root.getClass())) )
 			return false;
 		
   		LinkedList<Object> toVisit = new LinkedList<Object>();
@@ -194,40 +221,12 @@ public class HeapCanonizer {
   		while (!toVisit.isEmpty()) {
   			Object obj = toVisit.removeFirst();
   			Class objClass = obj.getClass();
-  			
-/*			if (CanonicalRepresentation.isObjectPrimitive(obj)) {
-				// If ignorePrimitive do not store primitive objects
-				// if (ignorePrimitive) continue;
 
-				if (addPrimitiveValueToExtensions(obj, CanonicalRepresentation.getPrimitiveFieldCanonicalName(objClass)))
-					extendedExtensions = true; 
-			}
-			else {*/
   			if (objClass.isArray()) {
 				// Process an array object. Add a dummy field for each of its elements
 				int length = Array.getLength(obj);
-
-				// If ignorePrimitive do not store primitive objects
-				/*if (ignorePrimitive && 
-						length > 0 &&
-						CanonicalRepresentation.isClassPrimitive(obj.getClass().getComponentType())) 
-					continue;*/
-
-				
 				for (int i = 0; i < length; i++) {
 					Object target = Array.get(obj, i);
-					// Don't store null values
-					// if (target == null) continue;
-					
-					// If ignorePrimitive do not store primitive objects
-					/*if (ignorePrimitive && target != null && CanonicalRepresentation.isObjectPrimitive(target)) 
-						continue;*/
-
-					// If target does not belong to the store add it and assign an index to it
-					/*if (target != null && getObjectIndex(target) == -1) {
-						assignIndexToObject(target);
-						toVisit.addLast(target);
-					}*/
 					
 					String fname = CanonicalRepresentation.getArrayFieldCanonicalName(objClass, i);
 					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, fname);
@@ -256,21 +255,6 @@ public class HeapCanonizer {
 						throw new RuntimeException("ERROR: Illegal access to an object field during canonization");
 					}
 
-					// Don't store null values
-					// if (target == null) continue;
-	
-					// If ignorePrimitive do not store primitive objects
-					/* if (ignorePrimitive && target != null && CanonicalRepresentation.isObjectPrimitive(target)) 
-						continue;*/
-					
-					// If target does not belong to the store add it and assign an index to it
-					// Don't store null values
-					/*
-					if (target != null && getObjectIndex(target) == -1) {
-						assignIndexToObject(target);
-						toVisit.addLast(target);
-					}*/
-					
 					String fname = CanonicalRepresentation.getFieldCanonicalName(fld);
 					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, fname);
 					
@@ -279,7 +263,6 @@ public class HeapCanonizer {
 						// target is an object of a non ignored class that was encountered for the first time.
 						// Enqueue it for its fields to be inspected in a following iteration.
 						toVisit.addLast(target);
-					
 					// System.out.println(CanonicalRepresentation.getFieldCanonicalName(fld));
 				}
 			}
@@ -331,7 +314,8 @@ public class HeapCanonizer {
 		while (cls != null && 
 				cls != Object.class && 
 				!CanonicalRepresentation.isClassPrimitive(cls) &&
-				!isIgnoredClass(cls)) {
+				!isIgnoredClass(cls) &&
+				(!fieldBasedGenByClasses || belongsToFieldBasedClasses(cls))) {
 						
 			Field [] fieldsArray = cls.getDeclaredFields();
 			
@@ -349,17 +333,22 @@ public class HeapCanonizer {
 				//System.out.println(f.toString());
 				//System.out.println(f.getType());
 				// If ignorePrimitive do not consider primitive fields
-				
 				Class ftype = f.getType();
 				if (isIgnoredClass(ftype))
 					continue;
+
+				// If field based generation is done for a particular set of classes, 
+				// ignore fields that are not in the set
+				if (fieldBasedGenByClasses && !belongsToFieldBasedClasses(ftype))
+					continue;
 				
 				// Avoid following objects of the outer class
+				/*
 				if (f.getName().equals("this$0")) {
 					//System.out.println(f.getName());
 					continue;
 				}
-				
+				*/
 				
 				clsFields.add(f);
 			}

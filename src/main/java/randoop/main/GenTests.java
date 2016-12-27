@@ -18,6 +18,7 @@ import randoop.ExecutionVisitor;
 import randoop.JunitFileWriter;
 import randoop.MultiVisitor;
 import randoop.generation.AbstractGenerator;
+import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.generation.ComponentManager;
 import randoop.generation.ForwardGenerator;
 import randoop.generation.RandoopListenerManager;
@@ -157,6 +158,15 @@ public class GenTests extends GenInputsAbstract {
 
     // get names of classes under test
     Set<String> classnames = GenInputsAbstract.getClassnamesFromArgs();
+   
+    Set<String> field_based_gen_classnames = null;
+    if (GenInputsAbstract.field_based_gen_classlist != null) 
+    	field_based_gen_classnames = GenInputsAbstract.getFieldBasedGenClassnamesFromArgs();
+    
+    for (String s: field_based_gen_classnames) {
+    	System.out.println(s);
+    }
+    
 
     // get names of classes that must be covered by output tests
     Set<String> coveredClassnames =
@@ -261,6 +271,15 @@ public class GenTests extends GenInputsAbstract {
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
+    // FIXME: PABLO: Very ugly hack to initialize the canonizer. 
+    if (AbstractGenerator.field_based_gen != FieldBasedGenType.DISABLED) {
+    	if (GenInputsAbstract.field_based_gen_classlist == null)
+    		((ForwardGenerator)explorer).initCanonizer();
+    	else 
+    		((ForwardGenerator)explorer).initCanonizer(field_based_gen_classnames);
+    }
+    
+    
     /*
      * setup for check generation
      */
