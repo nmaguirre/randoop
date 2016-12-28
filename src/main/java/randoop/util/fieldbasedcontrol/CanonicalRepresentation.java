@@ -38,10 +38,9 @@ public class CanonicalRepresentation {
 			// To handle anonymous classes correctly
 			if (name == null) {
 				name = c.getName();
+				
 			}
-			
 			//System.out.println("NEW CLASS NAME FOUND: " + name);
-			
 			classNames.put(c, name);
 		}
 
@@ -67,7 +66,8 @@ public class CanonicalRepresentation {
   				|| clazz == Character.class
   				|| clazz == Double.class
   				|| clazz == Boolean.class
-  				|| clazz == Date.class
+  				// || clazz == Date.class
+  				|| clazz == Object.class
 		  		|| clazz.isEnum()
 				// FIXME: Not sure if this is the best place to put these classes.
 				//|| clazz == java.util.ResourceBundle.class
@@ -111,10 +111,10 @@ public class CanonicalRepresentation {
   	
   	
   	
-  	
+  	/*
   	private static boolean isPrimitive(Class clazz) {
   		return (clazz.isPrimitive()
-  				/*
+  				
   				|| clazz == short.class
   				|| clazz == long.class
   				|| clazz == int.class
@@ -122,7 +122,7 @@ public class CanonicalRepresentation {
   				|| clazz == byte.class
   				|| clazz == char.class
   				|| clazz == double.class
-  				|| clazz == boolean.class*/
+  				|| clazz == boolean.class
    				|| clazz == Short.class
   				|| clazz == Long.class
   				|| clazz == String.class
@@ -136,7 +136,7 @@ public class CanonicalRepresentation {
 		  		|| clazz.isEnum()
 		  		);
   	}
-  	
+  	*/
   	
   	public static boolean isEnum(Object value) {
   		return value.getClass().isEnum();

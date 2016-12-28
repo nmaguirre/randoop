@@ -212,7 +212,14 @@ public class ForwardGenerator extends AbstractGenerator {
         		eSeq.sequence.clearAllActiveFlags();
         	}
         	else {
-        		
+        		/*
+        		try {
+					canonizer.getExtensions().toFile(eSeq.FILENAME + "extensions" + eSeq.seqnum + ".txt");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        	*/
     	    	if (field_based_gen == FieldBasedGenType.FAST) {
     	    		processSequence(eSeq);
 
@@ -247,14 +254,8 @@ public class ForwardGenerator extends AbstractGenerator {
 	      componentManager.addGeneratedSequence(eSeq.sequence);
 	    }
 	}
-	/*
-	try {
-		canonizer.getExtensions().toFile(eSeq.FILENAME + ExecutableSequence.seqnum + ".txt");
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-	*/
+   	
+
     
     endTime = System.nanoTime();
     gentime += endTime - startTime;

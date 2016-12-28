@@ -160,13 +160,13 @@ public class GenTests extends GenInputsAbstract {
     Set<String> classnames = GenInputsAbstract.getClassnamesFromArgs();
    
     Set<String> field_based_gen_classnames = null;
-    if (GenInputsAbstract.field_based_gen_classlist != null) 
+    if (GenInputsAbstract.field_based_gen_classlist != null) { 
     	field_based_gen_classnames = GenInputsAbstract.getFieldBasedGenClassnamesFromArgs();
     
-    for (String s: field_based_gen_classnames) {
-    	System.out.println(s);
+    	for (String s: field_based_gen_classnames) {
+    		System.out.println(s);
+    	}
     }
-    
 
     // get names of classes that must be covered by output tests
     Set<String> coveredClassnames =

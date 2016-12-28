@@ -8,6 +8,8 @@ import java.lang.reflect.Modifier;
 import java.text.AttributedCharacterIterator;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -20,8 +22,6 @@ import org.junit.Test;
 import randoop.util.fieldbasedcontrol.HeapDump;
 import randoop.util.fieldbasedcontrol.HeapVertex;
 import randoop.util.fieldbasedcontrol.LabeledEdge;
-import randoop.util.fieldexhuastive.structures.LinkedList;
-import randoop.util.fieldexhuastive.structures.LinkedListNode;
 
 
 public class DataStructuresDiferentialTests {
@@ -41,7 +41,15 @@ public class DataStructuresDiferentialTests {
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensions.txt");
     
     FieldExtensions fe2 = new FieldExtensions();
-    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
+    
+    Set<String> fbclasses = new LinkedHashSet<>();
+    fbclasses.add("java.util.LinkedList");
+    fbclasses.add("java.util.LinkedList.Node");
+    
+    //HeapCanonizer canonizer = new HeapCanonizer(fe2, true, fbclasses);
+    HeapCanonizer canonizer = new HeapCanonizer(fe2, false, fbclasses);
+    //HeapCanonizer canonizer = new HeapCanonizer(fe2, false);
+    //HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
     canonizer.canonizeAndEnlargeExtensions(l);
     fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensionsnew.txt");
     

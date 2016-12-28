@@ -148,7 +148,7 @@ public class HeapCanonizer {
 		boolean isTgtNew = false;
 		if (tgt == null)
 			tgtString = CanonicalRepresentation.getNullRepresentation();
-		else if (isIgnoredClass(tgtClass))
+		else if (isIgnoredClass(tgtClass) || (fieldBasedGenByClasses && !belongsToFieldBasedClasses(tgtClass)))
 			tgtString = CanonicalRepresentation.getDummyObjectRepresentation();
 		else if (CanonicalRepresentation.isClassPrimitive(tgtClass)) {
 			if (ignorePrimitive) 

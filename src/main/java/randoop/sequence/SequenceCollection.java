@@ -200,19 +200,19 @@ public class SequenceCollection {
   // PABLO: Save the subsequences that were active according to the extensions
   public List<Sequence> addActiveSubsequences(Sequence sequence) {
 	  
-	  /*
+	  
 	  System.out.println("*************************");
 	  System.out.println("> Current sequence:");
 	  System.out.println(sequence.toCodeString()); 
-	   */
+	   
 	  List<Sequence> res = new LinkedList<Sequence>();
 	  for (Integer stmtIndex: sequence.getActiveStatements()) {
 		  
 		Sequence newSubseq = sequence.getSubsequence(stmtIndex);
-		/*
+		
 		System.out.println("  > Adding subsequence for index " + stmtIndex);
 		System.out.println(newSubseq.toCodeString());
-		 */
+		
 		List<Type> formalTypes = newSubseq.getTypesForLastStatement();
 		List<Variable> arguments = newSubseq.getVariablesOfLastStatement();
 		assert formalTypes.size() == arguments.size();
