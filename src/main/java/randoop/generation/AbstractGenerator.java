@@ -60,10 +60,13 @@ public abstract class AbstractGenerator {
   public static FieldBasedGenType field_based_gen = FieldBasedGenType.DISABLED;
   
   @Option("Ignore primitive values in the construction of field extensions")
-  public static boolean field_based_ignore_primitive = true;
+  public static boolean field_based_gen_ignore_primitive = true;
+  
+  @Option("Drop tests that did not contribute to the field extensions")
+  public static boolean field_based_gen_drop_non_contributing_tests = false;
   
   @Option("Increase the probabilities of randomly selecting methods that contribute more frequently to the field extensions")
-  public static boolean field_based_weighted_selection = false; 
+  public static boolean field_based_gen_weighted_selection = false; 
   @Option("Increment the weight of an action by this ammount each time it contributes to the extensions")
   public static int weight_increment = 10;
   @Option("Decrement the weight of an action by this ammount each time it does not contribute to the extensions")
@@ -132,6 +135,8 @@ public abstract class AbstractGenerator {
   
   public int sumOfWeights;
 
+  public boolean extensionsExtended = false;
+  
 /*
   public int smallerWeight = 10;
   //public int startingDiffFactor = 10; // max difference between operations = (diffFactor * 2) - 1 
@@ -457,6 +462,8 @@ public abstract class AbstractGenerator {
         continue;
       }
 
+      // FIXME PABLO: Maybe this number should not be increased if the test is going to be dropped
+      // because of the field_based_gen_drop_non_contributing_tests option
       num_sequences_generated++;
       
       if (eSeq.hasFailure()) {
@@ -464,12 +471,16 @@ public abstract class AbstractGenerator {
       }
 
       if (outputTest.test(eSeq)) {
+    	  
         if (!eSeq.hasInvalidBehavior()) {
-          if (eSeq.hasFailure()) {
-            outErrorSeqs.add(eSeq);
-          } else {
-            outRegressionSeqs.add(eSeq);
-          }
+        	// FIXME PABLO: There's a still unknown problem with dropping non contributing tests and subsumption
+        	// if (!field_based_gen_drop_non_contributing_tests || extensionsExtended) {
+            if (eSeq.hasFailure()) {
+              outErrorSeqs.add(eSeq);
+            } else {
+              outRegressionSeqs.add(eSeq);
+            }
+          // }
         }
       }
 
@@ -484,7 +495,7 @@ public abstract class AbstractGenerator {
       }
     }
     
-    System.out.println("Field based dropped secuences: " + fieldBasedDroppedSeq);
+    System.out.println("tests not augmenting extensions: " + fieldBasedDroppedSeq);
 
 
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {

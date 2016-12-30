@@ -137,11 +137,11 @@ public class ForwardGenerator extends AbstractGenerator {
   
   
   public void initCanonizer() {
-	  canonizer = new HeapCanonizer(new FieldExtensions(), field_based_ignore_primitive);  
+	  canonizer = new HeapCanonizer(new FieldExtensions(), field_based_gen_ignore_primitive);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizer(new FieldExtensions(), field_based_ignore_primitive, fieldBasedGenClassnames);  
+	  canonizer = new HeapCanonizer(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
   }
   
   
@@ -196,12 +196,10 @@ public class ForwardGenerator extends AbstractGenerator {
 	eSeq.exectime = endTime - startTime;
 	startTime = endTime; // reset start time.
     
-
    	if (field_based_gen != FieldBasedGenType.DISABLED && eSeq.isNormalExecution()) {
 		// Field based filtering is only done on non error sequences
 		try {
 
-			boolean extensionsExtended = false;
 	    	if (field_based_gen == FieldBasedGenType.FAST) 
 	    		extensionsExtended = eSeq.enlargeExtensionsFast(canonizer, this);
 	    	else
@@ -638,7 +636,7 @@ public class ForwardGenerator extends AbstractGenerator {
     // Select a StatementInfo
     TypedOperation operation;
     
-    if (field_based_weighted_selection) {
+    if (field_based_gen_weighted_selection) {
     	// PABLO: Perform a weighted random selection
       operation = selectWeightedRandomOperation();
 //  	  System.out.println("Selected: " + operation);

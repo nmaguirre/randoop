@@ -449,7 +449,7 @@ public class ExecutableSequence {
 		extendedExtensions = true;
 	
 	// Update last method's weight
-	if (AbstractGenerator.field_based_weighted_selection) {
+	if (AbstractGenerator.field_based_gen_weighted_selection) {
 	    Statement stmt = sequence.getStatement(lastStmtIndex);		
 		if (extendedExtensions)
 			increaseOpearationWeight(stmt, generator);
@@ -563,7 +563,7 @@ public class ExecutableSequence {
 
     }
     	
-    if (AbstractGenerator.field_based_weighted_selection) {
+    if (AbstractGenerator.field_based_gen_weighted_selection) {
     	// Figure out how to update weights
     	Set<Integer> activeIndexes = sequence.getActiveStatements();
     	for (int i = 0; i < this.sequence.size(); i++) {
