@@ -495,7 +495,7 @@ public abstract class AbstractGenerator {
       }
     }
     
-    System.out.println("tests not augmenting extensions: " + fieldBasedDroppedSeq);
+    System.out.println("Tests not augmenting extensions: " + fieldBasedDroppedSeq);
 
 
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {

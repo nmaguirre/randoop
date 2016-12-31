@@ -33,6 +33,7 @@ import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
+import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 
 /**
@@ -97,8 +98,8 @@ import randoop.util.fieldbasedcontrol.HeapCanonizer;
 public class ExecutableSequence {
 
   // PABLO: fields for field based generation
-  public static int seqnum = 0;
-  public String FILENAME = "logs/seq";
+  //  public static int seqnum = 0;
+//   public String FILENAME = "logs/seq";
   // public boolean extendedExtensions;
   // public boolean canonizationError;
   // public boolean normalExecution;
@@ -474,9 +475,12 @@ public class ExecutableSequence {
 			  Object obj = statementResult;
 			  
 			  if (obj != null && !CanonicalRepresentation.isObjectPrimitive(obj)) {
-				  // System.out.println(obj.toString());
 			  	  if (canonizer.canonizeAndEnlargeExtensions(obj)) {
-			  		  // System.out.println("Statement " + i + ", active variable " + varIndex);
+		           	  if (FieldBasedGenLog.isLoggingOn()) {
+	        	    		FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+	        	    				+ stmt.toString() + " (index " + i + ")");
+		           	  }
+
 			  		  sequence.addActiveVar(i, varIndex);
 			  		  extendedExtensions = true;
 			  	  }
@@ -489,7 +493,11 @@ public class ExecutableSequence {
 				for (int j=0; j<inputVariables.length; j++) {
 					if (inputVariables[j] != null && !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])) {
 	        	    	if (canonizer.canonizeAndEnlargeExtensions(inputVariables[j])) {
-					  		// System.out.println("Statement " + i + ", active variable " + varIndex);
+	        	    		if (FieldBasedGenLog.isLoggingOn()) {
+	        	    			FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+	        	    					+ stmt.toString() + " (index " + i + ")");
+	        	    		}
+
 	        	    		sequence.addActiveVar(i, varIndex);		        	    		
 	        	    		extendedExtensions = true;
 	        	    	}
@@ -510,18 +518,24 @@ public class ExecutableSequence {
   private void increaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
 	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
 		  TypedOperation op = stmt.getOperation();
-		  System.out.println("Operator :" + op.toString() + "\nWeight before increment: " + generator.getWeight(op));
+		  int weightBefore = generator.getWeight(op);
 		  generator.increaseWeight(stmt.getOperation());
-		  System.out.println("Weight after: " + generator.getWeight(op));
+
+		  if (FieldBasedGenLog.isLoggingOn()) {
+		  	  FieldBasedGenLog.logLine("> Increased " + op.toString() + " weight to " + generator.getWeight(op) + "(was " + weightBefore + ")");
+		  }
   	  }
   }
 
   private void decreaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
 	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
 		  TypedOperation op = stmt.getOperation();
-		  System.out.println("Operator :" + op.toString() + "\nWeight before decrement: " + generator.getWeight(op));
+		  int weightBefore = generator.getWeight(op);
 		  generator.decreaseWeight(stmt.getOperation());
-		  System.out.println("Weight after: " + generator.getWeight(op));
+
+		  if (FieldBasedGenLog.isLoggingOn()) {
+		  	  FieldBasedGenLog.logLine("> Decreased " + op.toString() + " weight to " + generator.getWeight(op) + "(was " + weightBefore + ")");
+		  }
 	  }
   }
 
@@ -529,7 +543,7 @@ public class ExecutableSequence {
   public boolean enlargeExtensionsMin(HeapCanonizer canonizer, ForwardGenerator generator) throws CanonizationErrorException {
 
 	boolean extendedExtensions = false;
-	seqnum++;
+	//	seqnum++;
 	
 	// FIXME: Figure out how to do this more efficiently.
     // Now that we know that the execution has completed normally reset execution result values

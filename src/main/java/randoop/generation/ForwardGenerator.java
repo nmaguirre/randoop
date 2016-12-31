@@ -35,6 +35,7 @@ import randoop.util.Randomness;
 import randoop.util.SimpleList;
 import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
+import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 
@@ -192,11 +193,20 @@ public class ForwardGenerator extends AbstractGenerator {
     
 	eSeq.execute(executionVisitor, checkGenerator);
 
+	if (FieldBasedGenLog.isLoggingOn()) {
+		FieldBasedGenLog.logLine("> Executed current sequence: ");
+		FieldBasedGenLog.logLine(eSeq.sequence.toCodeString());
+	}
+	
 	endTime = System.nanoTime();
 	eSeq.exectime = endTime - startTime;
 	startTime = endTime; // reset start time.
     
    	if (field_based_gen != FieldBasedGenType.DISABLED && eSeq.isNormalExecution()) {
+   		if (FieldBasedGenLog.isLoggingOn()) {
+   			FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
+   		}
+   		
 		// Field based filtering is only done on non error sequences
 		try {
 
@@ -208,21 +218,25 @@ public class ForwardGenerator extends AbstractGenerator {
     		if (!extensionsExtended) {
         	    fieldBasedDroppedSeq++;
         		eSeq.sequence.clearAllActiveFlags();
+        		
+           		if (FieldBasedGenLog.isLoggingOn()) {
+           			FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
+           		}
         	}
         	else {
-        		/*
-        		try {
-					canonizer.getExtensions().toFile(eSeq.FILENAME + "extensions" + eSeq.seqnum + ".txt");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	        	*/
+
+           		if (FieldBasedGenLog.isLoggingOn())
+           			FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
+
     	    	if (field_based_gen == FieldBasedGenType.FAST) {
     	    		processSequence(eSeq);
 
-    	    		if (eSeq.sequence.hasActiveFlags())
+    	    		if (eSeq.sequence.hasActiveFlags()) {
     	    			componentManager.addGeneratedSequence(eSeq.sequence);
+
+    	    			if (FieldBasedGenLog.isLoggingOn())
+    	    				FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
+    	    		}
     	    	}
     	    	else {
     	    		// FIXME: This method should only consider indexes belonging to the minimized sequences. 
@@ -234,6 +248,10 @@ public class ForwardGenerator extends AbstractGenerator {
     	            	subsumed_sequences.add(s);
     	    	}
     	    	
+           		if (FieldBasedGenLog.isLoggingOn()) {
+           			FieldBasedGenLog.logLine("> New field extensions: ");
+           			FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+           		}
             }
     		
 		}
@@ -241,11 +259,20 @@ public class ForwardGenerator extends AbstractGenerator {
         	canonizationErrorNum++;
         	eSeq.sequence.clearAllActiveFlags();
         	System.out.println(eSeq.toCodeString());
-        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);    			
+        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
+        	if (FieldBasedGenLog.isLoggingOn()) {
+        		FieldBasedGenLog.logLine("> ERROR: Number of canonization errors: " + canonizationErrorNum + "Error sequence:");
+        		FieldBasedGenLog.logLine(eSeq.toCodeString());
+        	}
 		}
 	}
 	else {
-    	// Original randoop behaviour when field_based_gen is disabled, or the current sequence produced an error
+		
+	   	if (field_based_gen != FieldBasedGenType.DISABLED && FieldBasedGenLog.isLoggingOn()) {
+	   		FieldBasedGenLog.logLine("> Execution of the current sequence finished with errors. Didn't use it to enlarge field extensions.");
+	   	}
+		
+    	// Original randoop behavior when field_based_gen is disabled, or the current sequence produced an error
 	    processSequence(eSeq);
 	
 	    if (eSeq.sequence.hasActiveFlags()) {

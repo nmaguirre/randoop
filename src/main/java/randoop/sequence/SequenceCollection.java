@@ -18,6 +18,7 @@ import randoop.util.ArrayListSimpleList;
 import randoop.util.ListOfLists;
 import randoop.util.Log;
 import randoop.util.SimpleList;
+import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 
 /**
  * A collection of sequences that makes its efficient to ask for all the
@@ -200,18 +201,19 @@ public class SequenceCollection {
   // PABLO: Save the subsequences that were active according to the extensions
   public List<Sequence> addActiveSubsequences(Sequence sequence) {
 	  
-	  
-	  System.out.println("*************************");
-	  System.out.println("> Current sequence:");
-	  System.out.println(sequence.toCodeString()); 
-	   
+	  if (FieldBasedGenLog.isLoggingOn())
+    	FieldBasedGenLog.logLine("> Sequence minimization starting");
+
+
 	  List<Sequence> res = new LinkedList<Sequence>();
 	  for (Integer stmtIndex: sequence.getActiveStatements()) {
 		  
 		Sequence newSubseq = sequence.getSubsequence(stmtIndex);
 		
-		System.out.println("  > Adding subsequence for index " + stmtIndex);
-		System.out.println(newSubseq.toCodeString());
+		if (FieldBasedGenLog.isLoggingOn()) {
+			FieldBasedGenLog.logLine("> Adding subsequence for contributing statement: " + sequence.getStatement(stmtIndex).toString() + " (index " + stmtIndex);
+			FieldBasedGenLog.logLine(newSubseq.toCodeString());
+		}
 		
 		List<Type> formalTypes = newSubseq.getTypesForLastStatement();
 		List<Variable> arguments = newSubseq.getVariablesOfLastStatement();
@@ -230,6 +232,9 @@ public class SequenceCollection {
 		checkRep();
 	  }
 	  
+	  if (FieldBasedGenLog.isLoggingOn())
+    	FieldBasedGenLog.logLine("> End of sequence minimization");
+
 	  // FIXME: Comment to improve performance
 	  assert res.size() == sequence.getActiveStatements().size();
 	  return res;

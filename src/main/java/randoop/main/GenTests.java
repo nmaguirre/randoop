@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import plume.Option;
 import plume.Options;
 import plume.Options.ArgException;
 import plume.SimpleLog;
@@ -57,6 +58,7 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
+import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
@@ -155,6 +157,23 @@ public class GenTests extends GenInputsAbstract {
     /*
      * Setup model of classes under test
      */
+    
+    // PABLO: If logging is on, print information
+	if (FieldBasedGenLog.isLoggingOn()) {
+		if (AbstractGenerator.field_based_gen != null) 
+			FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen=" + AbstractGenerator.field_based_gen.toString());
+		
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
+
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-drop-non-contributing-tests=" + AbstractGenerator.field_based_gen_drop_non_contributing_tests);
+
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-weighted-selection=" + AbstractGenerator.field_based_gen_weighted_selection);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --weight-increment=" + AbstractGenerator.weight_increment);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --weight-decrement=" + AbstractGenerator.weight_decrement);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --smaller-weight=" + AbstractGenerator.smaller_weight);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --larger-weight=" + AbstractGenerator.larger_weight);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --starting-weight=" + AbstractGenerator.starting_weight);
+	}
 
     // get names of classes under test
     Set<String> classnames = GenInputsAbstract.getClassnamesFromArgs();
@@ -163,11 +182,20 @@ public class GenTests extends GenInputsAbstract {
     if (GenInputsAbstract.field_based_gen_classlist != null) { 
     	field_based_gen_classnames = GenInputsAbstract.getFieldBasedGenClassnamesFromArgs();
     
-    	for (String s: field_based_gen_classnames) {
-    		System.out.println(s);
+    	if (FieldBasedGenLog.isLoggingOn()) {
+    		FieldBasedGenLog.logLine("> Field based generation using classes from file: " + GenInputsAbstract.field_based_gen_classlist.getAbsolutePath() + ". Classes read: ");
+    	
+    		for (String s: field_based_gen_classnames) {
+    			FieldBasedGenLog.logLine(s);
+    		}
     	}
+    } 
+    else {
+    	if (FieldBasedGenLog.isLoggingOn()) {
+    		FieldBasedGenLog.logLine("> Field based generation using default classes.");
+    	}    	
     }
-
+    
     // get names of classes that must be covered by output tests
     Set<String> coveredClassnames =
         GenInputsAbstract.getStringSetFromFile(

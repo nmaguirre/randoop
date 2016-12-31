@@ -609,6 +609,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("<filename> Name of a file to which to log lots of information")
   public static FileWriter log = null;
 
+  @Option("<filename> Name of a file to which to log lots of information about field based generation")
+  public static FileWriter field_based_gen_log = null;
+
   ///////////////////////////////////////////////////////////////////
   // Options used when testing Randoop.
 
