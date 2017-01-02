@@ -12,6 +12,7 @@ import randoop.DummyVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
+import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.Operation;
@@ -62,8 +63,13 @@ public class ForwardGenerator extends AbstractGenerator {
   private final Set<Sequence> allSequences;
   private final Set<TypedOperation> observers;
 
+  
   /** Sequences that are used in other sequences (and are thus redundant) **/
-  private Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
+  // PABLO: This was here in original randoop. For now I moved it up to AbstractGenerator 
+  // because I needed it for subsumption related issues (ugly hack).
+//  private Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
+
+//  private Set<Sequence> subsumed_candidates; 
 
 
   
@@ -211,11 +217,11 @@ public class ForwardGenerator extends AbstractGenerator {
 		try {
 
 	    	if (field_based_gen == FieldBasedGenType.FAST) 
-	    		extensionsExtended = eSeq.enlargeExtensionsFast(canonizer, this);
+	    		eSeq.enlargeExtensionsFast(canonizer, this);
 	    	else
-	    		extensionsExtended = eSeq.enlargeExtensionsMin(canonizer, this);
+	    		eSeq.enlargeExtensionsMin(canonizer, this);
 	    		
-    		if (!extensionsExtended) {
+    		if (!eSeq.enlargesExtensions) {
         	    fieldBasedDroppedSeq++;
         		eSeq.sequence.clearAllActiveFlags();
         		
@@ -246,11 +252,16 @@ public class ForwardGenerator extends AbstractGenerator {
     		    	// The minimized sequences recently generated are subsumed by the whole test
     	            for (Sequence s: minSeq)
     	            	subsumed_sequences.add(s);
+    	    		if (FieldBasedGenLog.isLoggingOn())
+    	    			FieldBasedGenLog.logLine("> Minimized sequences stored as subsumed by the current test");
     	    	}
     	    	
            		if (FieldBasedGenLog.isLoggingOn()) {
-           			FieldBasedGenLog.logLine("> New field extensions: ");
-           			FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+       				// Only log extensions with up to 10000 elements to avoid a too large log file
+           			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) {
+           				FieldBasedGenLog.logLine("> New field extensions: ");
+           				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+           			}
            		}
             }
     		
@@ -264,12 +275,13 @@ public class ForwardGenerator extends AbstractGenerator {
         		FieldBasedGenLog.logLine("> ERROR: Number of canonization errors: " + canonizationErrorNum + "Error sequence:");
         		FieldBasedGenLog.logLine(eSeq.toCodeString());
         	}
+        	eSeq.canonizationError = true;
 		}
 	}
 	else {
 		
-	   	if (field_based_gen != FieldBasedGenType.DISABLED && FieldBasedGenLog.isLoggingOn()) {
-	   		FieldBasedGenLog.logLine("> Execution of the current sequence finished with errors. Didn't use it to enlarge field extensions.");
+	   	if (FieldBasedGenLog.isLoggingOn()) {
+	   		FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions.");
 	   	}
 		
     	// Original randoop behavior when field_based_gen is disabled, or the current sequence produced an error
@@ -280,8 +292,6 @@ public class ForwardGenerator extends AbstractGenerator {
 	    }
 	}
    	
-
-    
     endTime = System.nanoTime();
     gentime += endTime - startTime;
     eSeq.gentime = gentime;
@@ -735,7 +745,6 @@ public class ForwardGenerator extends AbstractGenerator {
     for (Sequence s : sequences.sequences) {
       s.lastTimeUsed = java.lang.System.currentTimeMillis();
     }
-
     
     
     randoopConsistencyTest2(newSequence);
@@ -750,8 +759,30 @@ public class ForwardGenerator extends AbstractGenerator {
     // Keep track of any input sequences that are used in this sequence.
     // Tests that contain only these sequences are probably redundant.
     
-    for (Sequence is : sequences.sequences) {
-      subsumed_sequences.add(is);
+    
+    if (FieldBasedGenLog.isLoggingOn()) 
+    	FieldBasedGenLog.logLine("\n\n>> New sequence constructed");
+ 
+    // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
+    if (field_based_gen_drop_non_contributing_tests) {
+    	// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
+    	// test enlarges the field extensions
+    	if (FieldBasedGenLog.isLoggingOn())
+    		FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
+    	
+    	subsumed_candidates = new LinkedHashSet<>();
+ 	    for (Sequence is : sequences.sequences) {
+	      subsumed_candidates.add(is);
+	    }
+    }
+    else {
+   		if (FieldBasedGenLog.isLoggingOn()) 
+   			FieldBasedGenLog.logLine("> New subsumed sequences stored");
+    	    	
+    	// PABLO: Original randoop behaviour
+	    for (Sequence is : sequences.sequences) {
+	      subsumed_sequences.add(is);
+	    }
     }
 
     return new ExecutableSequence(newSequence);

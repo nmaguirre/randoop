@@ -105,6 +105,8 @@ public class ExecutableSequence {
   // public boolean normalExecution;
 //  private boolean DIFFERENTIAL = false;
 //  private boolean DEBUG = false;
+  public boolean enlargesExtensions = false;
+  public boolean canonizationError = false;
 	
   /** The underlying sequence. */
   public Sequence sequence;
@@ -145,6 +147,8 @@ public class ExecutableSequence {
   private static PrintStream ps_output_buffer = new PrintStream(output_buffer);
 
   private IdentityMultiMap<Object, Variable> variableMap;
+
+
   
 
 
@@ -443,22 +447,22 @@ public class ExecutableSequence {
     // make sure statement executed
 	ExecutionOutcome statementResult = getResult(lastStmtIndex);
 	
-	boolean extendedExtensions = false;
+	enlargesExtensions = false;
 
 	
 	if (enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
-		extendedExtensions = true;
+		enlargesExtensions = true;
 	
 	// Update last method's weight
 	if (AbstractGenerator.field_based_gen_weighted_selection) {
 	    Statement stmt = sequence.getStatement(lastStmtIndex);		
-		if (extendedExtensions)
+		if (enlargesExtensions)
 			increaseOpearationWeight(stmt, generator);
 		else
 			decreaseOpearationWeight(stmt, generator);
 	}
 	
-	return extendedExtensions;
+	return enlargesExtensions;
   }
   
   
@@ -542,7 +546,7 @@ public class ExecutableSequence {
   
   public boolean enlargeExtensionsMin(HeapCanonizer canonizer, ForwardGenerator generator) throws CanonizationErrorException {
 
-	boolean extendedExtensions = false;
+	enlargesExtensions = false;
 	//	seqnum++;
 	
 	// FIXME: Figure out how to do this more efficiently.
@@ -573,7 +577,7 @@ public class ExecutableSequence {
   	  }
     		
   	  if (enlargeExtensions(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
-  	    extendedExtensions = true;
+  	    enlargesExtensions = true;
 
     }
     	
@@ -589,7 +593,7 @@ public class ExecutableSequence {
     	}
     }
     
-    return extendedExtensions;
+    return enlargesExtensions;
   }
   
   

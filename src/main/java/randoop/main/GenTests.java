@@ -158,6 +158,25 @@ public class GenTests extends GenInputsAbstract {
      * Setup model of classes under test
      */
     
+    // Check that the configuration options of the field based generation approach are ok 
+    if (AbstractGenerator.field_based_gen == null || 
+    		AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED) {
+
+    	if (AbstractGenerator.field_based_gen_drop_non_contributing_tests == true || 
+    			AbstractGenerator.field_based_gen_weighted_selection == true ||
+    			AbstractGenerator.field_based_gen_ignore_primitive == true || 
+    			GenInputsAbstract.field_based_gen_classlist != null ||
+    			GenInputsAbstract.field_based_gen_log != null
+    			) {
+    		System.out.println("Configuration error: --field-based-gen must be activated for "
+    				+ "--field-based-gen-drop-non-contributing-tests, "
+    				+ "--field-based-gen-weighted-selection, "
+    				+ "--field-based-gen-log and "
+    				+ "--field-based-gen-classlist to be enabled");
+    		System.exit(1);
+    	}
+    }
+    
     // PABLO: If logging is on, print information
 	if (FieldBasedGenLog.isLoggingOn()) {
 		if (AbstractGenerator.field_based_gen != null) 

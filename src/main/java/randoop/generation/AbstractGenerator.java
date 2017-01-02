@@ -4,6 +4,7 @@ import plume.Option;
 import plume.OptionGroup;
 import plume.Unpublicized;
 import randoop.*;
+import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
@@ -16,11 +17,13 @@ import randoop.util.ReflectionExecutor;
 import randoop.util.SimpleList;
 import randoop.util.Timer;
 import randoop.util.WeightedElement;
+import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,8 +80,9 @@ public abstract class AbstractGenerator {
   public static int smaller_weight = 10;
   @Option("Larger weight for an action in weighted selection")
   public static int larger_weight = 100;  
-
-  
+  @Option("Only log extensions with up to this size. Avoids very large log files")
+  public static int max_extensions_size_to_log = 1000;  
+   
   
   @OptionGroup(value = "AbstractGenerator unpublicized options", unpublicized = true)
   @Unpublicized
@@ -91,9 +95,6 @@ public abstract class AbstractGenerator {
 
   @RandoopStat("Number of sequences generated.")
   public int num_sequences_generated = 0;
-
-  // PABLO: The number of sequences generated changes with fb generation 
-  public int num_sequences_generated_fb = 0;
 
   @RandoopStat("Number of sequences generated that reveal a failure.")
   public int num_failing_sequences = 0;
@@ -129,23 +130,16 @@ public abstract class AbstractGenerator {
    */
   public List<TypedOperation> operations;
   
+  protected Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
+
+  protected Set<Sequence> subsumed_candidates; 
+  
+  
   // PABLO: Structures to add more weight to operations more frequently used
   // in random selection.
   public LinkedHashMap<TypedOperation, Integer> operationsWeight;
   
   public int sumOfWeights;
-
-  public boolean extensionsExtended = false;
-  
-/*
-  public int smallerWeight = 10;
-  //public int startingDiffFactor = 10; // max difference between operations = (diffFactor * 2) - 1 
-  public int weightInc = 10;
-  public int weightDec = 5;
-  
-  public int startingWeight = 30; //smallerWeight * startingDiffFactor;
-  public int largerWeight = 100;  //startingWeight * 2;
-*/
 
   public void setInitialOperationWeights() {
 	  sumOfWeights = 0;
@@ -462,8 +456,6 @@ public abstract class AbstractGenerator {
         continue;
       }
 
-      // FIXME PABLO: Maybe this number should not be increased if the test is going to be dropped
-      // because of the field_based_gen_drop_non_contributing_tests option
       num_sequences_generated++;
       
       if (eSeq.hasFailure()) {
@@ -473,15 +465,49 @@ public abstract class AbstractGenerator {
       if (outputTest.test(eSeq)) {
     	  
         if (!eSeq.hasInvalidBehavior()) {
-        	// FIXME PABLO: There's a still unknown problem with dropping non contributing tests and subsumption
-        	// if (!field_based_gen_drop_non_contributing_tests || extensionsExtended) {
-            if (eSeq.hasFailure()) {
-              outErrorSeqs.add(eSeq);
-            } else {
-              outRegressionSeqs.add(eSeq);
-            }
-          // }
+        	boolean stored = false;
+
+        	if (eSeq.hasFailure() ||
+        			(field_based_gen != FieldBasedGenType.DISABLED && eSeq.canonizationError == true)
+        			) {
+        		outErrorSeqs.add(eSeq);
+        		stored = true;
+
+        		if (FieldBasedGenLog.isLoggingOn()) 
+        			FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
+
+        	} else {
+        		// Execution of the current sequence was successful
+        		if (field_based_gen_drop_non_contributing_tests && eSeq.isNormalExecution() && !eSeq.enlargesExtensions) {
+        			stored = false;
+        			if (FieldBasedGenLog.isLoggingOn())
+        				FieldBasedGenLog.logLine("> Current sequence and subsumption candidates discarded");
+        		}
+        		else {
+            		if (FieldBasedGenLog.isLoggingOn()) {
+            			if (eSeq.isNormalExecution())
+            				FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
+            			else
+            				FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+            		}
+        			
+        			outRegressionSeqs.add(eSeq);
+        			stored = true;
+        		}
+        	}
+
+        	// If the sequence was stored there are subsumed sequences, save them
+        	if (field_based_gen_drop_non_contributing_tests && stored) {
+        		for (Sequence is : subsumed_candidates) {
+        			subsumed_sequences.add(is);
+        		}
+
+        		if (FieldBasedGenLog.isLoggingOn()) 
+        			FieldBasedGenLog.logLine("> The candidates for subsumed sequences are now saved as subsumed");	
+        	}
+
         }
+
       }
 
       if (dump_sequences) {
@@ -598,3 +624,4 @@ public abstract class AbstractGenerator {
 	fbSeq = s;
   }
 }
+
