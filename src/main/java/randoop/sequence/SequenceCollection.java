@@ -211,7 +211,7 @@ public class SequenceCollection {
 		Sequence newSubseq = sequence.getSubsequence(stmtIndex);
 		
 		if (FieldBasedGenLog.isLoggingOn()) {
-			FieldBasedGenLog.logLine("> Adding subsequence for contributing statement: " + sequence.getStatement(stmtIndex).toString() + " (index " + stmtIndex);
+			FieldBasedGenLog.logLine("> Adding subsequence for contributing statement: " + sequence.getStatement(stmtIndex).toString() + " (index " + stmtIndex + ")");
 			FieldBasedGenLog.logLine(newSubseq.toCodeString());
 		}
 		

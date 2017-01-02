@@ -73,9 +73,9 @@ public abstract class AbstractGenerator {
   @Option("Increment the weight of an action by this ammount each time it contributes to the extensions")
   public static int weight_increment = 10;
   @Option("Decrement the weight of an action by this ammount each time it does not contribute to the extensions")
-  public static int weight_decrement = 3;
+  public static int weight_decrement = 0;
   @Option("Starting weight of all actions in weighted selection")
-  public static int starting_weight = 30; 
+  public static int starting_weight = 10; 
   @Option("Smaller weight for an action in weighted selection")
   public static int smaller_weight = 10;
   @Option("Larger weight for an action in weighted selection")
@@ -182,7 +182,7 @@ public abstract class AbstractGenerator {
 	}
   }
   
-  public int getWeight(TypedOperation t) {
+  public Integer getWeight(TypedOperation t) {
 	  return operationsWeight.get(t);
   } 
 
@@ -453,6 +453,7 @@ public abstract class AbstractGenerator {
       }
 
       if (eSeq == null) {
+//    	System.out.println("NULL SEQUENCE");
         continue;
       }
 

@@ -22,6 +22,7 @@ import randoop.contract.EqualsTransitive;
 import randoop.contract.ObjectContract;
 import randoop.generation.ComponentManager;
 import randoop.main.ClassNameErrorHandler;
+import randoop.main.GenInputsAbstract;
 import randoop.operation.MethodCall;
 import randoop.operation.OperationParseException;
 import randoop.operation.OperationParser;
@@ -96,17 +97,19 @@ public class OperationModel {
     classLiteralMap = new MultiMap<>();
     annotatedTestValues = new LinkedHashSet<>();
     contracts = new ContractSet();
-    contracts.add(EqualsReflexive.getInstance());
-    contracts.add(EqualsSymmetric.getInstance());
-    contracts.add(EqualsHashcode.getInstance());
-    contracts.add(EqualsToNullRetFalse.getInstance());
-    contracts.add(EqualsReturnsNormally.getInstance());
-    contracts.add(EqualsTransitive.getInstance());
-    contracts.add(CompareToReflexive.getInstance());
-    contracts.add(CompareToAntiSymmetric.getInstance());
-    contracts.add(CompareToEquals.getInstance());
-    contracts.add(CompareToSubs.getInstance());
-    contracts.add(CompareToTransitive.getInstance());
+    if (!GenInputsAbstract.field_based_gen_disable_contracts) {
+		contracts.add(EqualsReflexive.getInstance());
+		contracts.add(EqualsSymmetric.getInstance());
+		contracts.add(EqualsHashcode.getInstance());
+		contracts.add(EqualsToNullRetFalse.getInstance());
+		contracts.add(EqualsReturnsNormally.getInstance());
+		contracts.add(EqualsTransitive.getInstance());
+		contracts.add(CompareToReflexive.getInstance());
+		contracts.add(CompareToAntiSymmetric.getInstance());
+		contracts.add(CompareToEquals.getInstance());
+		contracts.add(CompareToSubs.getInstance());
+		contracts.add(CompareToTransitive.getInstance());
+    }
     exercisedClasses = new LinkedHashSet<>();
     operations = new TreeSet<>();
   }

@@ -520,25 +520,49 @@ public class ExecutableSequence {
   
   
   private void increaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
+	  // FIXME: I don't know when a constructor is from an array type or not.
+	  // Array constructors return a null pointer exception when I try to increase
+	  // their weight because the corresponding operation does not exist in generator.
 	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
 		  TypedOperation op = stmt.getOperation();
-		  int weightBefore = generator.getWeight(op);
+
+		  Integer weightBefore = generator.getWeight(op);
+		  if (weightBefore == null) {
+			  if (FieldBasedGenLog.isLoggingOn()) {
+			  	  FieldBasedGenLog.logLine("> Unknown operation: Not increasing " + op.toString() + " weight");
+			  }
+
+			  return;
+		  }
+
 		  generator.increaseWeight(stmt.getOperation());
 
 		  if (FieldBasedGenLog.isLoggingOn()) {
-		  	  FieldBasedGenLog.logLine("> Increased " + op.toString() + " weight to " + generator.getWeight(op) + "(was " + weightBefore + ")");
+		  	  FieldBasedGenLog.logLine("> Increased " + op.toString() + " weight to " + generator.getWeight(op) + " (was " + weightBefore + ")");
 		  }
   	  }
   }
 
   private void decreaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
+	  // FIXME: I don't know when a constructor is from an array type or not.
+	  // Array constructors return a null pointer exception when I try to increase
+	  // their weight because the corresponding operation does not exist in generator.
 	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
 		  TypedOperation op = stmt.getOperation();
-		  int weightBefore = generator.getWeight(op);
+
+		  Integer weightBefore = generator.getWeight(op);
+		  if (weightBefore == null) {
+			  if (FieldBasedGenLog.isLoggingOn()) {
+			  	  FieldBasedGenLog.logLine("> Unknown operation: Not decreasing " + op.toString() + " weight");
+			  }
+
+			  return;
+		  }
+		  
 		  generator.decreaseWeight(stmt.getOperation());
 
 		  if (FieldBasedGenLog.isLoggingOn()) {
-		  	  FieldBasedGenLog.logLine("> Decreased " + op.toString() + " weight to " + generator.getWeight(op) + "(was " + weightBefore + ")");
+		  	  FieldBasedGenLog.logLine("> Decreased " + op.toString() + " weight to " + generator.getWeight(op) + " (was " + weightBefore + ")");
 		  }
 	  }
   }

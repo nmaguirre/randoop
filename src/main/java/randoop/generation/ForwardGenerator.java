@@ -257,11 +257,12 @@ public class ForwardGenerator extends AbstractGenerator {
     	    	}
     	    	
            		if (FieldBasedGenLog.isLoggingOn()) {
-       				// Only log extensions with up to 10000 elements to avoid a too large log file
-           			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) {
-           				FieldBasedGenLog.logLine("> New field extensions: ");
+       				// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
+          			FieldBasedGenLog.logLine("> New field extensions: ");
+           			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
            				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
-           			}
+           			else 
+           				FieldBasedGenLog.logLine("> Extensions size exceed the log limit: " + max_extensions_size_to_log + "and will not be shown");
            		}
             }
     		
@@ -676,7 +677,8 @@ public class ForwardGenerator extends AbstractGenerator {
     if (field_based_gen_weighted_selection) {
     	// PABLO: Perform a weighted random selection
       operation = selectWeightedRandomOperation();
-//  	  System.out.println("Selected: " + operation);
+      if (FieldBasedGenLog.isLoggingOn()) 
+    	  FieldBasedGenLog.logLine("> Selected operation: " + operation + " . Weight: " + getWeight(operation));
     }
     else
     	operation = Randomness.randomMember(this.operations);
