@@ -310,6 +310,11 @@ public class HeapCanonizer {
 		List<Field> clsFields = classFields.get(classname);
 		if (clsFields != null) return clsFields;
 
+		if (FieldBasedGenLog.isLoggingOn()) {
+			FieldBasedGenLog.logLine("> New class found during canonization: " + classname);
+			FieldBasedGenLog.logLine("> Considering fields: ");
+		}
+		
 		clsFields = new LinkedList<Field>();
 		while (cls != null && 
 				cls != Object.class && 
@@ -350,13 +355,18 @@ public class HeapCanonizer {
 				}
 				*/
 				
+				if (FieldBasedGenLog.isLoggingOn())
+					FieldBasedGenLog.logLine(CanonicalRepresentation.getFieldCanonicalName(f));
+
 				clsFields.add(f);
 			}
 				
 			cls = cls.getSuperclass();
 		}
 		
-		// System.out.println(">>Result: " + clsFields);
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("> No more fields for class: " + classname);
+	// System.out.println(">>Result: " + clsFields);
 
 		//System.out.println(clsFields);
 		Collections.sort(clsFields, new FieldByNameComp());
