@@ -1,12 +1,16 @@
 package randoop.util.fieldbasedcontrol;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.jfree.data.xy.XYDataset;
 import org.junit.Test;
 
 public class JChartNewTests {
 
+
+	
 	@Test
 	public void infiniteLoopHashCode() throws IOException {
 

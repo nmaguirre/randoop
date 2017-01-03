@@ -523,7 +523,8 @@ public class ExecutableSequence {
 	  // FIXME: I don't know when a constructor is from an array type or not.
 	  // Array constructors return a null pointer exception when I try to increase
 	  // their weight because the corresponding operation does not exist in generator.
-	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
+	  // if (/*stmt.isConstructorCall() ||*/ stmt.isMethodCall()) {
+	  if (stmt.isMethodCall() && !stmt.isConstructorCall() && !stmt.isPrimitiveInitialization())  {
 		  TypedOperation op = stmt.getOperation();
 
 		  Integer weightBefore = generator.getWeight(op);
@@ -547,7 +548,7 @@ public class ExecutableSequence {
 	  // FIXME: I don't know when a constructor is from an array type or not.
 	  // Array constructors return a null pointer exception when I try to increase
 	  // their weight because the corresponding operation does not exist in generator.
-	  if (stmt.isConstructorCall() || stmt.isMethodCall()) {
+	  if (stmt.isMethodCall() && !stmt.isConstructorCall() && !stmt.isPrimitiveInitialization())  {
 		  TypedOperation op = stmt.getOperation();
 
 		  Integer weightBefore = generator.getWeight(op);

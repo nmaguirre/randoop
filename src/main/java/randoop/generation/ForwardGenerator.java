@@ -250,8 +250,12 @@ public class ForwardGenerator extends AbstractGenerator {
 
     		    	List<Sequence> minSeq = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
     		    	// The minimized sequences recently generated are subsumed by the whole test
-    	            for (Sequence s: minSeq)
-    	            	subsumed_sequences.add(s);
+    	            for (Sequence s: minSeq) {
+    	            	// Unless the minimized sequence is exactly the size of the whole sequence,
+    	            	// meaning that minimization didn't have any effect
+    	            	if (s.size() < eSeq.sequence.size())
+    	            		subsumed_sequences.add(s);
+    	            }
     	    		if (FieldBasedGenLog.isLoggingOn())
     	    			FieldBasedGenLog.logLine("> Minimized sequences stored as subsumed by the current test");
     	    	}
@@ -262,7 +266,7 @@ public class ForwardGenerator extends AbstractGenerator {
            			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
            				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
            			else 
-           				FieldBasedGenLog.logLine("> Extensions size exceed the log limit: " + max_extensions_size_to_log + "and will not be shown");
+           				FieldBasedGenLog.logLine("> Extensions size (" + canonizer.getExtensions().size() + ") exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
            		}
             }
     		

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +37,21 @@ public class HeapCanonizer {
 	private List<String> ignoredClasses;
 	
 	private Set<String> fieldBasedGenClassnames;
+
+	private Set<String> fieldBasedGenClassnamesAndParents;
 	
 	private boolean fieldBasedGenByClasses;
 
+	
+	
+	private boolean belongsToFieldBasedClassesOrParents(Class clazz) {
+		String canonicalName = CanonicalRepresentation.getClassCanonicalName(clazz);
+		// Allow primitive fields and arrays to contribute to the extensions
+		if (CanonicalRepresentation.isClassPrimitive(clazz) || clazz.isArray())
+			return true;
+		
+		return fieldBasedGenClassnamesAndParents.contains(canonicalName);
+	}
 	
 	private boolean belongsToFieldBasedClasses(Class clazz) {
 		String canonicalName = CanonicalRepresentation.getClassCanonicalName(clazz);
@@ -102,6 +115,38 @@ public class HeapCanonizer {
 		ignoredClasses = new LinkedList<String>();
 
 		this.fieldBasedGenClassnames = fieldBasedGenClassnames;
+		this.fieldBasedGenClassnamesAndParents = new HashSet<>(this.fieldBasedGenClassnames);
+		
+		// For each given class, put its superclasses in fieldBasedGenClassnames to avoid 
+		// discarding fields that have superclasses as types.
+		for (String name: this.fieldBasedGenClassnames) {
+			
+			if (FieldBasedGenLog.isLoggingOn())
+				FieldBasedGenLog.logLine("> Added class " + name + " for canonization" );	
+			
+			Class cls = null;
+			try {
+				cls = Class.forName(name);
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.println("FATAL ERROR DURING CANONIZATION: Class " + name + " not found. Check your --field-based-gen-classnames file for errors.");
+				System.exit(1);
+			}
+			cls = cls.getSuperclass();
+			while (cls != null && 
+					cls != Object.class && 
+					!CanonicalRepresentation.isClassPrimitive(cls) &&
+					!isIgnoredClass(cls)) {
+				String parentName = CanonicalRepresentation.getClassCanonicalName(cls);
+				if (this.fieldBasedGenClassnamesAndParents.add(parentName)) {
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("> Added " + name + "'s parent " + parentName + " for canonization");
+				}
+			
+				cls = cls.getSuperclass();
+			}
+		}
 		fieldBasedGenByClasses = true;
 	}
 
@@ -310,10 +355,8 @@ public class HeapCanonizer {
 		List<Field> clsFields = classFields.get(classname);
 		if (clsFields != null) return clsFields;
 
-		if (FieldBasedGenLog.isLoggingOn()) {
-			FieldBasedGenLog.logLine("> New class found during canonization: " + classname);
-			FieldBasedGenLog.logLine("> Considering fields: ");
-		}
+		if (FieldBasedGenLog.isLoggingOn()) 
+			FieldBasedGenLog.logLine("> Considering fields for class " + classname + ": ");
 		
 		clsFields = new LinkedList<Field>();
 		while (cls != null && 
@@ -343,8 +386,8 @@ public class HeapCanonizer {
 					continue;
 
 				// If field based generation is done for a particular set of classes, 
-				// ignore fields that are not in the set
-				if (fieldBasedGenByClasses && !belongsToFieldBasedClasses(ftype))
+				// ignore fields with types that are not in the set that are not primitive or arrays
+				if (fieldBasedGenByClasses && !belongsToFieldBasedClassesOrParents(ftype))
 					continue;
 				
 				// Avoid following objects of the outer class
@@ -356,7 +399,7 @@ public class HeapCanonizer {
 				*/
 				
 				if (FieldBasedGenLog.isLoggingOn())
-					FieldBasedGenLog.logLine(CanonicalRepresentation.getFieldCanonicalName(f));
+					FieldBasedGenLog.logLine(f.getType().getName() + " " + CanonicalRepresentation.getFieldCanonicalName(f));
 
 				clsFields.add(f);
 			}
@@ -365,7 +408,7 @@ public class HeapCanonizer {
 		}
 		
 		if (FieldBasedGenLog.isLoggingOn())
-			FieldBasedGenLog.logLine("> No more fields for class: " + classname);
+			FieldBasedGenLog.logLine("> No more fields for: " + classname);
 	// System.out.println(">>Result: " + clsFields);
 
 		//System.out.println(clsFields);
