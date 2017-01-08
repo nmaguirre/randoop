@@ -770,7 +770,7 @@ public class ForwardGenerator extends AbstractGenerator {
     	FieldBasedGenLog.logLine("\n\n>> New sequence constructed");
  
     // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
-    if (field_based_gen_drop_non_contributing_tests) {
+    if (field_based_gen_keep_non_contributing_tests_percentage != 1) {
     	// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
     	// test enlarges the field extensions
     	if (FieldBasedGenLog.isLoggingOn())

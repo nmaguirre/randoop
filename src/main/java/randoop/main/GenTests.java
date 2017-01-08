@@ -158,18 +158,23 @@ public class GenTests extends GenInputsAbstract {
      * Setup model of classes under test
      */
     
+    if (AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage < 0 || AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage > 1) {
+    	System.out.println("ERROR: --field-based-gen-keep-non-contributing-tests-percentage must be a reaL number between 0 and 1");
+    	System.exit(1);
+    }
+    
     // Check that the configuration options of the field based generation approach are ok 
     if (AbstractGenerator.field_based_gen == null || 
     		AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED) {
 
-    	if (AbstractGenerator.field_based_gen_drop_non_contributing_tests == true || 
+    	if (AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage != 0 || 
     			AbstractGenerator.field_based_gen_weighted_selection == true ||
     			AbstractGenerator.field_based_gen_ignore_primitive == true || 
     			GenInputsAbstract.field_based_gen_classlist != null ||
     			GenInputsAbstract.field_based_gen_log != null
     			) {
     		System.out.println("Configuration error: --field-based-gen must be activated for "
-    				+ "--field-based-gen-drop-non-contributing-tests, "
+    				+ "--field-based-gen-keep-non-contributing-tests-percentage, "
     				+ "--field-based-gen-weighted-selection, "
     				+ "--field-based-gen-log and "
     				+ "--field-based-gen-classlist to be enabled");
@@ -184,7 +189,7 @@ public class GenTests extends GenInputsAbstract {
 		
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
 
-		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-drop-non-contributing-tests=" + AbstractGenerator.field_based_gen_drop_non_contributing_tests);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-weighted-selection=" + AbstractGenerator.field_based_gen_weighted_selection);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --weight-increment=" + AbstractGenerator.weight_increment);

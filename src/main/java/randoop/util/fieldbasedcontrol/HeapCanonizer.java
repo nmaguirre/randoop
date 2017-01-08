@@ -128,10 +128,11 @@ public class HeapCanonizer {
 			try {
 				cls = Class.forName(name);
 			} catch (ClassNotFoundException e) {
+				System.out.println("ERROR DURING CANONIZATION: Class " + name + " not found. Check your --field-based-gen-classnames file for errors.");
+				continue;
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.out.println("FATAL ERROR DURING CANONIZATION: Class " + name + " not found. Check your --field-based-gen-classnames file for errors.");
-				System.exit(1);
+				//e.printStackTrace();
+				// System.exit(1);
 			}
 			cls = cls.getSuperclass();
 			while (cls != null && 

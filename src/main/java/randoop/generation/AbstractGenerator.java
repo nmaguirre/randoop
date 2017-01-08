@@ -65,10 +65,13 @@ public abstract class AbstractGenerator {
   @Option("Ignore primitive values in the construction of field extensions")
   public static boolean field_based_gen_ignore_primitive = true;
   
-  @Option("Drop tests that did not contribute to the field extensions")
-  public static boolean field_based_gen_drop_non_contributing_tests = false;
+//  @Option("Drop tests that did not contribute to the field extensions")
+//  public static boolean field_based_gen_drop_non_contributing_tests = false;
   
-  @Option("Increase the probabilities of randomly selecting methods that contribute more frequently to the field extensions")
+  @Option("Drop a percentage of the tests that did not contribute to the field extensions")
+  public static float field_based_gen_keep_non_contributing_tests_percentage = 1;
+   @Option("Increase the probabilities of randomly selecting methods that contribute more frequently to the field extensions")
+
   public static boolean field_based_gen_weighted_selection = false; 
   @Option("Increment the weight of an action by this ammount each time it contributes to the extensions")
   public static int weight_increment = 10;
@@ -478,8 +481,46 @@ public abstract class AbstractGenerator {
         			FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
 
         	} else {
-        		// Execution of the current sequence was successful
-        		if (field_based_gen_drop_non_contributing_tests && eSeq.isNormalExecution() && !eSeq.enlargesExtensions) {
+        		
+        		if (field_based_gen_keep_non_contributing_tests_percentage == 1 || (eSeq.isNormalExecution() && eSeq.enlargesExtensions)) {
+            		if (FieldBasedGenLog.isLoggingOn()) {
+            			if (eSeq.isNormalExecution())
+            				FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
+            			else
+            				FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+            		}
+        			
+        			outRegressionSeqs.add(eSeq);
+        			stored = true;
+        		}
+        		else {
+	        		if (Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage)) {
+	        			
+						if (FieldBasedGenLog.isLoggingOn()) {
+							FieldBasedGenLog.logLine("> Coin flip result: true");
+							
+							if (eSeq.isNormalExecution())
+								FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
+							else
+								FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+						}
+						
+						outRegressionSeqs.add(eSeq);
+						stored = true;
+	        			
+	        		} else{
+						if (FieldBasedGenLog.isLoggingOn()) {
+							FieldBasedGenLog.logLine("> Coin flip result: false");
+							FieldBasedGenLog.logLine("> Current sequence dropped");
+						}
+						
+						stored = false;
+	        		}
+        		}
+        		
+        		/*
+        		// Execution of the current sequence was successful 
+        		if (field_based_gen_keep_non_contributing_tests_percentage != 1 && eSeq.isNormalExecution() && !eSeq.enlargesExtensions) {
         			stored = false;
         			if (FieldBasedGenLog.isLoggingOn())
         				FieldBasedGenLog.logLine("> Current sequence and subsumption candidates discarded");
@@ -495,10 +536,12 @@ public abstract class AbstractGenerator {
         			outRegressionSeqs.add(eSeq);
         			stored = true;
         		}
+        		*/
+        		
         	}
 
         	// If the sequence was stored there are subsumed sequences, save them
-        	if (field_based_gen_drop_non_contributing_tests && stored) {
+        	if (field_based_gen_keep_non_contributing_tests_percentage != 1 && stored) {
         		for (Sequence is : subsumed_candidates) {
         			subsumed_sequences.add(is);
         		}
