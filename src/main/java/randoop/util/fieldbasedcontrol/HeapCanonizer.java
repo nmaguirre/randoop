@@ -128,11 +128,24 @@ public class HeapCanonizer {
 			try {
 				cls = Class.forName(name);
 			} catch (ClassNotFoundException e) {
-				System.out.println("ERROR DURING CANONIZATION: Class " + name + " not found. Check your --field-based-gen-classnames file for errors.");
-				continue;
-				// TODO Auto-generated catch block
-				//e.printStackTrace();
-				// System.exit(1);
+				try {
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("> Class " + name + " not found");
+					//System.out.println("Class " + name + " not found");
+					int last = name.lastIndexOf(".");
+					name = name.substring(0, last) + "$" + name.substring(last+1);
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("> Trying: " + name);
+					//System.out.println("Trying: " + name);
+					cls = Class.forName(name);
+				} catch (ClassNotFoundException e2) {
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("FATAL ERROR DURING CANONIZATION: Class " + name + " not found. Check your --field-based-gen-classnames file for errors");
+					System.out.println("FATAL ERROR DURING CANONIZATION: Class " + name + " not found. Check your --field-based-gen-classnames file for errors");
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.exit(1);
+				}
 			}
 			cls = cls.getSuperclass();
 			while (cls != null && 

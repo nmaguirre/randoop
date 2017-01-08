@@ -549,6 +549,12 @@ public abstract class AbstractGenerator {
         		if (FieldBasedGenLog.isLoggingOn()) 
         			FieldBasedGenLog.logLine("> The candidates for subsumed sequences are now saved as subsumed");	
         	}
+        	
+         	if (field_based_gen_keep_non_contributing_tests_percentage != 1 && !stored) {
+        		if (FieldBasedGenLog.isLoggingOn()) 
+        			FieldBasedGenLog.logLine("> The candidates for subsumed sequences are dropped");	
+         	}
+       	
 
         }
 
