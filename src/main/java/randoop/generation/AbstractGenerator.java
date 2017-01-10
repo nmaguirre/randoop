@@ -48,8 +48,10 @@ public abstract class AbstractGenerator {
 	    DISABLED,
 	    /** Fast but not very precise field based generation */
 	    FAST,
-	    /** Field based generation with test miminization. Slower but very precise */
-	    MIN
+	    /** Field based generation with test miminization. Slower but precise */
+	    MIN,
+	    /** Field based generation with test miminization. Much slower but very precise */
+	    MINPRECISION
 	  }
   
   
@@ -482,7 +484,7 @@ public abstract class AbstractGenerator {
 
         	} else {
         		
-        		if (field_based_gen_keep_non_contributing_tests_percentage == 1 || (eSeq.isNormalExecution() && eSeq.enlargesExtensions)) {
+        		if (field_based_gen_keep_non_contributing_tests_percentage == 1 || (eSeq.isNormalExecution() && eSeq.enlargesExtensions) || !eSeq.isNormalExecution()) {
             		if (FieldBasedGenLog.isLoggingOn()) {
             			if (eSeq.isNormalExecution())
             				FieldBasedGenLog.logLine("> Current sequence saved as a regression test");

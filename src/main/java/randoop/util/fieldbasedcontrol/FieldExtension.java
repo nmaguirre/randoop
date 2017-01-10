@@ -25,6 +25,14 @@ public class FieldExtension {
 		return s.add(p2);
 	}
 	
+	public boolean containsPair(String p1, String p2) {
+		Set<String> s = extension.get(p1);
+		if (s == null)
+			return false;
+		
+		return s.contains(p2);
+	}
+
 	/*
 	@Override
 	public int hashCode() {

@@ -195,9 +195,14 @@ public class HeapCanonizer {
 		return new Tuple<Integer, Integer>(res, res);
 	}
 	
+	private Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, String fieldname) {
+		return addToExtensions(src, tgt, fieldname, false);
+	}
+	
+	
 	// Returns a pair (b1, b2) where b1 iff the extensions were enlarged by this call, and
 	// b2 iff tgt is an object visited for the first time in this call
-	private Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, String fieldname) {
+	private Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, String fieldname, boolean test) {
 		String srccls = CanonicalRepresentation.getClassCanonicalName(src.getClass());
 		Integer srcInd = getObjectIndex(src);
 		String srcString = srccls + srcInd;
@@ -226,8 +231,13 @@ public class HeapCanonizer {
 			tgtString = tgtcls + indt.getSecond();
 		}
 		
-		return new Tuple<Boolean, Boolean>(
+		if (!test)
+			return new Tuple<Boolean, Boolean>(
 				extensions.addPairToField(fieldname, srcString, tgtString),
+				isTgtNew);
+		else 
+			return new Tuple<Boolean, Boolean>(
+				!extensions.pairBelongsToField(fieldname, srcString, tgtString),
 				isTgtNew);
 	}
 	
@@ -259,11 +269,16 @@ public class HeapCanonizer {
 		lastIndex = new HashMap<String, Integer>();
 	}
 	
+	public boolean canonizeAndEnlargeExtensions(Object root) {
+		return canonizeAndEnlargeExtensions(root, false);
+	}
+		
+	
 	
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public boolean canonizeAndEnlargeExtensions(Object root) {
+	public boolean canonizeAndEnlargeExtensions(Object root, boolean test) {
 		clearStructures();
 		extendedExtensions = false;
 		
@@ -288,9 +303,12 @@ public class HeapCanonizer {
 					Object target = Array.get(obj, i);
 					
 					String fname = CanonicalRepresentation.getArrayFieldCanonicalName(objClass, i);
-					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, fname);
+					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, fname, test);
 					
 					extendedExtensions |= addRes.getFirst();
+
+					// if (test && extendedExtensions) return true;
+
 					if (addRes.getSecond())
 						// target is an object of a non ignored class that was encountered for the first time.
 						// Enqueue it for its fields to be inspected in a following iteration.
@@ -315,9 +333,12 @@ public class HeapCanonizer {
 					}
 
 					String fname = CanonicalRepresentation.getFieldCanonicalName(fld);
-					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, fname);
+					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, fname, test);
 					
 					extendedExtensions |= addRes.getFirst();
+					
+					// if (test && extendedExtensions) return true;
+					
 					if (addRes.getSecond())
 						// target is an object of a non ignored class that was encountered for the first time.
 						// Enqueue it for its fields to be inspected in a following iteration.

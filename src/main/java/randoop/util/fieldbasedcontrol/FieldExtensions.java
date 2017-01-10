@@ -26,6 +26,15 @@ public class FieldExtensions {
 		return added; 
 	}
 	
+	public boolean pairBelongsToField(String field, String src, String tgt) {
+		FieldExtension fe = extensions.get(field);
+		if (fe == null) 
+			return false;
+
+		return fe.containsPair(src, tgt);
+	}
+
+	
 	public String toString() {
 		String result = "";
 		for (String fname: extensions.keySet()) 

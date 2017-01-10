@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +23,7 @@ import randoop.NormalExecution;
 import randoop.NotExecuted;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.ForwardGenerator;
+import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.test.Check;
@@ -511,12 +513,84 @@ public class ExecutableSequence {
 		  }
 	  }	catch (Exception e) {
 		  e.printStackTrace();
-		  throw new CanonizationErrorException();
+		  throw new CanonizationErrorException("ERROR: Exception during heap canonization");
 	  }
 	  
 	  return extendedExtensions;
   }
 
+  
+  private boolean enlargeExtensionsPrecise(int i, Object statementResult, Object[] inputVariables, HeapCanonizer canonizer) throws CanonizationErrorException {
+	  boolean extendedExtensions = false;	
+	  
+	  
+	  try {
+		  List<Object> extendingObjs = new LinkedList<>();
+
+		  Statement stmt = sequence.getStatement(i);
+		  int varIndex = 0;
+		  if (!stmt.getOutputType().isVoid()) {
+			  Object obj = statementResult;
+			  
+			  if (obj != null && !CanonicalRepresentation.isObjectPrimitive(obj)) {
+				  // test if the result enlarges the extensions
+			  	  if (canonizer.canonizeAndEnlargeExtensions(obj, true)) {
+		           	  if (FieldBasedGenLog.isLoggingOn()) {
+	        	    		FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+	        	    				+ stmt.toString() + " (index " + i + ")");
+		           	  }
+		           	  
+		           	  extendingObjs.add(obj);
+			  		  sequence.addActiveVar(i, varIndex);
+			  		  extendedExtensions = true;
+			  	  }
+			  }
+			  varIndex++;
+		  }
+	
+		  // Cover the field values belonging to all the current method's parameters
+		  if (inputVariables.length > 0) {
+				for (int j=0; j<inputVariables.length; j++) {
+					if (inputVariables[j] != null && !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])) {
+						// test if the current parameter enlarges the extensions
+	        	    	if (canonizer.canonizeAndEnlargeExtensions(inputVariables[j], true)) {
+	        	    		if (FieldBasedGenLog.isLoggingOn()) {
+	        	    			FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+	        	    					+ stmt.toString() + " (index " + i + ")");
+	        	    		}
+
+	        	    		extendingObjs.add(inputVariables[j]);
+	        	    		sequence.addActiveVar(i, varIndex);		        	    		
+	        	    		extendedExtensions = true;
+	        	    	}
+					}
+					varIndex++;
+				}
+		  }
+		  
+		 /* 
+		  if (extendingObjs.size() > 1) {
+			  System.out.println("AHA, este caso no lo tenia");
+		  }*/
+		    
+		  boolean extendedAux = false;
+		  for (Object obj: extendingObjs)
+			  extendedAux |= canonizer.canonizeAndEnlargeExtensions(obj);
+		  
+		  if (extendingObjs.size() >= 1 && !extendedAux) {
+			  System.out.println("ERROR DURING CANONIZATION: Should have enlarged extensions but didn't");
+			  throw new CanonizationErrorException("ERROR DURING CANONIZATION: Should have enlarged extensions but didn't"); 
+		  }
+
+		  
+		  
+	  }	catch (Exception e) {
+		  e.printStackTrace();
+		  throw new CanonizationErrorException("ERROR DURING CANONIZATION: Should have enlarged extensions but didn't");
+	  }
+	  
+	  return extendedExtensions;
+  }
   
   
   private void increaseOpearationWeight(Statement stmt, ForwardGenerator generator) {
@@ -598,11 +672,19 @@ public class ExecutableSequence {
 
 	  if (!(statementResult instanceof NormalExecution)) {
 		System.out.println("ERROR: augmenting field extensions using exceptional behaviour.");
-		throw new RuntimeException("ERROR: augmenting field extensions using exceptional behaviour.");
+		throw new CanonizationErrorException("ERROR: augmenting field extensions using exceptional behaviour.");
   	  }
     		
-  	  if (enlargeExtensions(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
-  	    enlargesExtensions = true;
+	  if (AbstractGenerator.field_based_gen == FieldBasedGenType.MIN) {
+		  if (enlargeExtensions(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
+			  enlargesExtensions = true;
+	  }
+  	  else {
+ 		  if (enlargeExtensionsPrecise(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
+			  enlargesExtensions = true;
+  	  }
+	  
+//  	  if (enlargeExtensionsMin(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
 
     }
     	

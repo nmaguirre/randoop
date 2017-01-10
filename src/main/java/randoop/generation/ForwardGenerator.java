@@ -194,6 +194,7 @@ public class ForwardGenerator extends AbstractGenerator {
     setCurrentSequence(eSeq.sequence);
 
     long endTime = System.nanoTime();
+    
     long gentime = endTime - startTime;
     startTime = endTime; // reset start time.
     
@@ -208,6 +209,21 @@ public class ForwardGenerator extends AbstractGenerator {
 	eSeq.exectime = endTime - startTime;
 	startTime = endTime; // reset start time.
     
+	/*
+	if (numGeneratedSequences() > 70) {
+		System.out.println("OPA ERROR");
+	}
+
+	
+	if (numGeneratedSequences() == 100) {
+		System.out.println("OPA ERROR");
+	}
+	
+	
+	if (numGeneratedSequences() == 149) {
+		System.out.println("OPA ERROR");
+	}
+	*/
    	if (field_based_gen != FieldBasedGenType.DISABLED && eSeq.isNormalExecution()) {
    		if (FieldBasedGenLog.isLoggingOn()) {
    			FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
@@ -224,17 +240,17 @@ public class ForwardGenerator extends AbstractGenerator {
     		if (!eSeq.enlargesExtensions) {
         	    fieldBasedDroppedSeq++;
         		eSeq.sequence.clearAllActiveFlags();
-        		
-           		if (FieldBasedGenLog.isLoggingOn()) {
+
+   	    		processSequence(eSeq);
+           		if (FieldBasedGenLog.isLoggingOn()) 
            			FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
-           		}
         	}
         	else {
 
            		if (FieldBasedGenLog.isLoggingOn())
            			FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
 
-    	    	if (field_based_gen == FieldBasedGenType.FAST) {
+           		if (field_based_gen == FieldBasedGenType.FAST) {
     	    		processSequence(eSeq);
 
     	    		if (eSeq.sequence.hasActiveFlags()) {
@@ -248,7 +264,8 @@ public class ForwardGenerator extends AbstractGenerator {
     	    		// FIXME: This method should only consider indexes belonging to the minimized sequences. 
     	            processSequence(eSeq);
 
-    		    	List<Sequence> minSeq = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+    	            List<Sequence> minSeq = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+    		    	
     		    	// The minimized sequences recently generated are subsumed by the whole test
     	            for (Sequence s: minSeq) {
     	            	// Unless the minimized sequence is exactly the size of the whole sequence,
@@ -263,8 +280,10 @@ public class ForwardGenerator extends AbstractGenerator {
            		if (FieldBasedGenLog.isLoggingOn()) {
        				// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
           			FieldBasedGenLog.logLine("> New field extensions: ");
-           			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
-           				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+           			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) {
+           				FieldBasedGenLog.logLine("> Extensions size :" + canonizer.getExtensions().size());
+        				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+           			}
            			else 
            				FieldBasedGenLog.logLine("> Extensions size (" + canonizer.getExtensions().size() + ") exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
            		}

@@ -12,6 +12,8 @@ import java.util.Set;
 import randoop.Globals;
 import randoop.SubTypeSet;
 import randoop.generation.ForwardGenerator;
+import randoop.generation.AbstractGenerator;
+import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.main.GenInputsAbstract;
 import randoop.types.Type;
 import randoop.util.ArrayListSimpleList;
@@ -204,7 +206,6 @@ public class SequenceCollection {
 	  if (FieldBasedGenLog.isLoggingOn())
     	FieldBasedGenLog.logLine("> Sequence minimization starting");
 
-
 	  List<Sequence> res = new LinkedList<Sequence>();
 	  for (Integer stmtIndex: sequence.getActiveStatements()) {
 		  
@@ -218,20 +219,40 @@ public class SequenceCollection {
 		List<Type> formalTypes = newSubseq.getTypesForLastStatement();
 		List<Variable> arguments = newSubseq.getVariablesOfLastStatement();
 		assert formalTypes.size() == arguments.size();
-		for (Integer i: sequence.getActiveVars(stmtIndex)) {
-		  Variable argument = arguments.get(i);
-		  assert formalTypes.get(i).isAssignableFrom(argument.getType())
-		      : formalTypes.get(i).getName()
-		          + " should be assignable from "
-		          + argument.getType().getName();
-		    Type type = formalTypes.get(i);
-		    typeSet.add(type);
-		    updateCompatibleMap(newSubseq, type);
-		}
-	    res.add(newSubseq);
-		checkRep();
+		
+        if (AbstractGenerator.field_based_gen == FieldBasedGenType.MIN) {        
+			// With normal minimization we don't have the active vars precisely figured out 
+			// so we use all active variables in the current line
+			for (int i = 0; i < formalTypes.size(); i++) {
+				Variable argument = arguments.get(i);
+				assert formalTypes.get(i).isAssignableFrom(argument.getType())
+					: formalTypes.get(i).getName()
+						+ " should be assignable from "
+						+ argument.getType().getName();
+				if (sequence.isActive(argument.getDeclIndex())) {
+				  Type type = formalTypes.get(i);
+				  typeSet.add(type);
+				  updateCompatibleMap(newSubseq, type);
+				}
+			  }		
+        }
+        else {
+        	// All the active vars are figured out during precise minimization
+			for (Integer i: sequence.getActiveVars(stmtIndex)) {
+			  Variable argument = arguments.get(i);
+			  assert formalTypes.get(i).isAssignableFrom(argument.getType())
+				  : formalTypes.get(i).getName()
+					  + " should be assignable from "
+					  + argument.getType().getName();
+				Type type = formalTypes.get(i);
+				typeSet.add(type);
+				updateCompatibleMap(newSubseq, type);
+			}
+			res.add(newSubseq);
+			}
 	  }
-	  
+	  checkRep();
+
 	  if (FieldBasedGenLog.isLoggingOn())
     	FieldBasedGenLog.logLine("> End of sequence minimization");
 
