@@ -303,10 +303,8 @@ public class ForwardGenerator extends AbstractGenerator {
 		}
 	}
 	else {
-		
-	   	if (FieldBasedGenLog.isLoggingOn()) {
+	   	if (FieldBasedGenLog.isLoggingOn()) 
 	   		FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions.");
-	   	}
 		
     	// Original randoop behavior when field_based_gen is disabled, or the current sequence produced an error
 	    processSequence(eSeq);

@@ -51,15 +51,17 @@ public abstract class AbstractGenerator {
 	    /** Field based generation with test miminization. Slower but precise */
 	    MIN,
 	    /** Field based generation with test miminization. Much slower but very precise */
-	    MINPRECISION
+	    MINPRECISE
 	  }
   
   
   @OptionGroup("Field based generation")  
   @Option("Choose a field based generation approach. Field based generation can be done "
   		+ "considering only the last sentence of each test (value: FAST), or taking into"
-  		+ "account all the sentences of each test (value: MIN). The latter is slower but"
-  		+ "normally produces fewer tests cases with similar or better coverage levels."
+  		+ "account all the sentences of each test (value: MIN). The latter approach can "
+  		+ "be made more precise at the expense of a slower runtime (value: MINPRECISE) "
+  		+ "The minimization approach is slower but it might produce fewer and better tests"
+  		+ "(they tend to produce better results in testing evaluation metrics)."  
   		+ "Field based generation can also be disabled (value: DISABLED)."
   		+ "")
   public static FieldBasedGenType field_based_gen = FieldBasedGenType.DISABLED;

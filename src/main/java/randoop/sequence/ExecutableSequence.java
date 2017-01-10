@@ -25,6 +25,7 @@ import randoop.generation.AbstractGenerator;
 import randoop.generation.ForwardGenerator;
 import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedOperation;
 import randoop.test.Check;
 import randoop.test.TestCheckGenerator;
@@ -487,7 +488,7 @@ public class ExecutableSequence {
 	        	    				+ stmt.toString() + " (index " + i + ")");
 		           	  }
 
-			  		  sequence.addActiveVar(i, varIndex);
+			  		  //sequence.addActiveVar(i, varIndex);
 			  		  extendedExtensions = true;
 			  	  }
 			  }
@@ -504,13 +505,47 @@ public class ExecutableSequence {
 	        	    					+ stmt.toString() + " (index " + i + ")");
 	        	    		}
 
-	        	    		sequence.addActiveVar(i, varIndex);		        	    		
+	        	    		//sequence.addActiveVar(i, varIndex);		        	    		
 	        	    		extendedExtensions = true;
 	        	    	}
 					}
 					varIndex++;
 				}
 		  }
+		  
+		  // Set active variable flags for minimization
+		  if (extendedExtensions && AbstractGenerator.field_based_gen == FieldBasedGenType.MIN)  {
+			  varIndex = 0;
+
+			  if (!stmt.getOutputType().isVoid()) {
+				  Object obj = statementResult;
+				  Class<?> objectClass = obj.getClass();
+				  if (!(NonreceiverTerm.isNonreceiverType(objectClass) && !objectClass.equals(Class.class))) {
+					  if (FieldBasedGenLog.isLoggingOn()) 
+						  FieldBasedGenLog.logLine("> Marking variable " + varIndex + " of " 
+								  + stmt.toString() + " (index " + i + ") as active");
+					  
+					  sequence.addActiveVar(i, varIndex);
+				  }
+				  varIndex++;
+			  }
+
+			  if (inputVariables.length > 0) {
+				  for (int j=0; j<inputVariables.length; j++) {
+					  Class<?> objectClass = inputVariables[j].getClass();
+					  if (!(NonreceiverTerm.isNonreceiverType(objectClass) && !objectClass.equals(Class.class))) {
+						  if (FieldBasedGenLog.isLoggingOn()) 
+						  FieldBasedGenLog.logLine("> Marking variable " + varIndex + " of " 
+								  + stmt.toString() + " (index " + i + ") as active");
+
+						  sequence.addActiveVar(i, varIndex);
+					  }
+					  varIndex++;
+				  }
+			  }
+			  
+		  }
+		  
 	  }	catch (Exception e) {
 		  e.printStackTrace();
 		  throw new CanonizationErrorException("ERROR: Exception during heap canonization");
@@ -671,8 +706,8 @@ public class ExecutableSequence {
 	  ExecutionOutcome statementResult = getResult(i);
 
 	  if (!(statementResult instanceof NormalExecution)) {
-		System.out.println("ERROR: augmenting field extensions using exceptional behaviour.");
-		throw new CanonizationErrorException("ERROR: augmenting field extensions using exceptional behaviour.");
+		System.out.println("ERROR: augmenting field extensions using exceptional behaviour");
+		throw new CanonizationErrorException("ERROR: augmenting field extensions using exceptional behaviour");
   	  }
     		
 	  if (AbstractGenerator.field_based_gen == FieldBasedGenType.MIN) {
@@ -684,8 +719,6 @@ public class ExecutableSequence {
 			  enlargesExtensions = true;
   	  }
 	  
-//  	  if (enlargeExtensionsMin(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
-
     }
     	
     if (AbstractGenerator.field_based_gen_weighted_selection) {
