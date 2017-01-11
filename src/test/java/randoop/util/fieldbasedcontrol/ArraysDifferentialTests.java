@@ -17,7 +17,7 @@ public class ArraysDifferentialTests {
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/strarrext.txt");
 	
 	    FieldExtensions fe2 = new FieldExtensions();
-	    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
+	    HeapCanonizer canonizer = new HeapCanonizerHashMap(fe2, true);
 	    canonizer.canonizeAndEnlargeExtensions(l);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/strarrextnew.txt");
 	        
@@ -34,7 +34,7 @@ public class ArraysDifferentialTests {
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/intarrext.txt");
 	
 	    FieldExtensions fe2 = new FieldExtensions();
-	    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
+	    HeapCanonizer canonizer = new HeapCanonizerHashMap(fe2, true);
 	    canonizer.canonizeAndEnlargeExtensions(l);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/intarrextnew.txt");
 	        
@@ -50,7 +50,7 @@ public class ArraysDifferentialTests {
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext.txt");
 	
 	    FieldExtensions fe2 = new FieldExtensions();
-	    HeapCanonizer canonizer = new HeapCanonizer(fe2, true);
+	    HeapCanonizer canonizer = new HeapCanonizerHashMap(fe2, true);
 	    canonizer.canonizeAndEnlargeExtensions(l);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrextnew.txt");
 	        

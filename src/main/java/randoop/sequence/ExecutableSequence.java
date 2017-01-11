@@ -519,26 +519,30 @@ public class ExecutableSequence {
 
 			  if (!stmt.getOutputType().isVoid()) {
 				  Object obj = statementResult;
-				  Class<?> objectClass = obj.getClass();
-				  if (!(NonreceiverTerm.isNonreceiverType(objectClass) && !objectClass.equals(Class.class))) {
-					  if (FieldBasedGenLog.isLoggingOn()) 
-						  FieldBasedGenLog.logLine("> Marking variable " + varIndex + " of " 
-								  + stmt.toString() + " (index " + i + ") as active");
-					  
-					  sequence.addActiveVar(i, varIndex);
+				  if (obj != null) {
+					  Class<?> objectClass = obj.getClass();
+					  if (!(NonreceiverTerm.isNonreceiverType(objectClass) && !objectClass.equals(Class.class))) {
+						  if (FieldBasedGenLog.isLoggingOn()) 
+							  FieldBasedGenLog.logLine("> Marking variable " + varIndex + " of " 
+									  + stmt.toString() + " (index " + i + ") as active");
+						  
+						  sequence.addActiveVar(i, varIndex);
+					  }
 				  }
 				  varIndex++;
 			  }
 
 			  if (inputVariables.length > 0) {
 				  for (int j=0; j<inputVariables.length; j++) {
-					  Class<?> objectClass = inputVariables[j].getClass();
-					  if (!(NonreceiverTerm.isNonreceiverType(objectClass) && !objectClass.equals(Class.class))) {
-						  if (FieldBasedGenLog.isLoggingOn()) 
-						  FieldBasedGenLog.logLine("> Marking variable " + varIndex + " of " 
-								  + stmt.toString() + " (index " + i + ") as active");
+					  if (inputVariables[j] != null) {
+						  Class<?> objectClass = inputVariables[j].getClass();
+						  if (!(NonreceiverTerm.isNonreceiverType(objectClass) && !objectClass.equals(Class.class))) {
+							  if (FieldBasedGenLog.isLoggingOn()) 
+							  FieldBasedGenLog.logLine("> Marking variable " + varIndex + " of " 
+									  + stmt.toString() + " (index " + i + ") as active");
 
-						  sequence.addActiveVar(i, varIndex);
+							  sequence.addActiveVar(i, varIndex);
+						  }
 					  }
 					  varIndex++;
 				  }
@@ -558,7 +562,7 @@ public class ExecutableSequence {
   private boolean enlargeExtensionsPrecise(int i, Object statementResult, Object[] inputVariables, HeapCanonizer canonizer) throws CanonizationErrorException {
 	  boolean extendedExtensions = false;	
 	  
-	  
+	  int oldSize = canonizer.getExtensions().size();
 	  try {
 		  List<Object> extendingObjs = new LinkedList<>();
 
@@ -603,21 +607,29 @@ public class ExecutableSequence {
 				}
 		  }
 		  
-		 /* 
+		 
+		  int intermediateSize = canonizer.getExtensions().size();
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine("> Old size: " + oldSize + ", intermediate size: " + intermediateSize);
+		  
+		  if (oldSize != intermediateSize)
+			  throw new RuntimeException("FATAL ERROR: Added things to the extensions but it shouldn't have");
+
+		  
+		  /* 
 		  if (extendingObjs.size() > 1) {
 			  System.out.println("AHA, este caso no lo tenia");
 		  }*/
 		    
 		  boolean extendedAux = false;
-		  for (Object obj: extendingObjs)
+		  for (Object obj: extendingObjs) {
 			  extendedAux |= canonizer.canonizeAndEnlargeExtensions(obj);
+		  } 
 		  
 		  if (extendingObjs.size() >= 1 && !extendedAux) {
 			  System.out.println("ERROR DURING CANONIZATION: Should have enlarged extensions but didn't");
-			  throw new CanonizationErrorException("ERROR DURING CANONIZATION: Should have enlarged extensions but didn't"); 
+			  throw new RuntimeException("ERROR DURING CANONIZATION: Should have enlarged extensions but didn't"); 
 		  }
-
-		  
 		  
 	  }	catch (Exception e) {
 		  e.printStackTrace();

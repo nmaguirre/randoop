@@ -24,11 +24,11 @@ import java.util.TreeSet;
  * Date: December 2016.
  */
 
-public class HeapCanonizer {
+public abstract class HeapCanonizer {
 	// For each class name stores a map of objects with its corresponding indexes in the canonization
-	private Map<String, Map<Object, Integer>> store;
+	// private Map<String, Map<Object, Integer>> store;
 	// For each class name stores the last index assigned to an object of the class
-	private Map<String, Integer> lastIndex;
+	//private Map<String, Integer> lastIndex;
 	private Map<String, List<Field>> classFields;
 	private FieldExtensions extensions;
 	private boolean extendedExtensions;
@@ -102,7 +102,15 @@ public class HeapCanonizer {
 		ignoredClasses.add("java.beans.");
 		ignoredClasses.add("sun.");
 		ignoredClasses.add("com.sun.");
-		// ignoredFields.add("java.util.concurrent.");
+		ignoredClasses.add("java.util.concurrent.");
+		/*
+		ignoredClasses.add("java.util.locale.");
+		ignoredClasses.add("java.util.Locale");
+		ignoredClasses.add("java.util.ResourceBundle");
+		ignoredClasses.add("java.awt.");
+		ignoredClasses.add("java.util.");
+		ignoredClasses.add("java.text.");
+		 */
 		
 		fieldBasedGenByClasses = false;
 	}
@@ -169,31 +177,16 @@ public class HeapCanonizer {
 		return extensions; 
 	}
 
-	private Map<Object, Integer> ensureObjectClassIsInStore(String classname) {
-		Map<Object, Integer> m = store.get(classname);
-		if (m == null) {
-			m = new HashMap<Object, Integer>();
-			store.put(classname, m);
-			lastIndex.put(classname, -1);
-		}
-		return m;
-	}
+
+	protected abstract Integer getObjectIndex(Object o); 
+
+	protected abstract void initStructures(); 	
 
 	// Returns a tuple (old index, new index)
 	// if old index == new index then o was stored in a previous call
 	// old index is -1 if the object wasn't stored previously
-	private Tuple<Integer, Integer> assignIndexToObject(Object o) {
-		String classname = CanonicalRepresentation.getClassCanonicalName(o.getClass());
-		Map<Object, Integer> m = ensureObjectClassIsInStore(classname);
-		Integer res = m.get(o);
-		if (res == null) {
-			Integer nextIndex = lastIndex.get(classname) + 1;
-			m.put(o, nextIndex);
-			lastIndex.put(classname, nextIndex);
-			return new Tuple<Integer, Integer>(-1, nextIndex);
-		}
-		return new Tuple<Integer, Integer>(res, res);
-	}
+	protected abstract Tuple<Integer, Integer> assignIndexToObject(Object o); 
+
 	
 	private Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, String fieldname) {
 		return addToExtensions(src, tgt, fieldname, false);
@@ -241,45 +234,17 @@ public class HeapCanonizer {
 				isTgtNew);
 	}
 	
-	/*
-	private boolean addPrimitiveValueToExtensions(Object obj, String fieldname) {
-		Class objClass = obj.getClass();
-		String srccls = CanonicalRepresentation.getClassCanonicalName(objClass);
-		Integer srcInd = getObjectIndex(obj);
-		String srcString = srccls + srcInd;
-		
-		String value = obj.toString();
-		// trim string values to length maxStringSize
-		if (obj.getClass() == String.class && value.length() > CanonicalRepresentation.MAX_STRING_SIZE) {
-			value = value.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
-		}
-		
-		return extensions.addPairToField(fieldname, srcString, value);
-	}*/
 
-	private Integer getObjectIndex(Object o) {
-		String classname = CanonicalRepresentation.getClassCanonicalName(o.getClass());	
-		Map<Object, Integer> m = store.get(classname);
-		if (m == null || m.get(o) == null) return -1;
-		return m.get(o);
-	}
-	
-	private void clearStructures() {
-		store = new HashMap<String, Map<Object, Integer>>();
-		lastIndex = new HashMap<String, Integer>();
-	}
-	
 	public boolean canonizeAndEnlargeExtensions(Object root) {
 		return canonizeAndEnlargeExtensions(root, false);
 	}
 		
 	
-	
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
 	public boolean canonizeAndEnlargeExtensions(Object root, boolean test) {
-		clearStructures();
+		initStructures();
 		extendedExtensions = false;
 		
 		if ( root == null ||
@@ -307,7 +272,7 @@ public class HeapCanonizer {
 					
 					extendedExtensions |= addRes.getFirst();
 
-					// if (test && extendedExtensions) return true;
+					if (test && extendedExtensions) return true;
 
 					if (addRes.getSecond())
 						// target is an object of a non ignored class that was encountered for the first time.
@@ -337,7 +302,7 @@ public class HeapCanonizer {
 					
 					extendedExtensions |= addRes.getFirst();
 					
-					// if (test && extendedExtensions) return true;
+					if (test && extendedExtensions) return true;
 					
 					if (addRes.getSecond())
 						// target is an object of a non ignored class that was encountered for the first time.
@@ -417,8 +382,15 @@ public class HeapCanonizer {
 				//System.out.println(f.getType());
 				// If ignorePrimitive do not consider primitive fields
 				Class ftype = f.getType();
-				if (isIgnoredClass(ftype))
+				if (isIgnoredClass(ftype)) {
+					// System.out.println("Ignored: " + f.getType() + " " + f.getName());
 					continue;
+				}
+				/*
+				else {
+					System.out.println("Added: " + f.getType() + " " + f.getName());
+					
+				}*/
 
 				// If field based generation is done for a particular set of classes, 
 				// ignore fields with types that are not in the set that are not primitive or arrays
@@ -427,9 +399,9 @@ public class HeapCanonizer {
 				
 				// Avoid following objects of the outer class
 				/*
-				if (f.getName().equals("this$0")) {
-					//System.out.println(f.getName());
-					continue;
+				if (!fieldBasedGenByClasses && f.getName().equals("this$0")) {
+					System.out.println(f.getType() + " " + f.getName());
+					//continue;
 				}
 				*/
 				

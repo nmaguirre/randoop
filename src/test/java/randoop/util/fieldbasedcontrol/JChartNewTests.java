@@ -15,7 +15,7 @@ public class JChartNewTests {
 	public void infiniteLoopHashCode() throws IOException {
 
 	    FieldExtensions fe = new FieldExtensions();
-	    HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+	    HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, false);
 		
 		XYDataset xYDataset0 = null;
 		canonizer.canonizeAndEnlargeExtensions(xYDataset0);
@@ -42,10 +42,38 @@ public class JChartNewTests {
 	    
 	}
 	
+	@Test
+	public void extensionsVeryLarge() throws IOException {
+
+	    FieldExtensions fe = new FieldExtensions();
+	    HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, false);	
+	    org.jfree.chart.plot.CombinedRangeXYPlot combinedRangeXYPlot0 = new org.jfree.chart.plot.CombinedRangeXYPlot();
+	    org.jfree.chart.axis.NumberAxis numberAxis3 = new org.jfree.chart.axis.NumberAxis("hi!");
+	    java.awt.Font font4 = org.jfree.chart.JFreeChart.DEFAULT_TITLE_FONT;
+	    numberAxis3.setTickLabelFont(font4);
+	    combinedRangeXYPlot0.setDomainAxis(3, (org.jfree.chart.axis.ValueAxis)numberAxis3, true);
+	    org.jfree.chart.plot.CombinedRangeXYPlot combinedRangeXYPlot9 = new org.jfree.chart.plot.CombinedRangeXYPlot();
+	    org.jfree.chart.axis.NumberAxis numberAxis12 = new org.jfree.chart.axis.NumberAxis("hi!");
+	    java.awt.Font font13 = org.jfree.chart.JFreeChart.DEFAULT_TITLE_FONT;
+	    numberAxis12.setTickLabelFont(font13);
+	    combinedRangeXYPlot9.setDomainAxis(3, (org.jfree.chart.axis.ValueAxis)numberAxis12, true);
+	    combinedRangeXYPlot0.setDomainAxis(2958465, (org.jfree.chart.axis.ValueAxis)numberAxis12, true);
+	    canonizer.canonizeAndEnlargeExtensions(combinedRangeXYPlot0);
+	    canonizer.canonizeAndEnlargeExtensions(numberAxis12);
+
+	    //fe.toFile("/Users/pponzio/prueba-extensiones.txt");
+	    System.out.println("Extensions size: " + fe.size());
+
+	}
+	
+	
+	
+	
+	
 	  @Test
 	  public void testChart() {
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 		  
 		  org.jfree.chart.axis.ValueAxis valueAxis0 = null;
 		  canonizer.canonizeAndEnlargeExtensions(valueAxis0);
@@ -82,7 +110,7 @@ public class JChartNewTests {
 	  public void testPlot() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 		  
 		  org.jfree.chart.axis.ValueAxis valueAxis0 = null;
 		  canonizer.canonizeAndEnlargeExtensions(valueAxis0);
@@ -110,7 +138,7 @@ public class JChartNewTests {
 
 		  
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 		  
 		  org.jfree.chart.axis.ValueAxis valueAxis0 = null;
 		  canonizer.canonizeAndEnlargeExtensions(valueAxis0);
@@ -167,7 +195,7 @@ public class JChartNewTests {
 	  @Test
 	  public void testNullPointer() throws IllegalArgumentException, IllegalAccessException, IOException {
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 		  
 		  org.jfree.chart.axis.SegmentedTimeline segmentedTimeline3 = new org.jfree.chart.axis.SegmentedTimeline((long)(byte)1, 10, 500);
 		  canonizer.canonizeAndEnlargeExtensions(segmentedTimeline3);
@@ -202,7 +230,7 @@ public class JChartNewTests {
 	  public void testClassLoader() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 		  java.lang.Class class0 = Integer.class;
 		  canonizer.canonizeAndEnlargeExtensions(class0);
 		  java.lang.ClassLoader classLoader1 = org.jfree.chart.util.ObjectUtilities.getClassLoader(class0);
@@ -216,7 +244,7 @@ public class JChartNewTests {
 	  public void testAnotherStackOverflow() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 	  
 		  org.jfree.chart.axis.PeriodAxis periodAxis1 = new org.jfree.chart.axis.PeriodAxis("Multiple Pie Plot");
 		  canonizer.canonizeAndEnlargeExtensions(periodAxis1);
@@ -230,7 +258,7 @@ public class JChartNewTests {
 	  public void testAnotherNullPointer() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 	  
 		  org.jfree.chart.axis.NumberAxis numberAxis0 = null;
 		  canonizer.canonizeAndEnlargeExtensions(numberAxis0);
@@ -246,7 +274,7 @@ public class JChartNewTests {
 	  public void testYetAnotherStackOverflow() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 
 	  
 	  org.jfree.chart.renderer.xy.XYStepAreaRenderer xYStepAreaRenderer0 = new org.jfree.chart.renderer.xy.XYStepAreaRenderer();
@@ -301,7 +329,7 @@ public class JChartNewTests {
 	  public void testRevealsBugInICC_Profile() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 
 	  
 	  
@@ -318,7 +346,7 @@ public class JChartNewTests {
 	  public void testNull() throws IllegalArgumentException, IllegalAccessException, IOException {
 
 		  FieldExtensions fe = new FieldExtensions();
-		  HeapCanonizer canonizer = new HeapCanonizer(fe, true);
+		  HeapCanonizer canonizer = new HeapCanonizerHashMap(fe, true);
 
 	  org.jfree.chart.plot.PolarPlot polarPlot1 = new org.jfree.chart.plot.PolarPlot();
 	  canonizer.canonizeAndEnlargeExtensions(polarPlot1);

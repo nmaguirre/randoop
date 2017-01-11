@@ -39,6 +39,7 @@ import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
+import randoop.util.fieldbasedcontrol.HeapCanonizerHashMap;
 
 /**
  * Randoop's forward, component-based generator.
@@ -144,11 +145,11 @@ public class ForwardGenerator extends AbstractGenerator {
   
   
   public void initCanonizer() {
-	  canonizer = new HeapCanonizer(new FieldExtensions(), field_based_gen_ignore_primitive);  
+	  canonizer = new HeapCanonizerHashMap(new FieldExtensions(), field_based_gen_ignore_primitive);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizer(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
+	  canonizer = new HeapCanonizerHashMap(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
   }
   
   
