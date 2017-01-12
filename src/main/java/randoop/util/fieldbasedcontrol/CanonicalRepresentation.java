@@ -33,12 +33,14 @@ public class CanonicalRepresentation {
 	public static String getClassCanonicalName(Class c) {
 		String name = classNames.get(c);
 		if (name == null) {
-			name = c.getCanonicalName();
+			//name = c.getCanonicalName();
+			name = c.getName();
 			
 			// To handle anonymous classes correctly
 			if (name == null) {
-				name = c.getName();
-				
+				name = c.getCanonicalName();
+				//name = c.getName();
+				//System.out.println("NEW CLASS NAME FOUND: " + c.getName());
 			}
 			//System.out.println("NEW CLASS NAME FOUND: " + name);
 			classNames.put(c, name);

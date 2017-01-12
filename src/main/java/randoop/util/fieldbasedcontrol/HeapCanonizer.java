@@ -28,7 +28,7 @@ public abstract class HeapCanonizer {
 	// For each class name stores a map of objects with its corresponding indexes in the canonization
 	// private Map<String, Map<Object, Integer>> store;
 	// For each class name stores the last index assigned to an object of the class
-	//private Map<String, Integer> lastIndex;
+	protected Map<String, Integer> lastIndex;
 	private Map<String, List<Field>> classFields;
 	private FieldExtensions extensions;
 	private boolean extendedExtensions;
@@ -102,7 +102,7 @@ public abstract class HeapCanonizer {
 		ignoredClasses.add("java.beans.");
 		ignoredClasses.add("sun.");
 		ignoredClasses.add("com.sun.");
-		ignoredClasses.add("java.util.concurrent.");
+		//ignoredClasses.add("java.util.concurrent.");
 		/*
 		ignoredClasses.add("java.util.locale.");
 		ignoredClasses.add("java.util.Locale");
@@ -122,16 +122,17 @@ public abstract class HeapCanonizer {
 		this.ignorePrimitive = ignorePrimitive;
 		ignoredClasses = new LinkedList<String>();
 
-		this.fieldBasedGenClassnames = fieldBasedGenClassnames;
-		this.fieldBasedGenClassnamesAndParents = new HashSet<>(this.fieldBasedGenClassnames);
+		this.fieldBasedGenClassnames = new HashSet<>(); //fieldBasedGenClassnames;
+		this.fieldBasedGenClassnamesAndParents = new HashSet<>();//(this.fieldBasedGenClassnames);
 		
 		// For each given class, put its superclasses in fieldBasedGenClassnames to avoid 
 		// discarding fields that have superclasses as types.
-		for (String name: this.fieldBasedGenClassnames) {
+		for (String name: fieldBasedGenClassnames) {
 			
+			/*
 			if (FieldBasedGenLog.isLoggingOn())
 				FieldBasedGenLog.logLine("> Added class " + name + " for canonization" );	
-			
+			*/
 			Class cls = null;
 			try {
 				cls = Class.forName(name);
@@ -155,6 +156,13 @@ public abstract class HeapCanonizer {
 					System.exit(1);
 				}
 			}
+			
+			this.fieldBasedGenClassnames.add(name);
+			this.fieldBasedGenClassnamesAndParents.add(name);
+			
+			if (FieldBasedGenLog.isLoggingOn()) 
+				FieldBasedGenLog.logLine("> Added " + name + " for canonization");
+						
 			cls = cls.getSuperclass();
 			while (cls != null && 
 					cls != Object.class && 

@@ -344,7 +344,7 @@ public class ExecutableSequence {
 
     visitor.visitAfterSequence(this);
 
-    checks = gen.visit(this);
+   	checks = gen.visit(this);
   }
   
   
@@ -690,7 +690,7 @@ public class ExecutableSequence {
   }
 
   
-  public boolean enlargeExtensionsMin(HeapCanonizer canonizer, ForwardGenerator generator) throws CanonizationErrorException {
+  public boolean enlargeExtensionsMin(HeapCanonizer canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
 
 	enlargesExtensions = false;
 	//	seqnum++;
@@ -700,6 +700,10 @@ public class ExecutableSequence {
 	// and attempt to enlarge the extensions. Otherwise we would add field values to the extensions
 	// based on objects already modified by all the executed statements.
     hasNullInput = false;
+    
+    
+    // TODO PABLO: Maybe we don't delete the checks to detect flaky tests as soon as possible?
+    checks = null;
     executionResults.theList.clear();
     
     for (int i = 0; i < sequence.size(); i++) {
@@ -718,8 +722,8 @@ public class ExecutableSequence {
 	  ExecutionOutcome statementResult = getResult(i);
 
 	  if (!(statementResult instanceof NormalExecution)) {
-		System.out.println("ERROR: augmenting field extensions using exceptional behaviour");
-		throw new CanonizationErrorException("ERROR: augmenting field extensions using exceptional behaviour");
+		System.out.println("ERROR: augmenting field extensions using exceptional behavior. This is probably a flaky test");
+		throw new CanonizationErrorException("ERROR: augmenting field extensions using exceptional behavior. This is probably a flaky test");
   	  }
     		
 	  if (AbstractGenerator.field_based_gen == FieldBasedGenType.MIN) {
@@ -744,6 +748,8 @@ public class ExecutableSequence {
     			decreaseOpearationWeight(stmt, generator);
     	}
     }
+    
+    checks = checkgen.visit(this);
     
     return enlargesExtensions;
   }

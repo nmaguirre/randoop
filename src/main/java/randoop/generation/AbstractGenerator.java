@@ -69,13 +69,14 @@ public abstract class AbstractGenerator {
   @Option("Ignore primitive values in the construction of field extensions")
   public static boolean field_based_gen_ignore_primitive = true;
   
-//  @Option("Drop tests that did not contribute to the field extensions")
-//  public static boolean field_based_gen_drop_non_contributing_tests = false;
-  
-  @Option("Drop a percentage of the tests that did not contribute to the field extensions")
+  @Option("Keep a percentage of the tests that did not contribute to the field extensions")
   public static float field_based_gen_keep_non_contributing_tests_percentage = 1;
-   @Option("Increase the probabilities of randomly selecting methods that contribute more frequently to the field extensions")
 
+   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
+  public static boolean field_based_gen_precise_canonization = true;
+  
+  
+  @Option("Increase the probabilities of randomly selecting methods that contribute more frequently to the field extensions")
   public static boolean field_based_gen_weighted_selection = false; 
   @Option("Increment the weight of an action by this ammount each time it contributes to the extensions")
   public static int weight_increment = 10;
@@ -560,6 +561,9 @@ public abstract class AbstractGenerator {
          	}
        	
 
+        }
+        else {
+        	System.out.println("A ver la secuencia...");
         }
 
       }

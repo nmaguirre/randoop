@@ -39,7 +39,8 @@ import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
-import randoop.util.fieldbasedcontrol.HeapCanonizerHashMap;
+import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
+import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
 
 /**
  * Randoop's forward, component-based generator.
@@ -145,11 +146,17 @@ public class ForwardGenerator extends AbstractGenerator {
   
   
   public void initCanonizer() {
-	  canonizer = new HeapCanonizerHashMap(new FieldExtensions(), field_based_gen_ignore_primitive);  
+	  if (field_based_gen_precise_canonization)
+		  canonizer = new HeapCanonizerListStore(new FieldExtensions(), field_based_gen_ignore_primitive);  
+	  else 
+		  canonizer = new HeapCanonizerMapStore(new FieldExtensions(), field_based_gen_ignore_primitive);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizerHashMap(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
+	  if (field_based_gen_precise_canonization)
+		  canonizer = new HeapCanonizerListStore(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
+	  else
+		  canonizer = new HeapCanonizerMapStore(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
   }
   
   
@@ -210,21 +217,7 @@ public class ForwardGenerator extends AbstractGenerator {
 	eSeq.exectime = endTime - startTime;
 	startTime = endTime; // reset start time.
     
-	/*
-	if (numGeneratedSequences() > 70) {
-		System.out.println("OPA ERROR");
-	}
-
 	
-	if (numGeneratedSequences() == 100) {
-		System.out.println("OPA ERROR");
-	}
-	
-	
-	if (numGeneratedSequences() == 149) {
-		System.out.println("OPA ERROR");
-	}
-	*/
    	if (field_based_gen != FieldBasedGenType.DISABLED && eSeq.isNormalExecution()) {
    		if (FieldBasedGenLog.isLoggingOn()) {
    			FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
@@ -236,7 +229,7 @@ public class ForwardGenerator extends AbstractGenerator {
 	    	if (field_based_gen == FieldBasedGenType.FAST) 
 	    		eSeq.enlargeExtensionsFast(canonizer, this);
 	    	else
-	    		eSeq.enlargeExtensionsMin(canonizer, this);
+	    		eSeq.enlargeExtensionsMin(canonizer, checkGenerator, this);
 	    		
     		if (!eSeq.enlargesExtensions) {
         	    fieldBasedDroppedSeq++;

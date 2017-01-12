@@ -24,18 +24,16 @@ import java.util.TreeSet;
  * Date: December 2016.
  */
 
-public class HeapCanonizerHashMap extends HeapCanonizer {
+public class HeapCanonizerMapStore extends HeapCanonizer {
 	// For each class name stores a map of objects with its corresponding indexes in the canonization
 	private Map<String, Map<Object, Integer>> store;
-	// For each class name stores the last index assigned to an object of the class
-	private Map<String, Integer> lastIndex;
 
 	
-	public HeapCanonizerHashMap(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizerMapStore(FieldExtensions extensions, boolean ignorePrimitive) {
 		super(extensions, ignorePrimitive);
 	}
 	
-	public HeapCanonizerHashMap(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizerMapStore(FieldExtensions extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		super(extensions, ignorePrimitive, fieldBasedGenClassnames);
 	}

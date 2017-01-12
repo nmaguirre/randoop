@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import randoop.generation.AbstractGenerator;
+import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 
 /**
  * Main entry point for Randoop. Asks the command handlers who can handle the
@@ -60,12 +61,20 @@ public class Main {
     boolean success = false;
     try {
 
+      long startTime = System.nanoTime(); // reset start time.
+     
       success = handler.handle(args2);
-
+      
+      long endTime = System.nanoTime();
+      
+      
+      
       if (!success) {
         System.err.println("The command you issued returned a failing status flag.");
       }
 
+      System.out.println("Total execution time: " + (endTime - startTime) / 1000000 + " seconds");
+      
     } catch (RandoopTextuiException e) {
 
       System.out.println(e.getMessage());

@@ -176,7 +176,8 @@ public class GenTests extends GenInputsAbstract {
     		System.out.println("Configuration error: --field-based-gen must be activated for "
     				+ "--field-based-gen-keep-non-contributing-tests-percentage, "
     				+ "--field-based-gen-weighted-selection, "
-    				+ "--field-based-gen-log and "
+    				+ "--field-based-gen-log, "
+    				+ "--field-based-gen-precise-canonization and "
     				+ "--field-based-gen-classlist to be enabled");
     		System.exit(1);
     	}
@@ -188,6 +189,8 @@ public class GenTests extends GenInputsAbstract {
 			FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen=" + AbstractGenerator.field_based_gen.toString());
 		
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
+
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-precise-canonization=" + AbstractGenerator.field_based_gen_precise_canonization);
 
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 
