@@ -470,15 +470,15 @@ public abstract class AbstractGenerator {
       if (eSeq.hasFailure()) {
         num_failing_sequences++;
       }
-
+      
+      // TODO: If we are going to throw away a test because it didn't contribute to the extensions, do it before 
+      // any of the checks below are performed to improve performance.
       if (outputTest.test(eSeq)) {
     	  
         if (!eSeq.hasInvalidBehavior()) {
         	boolean stored = false;
 
-        	if (eSeq.hasFailure() ||
-        			(field_based_gen != FieldBasedGenType.DISABLED && eSeq.canonizationError == true)
-        			) {
+        	if (eSeq.hasFailure() || eSeq.canonizationError) {
         		outErrorSeqs.add(eSeq);
         		stored = true;
 
