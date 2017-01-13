@@ -58,6 +58,7 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
+import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -329,9 +330,11 @@ public class GenTests extends GenInputsAbstract {
     // FIXME: PABLO: Very ugly hack to initialize the canonizer. 
     if (AbstractGenerator.field_based_gen != FieldBasedGenType.DISABLED) {
     	if (GenInputsAbstract.field_based_gen_classlist == null)
-    		((ForwardGenerator)explorer).initCanonizer();
-    	else 
-    		((ForwardGenerator)explorer).initCanonizer(field_based_gen_classnames);
+    		explorer.initCanonizer();
+    	else {
+    		explorer.initCanonizer(field_based_gen_classnames);
+    		CanonicalRepresentation.setFieldBasedGenClasses(field_based_gen_classnames);
+    	}
     }
     
     

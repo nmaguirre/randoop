@@ -14,23 +14,21 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CanonicalRepresentation {
+public class CanonicalRepresentationEfficient {
 	
-	private static List<String> ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
-			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun."});
+	private List<String> ignoredClasses;
 
-
-	public static boolean isIgnoredClass(Class c, Tuple<String, Integer> t) {
+	public boolean isIgnoredClass(CanonizerClass cc) {
 		if (fieldBasedGenByClasses)
-			return !belongsToFieldBasedClasses(c, t);
+			return !belongsToFieldBasedClasses(cc);
 		else
-			return isIgnoredClass(t.getFirst());
+			return isIgnoredNonClassBased(cc);
 	}
 
 	
-	private static boolean isIgnoredClass(String name) {
+	private boolean isIgnoredNonClassBased(CanonizerClass cc) {
 		for (String s: ignoredClasses) {
-			if (name.startsWith(s)) {
+			if (cc.name.startsWith(s)) {
 				//System.out.println("WARNING: Ignored class: " + canonicalName);				
 				return true;
 			}
@@ -44,7 +42,13 @@ public class CanonicalRepresentation {
 	private static Set<Integer> fieldBasedGenClasses;
 	private static Set<Integer> fieldBasedGenClassesAndParents;
 	
-	public static void setFieldBasedGenClasses(Set<String> classNames) {
+	public CanonicalRepresentationEfficient() {
+		fieldBasedGenByClasses = false;
+		ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
+			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun."});
+	}
+	
+	public CanonicalRepresentationEfficient(Set<String> classNames) {
 		ignoredClasses = new LinkedList<String>();
 		fieldBasedGenByClasses = true;
 		
@@ -107,39 +111,34 @@ public class CanonicalRepresentation {
 
 	}
 
-	public static boolean belongsToFieldBasedClassesOrParents(Class c, Tuple<String, Integer> t) {
+	public boolean belongsToFieldBasedClassesOrParents(CanonizerClass cc) {
 		
 		// Allow primitive fields and arrays to contribute to the extensions
-		if (classIndexPrimitive.get(t.getSecond()) || c.isArray())
+		if (classIndexPrimitive.get(cc.index) || c.isArray())
 			return true;
 		
 		return fieldBasedGenClassesAndParents.contains(t.getFirst());
 	}
 	
-	public static boolean belongsToFieldBasedClasses(Class c, Tuple<String, Integer> t) {
+	public boolean belongsToFieldBasedClasses(CanonizerClass cc) {
 		// Allow primitive fields and arrays to contribute to the extensions
-		if (classIndexPrimitive.get(t.getSecond()) || c.isArray())
+		if (cc.primitive || cc.cls.isArray())
 			return true;
 	
-		return fieldBasedGenClasses.contains(t.getFirst());
+		return fieldBasedGenClasses.contains(cc.index);
 	}
 	
-	public final static Integer MAX_STRING_SIZE = 50;
+	public final Integer MAX_STRING_SIZE = 50;
 	
-	private static int classIndex = -1; 
+	private Map<Class, CanonizerClass> classNames = new HashMap<Class, CanonizerClass>();
+	private ArrayList<CanonizerClass> indexToClass = new ArrayList<CanonizerClass>();
+	private Map<Class, Map<Integer, CanonizerArrayField>> arrayFieldNames = new HashMap<Class, Map<Integer, CanonizerArrayField>>();
 	
-	private static int fieldIndex = -1;
-	
-	public static Map<Class, Tuple<String, Integer>> classNames = new HashMap<Class, Tuple<String, Integer>> ();
-	public static ArrayList<Class> indexToClass = new ArrayList<Class>();
-	public static ArrayList<Boolean> classIndexPrimitive = new ArrayList<Boolean>();
-	public static Map<Field, Tuple<String, Integer>> fieldNames = new HashMap<Field, Tuple<String, Integer>> ();
-	public static ArrayList<Field> indexToField = new ArrayList<Field>();
-	// private static Map<String, Integer> arrayFieldNames = new HashMap<String, Integer> ();
-	public static Map<Class, Map<Integer, Tuple<String, Integer>>> arrayFieldNames = new HashMap<Class, Map<Integer, Tuple<String, Integer>>> ();
-	
-	public static ArrayList<List<Integer>> classFields = new ArrayList<>();
 
+
+	
+	
+	
 	// For each class index stores a list of the objects corresponding to the class.
 	// The position of the object in the list corresponds to the object's index in the canonization
 	public static ArrayList<LinkedList<Object>> store = new ArrayList<>();
@@ -199,16 +198,11 @@ public class CanonicalRepresentation {
 			lastIndex.set(i, -1);
 	}
 
-	public static void clearStoreLastIndexes()	{
+	public static void clearStoreAndIndexes()	{
 		clearStore();
 		resetLastIndexes();
 	}
 	
-	
-	
-	public static String getArrayFieldCanonicalName(Class c, Integer pos) {
-		return getArrayFieldCanonicalNameAndIndex(c, pos).getFirst();
-	}
 	
 	public static Tuple<String, Integer> getArrayFieldCanonicalNameAndIndex(Class c, Integer pos) {
 		Map<Integer, Tuple<String, Integer>> m1 = arrayFieldNames.get(c);

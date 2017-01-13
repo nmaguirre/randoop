@@ -18,6 +18,10 @@ import randoop.util.SimpleList;
 import randoop.util.Timer;
 import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
+import randoop.util.fieldbasedcontrol.FieldExtensions;
+import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
+import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
+import randoop.util.fieldbasedcontrol.HeapCanonizerTraversal;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
@@ -194,6 +198,7 @@ public abstract class AbstractGenerator {
 	  return operationsWeight.get(t);
   } 
 
+    
   public TypedOperation selectWeightedRandomOperation() {
 	int randomPoint = Randomness.nextRandomInt(sumOfWeights);
     int currentPoint = 1;
@@ -204,6 +209,23 @@ public abstract class AbstractGenerator {
       }
     }
     throw new BugInRandoopException();
+  }
+  
+ 
+  public HeapCanonizerTraversal canonizer;
+
+  public void initCanonizer() {
+	  if (field_based_gen_precise_canonization)
+		  canonizer = new HeapCanonizerListStore(new FieldExtensions(), field_based_gen_ignore_primitive);  
+	  else 
+		  canonizer = new HeapCanonizerMapStore(new FieldExtensions(), field_based_gen_ignore_primitive);  
+  }
+  
+  public void initCanonizer(Set<String> fieldBasedGenClassnames) {
+	  if (field_based_gen_precise_canonization)
+		  canonizer = new HeapCanonizerListStore(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
+	  else
+		  canonizer = new HeapCanonizerMapStore(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
   }
   
 

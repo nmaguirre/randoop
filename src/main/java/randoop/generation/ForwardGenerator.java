@@ -37,10 +37,7 @@ import randoop.util.SimpleList;
 import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
-import randoop.util.fieldbasedcontrol.FieldExtensions;
-import randoop.util.fieldbasedcontrol.HeapCanonizerTraversal;
-import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
-import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
+
 
 /**
  * Randoop's forward, component-based generator.
@@ -50,7 +47,6 @@ public class ForwardGenerator extends AbstractGenerator {
   // PABLO: Fields for field based generation
   // public FieldExtensions fieldExtensions;
   // public FieldExtensions fieldExtensionsCanonizer;
-  public HeapCanonizerTraversal canonizer;
   // public boolean fieldBasedGen = true;
   //public boolean fieldBasedGen = false;
   private int canonizationErrorNum = 0;
@@ -145,19 +141,7 @@ public class ForwardGenerator extends AbstractGenerator {
   }
   
   
-  public void initCanonizer() {
-	  if (field_based_gen_precise_canonization)
-		  canonizer = new HeapCanonizerListStore(new FieldExtensions(), field_based_gen_ignore_primitive);  
-	  else 
-		  canonizer = new HeapCanonizerMapStore(new FieldExtensions(), field_based_gen_ignore_primitive);  
-  }
-  
-  public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  if (field_based_gen_precise_canonization)
-		  canonizer = new HeapCanonizerListStore(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
-	  else
-		  canonizer = new HeapCanonizerMapStore(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
-  }
+
   
   
   
