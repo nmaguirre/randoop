@@ -3,10 +3,126 @@ package randoop.util.fieldbasedcontrol;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Set;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CanonicalRepresentation {
+	
+	private static List<String> ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
+			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun."});
+
+
+	public static boolean isIgnoredClass(Class c, Tuple<String, Integer> t) {
+		if (fieldBasedGenByClasses)
+			return !belongsToFieldBasedClasses(c, t);
+		else
+			return isIgnoredClass(t.getFirst());
+	}
+
+	
+	private static boolean isIgnoredClass(String name) {
+		for (String s: ignoredClasses) {
+			if (name.startsWith(s)) {
+				//System.out.println("WARNING: Ignored class: " + canonicalName);				
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	private static boolean fieldBasedGenByClasses = false;
+	
+	private static Set<Integer> fieldBasedGenClasses;
+	private static Set<Integer> fieldBasedGenClassesAndParents;
+	
+	public static void setFieldBasedGenClasses(Set<String> classNames) {
+		ignoredClasses = new LinkedList<String>();
+		fieldBasedGenByClasses = true;
+		
+		fieldBasedGenClasses = new HashSet<>();
+		fieldBasedGenClassesAndParents = new HashSet<>();
+		
+		// For each given class, put its superclasses in fieldBasedGenClassnames to avoid 
+		// discarding fields that have superclasses as types.
+		for (String name: classNames) {
+			Class cls = null;
+			try {
+				cls = Class.forName(name);
+			} catch (ClassNotFoundException e) {
+				try {
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("> Class " + name + " not found");
+
+					int last = name.lastIndexOf(".");
+					name = name.substring(0, last) + "$" + name.substring(last+1);
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("> Trying: " + name);
+					cls = Class.forName(name);
+				} catch (ClassNotFoundException e2) {
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("FATAL ERROR DURING CANONIZATION: Class " + name + " not found. Check your --field-based-gen-classnames file for errors");
+					System.out.println("FATAL ERROR DURING CANONIZATION: Class " + name + " not found. Check your --field-based-gen-classnames file for errors");
+					e.printStackTrace();
+					System.exit(1);
+				}
+			}
+
+			Tuple<String, Integer> classTuple = getClassCanonicalNameAndIndex(cls);
+			String cname = classTuple.getFirst();
+			Integer cind = classTuple.getSecond();	
+		
+			fieldBasedGenClasses.add(cind);
+			fieldBasedGenClassesAndParents.add(cind);
+			if (FieldBasedGenLog.isLoggingOn()) 
+				FieldBasedGenLog.logLine("> Added " + cname + " for canonization");
+						
+			cls = cls.getSuperclass();
+			classTuple = getClassCanonicalNameAndIndex(cls);
+			cname = classTuple.getFirst();
+			cind = classTuple.getSecond();	
+			
+			while (cls != null && 
+					cls != Object.class && 
+					!classIndexPrimitive.get(cind)) {
+				if (fieldBasedGenClassesAndParents.add(cind)) {
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("> Added " + name + "'s parent " + cname + " for canonization");
+				}
+			
+				cls = cls.getSuperclass();
+				classTuple = getClassCanonicalNameAndIndex(cls);
+				cname = classTuple.getFirst();
+				cind = classTuple.getSecond();	
+			}
+		}		
+
+	}
+
+	public static boolean belongsToFieldBasedClassesOrParents(Class c, Tuple<String, Integer> t) {
+		
+		// Allow primitive fields and arrays to contribute to the extensions
+		if (classIndexPrimitive.get(t.getSecond()) || c.isArray())
+			return true;
+		
+		return fieldBasedGenClassesAndParents.contains(t.getFirst());
+	}
+	
+	public static boolean belongsToFieldBasedClasses(Class c, Tuple<String, Integer> t) {
+		// Allow primitive fields and arrays to contribute to the extensions
+		if (classIndexPrimitive.get(t.getSecond()) || c.isArray())
+			return true;
+	
+		return fieldBasedGenClasses.contains(t.getFirst());
+	}
 	
 	public final static Integer MAX_STRING_SIZE = 50;
 	
@@ -14,10 +130,81 @@ public class CanonicalRepresentation {
 	
 	private static int fieldIndex = -1;
 	
-	private static Map<Class, Tuple<String, Integer>> classNames = new HashMap<Class, Tuple<String, Integer>> ();
-	private static Map<Field, Tuple<String, Integer>> fieldNames = new HashMap<Field, Tuple<String, Integer>> ();
+	public static Map<Class, Tuple<String, Integer>> classNames = new HashMap<Class, Tuple<String, Integer>> ();
+	public static ArrayList<Class> indexToClass = new ArrayList<Class>();
+	public static ArrayList<Boolean> classIndexPrimitive = new ArrayList<Boolean>();
+	public static Map<Field, Tuple<String, Integer>> fieldNames = new HashMap<Field, Tuple<String, Integer>> ();
+	public static ArrayList<Field> indexToField = new ArrayList<Field>();
 	// private static Map<String, Integer> arrayFieldNames = new HashMap<String, Integer> ();
-	private static Map<Class, Map<Integer, Tuple<String, Integer>>> arrayFieldNames = new HashMap<Class, Map<Integer, Tuple<String, Integer>>> ();
+	public static Map<Class, Map<Integer, Tuple<String, Integer>>> arrayFieldNames = new HashMap<Class, Map<Integer, Tuple<String, Integer>>> ();
+	
+	public static ArrayList<List<Integer>> classFields = new ArrayList<>();
+
+	// For each class index stores a list of the objects corresponding to the class.
+	// The position of the object in the list corresponds to the object's index in the canonization
+	public static ArrayList<LinkedList<Object>> store = new ArrayList<>();
+	
+	public static void clearStore() {
+		for (LinkedList l: store) {
+			l.clear();
+		}
+	}
+
+	public static Integer getObjectIndex(Integer classIndex, Object o) {
+		List<Object> l = store.get(classIndex);
+		
+		if (l == null) return -1;
+		
+		int ind = 0;
+		for (Object obj: l) {
+			if (o == obj) 
+				return ind;			
+
+			ind++;
+		}
+		
+		return -1; 
+	}
+	
+	// Returns a tuple (old index, new index)
+	// if old index == new index then o was stored in a previous call
+	// old index is -1 if the object wasn't stored previously
+	public static Tuple<Integer, Integer> assignIndexToObject(Integer clsIndex, Object o) {
+		List<Object> l = store.get(clsIndex);
+
+		int ind = 0;
+		for (Object obj: l) {
+			if (o == obj)
+				break;
+
+			ind++;
+		}
+		
+		if (ind == l.size()) {
+			lastIndex.set(clsIndex, lastIndex.get(clsIndex) + 1);
+			l.add(o);
+			return new Tuple<Integer, Integer>(-1, lastIndex.get(clsIndex));
+		}
+		
+		return new Tuple<Integer, Integer>(ind, ind);
+	}
+	
+	
+	
+	// For each class name stores the last index assigned to an object of the class
+	public static ArrayList<Integer> lastIndex;
+	
+	public static void resetLastIndexes() {
+		for (int i = 0; i < lastIndex.size(); i++)
+			lastIndex.set(i, -1);
+	}
+
+	public static void clearStoreLastIndexes()	{
+		clearStore();
+		resetLastIndexes();
+	}
+	
+	
 	
 	public static String getArrayFieldCanonicalName(Class c, Integer pos) {
 		return getArrayFieldCanonicalNameAndIndex(c, pos).getFirst();
@@ -45,15 +232,28 @@ public class CanonicalRepresentation {
 		return getFieldCanonicalNameAndIndex(f).getFirst();
 	}
 
+
 	public static Tuple<String, Integer> getFieldCanonicalNameAndIndex(Field f) {
 		Tuple<String, Integer> tuple = fieldNames.get(f);
 		if (tuple != null) return tuple;
 		
-		String name = getClassCanonicalName(f.getDeclaringClass()) + "." + f.getName();
-		tuple = new Tuple<String, Integer>(name, ++fieldIndex);
+		Tuple<String, Integer> classTuple = getClassCanonicalNameAndIndex(f.getDeclaringClass());
+		String cname = classTuple.getFirst();
+		int cind = classTuple.getSecond();
+
+		String fname = cname + "." + f.getName();
+		tuple = new Tuple<String, Integer>(fname, ++fieldIndex);
 		fieldNames.put(f, tuple);
+		indexToField.add(f);
+		assert indexToField.size() == fieldIndex;
+		
+		classFields.get(cind).add(fieldIndex);
+		
 		if (FieldBasedGenLog.isLoggingOn()) 
-			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored field " + name + " with index " + fieldIndex);
+			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored field " + fname + " with index " + fieldIndex + 
+					", belonging to class " + cname + " with index " + cind + ". "
+					+ "Pair (" + cind + "," + fieldIndex + ") added to class fields.");
+
 		return tuple;
 	}
 
@@ -73,10 +273,76 @@ public class CanonicalRepresentation {
 		
 		tuple = new Tuple<String, Integer>(name, ++classIndex);
 		classNames.put(c, tuple);
+
+		indexToClass.add(c);
+		assert indexToClass.size() == classIndex;
+
+		classIndexPrimitive.add(isClassPrimitive(c));
+		assert classIndexPrimitive.size() == classIndex;
+		
+		classFields.add(new LinkedList<Integer>());
+		assert classFields.size() == classIndex;
+		
+		store.add(new LinkedList<Object>());
+		assert store.size() == classIndex;
+		
+		lastIndex.add(-1);
+		assert lastIndex.size() == classIndex;
+		
+		loadFieldsForClass(c, tuple);
+			
 		if (FieldBasedGenLog.isLoggingOn()) 
 			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored class " + name + " with index " + classIndex);
 		return tuple;
 	}
+	
+	
+	// Returns the list with cls' fields. It stores the fields 
+	// the first time to return them in the same order later.
+	private static void loadFieldsForClass(Class cls, Tuple<String, Integer> tuple) {
+		String classname = tuple.getFirst();
+		Integer classindex = tuple.getSecond();
+		
+	
+		while (cls != null && 
+				cls != Object.class && 
+				!CanonicalRepresentation.isClassPrimitive(cls) &&
+				!isIgnoredClass(cls, tuple)) {
+			
+			if (FieldBasedGenLog.isLoggingOn()) 
+				FieldBasedGenLog.logLine("> Considering fields for class " + classname + ": ");
+						
+			Field [] fieldsArray = cls.getDeclaredFields();
+			for (int i = 0; i < fieldsArray.length; i++) {
+				Field f = fieldsArray[i];
+				
+				Class ftype = f.getType();
+				Tuple<String, Integer> ftypetuple = getClassCanonicalNameAndIndex(ftype);
+
+				if (isIgnoredClass(ftypetuple.getFirst())) {
+					// System.out.println("Ignored: " + f.getType() + " " + f.getName());
+					continue;
+				}
+				if (fieldBasedGenByClasses && !belongsToFieldBasedClassesOrParents(ftype, ftypetuple))
+					continue;
+			
+			
+				Tuple<String, Integer> ftuple = getFieldCanonicalNameAndIndex(f);
+				if (FieldBasedGenLog.isLoggingOn()) 
+					FieldBasedGenLog.logLine(ftypetuple.getFirst() +  " " +  ftuple.getFirst());			
+			}
+				
+			if (FieldBasedGenLog.isLoggingOn())
+				FieldBasedGenLog.logLine("> No more fields for: " + classname);
+
+			cls = cls.getSuperclass();
+			tuple = getClassCanonicalNameAndIndex(cls);
+			classname = tuple.getFirst();
+			classindex = tuple.getSecond();	
+		}
+		
+	}
+	
 	
   	public static boolean isClassPrimitive(Class clazz) {
   		if (clazz.isPrimitive()
