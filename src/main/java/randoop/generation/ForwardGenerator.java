@@ -38,7 +38,7 @@ import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
-import randoop.util.fieldbasedcontrol.HeapCanonizer;
+import randoop.util.fieldbasedcontrol.HeapCanonizerTraversal;
 import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
 
@@ -50,7 +50,7 @@ public class ForwardGenerator extends AbstractGenerator {
   // PABLO: Fields for field based generation
   // public FieldExtensions fieldExtensions;
   // public FieldExtensions fieldExtensionsCanonizer;
-  public HeapCanonizer canonizer;
+  public HeapCanonizerTraversal canonizer;
   // public boolean fieldBasedGen = true;
   //public boolean fieldBasedGen = false;
   private int canonizationErrorNum = 0;

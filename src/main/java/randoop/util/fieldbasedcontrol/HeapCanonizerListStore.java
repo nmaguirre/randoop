@@ -17,7 +17,7 @@ import java.util.Set;
  * Date: December 2016.
  */
 
-public class HeapCanonizerListStore extends HeapCanonizer {
+public class HeapCanonizerListStore extends HeapCanonizerObjectIndexes {
 
 	// For each class name stores a map of objects with its corresponding indexes in the canonization
 	private Map<String, List<Object>> store;

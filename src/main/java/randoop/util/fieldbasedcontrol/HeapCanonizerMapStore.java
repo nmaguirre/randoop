@@ -24,7 +24,7 @@ import java.util.TreeSet;
  * Date: December 2016.
  */
 
-public class HeapCanonizerMapStore extends HeapCanonizer {
+public class HeapCanonizerMapStore extends HeapCanonizerObjectIndexes {
 	// For each class name stores a map of objects with its corresponding indexes in the canonization
 	private Map<String, Map<Object, Integer>> store;
 

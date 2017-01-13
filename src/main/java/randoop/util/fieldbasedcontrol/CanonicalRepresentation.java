@@ -1,5 +1,6 @@
 package randoop.util.fieldbasedcontrol;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Date;
@@ -9,53 +10,73 @@ public class CanonicalRepresentation {
 	
 	public final static Integer MAX_STRING_SIZE = 50;
 	
-	private static Map<Class, String> classNames = new HashMap<Class, String> ();
-	//private static Map<Field, String> fieldNames = new HashMap<Field, String> ();
+	private static int classIndex = -1; 
 	
-	public static String getFieldCanonicalName(Field f) {
-		return getClassCanonicalName(f.getDeclaringClass()) + "." + f.getName();
-	}
-
-	/*
-	public static String getFieldCanonicalName(Field f, Class c) {
-		return getClassCanonicalName(c) + "." + f.getName();
-	}*/
+	private static int fieldIndex = -1;
+	
+	private static Map<Class, Tuple<String, Integer>> classNames = new HashMap<Class, Tuple<String, Integer>> ();
+	private static Map<Field, Tuple<String, Integer>> fieldNames = new HashMap<Field, Tuple<String, Integer>> ();
+	// private static Map<String, Integer> arrayFieldNames = new HashMap<String, Integer> ();
+	private static Map<Class, Map<Integer, Tuple<String, Integer>>> arrayFieldNames = new HashMap<Class, Map<Integer, Tuple<String, Integer>>> ();
 	
 	public static String getArrayFieldCanonicalName(Class c, Integer pos) {
-		return getClassCanonicalName(c) + ".elem" + pos;
-	}
-
-	public static String getPrimitiveFieldCanonicalName(Class c) {
-		return getClassCanonicalName(c) + ".value";
+		return getArrayFieldCanonicalNameAndIndex(c, pos).getFirst();
 	}
 	
-	
-	public static String getClassCanonicalName(Class c) {
-		String name = classNames.get(c);
-		if (name == null) {
-			//name = c.getCanonicalName();
-			name = c.getName();
-			
-			// To handle anonymous classes correctly
-			if (name == null) {
-				name = c.getCanonicalName();
-				//name = c.getName();
-				//System.out.println("NEW CLASS NAME FOUND: " + c.getName());
-			}
-			//System.out.println("NEW CLASS NAME FOUND: " + name);
-			classNames.put(c, name);
+	public static Tuple<String, Integer> getArrayFieldCanonicalNameAndIndex(Class c, Integer pos) {
+		Map<Integer, Tuple<String, Integer>> m1 = arrayFieldNames.get(c);
+		if (m1 == null) {
+			m1 = new HashMap<Integer, Tuple<String, Integer>>();
+			arrayFieldNames.put(c, m1);
 		}
-
-		return name;
+	
+		Tuple<String, Integer> t = m1.get(pos);
+		if (t != null) return t;
+		
+		String name = getClassCanonicalName(c) + ".elem" + pos;
+		t = new Tuple<String, Integer>(name, ++fieldIndex);
+		m1.put(pos, t);
+		if (FieldBasedGenLog.isLoggingOn()) 
+			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored array field " + name + " with index " + fieldIndex);
+		return t;
 	}
 	
-	
-	public static String getVertexCanonicalName(HeapVertex v) {
-		Object object = v.getObject();
-		if (object == null) return "null";
-		return getClassCanonicalName(object.getClass()) + v.getIndex();
+	public static String getFieldCanonicalName(Field f) {
+		return getFieldCanonicalNameAndIndex(f).getFirst();
 	}
 
+	public static Tuple<String, Integer> getFieldCanonicalNameAndIndex(Field f) {
+		Tuple<String, Integer> tuple = fieldNames.get(f);
+		if (tuple != null) return tuple;
+		
+		String name = getClassCanonicalName(f.getDeclaringClass()) + "." + f.getName();
+		tuple = new Tuple<String, Integer>(name, ++fieldIndex);
+		fieldNames.put(f, tuple);
+		if (FieldBasedGenLog.isLoggingOn()) 
+			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored field " + name + " with index " + fieldIndex);
+		return tuple;
+	}
+
+	public static String getClassCanonicalName(Class c) {
+		return getClassCanonicalNameAndIndex(c).getFirst();
+	}
+
+	public static Tuple<String, Integer> getClassCanonicalNameAndIndex(Class c) {
+		Tuple<String, Integer> tuple = classNames.get(c);
+		if (tuple != null) return tuple;
+		
+		String name = c.getName();
+		// FIXME: To handle anonymous classes correctly, not sure if this is still needed
+		if (name == null) {
+			name = c.getCanonicalName();
+		}
+		
+		tuple = new Tuple<String, Integer>(name, ++classIndex);
+		classNames.put(c, tuple);
+		if (FieldBasedGenLog.isLoggingOn()) 
+			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored class " + name + " with index " + classIndex);
+		return tuple;
+	}
 	
   	public static boolean isClassPrimitive(Class clazz) {
   		if (clazz.isPrimitive()
@@ -177,4 +198,19 @@ public class CanonicalRepresentation {
   		return simpleName;
   	}
   	*/
+	
+	// DEPRECATED: Only used for backwards compatibility, we shouldn't use these methods anymore.
+	public static String getFieldCanonicalName(Field f, Class c) {
+		return getClassCanonicalName(c) + "." + f.getName();
+	}
+	
+	public static String getVertexCanonicalName(HeapVertex v) {
+		Object object = v.getObject();
+		if (object == null) return "null";
+		return getClassCanonicalName(object.getClass()) + v.getIndex();
+	}
+	
+	public static String getPrimitiveFieldCanonicalName(Class c) {
+		return getClassCanonicalName(c) + ".value";
+	}
 }

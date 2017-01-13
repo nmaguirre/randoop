@@ -22,12 +22,12 @@ public class VectorsDifferentialTests {
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext.txt");
 	
 	    FieldExtensions fe1 = new FieldExtensions();
-	    HeapCanonizer canonizer1 = new HeapCanonizerListStore(fe1, false);
+	    HeapCanonizerTraversal canonizer1 = new HeapCanonizerListStore(fe1, false);
 	    canonizer1.canonizeAndEnlargeExtensions(v);
 	    fe1.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext1.txt");
 
 		FieldExtensions fe2 = new FieldExtensions();
-	    HeapCanonizer canonizer2 = new HeapCanonizerMapStore(fe2, false);
+	    HeapCanonizerTraversal canonizer2 = new HeapCanonizerMapStore(fe2, false);
 	    canonizer2.canonizeAndEnlargeExtensions(v);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext2.txt");;
 	        
@@ -55,12 +55,12 @@ public class VectorsDifferentialTests {
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext.txt");   
 	
 	    FieldExtensions fe1 = new FieldExtensions();
-	    HeapCanonizer canonizer1 = new HeapCanonizerListStore(fe1, false);
+	    HeapCanonizerTraversal canonizer1 = new HeapCanonizerListStore(fe1, false);
 	    canonizer1.canonizeAndEnlargeExtensions(va);
 	    fe1.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext1.txt");
 
 		FieldExtensions fe2 = new FieldExtensions();
-	    HeapCanonizer canonizer2 = new HeapCanonizerMapStore(fe2, false);
+	    HeapCanonizerTraversal canonizer2 = new HeapCanonizerMapStore(fe2, false);
 	    canonizer2.canonizeAndEnlargeExtensions(va);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext2.txt");
 	    

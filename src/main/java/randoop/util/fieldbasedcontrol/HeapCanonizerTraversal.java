@@ -24,15 +24,15 @@ import java.util.TreeSet;
  * Date: December 2016.
  */
 
-public abstract class HeapCanonizer {
+public abstract class HeapCanonizerTraversal {
 	// For each class name stores a map of objects with its corresponding indexes in the canonization
 	// private Map<String, Map<Object, Integer>> store;
 	// For each class name stores the last index assigned to an object of the class
 	protected Map<String, Integer> lastIndex;
 	private Map<String, List<Field>> classFields;
-	private FieldExtensions extensions;
+	protected FieldExtensions extensions;
 	private boolean extendedExtensions;
-	private boolean ignorePrimitive;
+	protected boolean ignorePrimitive;
 	
 	private List<String> ignoredClasses;
 	
@@ -40,7 +40,7 @@ public abstract class HeapCanonizer {
 
 	private Set<String> fieldBasedGenClassnamesAndParents;
 	
-	private boolean fieldBasedGenByClasses;
+	protected boolean fieldBasedGenByClasses;
 
 	
 	
@@ -53,7 +53,7 @@ public abstract class HeapCanonizer {
 		return fieldBasedGenClassnamesAndParents.contains(canonicalName);
 	}
 	
-	private boolean belongsToFieldBasedClasses(Class clazz) {
+	protected boolean belongsToFieldBasedClasses(Class clazz) {
 		String canonicalName = CanonicalRepresentation.getClassCanonicalName(clazz);
 		// Allow primitive fields and arrays to contribute to the extensions
 		if (CanonicalRepresentation.isClassPrimitive(clazz) || clazz.isArray())
@@ -63,7 +63,7 @@ public abstract class HeapCanonizer {
 	}
 	
 	
-	private boolean isIgnoredClass(Class clazz) {
+	protected boolean isIgnoredClass(Class clazz) {
 		String canonicalName = CanonicalRepresentation.getClassCanonicalName(clazz);
 		// Anonymous classes have a null canonicalName, and are considered primitive
 		// for the moment
@@ -87,7 +87,7 @@ public abstract class HeapCanonizer {
 		this(extensions, true);
 	}
 	*/
-	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizerTraversal(FieldExtensions extensions, boolean ignorePrimitive) {
 		classFields = new HashMap<String, List<Field>>();
 		this.extensions = extensions;
 		this.ignorePrimitive = ignorePrimitive;
@@ -115,7 +115,7 @@ public abstract class HeapCanonizer {
 		fieldBasedGenByClasses = false;
 	}
 	
-	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizerTraversal(FieldExtensions extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		classFields = new HashMap<String, List<Field>>();
 		this.extensions = extensions;
@@ -196,62 +196,23 @@ public abstract class HeapCanonizer {
 	protected abstract Tuple<Integer, Integer> assignIndexToObject(Object o); 
 
 	
+	/*
 	private Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, String fieldname) {
 		return addToExtensions(src, tgt, fieldname, false);
 	}
-	
+	*/
 	
 	// Returns a pair (b1, b2) where b1 iff the extensions were enlarged by this call, and
 	// b2 iff tgt is an object visited for the first time in this call
-	private Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, String fieldname, boolean test) {
-		String srccls = CanonicalRepresentation.getClassCanonicalName(src.getClass());
-		Integer srcInd = getObjectIndex(src);
-		String srcString = srccls + srcInd;
-		
-		String tgtString;
-		Class tgtClass = (tgt == null) ? null : tgt.getClass();
-		boolean isTgtNew = false;
-		if (tgt == null)
-			tgtString = CanonicalRepresentation.getNullRepresentation();
-		else if (isIgnoredClass(tgtClass) || (fieldBasedGenByClasses && !belongsToFieldBasedClasses(tgtClass)))
-			tgtString = CanonicalRepresentation.getDummyObjectRepresentation();
-		else if (CanonicalRepresentation.isClassPrimitive(tgtClass)) {
-			if (ignorePrimitive) 
-				tgtString = CanonicalRepresentation.getDummyObjectRepresentation();
-			else {
-				tgtString = tgt.toString();
-				// trim string values to length maxStringSize
-				if (tgtClass == String.class && tgtString.length() > CanonicalRepresentation.MAX_STRING_SIZE)
-					tgtString = tgtString.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
-			}
-		}
-		else {
-			String tgtcls = CanonicalRepresentation.getClassCanonicalName(tgtClass);
-			Tuple<Integer, Integer> indt = assignIndexToObject(tgt);
-			isTgtNew = indt.getFirst() == -1;
-			tgtString = tgtcls + indt.getSecond();
-		}
-		
-		if (!test)
-			return new Tuple<Boolean, Boolean>(
-				extensions.addPairToField(fieldname, srcString, tgtString),
-				isTgtNew);
-		else 
-			return new Tuple<Boolean, Boolean>(
-				!extensions.pairBelongsToField(fieldname, srcString, tgtString),
-				isTgtNew);
-	}
-	
+	protected abstract Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, Tuple<String, Integer> ftuple);	
 
-	public boolean canonizeAndEnlargeExtensions(Object root) {
-		return canonizeAndEnlargeExtensions(root, false);
-	}
+	
 		
 	
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public boolean canonizeAndEnlargeExtensions(Object root, boolean test) {
+	public boolean canonizeAndEnlargeExtensions(Object root) {
 		initStructures();
 		extendedExtensions = false;
 		
@@ -275,12 +236,10 @@ public abstract class HeapCanonizer {
 				for (int i = 0; i < length; i++) {
 					Object target = Array.get(obj, i);
 					
-					String fname = CanonicalRepresentation.getArrayFieldCanonicalName(objClass, i);
-					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, fname, test);
+					Tuple<String, Integer> ftuple = CanonicalRepresentation.getArrayFieldCanonicalNameAndIndex(objClass, i);
+					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, ftuple);
 					
 					extendedExtensions |= addRes.getFirst();
-
-					if (test && extendedExtensions) return true;
 
 					if (addRes.getSecond())
 						// target is an object of a non ignored class that was encountered for the first time.
@@ -305,12 +264,10 @@ public abstract class HeapCanonizer {
 						throw new RuntimeException("ERROR: Illegal access to an object field during canonization");
 					}
 
-					String fname = CanonicalRepresentation.getFieldCanonicalName(fld);
-					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, fname, test);
+					Tuple<String, Integer> ftuple = CanonicalRepresentation.getFieldCanonicalNameAndIndex(fld);
+					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, ftuple);
 					
 					extendedExtensions |= addRes.getFirst();
-					
-					if (test && extendedExtensions) return true;
 					
 					if (addRes.getSecond())
 						// target is an object of a non ignored class that was encountered for the first time.

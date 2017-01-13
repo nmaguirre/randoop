@@ -37,7 +37,7 @@ import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
-import randoop.util.fieldbasedcontrol.HeapCanonizer;
+import randoop.util.fieldbasedcontrol.HeapCanonizerTraversal;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -440,7 +440,7 @@ public class ExecutableSequence {
   
   
   
-  public boolean enlargeExtensionsFast(HeapCanonizer canonizer, ForwardGenerator generator) throws CanonizationErrorException {
+  public boolean enlargeExtensionsFast(HeapCanonizerTraversal canonizer, ForwardGenerator generator) throws CanonizationErrorException {
 	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
 	// for attempting to enlarge field extensions
 	int lastStmtIndex = this.sequence.size()-1;
@@ -472,7 +472,7 @@ public class ExecutableSequence {
 
   
   
-  private boolean enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizer canonizer) throws CanonizationErrorException {
+  private boolean enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizerTraversal canonizer) throws CanonizationErrorException {
 	  boolean extendedExtensions = false;	
 	  
 	  try {
@@ -559,9 +559,9 @@ public class ExecutableSequence {
   }
 
   
-  private boolean enlargeExtensionsPrecise(int i, Object statementResult, Object[] inputVariables, HeapCanonizer canonizer) throws CanonizationErrorException {
+  private boolean enlargeExtensionsPrecise(int i, Object statementResult, Object[] inputVariables, HeapCanonizerTraversal canonizer) throws CanonizationErrorException {
 	  boolean extendedExtensions = false;	
-	  
+/*	  
 	  int oldSize = canonizer.getExtensions().size();
 	  try {
 		  List<Object> extendingObjs = new LinkedList<>();
@@ -616,10 +616,6 @@ public class ExecutableSequence {
 			  throw new RuntimeException("FATAL ERROR: Added things to the extensions but it shouldn't have");
 
 		  
-		  /* 
-		  if (extendingObjs.size() > 1) {
-			  System.out.println("AHA, este caso no lo tenia");
-		  }*/
 		    
 		  boolean extendedAux = false;
 		  for (Object obj: extendingObjs) {
@@ -636,6 +632,7 @@ public class ExecutableSequence {
 		  throw new CanonizationErrorException("ERROR DURING CANONIZATION: Should have enlarged extensions but didn't");
 	  }
 	  
+	  */
 	  return extendedExtensions;
   }
   
@@ -690,7 +687,7 @@ public class ExecutableSequence {
   }
 
   
-  public boolean enlargeExtensionsMin(HeapCanonizer canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
+  public boolean enlargeExtensionsMin(HeapCanonizerTraversal canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
 
 	enlargesExtensions = false;
 	//	seqnum++;
