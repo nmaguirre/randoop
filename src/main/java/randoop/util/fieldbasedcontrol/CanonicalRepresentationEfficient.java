@@ -24,7 +24,6 @@ public class CanonicalRepresentationEfficient {
 		else
 			return isIgnoredNonClassBased(cc);
 	}
-
 	
 	private boolean isIgnoredNonClassBased(CanonizerClass cc) {
 		for (String s: ignoredClasses) {
@@ -36,6 +35,24 @@ public class CanonicalRepresentationEfficient {
 
 		return false;
 	}
+	
+	public boolean belongsToFieldBasedClassesOrParents(CanonizerClass cc) {
+		
+		// Allow primitive fields and arrays to contribute to the extensions
+		if (classIndexPrimitive.get(cc.index) || c.isArray())
+			return true;
+		
+		return fieldBasedGenClassesAndParents.contains(t.getFirst());
+	}
+	
+	public boolean belongsToFieldBasedClasses(CanonizerClass cc) {
+		// Allow primitive fields and arrays to contribute to the extensions
+		if (cc.primitive || cc.cls.isArray())
+			return true;
+	
+		return fieldBasedGenClasses.contains(cc.index);
+	}
+	
 	
 	private static boolean fieldBasedGenByClasses = false;
 	
@@ -111,22 +128,6 @@ public class CanonicalRepresentationEfficient {
 
 	}
 
-	public boolean belongsToFieldBasedClassesOrParents(CanonizerClass cc) {
-		
-		// Allow primitive fields and arrays to contribute to the extensions
-		if (classIndexPrimitive.get(cc.index) || c.isArray())
-			return true;
-		
-		return fieldBasedGenClassesAndParents.contains(t.getFirst());
-	}
-	
-	public boolean belongsToFieldBasedClasses(CanonizerClass cc) {
-		// Allow primitive fields and arrays to contribute to the extensions
-		if (cc.primitive || cc.cls.isArray())
-			return true;
-	
-		return fieldBasedGenClasses.contains(cc.index);
-	}
 	
 	public final Integer MAX_STRING_SIZE = 50;
 	

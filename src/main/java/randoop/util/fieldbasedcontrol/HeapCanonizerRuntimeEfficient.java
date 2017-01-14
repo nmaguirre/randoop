@@ -95,22 +95,19 @@ public abstract class HeapCanonizerRuntimeEfficient {
 		
 		CanonicalRepresentation.clearStoreAndIndexes();
 		extendedExtensions = false;
-		
-	
+
   		LinkedList<Object> toVisit = new LinkedList<Object>();
   		toVisit.addLast(root);
   		assignIndexToObject(root);
   		while (!toVisit.isEmpty()) {
   			Object obj = toVisit.removeFirst();
   			Class objClass = obj.getClass();
-  			
 
   			if (obj == null ||
   					obj.getClass() == Object.class ||	
   					CanonicalRepresentation.classIndexPrimitive.get(index) ||
   					CanonicalRepresentation.isIgnoredClass(
   				continue;
-  			
   			
 
   			if (objClass.isArray()) {
