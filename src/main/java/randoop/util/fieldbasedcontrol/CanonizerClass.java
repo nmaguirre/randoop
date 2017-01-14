@@ -9,19 +9,20 @@ public class CanonizerClass {
 	public String name;
 	public Integer index;
 	public boolean primitive;
-	public boolean fieldBasedClasses;
-	public boolean fieldBasedClassesAncestors; 
-	public boolean ignoredClass;
+	public Boolean fieldBasedClasses = null;
+	public Boolean fieldBasedClassesAncestors = null; 
+	public Boolean ignoredClass = null;
 	public ArrayList<CanonizerField> classFields;
 
-	public CanonizerClass(Class cls, String name) {
+	public CanonizerClass(Class cls, String name, Integer index, boolean primitive) {
 		this.cls = cls;
 		this.name = name;
+		this.index = index;
+		this.primitive = primitive;
 		classFields = new ArrayList<>();
 	}
 	
 	public void addField(CanonizerField f) {
-		f.fromClass = this;
 		f.index = classFields.size();
 		classFields.add(f);
 	}
