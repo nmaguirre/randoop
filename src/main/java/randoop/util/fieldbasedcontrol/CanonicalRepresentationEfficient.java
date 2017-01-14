@@ -137,10 +137,7 @@ public class CanonicalRepresentationEfficient {
 
 	}
 
-	
 	public final Integer MAX_STRING_SIZE = 50;
-	
-	
 	
 	private Map<Class, CanonizerClass> classNames = new HashMap<Class, CanonizerClass>();
 	// private ArrayList<CanonizerClass> indexToClass = new ArrayList<CanonizerClass>();
