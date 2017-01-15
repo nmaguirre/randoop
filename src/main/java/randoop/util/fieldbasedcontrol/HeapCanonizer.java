@@ -24,7 +24,7 @@ import java.util.TreeSet;
  * Date: December 2016.
  */
 
-public abstract class HeapCanonizerTraversal {
+public abstract class HeapCanonizer {
 	// For each class name stores a map of objects with its corresponding indexes in the canonization
 	// private Map<String, Map<Object, Integer>> store;
 	// For each class name stores the last index assigned to an object of the class
@@ -87,7 +87,7 @@ public abstract class HeapCanonizerTraversal {
 		this(extensions, true);
 	}
 	*/
-	public HeapCanonizerTraversal(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive) {
 		classFields = new HashMap<String, List<Field>>();
 		this.extensions = extensions;
 		this.ignorePrimitive = ignorePrimitive;
@@ -115,7 +115,7 @@ public abstract class HeapCanonizerTraversal {
 		fieldBasedGenByClasses = false;
 	}
 	
-	public HeapCanonizerTraversal(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		classFields = new HashMap<String, List<Field>>();
 		this.extensions = extensions;

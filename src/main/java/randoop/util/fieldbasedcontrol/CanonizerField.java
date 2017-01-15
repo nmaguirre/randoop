@@ -9,10 +9,11 @@ public class CanonizerField {
 	public String name;
 	public Integer index;
 
-	public CanonizerField(Field fld, CanonizerClass fromClass) {
+	public CanonizerField(Field fld, CanonizerClass fromClass, Integer index) {
 		this.fld = fld;
 		this.name = fromClass.name + "." + fld.getName();
 		this.fromClass = fromClass;
+		this.index = index;
 	}
 
 }

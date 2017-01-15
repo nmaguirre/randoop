@@ -24,7 +24,7 @@ import java.util.TreeSet;
  * Date: December 2016.
  */
 
-public abstract class HeapCanonizerObjectIndexes extends HeapCanonizerTraversal {
+public abstract class HeapCanonizerObjectIndexes extends HeapCanonizer {
 	
 
 	public HeapCanonizerObjectIndexes(FieldExtensions extensions, boolean ignorePrimitive) {

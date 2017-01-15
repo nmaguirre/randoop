@@ -21,7 +21,7 @@ import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
-import randoop.util.fieldbasedcontrol.HeapCanonizerTraversal;
+import randoop.util.fieldbasedcontrol.HeapCanonizer;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
@@ -212,7 +212,7 @@ public abstract class AbstractGenerator {
   }
   
  
-  public HeapCanonizerTraversal canonizer;
+  public HeapCanonizer canonizer;
 
   public void initCanonizer() {
 	  if (field_based_gen_precise_canonization)

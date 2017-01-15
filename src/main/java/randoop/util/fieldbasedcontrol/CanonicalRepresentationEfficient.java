@@ -1,24 +1,39 @@
 package randoop.util.fieldbasedcontrol;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-
-import org.checkerframework.checker.units.qual.C;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+// TODO: Change name to CanonicalHeapRepresentation
 public class CanonicalRepresentationEfficient {
 	
-	private List<String> ignoredClasses;
+	static CanonicalRepresentationEfficient instance;
+	CanonicalHeapStore store = CanonicalHeapStore.getInstance();
+	
+	private static boolean fieldBasedGenByClasses = false;
+	List<String> ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
+			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun."});
+	private static Set<Integer> fieldBasedGenClasses;
+	private static Set<Integer> fieldBasedGenClassesAndParents;
+
+	public static CanonicalRepresentationEfficient getInstance() {
+		if (instance == null)
+			instance = new CanonicalRepresentationEfficient();
+		
+		return instance;
+	}
+	
+	private CanonicalRepresentationEfficient() {
+		
+	}
 
 	public boolean isIgnoredClass(CanonizerClass cc) {
 		if (fieldBasedGenByClasses) {
@@ -63,19 +78,8 @@ public class CanonicalRepresentationEfficient {
 	}
 	
 	
-	private static boolean fieldBasedGenByClasses = false;
-	
-	private static Set<Integer> fieldBasedGenClasses;
-	private static Set<Integer> fieldBasedGenClassesAndParents;
-	
-	public CanonicalRepresentationEfficient() {
-		fieldBasedGenByClasses = false;
-		ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
-			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun."});
-	}
-	
-	public CanonicalRepresentationEfficient(Set<String> classNames) {
-		ignoredClasses = new LinkedList<String>();
+	public void setFieldBasedGenByClasses(Set<String> fbGenClasses) {
+		ignoredClasses = null;
 		fieldBasedGenByClasses = true;
 		
 		fieldBasedGenClasses = new HashSet<>();
@@ -83,7 +87,7 @@ public class CanonicalRepresentationEfficient {
 		
 		// For each given class, put its superclasses in fieldBasedGenClassnames to avoid 
 		// discarding fields that have superclasses as types.
-		for (String name: classNames) {
+		for (String name: fbGenClasses) {
 			Class cls = null;
 			try {
 				cls = Class.forName(name);
@@ -106,34 +110,31 @@ public class CanonicalRepresentationEfficient {
 				}
 			}
 
-			Tuple<String, Integer> classTuple = getClassCanonicalNameAndIndex(cls);
-			String cname = classTuple.getFirst();
-			Integer cind = classTuple.getSecond();	
+			CanonizerClass cc = canonizeClass(cls, false);
 		
-			fieldBasedGenClasses.add(cind);
-			fieldBasedGenClassesAndParents.add(cind);
+			fieldBasedGenClasses.add(cc.index);
+			fieldBasedGenClassesAndParents.add(cc.index);
 			if (FieldBasedGenLog.isLoggingOn()) 
-				FieldBasedGenLog.logLine("> Added " + cname + " for canonization");
-						
-			cls = cls.getSuperclass();
-			classTuple = getClassCanonicalNameAndIndex(cls);
-			cname = classTuple.getFirst();
-			cind = classTuple.getSecond();	
+				FieldBasedGenLog.logLine("> Added " + cc.name + " for canonization, with index " + cc.index);
 			
-			while (cls != null && 
-					cls != Object.class && 
-					!classIndexPrimitive.get(cind)) {
-				if (fieldBasedGenClassesAndParents.add(cind)) {
+			while (true) {
+				cls = cc.cls.getSuperclass();
+				if (cls == null) break;
+				cc = canonizeClass(cls, false);
+				if (cc.primitive) break;
+
+				if (fieldBasedGenClassesAndParents.add(cc.index)) 
 					if (FieldBasedGenLog.isLoggingOn())
-						FieldBasedGenLog.logLine("> Added " + name + "'s parent " + cname + " for canonization");
-				}
-			
-				cls = cls.getSuperclass();
-				classTuple = getClassCanonicalNameAndIndex(cls);
-				cname = classTuple.getFirst();
-				cind = classTuple.getSecond();	
+						FieldBasedGenLog.logLine("> Added " + name + "'s parent " + cc.name + " for canonization, with index" + cc.index);
 			}
 		}		
+		
+		// Now that we have the classes for field based generation figured out, 
+		// we can add fields to those classes (some fields will not be added because 
+		// their types do not belong to field based generation classes)
+		for (Entry<Class, CanonizerClass> entry: classNames.entrySet()) {
+			canonizeFields(entry.getValue());
+		}
 
 	}
 
@@ -141,74 +142,13 @@ public class CanonicalRepresentationEfficient {
 	
 	private Map<Class, CanonizerClass> classNames = new HashMap<Class, CanonizerClass>();
 	// private ArrayList<CanonizerClass> indexToClass = new ArrayList<CanonizerClass>();
-	private Map<Class, Map<Integer, Tuple<String, Integer>>> arrayFieldNames = new HashMap<Class,Map<Integer, Tuple<String, Integer>>>();
+	private Map<Class, Map<Integer, Tuple<String, Integer>>> arrayFieldNames = new HashMap<Class, Map<Integer, Tuple<String, Integer>>>();
 	private int arrFieldIndex = -1;
-	
+	private ArrayList<CanonizerField> fields = new ArrayList<>();
 
 	
-	// For each class index stores a list of the objects corresponding to the class.
-	// The position of the object in the list corresponds to the object's index in the canonization
-	public static ArrayList<LinkedList<Object>> store = new ArrayList<>();
 	
-	public static void clearStore() {
-		for (LinkedList l: store) {
-			l.clear();
-		}
-	}
 
-	public static Integer getObjectIndex(Integer classIndex, Object o) {
-		List<Object> l = store.get(classIndex);
-		
-		if (l == null) return -1;
-		
-		int ind = 0;
-		for (Object obj: l) {
-			if (o == obj) 
-				return ind;			
-
-			ind++;
-		}
-		
-		return -1; 
-	}
-	
-	// Returns a tuple (old index, new index)
-	// if old index == new index then o was stored in a previous call
-	// old index is -1 if the object wasn't stored previously
-	public static Tuple<Integer, Integer> assignIndexToObject(Integer clsIndex, Object o) {
-		List<Object> l = store.get(clsIndex);
-
-		int ind = 0;
-		for (Object obj: l) {
-			if (o == obj)
-				break;
-
-			ind++;
-		}
-		
-		if (ind == l.size()) {
-			lastIndex.set(clsIndex, lastIndex.get(clsIndex) + 1);
-			l.add(o);
-			return new Tuple<Integer, Integer>(-1, lastIndex.get(clsIndex));
-		}
-		
-		return new Tuple<Integer, Integer>(ind, ind);
-	}
-	
-	
-	
-	// For each class name stores the last index assigned to an object of the class
-	public static ArrayList<Integer> lastIndex;
-	
-	public static void resetLastIndexes() {
-		for (int i = 0; i < lastIndex.size(); i++)
-			lastIndex.set(i, -1);
-	}
-
-	public static void clearStoreAndIndexes()	{
-		clearStore();
-		resetLastIndexes();
-	}
 	
 	
 	public Tuple<String, Integer> getArrayFieldCanonicalNameAndIndex(CanonizerClass arrType, Integer pos) {
@@ -248,16 +188,11 @@ public class CanonicalRepresentationEfficient {
 		cc = new CanonizerClass(c, name, classNames.size(), isClassPrimitive(c));
 		classNames.put(c, cc);
 
-		store.add(new LinkedList<Object>());
-		assert store.size() == classNames.size();
+		store.addNewClass();
 		
-		lastIndex.add(-1);
-		assert lastIndex.size() == classNames.size();
-		
-		// have the option of loading fields later if the user wants
+		// have the option of loading fields later if the caller wants
 		if (canonizeFlds) 
 			canonizeFields(cc);
-			
 
 		if (FieldBasedGenLog.isLoggingOn()) 
 			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored class " + cc.name + " with index " + cc.index);
@@ -297,7 +232,8 @@ public class CanonicalRepresentationEfficient {
 					}
 				}
 			
-				CanonizerField cf = new CanonizerField(f, cc); 
+				CanonizerField cf = new CanonizerField(f, cc, fields.size()); 
+				fields.add(cf);
 				cc.addField(cf);
 				
 				if (FieldBasedGenLog.isLoggingOn()) 

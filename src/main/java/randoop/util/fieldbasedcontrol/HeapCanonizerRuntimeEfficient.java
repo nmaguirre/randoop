@@ -25,7 +25,8 @@ import java.util.TreeSet;
  * Date: December 2016.
  */
 
-public abstract class HeapCanonizerRuntimeEfficient {
+// TODO: Change its name to heap traversal
+public class HeapCanonizerRuntimeEfficient {
 	
 	protected FieldExtensions extensions;
 	
@@ -33,15 +34,19 @@ public abstract class HeapCanonizerRuntimeEfficient {
 
 	protected boolean ignorePrimitive;
 	
-	/*
-	public HeapCanonizer(FieldExtensions extensions) {
-		//this(extensions, false);
-		this(extensions, true);
-	}
-	*/
+	private CanonicalRepresentationEfficient canonicalRep;
+	
 	public HeapCanonizerRuntimeEfficient(FieldExtensions extensions, boolean ignorePrimitive) {
+		this(extensions, ignorePrimitive, null);
+	}
+
+	public HeapCanonizerRuntimeEfficient(FieldExtensions extensions, boolean ignorePrimitive,
+			Set<String> fieldBasedGenClassnames) {
 		this.extensions = extensions;
 		this.ignorePrimitive = ignorePrimitive;
+		canonicalRep = CanonicalRepresentationEfficient.getInstance();
+		if (fieldBasedGenClassnames != null)
+			canonicalRep.setFieldBasedGenByClasses(fieldBasedGenClassnames);
 	}
 	
 
@@ -91,9 +96,10 @@ public abstract class HeapCanonizerRuntimeEfficient {
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public boolean canonizeAndEnlargeExtensions(Object root) {
+	public boolean traverseAndCanonizeBreadthFirst(Object root) {
+		if (root == null) return false;
 		
-		CanonicalRepresentation.clearStoreAndIndexes();
+		canonicalRep.clearStoreAndIndexes();
 		extendedExtensions = false;
 
   		LinkedList<Object> toVisit = new LinkedList<Object>();
