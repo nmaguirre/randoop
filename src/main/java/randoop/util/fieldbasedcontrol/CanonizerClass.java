@@ -9,9 +9,9 @@ public class CanonizerClass {
 	public String name;
 	public Integer index;
 	public boolean primitive;
-	public Boolean fieldBasedClasses = null;
-	public Boolean fieldBasedClassesAncestors = null; 
-	public Boolean ignoredClass = null;
+	// ignored means no objects of the class will be saved during heap canonization
+	// primitive values' classes are always ignored 
+	public boolean ignored;
 	public List<CanonizerField> classFields;
 
 	public CanonizerClass(Class cls, String name, Integer index, boolean primitive) {

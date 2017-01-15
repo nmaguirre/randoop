@@ -34,7 +34,7 @@ public class HeapCanonizerRuntimeEfficient {
 
 	protected boolean ignorePrimitive;
 	
-	private CanonicalRepresentationEfficient canonicalRep;
+	private CanonicalRepresentationEfficient store;
 	
 	public HeapCanonizerRuntimeEfficient(FieldExtensions extensions, boolean ignorePrimitive) {
 		this(extensions, ignorePrimitive, null);
@@ -44,9 +44,9 @@ public class HeapCanonizerRuntimeEfficient {
 			Set<String> fieldBasedGenClassnames) {
 		this.extensions = extensions;
 		this.ignorePrimitive = ignorePrimitive;
-		canonicalRep = CanonicalRepresentationEfficient.getInstance();
+		store = CanonicalRepresentationEfficient.getInstance();
 		if (fieldBasedGenClassnames != null)
-			canonicalRep.setFieldBasedGenByClasses(fieldBasedGenClassnames);
+			store.setFieldBasedGenByClasses(fieldBasedGenClassnames);
 	}
 	
 
@@ -96,21 +96,39 @@ public class HeapCanonizerRuntimeEfficient {
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public boolean traverseAndCanonizeBreadthFirst(Object root) {
-		if (root == null) return false;
-		
-		canonicalRep.clearStoreAndIndexes();
-		extendedExtensions = false;
+	public boolean traverseBreadthFirstAndEnlargeExtensions(Object root) {
 
-  		LinkedList<Object> toVisit = new LinkedList<Object>();
+		store.clear();
+		extendedExtensions = false;
+		
+  		LinkedList<CanonizerObject> toVisit = new LinkedList<CanonizerObject>();
+  	
+  		CanonizerObject croot = store.addObject(root);
+  		if (croot == null) return false;
+  		
+  		
   		toVisit.addLast(root);
-  		assignIndexToObject(root);
   		while (!toVisit.isEmpty()) {
+  			
   			Object obj = toVisit.removeFirst();
+  			
+  			// save obj in store
+  			// if it was not visited (saved) before then
+  				// for all tgt = obj.f for some field f
+  					// put tgt in toVisit queue
+  					// enlarge extensions with obj and tgt
+  				
+  			
+  			
+  			
+  			
+  			
+  			
+  			// CanonizerObject co = canonicalRep.canonizeObject(obj);
+  			
   			Class objClass = obj.getClass();
 
   			if (obj == null ||
-  					obj.getClass() == Object.class ||	
   					CanonicalRepresentation.classIndexPrimitive.get(index) ||
   					CanonicalRepresentation.isIgnoredClass(
   				continue;
