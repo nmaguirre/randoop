@@ -2,7 +2,6 @@ package randoop.util.fieldbasedcontrol;
 
 import java.lang.reflect.Field;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,9 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 // TODO: Change name to CanonicalHeapStore
-public class CanonicalRepresentationEfficient {
+public class CanonicalHeapStore {
 	
-	static CanonicalRepresentationEfficient instance;
+	static CanonicalHeapStore instance;
 	
 	private static boolean fieldBasedGenByClasses = false;
 	List<String> ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
@@ -22,14 +21,14 @@ public class CanonicalRepresentationEfficient {
 	private static Set<Integer> fieldBasedGenClasses;
 	private static Set<Integer> fieldBasedGenClassesAndParents;
 
-	public static CanonicalRepresentationEfficient getInstance() {
+	public static CanonicalHeapStore getInstance() {
 		if (instance == null)
-			instance = new CanonicalRepresentationEfficient();
+			instance = new CanonicalHeapStore();
 		
 		return instance;
 	}
 	
-	private CanonicalRepresentationEfficient() {}
+	private CanonicalHeapStore() {}
 
 	private boolean isIgnoredFieldType(CanonizerClass cc) {
 		if (fieldBasedGenByClasses) 
@@ -149,31 +148,36 @@ public class CanonicalRepresentationEfficient {
 	
 	private Map<Class, CanonizerClass> classNames = new HashMap<Class, CanonizerClass>();
 	private ArrayList<CanonizerClass> indexToClass = new ArrayList<CanonizerClass>();
-	private Map<Class, Map<Integer, Tuple<String, Integer>>> arrayFieldNames = new HashMap<Class, Map<Integer, Tuple<String, Integer>>>();
-	private int arrFieldIndex = -1;
+	// private Map<Class, Map<Integer, CanonizerArrayField>> arrayFieldNames = new HashMap<Class, Map<Integer, CanonizerArrayField>>();
+	// private int arrFieldIndex = -1;
 	private ArrayList<CanonizerField> fields = new ArrayList<>();
 	// For each class index stores a list of the objects corresponding to the class.
 	// The position of the object in the list corresponds to the object's index in the canonization
 	private ArrayList<LinkedList<CanonizerObject>> store = new ArrayList<>();
 	
 	
-	public Tuple<String, Integer> getArrayFieldCanonicalNameAndIndex(CanonizerClass arrType, Integer pos) {
+	public String canonizeArrayField(CanonizerClass arrType, Integer pos) {
+		return arrType.name + ".elem" + pos;
+		/*
 		Class c = arrType.cls;
-		Map<Integer, Tuple<String, Integer>> m1 = arrayFieldNames.get(c);
+		Map<Integer, CanonizerArrayField> m1 = arrayFieldNames.get(c);
 		if (m1 == null) {
-			m1 = new HashMap<Integer, Tuple<String, Integer>>();
+			m1 = new HashMap<Integer, CanonizerArrayField>();
 			arrayFieldNames.put(c, m1);
 		}
 	
-		Tuple<String, Integer> t = m1.get(pos);
+		CanonizerArrayField t = m1.get(pos);
 		if (t != null) return t;
 		
 		String name = arrType.name + ".elem" + pos;
-		t = new Tuple<String, Integer>(name, ++arrFieldIndex);
+		t = new CanonizerArrayField(c, pos, name, ++arrFieldIndex);
 		m1.put(pos, t);
+		
 		if (FieldBasedGenLog.isLoggingOn()) 
 			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored array field " + name + " with index " + arrFieldIndex);
+
 		return t;
+		*/
 	}
 	
 	
@@ -282,11 +286,11 @@ public class CanonicalRepresentationEfficient {
   	}
   	
   
-	public static String getNullRepresentation() {
+	public String getNullRepresentation() {
 		return "null";
 	}
 
-	public static String getDummyObjectRepresentation() {
+	public String getDummyObjectRepresentation() {
 		return "_DUMMY_";
 	}
 	

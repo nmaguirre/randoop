@@ -1,18 +1,8 @@
 package randoop.util.fieldbasedcontrol;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 
 /* 
@@ -34,7 +24,7 @@ public class HeapCanonizerRuntimeEfficient {
 
 	protected boolean ignorePrimitive;
 	
-	private CanonicalRepresentationEfficient store;
+	private CanonicalHeapStore store;
 	
 	public HeapCanonizerRuntimeEfficient(FieldExtensions extensions, boolean ignorePrimitive) {
 		this(extensions, ignorePrimitive, null);
@@ -44,7 +34,7 @@ public class HeapCanonizerRuntimeEfficient {
 			Set<String> fieldBasedGenClassnames) {
 		this.extensions = extensions;
 		this.ignorePrimitive = ignorePrimitive;
-		store = CanonicalRepresentationEfficient.getInstance();
+		store = CanonicalHeapStore.getInstance();
 		if (fieldBasedGenClassnames != null)
 			store.setFieldBasedGenByClasses(fieldBasedGenClassnames);
 	}
@@ -57,39 +47,33 @@ public class HeapCanonizerRuntimeEfficient {
 	
 	// Returns a pair (b1, b2) where b1 iff the extensions were enlarged by this call, and
 	// b2 iff tgt is an object visited for the first time in this call
-	protected Tuple<Boolean, Boolean> addToExtensions(Object src, Object tgt, Tuple<String, Integer> ftuple) {
-		String srccls = CanonicalRepresentation.getClassCanonicalName(src.getClass());
-		Integer srcInd = getObjectIndex(src);
-		String srcString = srccls + srcInd;
+	protected boolean addToExtensions(CanonizerObject src, CanonizerObject tgt, CanonizerField fld) {
+		String srccls = src.cc.name;
+		Integer srcInd = src.index;
+		String srcString = srccls + srcInd;	
 		
 		String tgtString;
-		Class tgtClass = (tgt == null) ? null : tgt.getClass();
-		boolean isTgtNew = false;
 		if (tgt == null)
-			tgtString = CanonicalRepresentation.getNullRepresentation();
-		else if (isIgnoredClass(tgtClass) || (fieldBasedGenByClasses && !belongsToFieldBasedClasses(tgtClass)))
-			//tgtString = CanonicalRepresentation.getDummyObjectRepresentation();
-			return new Tuple<Boolean, Boolean>(false, false);
-		else if (CanonicalRepresentation.isClassPrimitive(tgtClass)) {
+			tgtString = store.getNullRepresentation();
+		else if (tgt.primitive()) {
 			if (ignorePrimitive) 
-				tgtString = CanonicalRepresentation.getDummyObjectRepresentation();
+				tgtString = store.getDummyObjectRepresentation();
 			else {
-				tgtString = tgt.toString();
+				tgtString = tgt.obj.toString();
 				// trim string values to length maxStringSize
-				if (tgtClass == String.class && tgtString.length() > CanonicalRepresentation.MAX_STRING_SIZE)
+				if (tgt.cc.cls == String.class && tgtString.length() > CanonicalRepresentation.MAX_STRING_SIZE)
 					tgtString = tgtString.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
 			}
 		}
+		else if (tgt.ignored())		
+			//tgtString = CanonicalRepresentation.getDummyObjectRepresentation();
+			return false;
 		else {
-			String tgtcls = CanonicalRepresentation.getClassCanonicalName(tgtClass);
-			Tuple<Integer, Integer> indt = assignIndexToObject(tgt);
-			isTgtNew = indt.getFirst() == -1;
-			tgtString = tgtcls + indt.getSecond();
+			String tgtcls =	tgt.cc.name;
+			tgtString = tgtcls + tgt.index; 
 		}
 		
-		return new Tuple<Boolean, Boolean>(
-				extensions.addPairToField(ftuple.getFirst(), srcString, tgtString),
-				isTgtNew);
+		return extensions.addPairToField(fld.name, srcString, tgtString);
 	}
 
 	
@@ -97,91 +81,58 @@ public class HeapCanonizerRuntimeEfficient {
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
 	public boolean traverseBreadthFirstAndEnlargeExtensions(Object root) {
-
 		store.clear();
 		extendedExtensions = false;
-		
-  		LinkedList<CanonizerObject> toVisit = new LinkedList<CanonizerObject>();
   	
   		CanonizerObject croot = store.addObject(root);
-  		if (croot == null) return false;
-  		
-  		
-  		toVisit.addLast(root);
+		if (croot == null || croot.ignored()) 
+			return false;
+
+  		LinkedList<CanonizerObject> toVisit = new LinkedList<>();
+  		toVisit.addLast(croot);
+
   		while (!toVisit.isEmpty()) {
-  			
-  			Object obj = toVisit.removeFirst();
-  			
-  			// save obj in store
-  			// if it was not visited (saved) before then
-  				// for all tgt = obj.f for some field f
-  					// put tgt in toVisit queue
-  					// enlarge extensions with obj and tgt
-  				
-  			
-  			
-  			
-  			
-  			
-  			
-  			// CanonizerObject co = canonicalRep.canonizeObject(obj);
-  			
-  			Class objClass = obj.getClass();
+  			// New obj is already in store, use its fields to enlarge extensions
+  			CanonizerObject cobj = toVisit.pop();
 
-  			if (obj == null ||
-  					CanonicalRepresentation.classIndexPrimitive.get(index) ||
-  					CanonicalRepresentation.isIgnoredClass(
-  				continue;
-  			
-
-  			if (objClass.isArray()) {
+  			if (cobj.isArray()) {
 				// Process an array object. Add a dummy field for each of its elements
-				int length = Array.getLength(obj);
+				int length = Array.getLength(cobj.obj);
 				for (int i = 0; i < length; i++) {
-					Object target = Array.get(obj, i);
 					
-					Tuple<String, Integer> ftuple = CanonicalRepresentation.getArrayFieldCanonicalNameAndIndex(objClass, i);
-					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, ftuple);
-					
-					extendedExtensions |= addRes.getFirst();
+					Object target = Array.get(cobj.obj, i);
+					CanonizerObject newcobj = store.addObject(target);
+					if (newcobj != null && !newcobj.ignored())
+						toVisit.add(newcobj);
 
-					if (addRes.getSecond())
-						// target is an object of a non ignored class that was encountered for the first time.
-						// Enqueue it for its fields to be inspected in a following iteration.
-						toVisit.addLast(target);
+					CanonizerField arrayDummy = new CanonizerField(store.canonizeArrayField(cobj.cc, i));
+					if (addToExtensions(cobj, newcobj, arrayDummy))
+						extendedExtensions = true; 
 				}
 			}
 			else {
-				// Process a non array, non primitive object.
-				// Use its field values to enlarge the extensions
-				// FIXME: Go back to the unsorted version for better performance
-				for (Field fld: getAllClassFieldsSortedByName(objClass)) {
-				//for (Field fld: getAllClassFields(objClass)) {
-					fld.setAccessible(true);
+				for (CanonizerField cf: cobj.fields()) {
+					// Did this in field creation
+					// cf.fld.setAccessible(true);
 					Object target;
 					try {
-						target = fld.get(obj);
+						target = cf.fld.get(cobj.obj);
 					} catch (Exception e) {
-						//e.printStackTrace();
-						System.out.println("FAILURE in field: " + fld.toString());
+						e.printStackTrace();
+						System.out.println("FAILURE in field: " + cf.fld.toString());
 						// Cannot happen
 						throw new RuntimeException("ERROR: Illegal access to an object field during canonization");
 					}
 
-					Tuple<String, Integer> ftuple = CanonicalRepresentation.getFieldCanonicalNameAndIndex(fld);
-					Tuple<Boolean, Boolean> addRes = addToExtensions(obj, target, ftuple);
-					
-					extendedExtensions |= addRes.getFirst();
-					
-					if (addRes.getSecond())
-						// target is an object of a non ignored class that was encountered for the first time.
-						// Enqueue it for its fields to be inspected in a following iteration.
-						toVisit.addLast(target);
-					// System.out.println(CanonicalRepresentation.getFieldCanonicalName(fld));
+					CanonizerObject newcobj = store.addObject(target);
+					if (newcobj != null && !newcobj.ignored())
+						toVisit.add(newcobj);
+
+					if (addToExtensions(cobj, newcobj, cf))
+						extendedExtensions = true; 
 				}
 			}
 		}
-
   		return extendedExtensions;
 	}
 	

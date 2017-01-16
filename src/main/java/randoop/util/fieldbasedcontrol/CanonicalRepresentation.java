@@ -192,7 +192,7 @@ public class CanonicalRepresentation {
 	
 	
 	// For each class name stores the last index assigned to an object of the class
-	public static ArrayList<Integer> lastIndex;
+	public static ArrayList<Integer> lastIndex = new ArrayList<>();
 	
 	public static void resetLastIndexes() {
 		for (int i = 0; i < lastIndex.size(); i++)

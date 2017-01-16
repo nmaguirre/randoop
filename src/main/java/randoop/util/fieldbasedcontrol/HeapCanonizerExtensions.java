@@ -24,15 +24,15 @@ import java.util.TreeSet;
  * Date: December 2016.
  */
 
-public abstract class HeapCanonizerObjectIndexes extends HeapCanonizer {
+public abstract class HeapCanonizerExtensions extends HeapCanonizer {
 	
 
-	public HeapCanonizerObjectIndexes(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizerExtensions(FieldExtensions extensions, boolean ignorePrimitive) {
 		super(extensions, ignorePrimitive);
 	}
 	
 	
-	public HeapCanonizerObjectIndexes(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizerExtensions(FieldExtensions extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		super(extensions, ignorePrimitive, fieldBasedGenClassnames);
 	}
