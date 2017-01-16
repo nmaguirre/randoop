@@ -3,25 +3,13 @@ package randoop.util.fieldbasedcontrol;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.text.AttributedCharacterIterator;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Vector;
-
-import org.jgrapht.graph.DirectedPseudograph;
-
 import org.junit.Test;
-
 import randoop.util.fieldbasedcontrol.HeapDump;
-import randoop.util.fieldbasedcontrol.HeapVertex;
-import randoop.util.fieldbasedcontrol.LabeledEdge;
 
 
 public class DataStructuresDiferentialTests {
@@ -34,13 +22,11 @@ public class DataStructuresDiferentialTests {
 	l.add(214);
 	l.add("hola");
 	l.add("chau");
-	
+
 	FieldExtensions fe = new FieldExtensions();	
     HeapDump objectDump = new HeapDump(l, fe);
     objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/llistgraph.dot");
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensions.txt");
-    
-    //FieldExtensions fe2 = new FieldExtensions();
     
     Set<String> fbclasses = new LinkedHashSet<>();
     fbclasses.add("java.util.LinkedList");
@@ -64,7 +50,13 @@ public class DataStructuresDiferentialTests {
     canonizer2.canonizeAndEnlargeExtensions(l);
     fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensions2.txt");
     
+    FieldExtensions fe3 = new FieldExtensions();
+    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+    canonizer3.traverseBreadthFirstAndEnlargeExtensions(l);
+    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensions3.txt");
+        
     assertTrue(fe1.equals(fe2));
+    assertTrue(fe2.equals(fe3));
   }
   
   
@@ -84,11 +76,17 @@ public class DataStructuresDiferentialTests {
     objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistextensions.txt");
     
     FieldExtensions fe2 = new FieldExtensions();
-    HeapCanonizer canonizer = new HeapCanonizerMapStore(fe2, true);
+    HeapCanonizer canonizer = new HeapCanonizerMapStore(fe2, false);
     canonizer.canonizeAndEnlargeExtensions(l);
-    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistextensionsnew.txt");
+    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistextensions2.txt");
     
-    assertTrue(fe1.equals(fe2));
+    FieldExtensions fe3 = new FieldExtensions();
+    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+    canonizer3.traverseBreadthFirstAndEnlargeExtensions(l);
+    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistextensions3.txt");
+        
+    //assertTrue(fe1.equals(fe2));
+    assertTrue(fe2.equals(fe3));
   }
   
   @Test
@@ -100,24 +98,30 @@ public class DataStructuresDiferentialTests {
 	l.add("d");
 
     FieldExtensions fe1 = new FieldExtensions();	
-    HeapDump objectDump = new HeapDump(l, fe1);
-    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetgraph.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensions.txt");
-    
+//    HeapDump objectDump = new HeapDump(l, fe1);
+//    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetgraph.dot");
+//    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensions.txt");
+//    
     FieldExtensions fe2 = new FieldExtensions();
-    HeapCanonizer canonizer = new HeapCanonizerMapStore(fe2, true);
+    HeapCanonizer canonizer = new HeapCanonizerMapStore(fe2, false);
     canonizer.canonizeAndEnlargeExtensions(l);
-    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensionsnew.txt");
+    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensions2.txt");
         
     System.out.println("Extensions1 size: " + fe1.size());
     System.out.println("Extensions2 size: " + fe2.size());
     
+    FieldExtensions fe3 = new FieldExtensions();
+    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+    canonizer3.traverseBreadthFirstAndEnlargeExtensions(l);
+    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/tsetextensions3.txt");
+        
     // This reveals a bug with the old implementation. 
     // The problem is that jgrapht uses equals to decide whether to create a new node for an   
     // object in the graph, and hence there will be only one node in the graph for 
     // different objects o1 and o2 such that o1.equals(o2) (because of a bug in equals, for example).
     // This is clearly unwanted behaviour. Randoop is not good detecting this kind of behaviour.
-    assertFalse(fe1.equals(fe2));
+//    assertFalse(fe1.equals(fe2));
+    assertTrue(fe2.equals(fe3));
   }
 
   

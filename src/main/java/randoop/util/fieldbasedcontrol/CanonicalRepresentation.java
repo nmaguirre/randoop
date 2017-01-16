@@ -220,7 +220,7 @@ public class CanonicalRepresentation {
 		Tuple<String, Integer> t = m1.get(pos);
 		if (t != null) return t;
 		
-		String name = getClassCanonicalName(c) + ".elem" + pos;
+		String name = getClassCanonicalName(c) + pos;
 		t = new Tuple<String, Integer>(name, ++fieldIndex);
 		m1.put(pos, t);
 		if (FieldBasedGenLog.isLoggingOn()) 
@@ -264,7 +264,14 @@ public class CanonicalRepresentation {
 	public static Tuple<String, Integer> getClassCanonicalNameAndIndex(Class c) {
 		Tuple<String, Integer> tuple = classNames.get(c);
 		if (tuple != null) return tuple;
-		
+	
+		/*
+		if (c == null) {
+			System.out.println("WTF");
+		}
+		System.out.println(c.toString());
+		*/
+
 		String name = c.getName();
 		// FIXME: To handle anonymous classes correctly, not sure if this is still needed
 		if (name == null) {
@@ -303,7 +310,6 @@ public class CanonicalRepresentation {
 		String classname = tuple.getFirst();
 		Integer classindex = tuple.getSecond();
 		
-	
 		while (cls != null && 
 				cls != Object.class && 
 				!CanonicalRepresentation.isClassPrimitive(cls) &&
@@ -336,9 +342,12 @@ public class CanonicalRepresentation {
 				FieldBasedGenLog.logLine("> No more fields for: " + classname);
 
 			cls = cls.getSuperclass();
-			tuple = getClassCanonicalNameAndIndex(cls);
-			classname = tuple.getFirst();
-			classindex = tuple.getSecond();	
+			
+			if (cls != null) {
+				tuple = getClassCanonicalNameAndIndex(cls);
+				classname = tuple.getFirst();
+				classindex = tuple.getSecond();	
+			}
 		}
 		
 	}

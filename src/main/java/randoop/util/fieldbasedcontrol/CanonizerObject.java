@@ -7,7 +7,7 @@ public class CanonizerObject {
 	public Object obj;
 	public CanonizerClass cc;
 	public Integer index;
-	public boolean added;
+	public boolean visited;
 
 	public CanonizerObject(Object obj, CanonizerClass cls, Integer index) {
 		this.obj = obj;
@@ -24,7 +24,7 @@ public class CanonizerObject {
 	}
 	
 	public boolean visited() {
-		return added;
+		return visited;
 	}
 	
 	public boolean isArray() {
@@ -32,11 +32,15 @@ public class CanonizerObject {
 	}
 	
 	public List<CanonizerField> fields() {
-		return cc.classFields;  
+		return cc.getAllFields();  
 	}
 
-	public Class getObjClass() {
+	public Class<?> getObjClass() {
 		return cc.cls;
+	}
+
+	public String toString() {
+		return cc.name + "," + index;
 	}
 	
 	

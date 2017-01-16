@@ -146,7 +146,7 @@ public class CanonicalHeapStore {
 
 	public final Integer MAX_STRING_SIZE = 50;
 	
-	private Map<Class, CanonizerClass> classNames = new HashMap<Class, CanonizerClass>();
+	private Map<Class, CanonizerClass> classes = new HashMap<Class, CanonizerClass>();
 	private ArrayList<CanonizerClass> indexToClass = new ArrayList<CanonizerClass>();
 	// private Map<Class, Map<Integer, CanonizerArrayField>> arrayFieldNames = new HashMap<Class, Map<Integer, CanonizerArrayField>>();
 	// private int arrFieldIndex = -1;
@@ -157,7 +157,7 @@ public class CanonicalHeapStore {
 	
 	
 	public String canonizeArrayField(CanonizerClass arrType, Integer pos) {
-		return arrType.name + ".elem" + pos;
+		return arrType.name + pos;
 		/*
 		Class c = arrType.cls;
 		Map<Integer, CanonizerArrayField> m1 = arrayFieldNames.get(c);
@@ -186,7 +186,7 @@ public class CanonicalHeapStore {
 	}
 	
 	public CanonizerClass canonizeClass(Class c, boolean setupFBClsGen) {
-		CanonizerClass cc = classNames.get(c);
+		CanonizerClass cc = classes.get(c);
 		if (cc != null) return cc;
 		
 		String name = c.getName();
@@ -195,14 +195,10 @@ public class CanonicalHeapStore {
 			name = c.getCanonicalName();
 		}
 		
-		cc = new CanonizerClass(c, name, classNames.size(), isClassPrimitive(c));
-		classNames.put(c, cc);
+		cc = new CanonizerClass(c, name, classes.size(), isClassPrimitive(c));
+		classes.put(c, cc);
 		indexToClass.add(cc);
 		store.add(new LinkedList<CanonizerObject>());
-		
-		// have the option of loading fields later if the caller wants
-		if (!setupFBClsGen && !cc.primitive) 
-			canonizeFields(cc);
 		
 		if (cc.primitive) {
 			cc.ignored = true;
@@ -211,6 +207,11 @@ public class CanonicalHeapStore {
 			if (!setupFBClsGen)
 				cc.ignored = isIgnoredClass(cc);
 		}
+		
+		// have the option of loading fields later if the caller wants
+		if (!setupFBClsGen && !cc.ignored) 
+			canonizeFields(cc);
+		
 
 		if (FieldBasedGenLog.isLoggingOn()) 
 			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored class " + cc.name + " with index " + cc.index);
@@ -222,46 +223,40 @@ public class CanonicalHeapStore {
 	// the first time to return them in the same order later.
 	private void canonizeFields(CanonizerClass cc) {
 	
-		while (!cc.primitive && 
-				!isIgnoredFieldType(cc)) {
+		if (FieldBasedGenLog.isLoggingOn()) 
+			FieldBasedGenLog.logLine("> Considering fields for class " + cc.name + ": ");
+					
+		Field [] fieldsArray = cc.cls.getDeclaredFields();
+		for (int i = 0; i < fieldsArray.length; i++) {
+			Field f = fieldsArray[i];
+			
+			Class<?> ftype = f.getType();
+			CanonizerClass ccFieldType = canonizeClass(ftype);
+
+			if (isIgnoredFieldType(ccFieldType)) {
+				if (FieldBasedGenLog.isLoggingOn()) 
+					FieldBasedGenLog.logLine("Ignored field: " + f.getType() + " " + f.getName());
+
+				continue;
+			}
+		
+			CanonizerField cf = new CanonizerField(f, cc, fields.size()); 
+			fields.add(cf);
+			cc.addField(cf);
 			
 			if (FieldBasedGenLog.isLoggingOn()) 
-				FieldBasedGenLog.logLine("> Considering fields for class " + cc.name + ": ");
-						
-			Field [] fieldsArray = cc.cls.getDeclaredFields();
-			for (int i = 0; i < fieldsArray.length; i++) {
-				Field f = fieldsArray[i];
-				
-				Class<?> ftype = f.getType();
-				CanonizerClass ccFieldType = canonizeClass(ftype);
-				if (ccFieldType.primitive) continue;
-
-				if (isIgnoredFieldType(ccFieldType)) {
-					if (FieldBasedGenLog.isLoggingOn()) 
-						FieldBasedGenLog.logLine("Ignored field: " + f.getType() + " " + f.getName());
-
-					continue;
-				}
-			
-				CanonizerField cf = new CanonizerField(f, cc, fields.size()); 
-				fields.add(cf);
-				cc.addField(cf);
-				
-				if (FieldBasedGenLog.isLoggingOn()) 
-					FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored field " + cf.name + " with index " + cf.index + 
-							", belonging to class " + cf.fromClass.name + " with index " + cf.fromClass.index + ". ");
-
-			}
-				
-			if (FieldBasedGenLog.isLoggingOn())
-				FieldBasedGenLog.logLine("> No more fields for: " + cc.name);
-
-			if (cc.cls.getSuperclass() == null) return;
-		
-			cc = canonizeClass(cc.cls.getSuperclass());
-			
+				FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored field " + cf.name + " with index " + cf.index + 
+						", belonging to class " + cf.fromClass.name + " with index " + cf.fromClass.index + ". ");
 		}
-		
+			
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("> No more fields for: " + cc.name);
+
+		if (cc.cls.getSuperclass() != null) {
+			CanonizerClass anc = canonizeClass(cc.cls.getSuperclass()); 
+			if (!anc.ignored)
+				cc.ancestor = anc;
+		}
 	}
 	
 	
@@ -314,7 +309,7 @@ public class CanonicalHeapStore {
 		int ind = 0;
 		for (CanonizerObject co: l) {
 			if (co.obj == obj) {
-				co.added = false;
+				co.visited = true;
 				return co;
 			}
 			ind++;
@@ -322,7 +317,7 @@ public class CanonicalHeapStore {
 		
 		CanonizerObject res = new CanonizerObject(obj, cc, l.size());
 		l.add(res);
-		res.added = true;
+		res.visited = false;
 		return res;
 	}
 

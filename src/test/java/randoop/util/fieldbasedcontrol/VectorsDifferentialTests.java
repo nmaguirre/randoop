@@ -18,7 +18,7 @@ public class VectorsDifferentialTests {
 	
 		FieldExtensions fe = new FieldExtensions();
 	    HeapDump objectDump = new HeapDump(v, fe);
-	    //objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vector.dot");
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vector.dot");
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext.txt");
 	
 	    FieldExtensions fe1 = new FieldExtensions();
@@ -31,7 +31,13 @@ public class VectorsDifferentialTests {
 	    canonizer2.canonizeAndEnlargeExtensions(v);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext2.txt");;
 	        
+	    FieldExtensions fe3 = new FieldExtensions();
+	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(v);
+	    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext3.txt");
+	        
 	    assertTrue(fe1.equals(fe2));
+	    assertTrue(fe2.equals(fe3));
   	}    
 
     @Test
@@ -51,7 +57,7 @@ public class VectorsDifferentialTests {
     
 		FieldExtensions fe = new FieldExtensions();
 	    HeapDump objectDump = new HeapDump(va, fe);
-	    //objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarr.dot");
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarr.dot");
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext.txt");   
 	
 	    FieldExtensions fe1 = new FieldExtensions();
@@ -64,7 +70,13 @@ public class VectorsDifferentialTests {
 	    canonizer2.canonizeAndEnlargeExtensions(va);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext2.txt");
 	    
+	    FieldExtensions fe3 = new FieldExtensions();
+	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(va);
+	    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext3.txt");
+	        
 	    assertTrue(fe1.equals(fe2));
+	    assertTrue(fe2.equals(fe3));
    
     }
 	

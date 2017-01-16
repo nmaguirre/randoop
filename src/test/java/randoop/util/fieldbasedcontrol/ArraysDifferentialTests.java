@@ -13,11 +13,10 @@ public class ArraysDifferentialTests {
 		  
 		String [] l = { "abc", "a", "abc" };
 		
-/*		FieldExtensions fe = new FieldExtensions();
+		FieldExtensions fe = new FieldExtensions();
 	    HeapDump objectDump = new HeapDump(l, fe);
-	    //objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/strarr.dot");
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/strarr.dot");
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/strarrext.txt");
-	    */
 	
 	    FieldExtensions fe1 = new FieldExtensions();
 	    HeapCanonizer canonizer1 = new HeapCanonizerListStore(fe1, false);
@@ -59,7 +58,13 @@ public class ArraysDifferentialTests {
 	    canonizer.canonizeAndEnlargeExtensions(l);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/intarrext2.txt");
 	        
+	    FieldExtensions fe3 = new FieldExtensions();
+	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(l);
+	    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/intarrext3.txt");
+	        
 	    assertTrue(fe1.equals(fe2));
+	    assertTrue(fe2.equals(fe3));
 	  
 	  }
 	  
@@ -70,7 +75,7 @@ public class ArraysDifferentialTests {
 
 		FieldExtensions fe = new FieldExtensions();
 	    HeapDump objectDump = new HeapDump(l, fe);
-	    //objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarr.dot");
+	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarr.dot");
 	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext.txt");
 
 	    FieldExtensions fe1 = new FieldExtensions();
@@ -82,8 +87,15 @@ public class ArraysDifferentialTests {
 	    HeapCanonizer canonizer2 = new HeapCanonizerMapStore(fe2, false);
 	    canonizer2.canonizeAndEnlargeExtensions(l);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext2.txt");
+	    
+	    FieldExtensions fe3 = new FieldExtensions();
+	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(l);
+	    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext3.txt");
 	        
 	    assertTrue(fe1.equals(fe2));
+	    assertTrue(fe2.equals(fe3));
+
 	  }
 
 }

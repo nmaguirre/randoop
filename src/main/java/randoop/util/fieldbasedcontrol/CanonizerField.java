@@ -25,4 +25,9 @@ public class CanonizerField {
 		isArray = true;
 	}
 	
+	
+	public String toString() {
+		return fld.toString();
+	}
+	
 }

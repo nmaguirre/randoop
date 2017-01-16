@@ -102,7 +102,7 @@ public class HeapCanonizerRuntimeEfficient {
 					
 					Object target = Array.get(cobj.obj, i);
 					CanonizerObject newcobj = store.addObject(target);
-					if (newcobj != null && !newcobj.ignored())
+					if (newcobj != null && !newcobj.ignored() && !newcobj.visited())
 						toVisit.add(newcobj);
 
 					CanonizerField arrayDummy = new CanonizerField(store.canonizeArrayField(cobj.cc, i));
@@ -125,7 +125,7 @@ public class HeapCanonizerRuntimeEfficient {
 					}
 
 					CanonizerObject newcobj = store.addObject(target);
-					if (newcobj != null && !newcobj.ignored())
+					if (newcobj != null && !newcobj.ignored() && !newcobj.visited())
 						toVisit.add(newcobj);
 
 					if (addToExtensions(cobj, newcobj, cf))

@@ -29,6 +29,7 @@ public class HeapVertexNameProvider<V> extends StringNameProvider<V> {
 			name = name.replace(".", "_");
 			name = name.replace("[", "");
 			name = name.replace("]", "");
+			name = name.replace(";", "");
 			return "ARR_" + name;		
 		}
 		/*else if (v.getObject().getClass() == java.util.Vector.class) {
