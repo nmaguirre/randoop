@@ -38,6 +38,7 @@ import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
+import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -440,7 +441,7 @@ public class ExecutableSequence {
   
   
   
-  public boolean enlargeExtensionsFast(HeapCanonizer canonizer, ForwardGenerator generator) throws CanonizationErrorException {
+  public boolean enlargeExtensionsFast(HeapCanonizerRuntimeEfficient canonizer, ForwardGenerator generator) throws CanonizationErrorException {
 	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
 	// for attempting to enlarge field extensions
 	int lastStmtIndex = this.sequence.size()-1;
@@ -472,7 +473,7 @@ public class ExecutableSequence {
 
   
   
-  private boolean enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizer canonizer) throws CanonizationErrorException {
+  private boolean enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 	  boolean extendedExtensions = false;	
 	  
 	  try {
@@ -482,7 +483,7 @@ public class ExecutableSequence {
 			  Object obj = statementResult;
 			  
 			  if (obj != null && !CanonicalRepresentation.isObjectPrimitive(obj)) {
-			  	  if (canonizer.canonizeAndEnlargeExtensions(obj)) {
+			  	  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj)) {
 		           	  if (FieldBasedGenLog.isLoggingOn()) {
 	        	    		FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 	        	    				+ stmt.toString() + " (index " + i + ")");
@@ -499,7 +500,7 @@ public class ExecutableSequence {
 		  if (inputVariables.length > 0) {
 				for (int j=0; j<inputVariables.length; j++) {
 					if (inputVariables[j] != null && !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])) {
-	        	    	if (canonizer.canonizeAndEnlargeExtensions(inputVariables[j])) {
+	        	    	if (canonizer.traverseBreadthFirstAndEnlargeExtensions(inputVariables[j])) {
 	        	    		if (FieldBasedGenLog.isLoggingOn()) {
 	        	    			FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 	        	    					+ stmt.toString() + " (index " + i + ")");
@@ -559,7 +560,7 @@ public class ExecutableSequence {
   }
 
   
-  private boolean enlargeExtensionsPrecise(int i, Object statementResult, Object[] inputVariables, HeapCanonizer canonizer) throws CanonizationErrorException {
+  private boolean enlargeExtensionsPrecise(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 	  boolean extendedExtensions = false;	
 /*	  
 	  int oldSize = canonizer.getExtensions().size();
@@ -687,7 +688,7 @@ public class ExecutableSequence {
   }
 
   
-  public boolean enlargeExtensionsMin(HeapCanonizer canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
+  public boolean enlargeExtensionsMin(HeapCanonizerRuntimeEfficient canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
 
 	enlargesExtensions = false;
 	//	seqnum++;

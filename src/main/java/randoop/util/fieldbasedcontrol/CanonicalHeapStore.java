@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-// TODO: Change name to CanonicalHeapStore
 public class CanonicalHeapStore {
 	
 	static CanonicalHeapStore instance;
@@ -196,6 +195,10 @@ public class CanonicalHeapStore {
 		}
 		
 		cc = new CanonizerClass(c, name, classes.size(), isClassPrimitive(c));
+		
+		if (FieldBasedGenLog.isLoggingOn()) 
+			FieldBasedGenLog.logLine("> Storing class " + cc.name + " with index " + cc.index);
+		
 		classes.put(c, cc);
 		indexToClass.add(cc);
 		store.add(new LinkedList<CanonizerObject>());
@@ -212,9 +215,6 @@ public class CanonicalHeapStore {
 		if (!setupFBClsGen && !cc.ignored) 
 			canonizeFields(cc);
 		
-
-		if (FieldBasedGenLog.isLoggingOn()) 
-			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored class " + cc.name + " with index " + cc.index);
 		return cc;
 	}
 	
@@ -245,7 +245,7 @@ public class CanonicalHeapStore {
 			cc.addField(cf);
 			
 			if (FieldBasedGenLog.isLoggingOn()) 
-				FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored field " + cf.name + " with index " + cf.index + 
+				FieldBasedGenLog.logLine("Stored field " + cf.name + " with index " + cf.index + 
 						", belonging to class " + cf.fromClass.name + " with index " + cf.fromClass.index + ". ");
 		}
 			

@@ -58,7 +58,6 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
-import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -178,7 +177,7 @@ public class GenTests extends GenInputsAbstract {
     				+ "--field-based-gen-keep-non-contributing-tests-percentage, "
     				+ "--field-based-gen-weighted-selection, "
     				+ "--field-based-gen-log, "
-    				+ "--field-based-gen-precise-canonization and "
+    				//+ "--field-based-gen-precise-canonization and "
     				+ "--field-based-gen-classlist to be enabled");
     		System.exit(1);
     	}
@@ -191,7 +190,7 @@ public class GenTests extends GenInputsAbstract {
 		
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
 
-		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-precise-canonization=" + AbstractGenerator.field_based_gen_precise_canonization);
+		//FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-precise-canonization=" + AbstractGenerator.field_based_gen_precise_canonization);
 
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 
@@ -333,7 +332,6 @@ public class GenTests extends GenInputsAbstract {
     		explorer.initCanonizer();
     	else {
     		explorer.initCanonizer(field_based_gen_classnames);
-    		CanonicalRepresentation.setFieldBasedGenClasses(field_based_gen_classnames);
     	}
     }
     

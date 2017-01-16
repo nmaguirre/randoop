@@ -21,6 +21,7 @@ import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensions;
 import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
+import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -76,8 +77,8 @@ public abstract class AbstractGenerator {
   @Option("Keep a percentage of the tests that did not contribute to the field extensions")
   public static float field_based_gen_keep_non_contributing_tests_percentage = 1;
 
-   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
-  public static boolean field_based_gen_precise_canonization = true;
+//   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
+//  public static boolean field_based_gen_precise_canonization = true;
   
   
   @Option("Increase the probabilities of randomly selecting methods that contribute more frequently to the field extensions")
@@ -212,20 +213,14 @@ public abstract class AbstractGenerator {
   }
   
  
-  public HeapCanonizer canonizer;
+  public HeapCanonizerRuntimeEfficient canonizer;
 
   public void initCanonizer() {
-	  if (field_based_gen_precise_canonization)
-		  canonizer = new HeapCanonizerListStore(new FieldExtensions(), field_based_gen_ignore_primitive);  
-	  else 
-		  canonizer = new HeapCanonizerMapStore(new FieldExtensions(), field_based_gen_ignore_primitive);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(new FieldExtensions(), field_based_gen_ignore_primitive);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  if (field_based_gen_precise_canonization)
-		  canonizer = new HeapCanonizerListStore(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
-	  else
-		  canonizer = new HeapCanonizerMapStore(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
   }
   
 
