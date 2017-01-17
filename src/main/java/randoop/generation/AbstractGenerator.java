@@ -580,7 +580,8 @@ public abstract class AbstractGenerator {
 
         }
         else {
-        	System.out.println("A ver la secuencia...");
+        	System.out.println("> Sequence with invalid behavior:");
+        	System.out.println(eSeq.sequence.toCodeString());
         }
 
       }
