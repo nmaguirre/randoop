@@ -7,7 +7,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,26 +14,22 @@ import java.util.Set;
 public class FieldExtensionsIndexes {
 	
 	private int size = 0;
-
-	private ArrayList<Map<Integer, Map<Integer, Map<Integer, Set<Object>>>>> extensions = new ArrayList<>();
-	private ArrayList<Map<Integer, Set<Object>>> arrayExtensions = new ArrayList<>();
-
-	private boolean ignorePrimitive;
 	
-	public FieldExtensionsIndexes(boolean ignorePrimitive) {
-		this.ignorePrimitive = ignorePrimitive;
+	private CanonicalHeapStore store;
+	
+	public FieldExtensionsIndexes(CanonicalHeapStore store) {
+		this.store = store;
 	}
 	
+	private ArrayList<Map<Integer, Map<Integer, Map<Integer, Set<Object>>>>> extensions = new ArrayList<>();
+
 	public void addField() {
 		extensions.add(new HashMap<Integer, Map<Integer,Map<Integer,Set<Object>>>>());
 	}
-
-	public void addArrayField() {
-		arrayExtensions.add(new HashMap<Integer, Set<Object>>());
-	}
 	
-	public boolean addPairToField(CanonizerField field, CanonizerClass c1, 
-			CanonizerObject o1, CanonizerClass c2, CanonizerObject o2) {
+	public boolean addPairToField(CanonizerField field, CanonizerObject o1, CanonizerObject o2) {
+		CanonizerClass c1 = o1.cc;
+		CanonizerClass c2 = o2.cc; 
 		
 		boolean extended;
 		Map<Integer, Map<Integer,Map<Integer,Set<Object>>>> m = extensions.get(field.index);	
@@ -57,23 +52,69 @@ public class FieldExtensionsIndexes {
 			m2.put(o1.index, m3);
 		}
 		
-		if (o2 == null)
-			extended = m3.add(-1);
-		else if (o2.primitive())
-			extended = m3.add(o2.toString());
+		if (o2.primitive()) {
+			if (o2.cc.cls == String.class) {
+				String toStore = ((String)o2.obj);
+				if (toStore.length() > CanonicalRepresentation.MAX_STRING_SIZE)
+					toStore = toStore.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
+				extended = m3.add(toStore);
+			} 
+			else 
+				extended = m3.add(o2.obj.toString());
+		}
 		else
 			extended = m3.add(o2.index);
 			
+		if (extended) size++;
+		
 		return extended;
 	}
 	
 	
 	public String toString() {
-		String result = "";
-		for (String fname: extensions.keySet()) 
-			result += extensions.get(fname).toString() + '\n';
-		return result;
+		String res = "";
+		
+		for (int i = 0; i < extensions.size(); i++) {
+
+			res += store.fields.get(i).name + ":{";
+
+			Map<Integer, Map<Integer,Map<Integer,Set<Object>>>> m = extensions.get(i);	
+			for (Integer c1: m.keySet()) {
+				CanonizerClass srccls = store.indexToClass.get(c1);
+				
+				Map<Integer,Map<Integer,Set<Object>>> m1 = m.get(c1);
+				for (Integer c2: m1.keySet()) {
+					CanonizerClass tgtcls = store.indexToClass.get(c2);
+
+					Map<Integer,Set<Object>> m2 = m1.get(c2);
+					for (Integer o1: m2.keySet()) {
+
+						Set<Object> m3 = m2.get(o1);
+						for (Object o2: m3) {
+							res += "(" + srccls.name + o1.toString() + ", ";
+							
+							if (tgtcls.cls == DummyNullClass.class)
+								res += "null";
+							else {
+								if (!tgtcls.primitive) 
+									res += tgtcls.name;
+								res += o2.toString();
+							}
+							res += "), ";
+
+						}
+					}
+				
+				}
+				
+			}
+
+			res += "}\n";
+		}
+
+		return res;
 	}
+	
 	
 	public void toFile(String filename) throws IOException {
 		try (Writer writer = new BufferedWriter(new FileWriter(filename))) {

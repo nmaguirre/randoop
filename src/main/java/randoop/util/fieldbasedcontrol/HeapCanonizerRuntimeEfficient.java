@@ -15,65 +15,81 @@ import java.util.Set;
  * Date: December 2016.
  */
 
-// TODO: Change its name to heap traversal
 public class HeapCanonizerRuntimeEfficient {
 	
-	protected FieldExtensionsStrings extensions;
+	public FieldExtensionsStrings readableExtensions = null;
 	
 	private boolean extendedExtensions;
 
 	protected boolean ignorePrimitive;
 	
-	private CanonicalHeapStore store;
+	public CanonicalHeapStore store;
 	
-	public HeapCanonizerRuntimeEfficient(FieldExtensionsStrings extensions, boolean ignorePrimitive) {
-		this(extensions, ignorePrimitive, null);
+	
+	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive) {
+		this(ignorePrimitive, null);
 	}
 
-	public HeapCanonizerRuntimeEfficient(FieldExtensionsStrings extensions, boolean ignorePrimitive,
+	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
-		this.extensions = extensions;
 		this.ignorePrimitive = ignorePrimitive;
-		store = CanonicalHeapStore.getInstance();
+		this.store = new CanonicalHeapStore();
 		if (fieldBasedGenClassnames != null)
 			store.setFieldBasedGenByClasses(fieldBasedGenClassnames);
 	}
 	
 
-	public FieldExtensionsStrings getExtensions() {
-		return extensions; 
+	public FieldExtensionsIndexes getExtensions() {
+		return store.extensions; 
 	}
 
 	
+	public void activateReadableExtensions() {
+		readableExtensions = new FieldExtensionsStrings();
+	}
+	
+	
+	public FieldExtensionsStrings getReadableExtensions() {
+		return readableExtensions; 
+	}
+	
+	
+    protected boolean addToReadableExtensions(CanonizerObject src, CanonizerObject tgt, CanonizerField fld) {
+    	String srccls = src.cc.name;
+    	Integer srcInd = src.index;
+    	String srcString = srccls + srcInd;     
+
+    	String tgtString = null;
+   		if (tgt.obj == null)
+   			tgtString = store.getNullRepresentation();
+   		else if (tgt.primitive()) {
+			tgtString = tgt.obj.toString();
+				// trim string values to length maxStringSize
+			if (tgt.cc.cls == String.class && tgtString.length() > CanonicalRepresentation.MAX_STRING_SIZE)
+				tgtString = tgtString.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
+    	}
+    	else {
+    		String tgtcls = tgt.cc.name;
+   			tgtString = tgtcls + tgt.index; 
+   		}
+
+    	return readableExtensions.addPairToField(fld.name, srcString, tgtString);
+    }
+	
+	
+    
+    // TODO: This method belongs to the store?
 	// Returns a pair (b1, b2) where b1 iff the extensions were enlarged by this call, and
 	// b2 iff tgt is an object visited for the first time in this call
 	protected boolean addToExtensions(CanonizerObject src, CanonizerObject tgt, CanonizerField fld) {
-		String srccls = src.cc.name;
-		Integer srcInd = src.index;
-		String srcString = srccls + srcInd;	
 		
-		String tgtString;
-		if (tgt == null)
-			tgtString = store.getNullRepresentation();
-		else if (tgt.primitive()) {
-			if (ignorePrimitive) 
-				tgtString = store.getDummyObjectRepresentation();
-			else {
-				tgtString = tgt.obj.toString();
-				// trim string values to length maxStringSize
-				if (tgt.cc.cls == String.class && tgtString.length() > CanonicalRepresentation.MAX_STRING_SIZE)
-					tgtString = tgtString.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
-			}
-		}
-		else if (tgt.ignored())		
-			//tgtString = CanonicalRepresentation.getDummyObjectRepresentation();
+		if (ignorePrimitive && (tgt.primitive() || tgt.isNull()))
 			return false;
-		else {
-			String tgtcls =	tgt.cc.name;
-			tgtString = tgtcls + tgt.index; 
-		}
 		
-		return extensions.addPairToField(fld.name, srcString, tgtString);
+		if (readableExtensions != null) 
+			addToReadableExtensions(src, tgt, fld);
+		
+		return store.extensions.addPairToField(fld, src, tgt);
 	}
 
 	
@@ -85,7 +101,7 @@ public class HeapCanonizerRuntimeEfficient {
 		extendedExtensions = false;
   	
   		CanonizerObject croot = store.addObject(root);
-		if (croot == null || croot.ignored()) 
+		if (croot.ignored() || croot.primitive() || croot.isNull()) 
 			return false;
 
   		LinkedList<CanonizerObject> toVisit = new LinkedList<>();
@@ -102,11 +118,11 @@ public class HeapCanonizerRuntimeEfficient {
 					
 					Object target = Array.get(cobj.obj, i);
 					CanonizerObject newcobj = store.addObject(target);
-					if (newcobj != null && !newcobj.ignored() && !newcobj.visited())
+					if (!newcobj.ignored() && !newcobj.visited() && !newcobj.primitive() && !newcobj.isNull())
 						toVisit.add(newcobj);
 
-					CanonizerField arrayDummy = new CanonizerField(store.canonizeArrayField(cobj.cc, i));
-					if (addToExtensions(cobj, newcobj, arrayDummy))
+					CanonizerField arrayDummy = store.canonizeArrayField(cobj.cc, i);
+					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, arrayDummy))
 						extendedExtensions = true; 
 				}
 			}
@@ -125,10 +141,10 @@ public class HeapCanonizerRuntimeEfficient {
 					}
 
 					CanonizerObject newcobj = store.addObject(target);
-					if (newcobj != null && !newcobj.ignored() && !newcobj.visited())
+					if (!newcobj.ignored() && !newcobj.visited() && !newcobj.primitive() && !newcobj.isNull())
 						toVisit.add(newcobj);
 
-					if (addToExtensions(cobj, newcobj, cf))
+					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, cf))
 						extendedExtensions = true; 
 				}
 			}

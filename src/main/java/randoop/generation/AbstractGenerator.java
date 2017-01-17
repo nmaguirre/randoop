@@ -216,11 +216,11 @@ public abstract class AbstractGenerator {
   public HeapCanonizerRuntimeEfficient canonizer;
 
   public void initCanonizer() {
-	  canonizer = new HeapCanonizerRuntimeEfficient(new FieldExtensionsStrings(), field_based_gen_ignore_primitive);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizerRuntimeEfficient(new FieldExtensionsStrings(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
   }
   
 

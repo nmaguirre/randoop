@@ -31,13 +31,17 @@ public class VectorsDifferentialTests {
 	    canonizer2.canonizeAndEnlargeExtensions(v);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext2.txt");;
 	        
-	    FieldExtensionsStrings fe3 = new FieldExtensionsStrings();
-	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(false);
+	    canonizer3.activateReadableExtensions();
 	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(v);
+	    FieldExtensionsStrings fe3 = canonizer3.getReadableExtensions();
 	    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext3.txt");
+	    FieldExtensionsIndexes fe4 = canonizer3.getExtensions();
+	    fe4.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext4.txt");
 	        
 	    assertTrue(fe1.equals(fe2));
 	    assertTrue(fe2.equals(fe3));
+	    assertTrue(fe3.size() == fe4.size()); 
   	}    
 
     @Test
@@ -70,13 +74,17 @@ public class VectorsDifferentialTests {
 	    canonizer2.canonizeAndEnlargeExtensions(va);
 	    fe2.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext2.txt");
 	    
-	    FieldExtensionsStrings fe3 = new FieldExtensionsStrings();
-	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(fe3, false);
+	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(false);
+	    canonizer3.activateReadableExtensions();
 	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(va);
+	    FieldExtensionsStrings fe3 = canonizer3.getReadableExtensions();
 	    fe3.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext3.txt");
+	    FieldExtensionsIndexes fe4 = canonizer3.getExtensions();
+	    fe4.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext4.txt");
 	        
 	    assertTrue(fe1.equals(fe2));
 	    assertTrue(fe2.equals(fe3));
+	    assertTrue(fe3.size() == fe4.size()); ;
    
     }
 	

@@ -12,7 +12,9 @@ import java.util.List;
 
 public class CanonicalHeapStore {
 	
-	static CanonicalHeapStore instance;
+	//private static CanonicalHeapStore instance;
+	
+	public FieldExtensionsIndexes extensions;
 	
 	private static boolean fieldBasedGenByClasses = false;
 	List<String> ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
@@ -20,14 +22,17 @@ public class CanonicalHeapStore {
 	private static Set<Integer> fieldBasedGenClasses;
 	private static Set<Integer> fieldBasedGenClassesAndParents;
 
-	public static CanonicalHeapStore getInstance() {
+	/*
+	public static CanonicalHeapStore getInstance(FieldExtensionsIndexes extensions) {
 		if (instance == null)
-			instance = new CanonicalHeapStore();
+			instance = new CanonicalHeapStore(extensions);
 		
 		return instance;
-	}
+	}*/
 	
-	private CanonicalHeapStore() {}
+	public CanonicalHeapStore() {
+		this.extensions = new FieldExtensionsIndexes(this);
+	}
 
 	private boolean isIgnoredFieldType(CanonizerClass cc) {
 		if (fieldBasedGenByClasses) 
@@ -145,38 +150,35 @@ public class CanonicalHeapStore {
 
 	public final Integer MAX_STRING_SIZE = 50;
 	
-	private Map<Class, CanonizerClass> classes = new HashMap<Class, CanonizerClass>();
-	private ArrayList<CanonizerClass> indexToClass = new ArrayList<CanonizerClass>();
-	// private Map<Class, Map<Integer, CanonizerArrayField>> arrayFieldNames = new HashMap<Class, Map<Integer, CanonizerArrayField>>();
-	// private int arrFieldIndex = -1;
-	private ArrayList<CanonizerField> fields = new ArrayList<>();
+	public Map<Class, CanonizerClass> classes = new HashMap<Class, CanonizerClass>();
+	public ArrayList<CanonizerClass> indexToClass = new ArrayList<CanonizerClass>();
+	public Map<String, Map<Integer, CanonizerField>> arrayFieldNames = new HashMap<String, Map<Integer, CanonizerField>>();
+	public ArrayList<CanonizerField> fields = new ArrayList<>();
 	// For each class index stores a list of the objects corresponding to the class.
 	// The position of the object in the list corresponds to the object's index in the canonization
 	private ArrayList<LinkedList<CanonizerObject>> store = new ArrayList<>();
 	
 	
-	public String canonizeArrayField(CanonizerClass arrType, Integer pos) {
-		return arrType.name + pos;
-		/*
-		Class c = arrType.cls;
-		Map<Integer, CanonizerArrayField> m1 = arrayFieldNames.get(c);
+	
+	public CanonizerField canonizeArrayField(CanonizerClass arrType, Integer pos) {
+		Map<Integer, CanonizerField> m1 = arrayFieldNames.get(arrType.name);
 		if (m1 == null) {
-			m1 = new HashMap<Integer, CanonizerArrayField>();
-			arrayFieldNames.put(c, m1);
+			m1 = new HashMap<Integer, CanonizerField>();
+			arrayFieldNames.put(arrType.name, m1);
 		}
 	
-		CanonizerArrayField t = m1.get(pos);
-		if (t != null) return t;
+		CanonizerField cf = m1.get(pos);
+		if (cf != null) return cf;
 		
-		String name = arrType.name + ".elem" + pos;
-		t = new CanonizerArrayField(c, pos, name, ++arrFieldIndex);
-		m1.put(pos, t);
+		cf = new CanonizerField(arrType.name + pos, fields.size());
+		m1.put(pos, cf);
+		fields.add(cf);
+		extensions.addField();
 		
 		if (FieldBasedGenLog.isLoggingOn()) 
-			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored array field " + name + " with index " + arrFieldIndex);
+			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored array field " + cf.name + " with index " + cf.index);
 
-		return t;
-		*/
+		return cf;
 	}
 	
 	
@@ -203,16 +205,11 @@ public class CanonicalHeapStore {
 		indexToClass.add(cc);
 		store.add(new LinkedList<CanonizerObject>());
 		
-		if (cc.primitive) {
-			cc.ignored = true;
-		}
-		else {
-			if (!setupFBClsGen)
-				cc.ignored = isIgnoredClass(cc);
-		}
+		if (!setupFBClsGen)
+			cc.ignored = isIgnoredClass(cc);
 		
 		// have the option of loading fields later if the caller wants
-		if (!setupFBClsGen && !cc.ignored) 
+		if (!setupFBClsGen && !cc.ignored && !cc.cls.isArray() && !cc.primitive) 
 			canonizeFields(cc);
 		
 		return cc;
@@ -222,7 +219,7 @@ public class CanonicalHeapStore {
 	// Returns the list with cls' fields. It stores the fields 
 	// the first time to return them in the same order later.
 	private void canonizeFields(CanonizerClass cc) {
-	
+		
 		if (FieldBasedGenLog.isLoggingOn()) 
 			FieldBasedGenLog.logLine("> Considering fields for class " + cc.name + ": ");
 					
@@ -243,6 +240,7 @@ public class CanonicalHeapStore {
 			CanonizerField cf = new CanonizerField(f, cc, fields.size()); 
 			fields.add(cf);
 			cc.addField(cf);
+			extensions.addField();
 			
 			if (FieldBasedGenLog.isLoggingOn()) 
 				FieldBasedGenLog.logLine("Stored field " + cf.name + " with index " + cf.index + 
@@ -254,7 +252,7 @@ public class CanonicalHeapStore {
 
 		if (cc.cls.getSuperclass() != null) {
 			CanonizerClass anc = canonizeClass(cc.cls.getSuperclass()); 
-			if (!anc.ignored)
+			if (!anc.ignored && !anc.primitive)
 				cc.ancestor = anc;
 		}
 	}
@@ -298,12 +296,18 @@ public class CanonicalHeapStore {
 	}
 
 	public CanonizerObject addObject(Object obj) {
-		if (obj == null) return null;
+		Class<?> objcls; 
+		if (obj == null) {
+			objcls = DummyNullClass.class;
+		}			
+		else {
+			objcls = obj.getClass();
+		}
 		
-		Class<?> objcls = obj.getClass();
 		CanonizerClass cc = canonizeClass(objcls);
 
-		if (cc.ignored) return new CanonizerObject(obj, cc, -1);
+		// if the class is ignored we just return a dummy object
+		if (obj == null || cc.ignored || cc.primitive) return new CanonizerObject(obj, cc, -1);
 	
 		List<CanonizerObject> l = store.get(cc.index);
 		int ind = 0;
@@ -318,6 +322,7 @@ public class CanonicalHeapStore {
 		CanonizerObject res = new CanonizerObject(obj, cc, l.size());
 		l.add(res);
 		res.visited = false;
+
 		return res;
 	}
 

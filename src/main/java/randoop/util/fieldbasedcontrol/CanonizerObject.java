@@ -43,5 +43,8 @@ public class CanonizerObject {
 		return cc.name + "," + index;
 	}
 	
+	public boolean isNull() {
+		return obj == null;
+	}
 	
 }
