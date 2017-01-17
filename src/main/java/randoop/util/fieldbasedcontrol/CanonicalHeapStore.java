@@ -16,6 +16,9 @@ public class CanonicalHeapStore {
 	
 	public FieldExtensionsIndexes extensions;
 	
+	// Max number of stored objects for each (non-primitive) individual class
+	private int maxObjects;
+	
 	private static boolean fieldBasedGenByClasses = false;
 	List<String> ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
 			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun."});
@@ -30,7 +33,8 @@ public class CanonicalHeapStore {
 		return instance;
 	}*/
 	
-	public CanonicalHeapStore() {
+	public CanonicalHeapStore(int maxObjects) {
+		this.maxObjects = maxObjects;
 		this.extensions = new FieldExtensionsIndexes(this);
 	}
 
@@ -176,7 +180,7 @@ public class CanonicalHeapStore {
 		extensions.addField();
 		
 		if (FieldBasedGenLog.isLoggingOn()) 
-			FieldBasedGenLog.logLine("> CANONICAL REPRESENTATION: Stored array field " + cf.name + " with index " + cf.index);
+			FieldBasedGenLog.logLine("> Stored array field " + cf.name + " with index " + cf.index);
 
 		return cf;
 	}
@@ -310,15 +314,23 @@ public class CanonicalHeapStore {
 		if (obj == null || cc.ignored || cc.primitive) return new CanonizerObject(obj, cc, -1);
 	
 		List<CanonizerObject> l = store.get(cc.index);
-		int ind = 0;
+		
 		for (CanonizerObject co: l) {
 			if (co.obj == obj) {
 				co.visited = true;
 				return co;
 			}
-			ind++;
 		}
 		
+		if (l.size() > maxObjects) {
+			String message = "> FIELD BASED GENERATION WARNING: Number of objects limit (" + maxObjects + ") exceeded for class " + cc.name;
+			System.out.println(message);
+			if (FieldBasedGenLog.isLoggingOn()) 
+				FieldBasedGenLog.logLine(message);
+			
+			return null;
+		}
+
 		CanonizerObject res = new CanonizerObject(obj, cc, l.size());
 		l.add(res);
 		res.visited = false;

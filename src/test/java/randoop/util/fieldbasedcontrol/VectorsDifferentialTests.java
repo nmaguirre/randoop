@@ -84,7 +84,7 @@ public class VectorsDifferentialTests {
 	        
 	    assertTrue(fe1.equals(fe2));
 	    assertTrue(fe2.equals(fe3));
-	    assertTrue(fe3.size() == fe4.size()); ;
+	    assertTrue(fe3.size() == fe4.size());
    
     }
 	

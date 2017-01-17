@@ -70,13 +70,58 @@ public class FieldExtensionsIndexes {
 		return extended;
 	}
 	
-	
 	public String toString() {
 		String res = "";
-		
+
 		for (int i = 0; i < extensions.size(); i++) {
 
 			res += store.fields.get(i).name + ":{";
+
+			Map<Integer, Map<Integer,Map<Integer,Set<Object>>>> m = extensions.get(i);      
+			for (Integer c1: m.keySet()) {
+				CanonizerClass srccls = store.indexToClass.get(c1);
+
+				Map<Integer,Map<Integer,Set<Object>>> m1 = m.get(c1);
+				for (Integer c2: m1.keySet()) {
+					CanonizerClass tgtcls = store.indexToClass.get(c2);
+
+					Map<Integer,Set<Object>> m2 = m1.get(c2);
+					for (Integer o1: m2.keySet()) {
+
+						Set<Object> m3 = m2.get(o1);
+						for (Object o2: m3) {
+							res += "(" + srccls.name + o1.toString() + ", ";
+
+							if (tgtcls.cls == DummyNullClass.class)
+								res += "null";
+							else {
+								if (!tgtcls.primitive) 
+									res += tgtcls.name;
+								res += o2.toString();
+							}
+							res += "), ";
+
+						}
+					}
+
+				}
+
+			}
+
+			res += "}\n";
+		}
+
+		return res;
+	}
+	
+	
+	public FieldExtensionsStrings toFieldExtensionsStrings() {
+		FieldExtensionsStrings stringsExt = new FieldExtensionsStrings();
+		
+		for (int i = 0; i < extensions.size(); i++) {
+
+			//			res += store.fields.get(i).name + ":{";
+			String field = store.fields.get(i).name;
 
 			Map<Integer, Map<Integer,Map<Integer,Set<Object>>>> m = extensions.get(i);	
 			for (Integer c1: m.keySet()) {
@@ -91,17 +136,17 @@ public class FieldExtensionsIndexes {
 
 						Set<Object> m3 = m2.get(o1);
 						for (Object o2: m3) {
-							res += "(" + srccls.name + o1.toString() + ", ";
-							
+							String src = srccls.name + o1.toString();
+							String tgt = "";
+
 							if (tgtcls.cls == DummyNullClass.class)
-								res += "null";
+								tgt = "null";
 							else {
 								if (!tgtcls.primitive) 
-									res += tgtcls.name;
-								res += o2.toString();
+									tgt = tgtcls.name;
+								tgt += o2.toString();
 							}
-							res += "), ";
-
+							stringsExt.addPairToField(field, src, tgt);
 						}
 					}
 				
@@ -109,10 +154,9 @@ public class FieldExtensionsIndexes {
 				
 			}
 
-			res += "}\n";
 		}
 
-		return res;
+		return stringsExt;
 	}
 	
 	

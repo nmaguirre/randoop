@@ -4,6 +4,8 @@ import java.lang.reflect.Array;
 import java.util.LinkedList;
 import java.util.Set;
 
+import randoop.generation.AbstractGenerator;
+
 
 /* 
  * class HeapCanonizer
@@ -25,20 +27,39 @@ public class HeapCanonizerRuntimeEfficient {
 	
 	public CanonicalHeapStore store;
 	
-	
+	private static final int DEFAULT_MAX_OBJECTS = 100000;
+	private static final int DEFAULT_MAX_ARRAY = 10000;
+	private int maxObjects;
+	private int maxArray;
+		
 	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive) {
-		this(ignorePrimitive, null);
+		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_ARRAY);
 	}
 
 	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
-		this.ignorePrimitive = ignorePrimitive;
-		this.store = new CanonicalHeapStore();
-		if (fieldBasedGenClassnames != null)
-			store.setFieldBasedGenByClasses(fieldBasedGenClassnames);
+		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_ARRAY);
 	}
 	
-
+	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive, int maxObjects, int maxArray) {
+		this(ignorePrimitive, null, maxObjects, maxArray);
+	}
+	
+	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive,
+			Set<String> fieldBasedGenClassnames, int maxObjects, int maxArray) {
+		this.ignorePrimitive = ignorePrimitive;
+		this.store = new CanonicalHeapStore(maxObjects);
+		if (fieldBasedGenClassnames != null)
+			store.setFieldBasedGenByClasses(fieldBasedGenClassnames);
+		
+		if (AbstractGenerator.field_based_gen_differential_runtime_checks)
+			activateReadableExtensions();
+		
+		this.maxObjects = maxObjects;
+		this.maxArray = maxArray;
+	}
+	
+	
 	public FieldExtensionsIndexes getExtensions() {
 		return store.extensions; 
 	}
@@ -86,10 +107,19 @@ public class HeapCanonizerRuntimeEfficient {
 		if (ignorePrimitive && (tgt.primitive() || tgt.isNull()))
 			return false;
 		
-		if (readableExtensions != null) 
-			addToReadableExtensions(src, tgt, fld);
-		
-		return store.extensions.addPairToField(fld, src, tgt);
+		boolean newRes = store.extensions.addPairToField(fld, src, tgt);
+
+		if (readableExtensions != null) {
+			boolean oldRes = addToReadableExtensions(src, tgt, fld); 
+			
+			if (oldRes != newRes) { 
+				System.out.println("ERROR: Differential test failed when adding to the extensions");
+				throw new RuntimeException("ERROR: Differential test failed when adding to the extensions");
+			}
+				
+		}	
+
+		return newRes;
 	}
 
 	
@@ -114,10 +144,20 @@ public class HeapCanonizerRuntimeEfficient {
   			if (cobj.isArray()) {
 				// Process an array object. Add a dummy field for each of its elements
 				int length = Array.getLength(cobj.obj);
+				if (length >= maxArray) {
+					length = maxArray;
+					String message = "> FIELD BASED GENERATION WARNING: Array length limit (" + maxArray + ") exceeded for class " + cobj.cc.name;
+					System.out.println(message);
+					if (FieldBasedGenLog.isLoggingOn()) 
+						FieldBasedGenLog.logLine(message);
+				}
 				for (int i = 0; i < length; i++) {
 					
 					Object target = Array.get(cobj.obj, i);
 					CanonizerObject newcobj = store.addObject(target);
+					// Max number of stored objects for the class exceeded
+					if (newcobj == null) continue;
+
 					if (!newcobj.ignored() && !newcobj.visited() && !newcobj.primitive() && !newcobj.isNull())
 						toVisit.add(newcobj);
 
@@ -141,6 +181,9 @@ public class HeapCanonizerRuntimeEfficient {
 					}
 
 					CanonizerObject newcobj = store.addObject(target);
+					// Max number of stored objects for the class exceeded
+					if (newcobj == null) continue;
+					
 					if (!newcobj.ignored() && !newcobj.visited() && !newcobj.primitive() && !newcobj.isNull())
 						toVisit.add(newcobj);
 
@@ -149,6 +192,15 @@ public class HeapCanonizerRuntimeEfficient {
 				}
 			}
 		}
+  		
+		if (readableExtensions != null) {
+			
+			if (!readableExtensions.equals(store.extensions.toFieldExtensionsStrings())) {
+				System.out.println("ERROR: Differential test failed. Different versions of the extensions differ");
+				throw new RuntimeException("ERROR: Differential test failed. Different versions of the extensions differ");
+			}
+		}	
+  		
   		return extendedExtensions;
 	}
 	

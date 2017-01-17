@@ -69,13 +69,25 @@ public abstract class AbstractGenerator {
   		+ "(they tend to produce better results in testing evaluation metrics)."  
   		+ "Field based generation can also be disabled (value: DISABLED)."
   		+ "")
-  public static FieldBasedGenType field_based_gen = FieldBasedGenType.DISABLED;
+  public static FieldBasedGenType field_based_gen = FieldBasedGenType.FAST;
   
   @Option("Ignore primitive values in the construction of field extensions")
-  public static boolean field_based_gen_ignore_primitive = true;
+  public static boolean field_based_gen_ignore_primitive = false;
   
   @Option("Keep a percentage of the tests that did not contribute to the field extensions")
   public static float field_based_gen_keep_non_contributing_tests_percentage = 1;
+  
+  @Option("Activate regression tests to try to find bugs in the different implementations of the field extensions. "
+  		+ "When active it slowdowns the analysis a lot. Only for debug purposes")
+  public static boolean field_based_gen_differential_runtime_checks = false;
+
+ @Option("Only consider arrays with up to this number of elements for augmenting the extensions")
+  public static int field_based_gen_max_array = 10000;
+
+ @Option("Only store up to this number of objects for each individual class during canonization")
+  public static int field_based_gen_max_objects = 100000;
+
+
 
 //   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
 //  public static boolean field_based_gen_precise_canonization = true;
@@ -216,11 +228,11 @@ public abstract class AbstractGenerator {
   public HeapCanonizerRuntimeEfficient canonizer;
 
   public void initCanonizer() {
-	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, field_based_gen_max_objects, field_based_gen_max_array);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames, field_based_gen_max_objects, field_based_gen_max_array);  
   }
   
 
@@ -258,6 +270,7 @@ public abstract class AbstractGenerator {
    * behavior.
    */
   public static Sequence currSeq = null;
+
 
   /**
    * The list of error test sequences to be output as JUnit tests. May include

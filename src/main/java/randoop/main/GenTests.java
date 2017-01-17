@@ -177,11 +177,28 @@ public class GenTests extends GenInputsAbstract {
     				+ "--field-based-gen-keep-non-contributing-tests-percentage, "
     				+ "--field-based-gen-weighted-selection, "
     				+ "--field-based-gen-log, "
-    				//+ "--field-based-gen-precise-canonization and "
+    				+ "--field-based-gen-max-objects,"
+    				+ "--field-based-gen-max-array and "
     				+ "--field-based-gen-classlist to be enabled");
     		System.exit(1);
     	}
     }
+    
+
+	if (AbstractGenerator.field_based_gen != null) {
+		System.out.println("> Field Based Generation Option: --field-based-gen=" + AbstractGenerator.field_based_gen.toString());
+		System.out.println("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
+		System.out.println("> Field Based Generation Option: --field-based-gen-max-objects=" + AbstractGenerator.field_based_gen_max_objects);
+		System.out.println("> Field Based Generation Option: --field-based-gen-max-array=" + AbstractGenerator.field_based_gen_max_array);
+		System.out.println("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
+		System.out.println("> Field Based Generation Option: --field-based-gen-weighted-selection=" + AbstractGenerator.field_based_gen_weighted_selection);
+		System.out.println("> Field Based Generation Option: --weight-increment=" + AbstractGenerator.weight_increment);
+		System.out.println("> Field Based Generation Option: --weight-decrement=" + AbstractGenerator.weight_decrement);
+		System.out.println("> Field Based Generation Option: --smaller-weight=" + AbstractGenerator.smaller_weight);
+		System.out.println("> Field Based Generation Option: --larger-weight=" + AbstractGenerator.larger_weight);
+		System.out.println("> Field Based Generation Option: --starting-weight=" + AbstractGenerator.starting_weight);
+	}
+    
     
     // PABLO: If logging is on, print information
 	if (FieldBasedGenLog.isLoggingOn()) {
@@ -189,9 +206,10 @@ public class GenTests extends GenInputsAbstract {
 			FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen=" + AbstractGenerator.field_based_gen.toString());
 		
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-objects=" + AbstractGenerator.field_based_gen_max_objects);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-array=" + AbstractGenerator.field_based_gen_max_array);
 
 		//FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-precise-canonization=" + AbstractGenerator.field_based_gen_precise_canonization);
-
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-weighted-selection=" + AbstractGenerator.field_based_gen_weighted_selection);

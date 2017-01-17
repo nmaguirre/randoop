@@ -10,6 +10,30 @@ import org.junit.Test;
 public class JChartNewTests {
 
 	@Test
+	public void arrayTooLarge() throws IOException {
+		FieldExtensionsStrings fe2 = new FieldExtensionsStrings();
+		HeapCanonizer canonizer2 = new HeapCanonizerListStore(fe2, false);	
+		
+		org.jfree.chart.plot.CombinedRangeXYPlot combinedRangeXYPlot0 = new org.jfree.chart.plot.CombinedRangeXYPlot();
+		org.jfree.chart.axis.NumberAxis numberAxis3 = new org.jfree.chart.axis.NumberAxis("hi!");
+		combinedRangeXYPlot0.setRangeAxis((int)(byte)100, (org.jfree.chart.axis.ValueAxis)numberAxis3);
+		java.awt.Paint paint5 = combinedRangeXYPlot0.getDomainGridlinePaint();
+		org.jfree.chart.plot.CombinedRangeXYPlot combinedRangeXYPlot7 = new org.jfree.chart.plot.CombinedRangeXYPlot();
+		org.jfree.chart.axis.AxisLocation axisLocation9 = org.jfree.chart.axis.AxisLocation.TOP_OR_RIGHT;
+		combinedRangeXYPlot7.setDomainAxisLocation(4, axisLocation9);
+		combinedRangeXYPlot0.setRangeAxisLocation(2958465, axisLocation9);
+	
+		
+		canonizer2.canonizeAndEnlargeExtensions(combinedRangeXYPlot0);
+		//canonizer2.canonizeAndEnlargeExtensions(numberAxis12);
+
+		// fe.toFile("/Users/pponzio/prueba-extensiones.txt");
+		System.out.println("Extensions size: " + fe2.size());
+	
+	}
+	
+	
+	@Test
 	public void infiniteLoopHashCode() throws IOException {
 
 		FieldExtensionsStrings fe = new FieldExtensionsStrings();
@@ -48,6 +72,7 @@ public class JChartNewTests {
 		FieldExtensionsStrings fe2 = new FieldExtensionsStrings();
 		HeapCanonizer canonizer1 = new HeapCanonizerMapStore(fe1, false);
 		HeapCanonizer canonizer2 = new HeapCanonizerListStore(fe2, false);
+	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(false);
 		org.jfree.chart.plot.CombinedRangeXYPlot combinedRangeXYPlot0 = new org.jfree.chart.plot.CombinedRangeXYPlot();
 		org.jfree.chart.axis.NumberAxis numberAxis3 = new org.jfree.chart.axis.NumberAxis("hi!");
 		java.awt.Font font4 = org.jfree.chart.JFreeChart.DEFAULT_TITLE_FONT;
@@ -62,12 +87,15 @@ public class JChartNewTests {
 		//canonizer1.canonizeAndEnlargeExtensions(combinedRangeXYPlot0);
 		//canonizer1.canonizeAndEnlargeExtensions(numberAxis12);
 
-		canonizer2.canonizeAndEnlargeExtensions(combinedRangeXYPlot0);
-		canonizer2.canonizeAndEnlargeExtensions(numberAxis12);
+// 		canonizer2.canonizeAndEnlargeExtensions(combinedRangeXYPlot0);
+//		canonizer2.canonizeAndEnlargeExtensions(numberAxis12);
+	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(combinedRangeXYPlot0);
+	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(numberAxis12);
 
 		// fe.toFile("/Users/pponzio/prueba-extensiones.txt");
 		System.out.println("Extensions size: " + fe1.size());
 		System.out.println("Extensions size: " + fe2.size());
+		System.out.println("Extensions size: " + canonizer3.getExtensions().size());
 
 	}
 
