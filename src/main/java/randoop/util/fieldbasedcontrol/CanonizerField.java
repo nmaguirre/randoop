@@ -20,13 +20,17 @@ public class CanonizerField {
 
 	
 	// Hack for simplifying the creating of dummy array fields
-	public CanonizerField(String name) {
+	public CanonizerField(String name, Integer index) {
 		this.name = name;
+		this.index = index;
 		isArray = true;
 	}
 	
 	
 	public String toString() {
+		if (isArray)
+			return name;
+
 		return fld.toString();
 	}
 	

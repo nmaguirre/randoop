@@ -40,7 +40,7 @@ public class HeapDump {
 	private HeapVertex root;
 	private HashMap<String, Integer> lastIndex = new HashMap<String, Integer>();
 	
-	private FieldExtensions fieldExtensions;
+	private FieldExtensionsStrings fieldExtensions;
 	
 	private boolean extensionsExtended = false;
 	
@@ -48,7 +48,7 @@ public class HeapDump {
 			//new HashMap<String, HashMap<Integer, Object>>();
 	
 	
-	public HeapDump(Object o, FieldExtensions fe) {
+	public HeapDump(Object o, FieldExtensionsStrings fe) {
 		this(o, Integer.MAX_VALUE, Integer.MAX_VALUE, null, null, fe);
 	}
 	
@@ -66,11 +66,11 @@ public class HeapDump {
 	}
 
 	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields) {
-		this(o, maxDepth, maxArrayElements, ignoredClasses, ignoredFields, new FieldExtensions());
+		this(o, maxDepth, maxArrayElements, ignoredClasses, ignoredFields, new FieldExtensionsStrings());
 	}
 	
 	
-	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields, FieldExtensions ext) {
+	public HeapDump(Object o, int maxDepth, int maxArrayElements, String[] ignoredClasses, String[] ignoredFields, FieldExtensionsStrings ext) {
 
 		this.maxDepth = maxDepth;
 		this.maxArrayElements = maxArrayElements;
@@ -177,7 +177,7 @@ public class HeapDump {
 	}
 	
 
-	public FieldExtensions getFieldExtensions() {
+	public FieldExtensionsStrings getFieldExtensions() {
 		return fieldExtensions;
 	}
 

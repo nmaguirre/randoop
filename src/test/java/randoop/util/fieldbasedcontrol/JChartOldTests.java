@@ -15,7 +15,7 @@ public class JChartOldTests {
 		  NumberFormat numberFormat0 = NumberFormat.getCurrencyInstance();
 		  AttributedCharacterIterator attributedCharacterIterator2 = numberFormat0.formatToCharacterIterator((java.lang.Object)10.0d);
 		  
-		  FieldExtensions fe1 = new FieldExtensions();
+		  FieldExtensionsStrings fe1 = new FieldExtensionsStrings();
 		  HeapDump objectDump = new HeapDump(attributedCharacterIterator2, fe1);
 		  objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/numberformatext.txt");
 		  objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/numberformat.dot");
@@ -44,7 +44,7 @@ public class JChartOldTests {
 		  String[] ignoredClasses = {};
 		  String [] ignoredFields = {};
 		  
-		  FieldExtensions ext = new FieldExtensions();
+		  FieldExtensionsStrings ext = new FieldExtensionsStrings();
 		  
 		  HeapDump objectDump = new HeapDump(valueAxis0, ext);
 		  objectDump = new HeapDump(combinedRangeXYPlot1, ext);
@@ -63,7 +63,7 @@ public class JChartOldTests {
 	  @Test
 	  public void testPlot2() throws IllegalArgumentException, IllegalAccessException, IOException {
 
-		  FieldExtensions ext = new FieldExtensions();
+		  FieldExtensionsStrings ext = new FieldExtensionsStrings();
 		  org.jfree.chart.axis.ValueAxis valueAxis0 = null;
 		  HeapDump objectDump = new HeapDump(valueAxis0, ext);
 		  
@@ -102,7 +102,7 @@ public class JChartOldTests {
 	  
 	  @Test
 	  public void testChart() {
-		  FieldExtensions ext = new FieldExtensions();
+		  FieldExtensionsStrings ext = new FieldExtensionsStrings();
 
 		  org.jfree.chart.axis.ValueAxis valueAxis0 = null;
 		  HeapDump objectDump = new HeapDump(valueAxis0, ext);

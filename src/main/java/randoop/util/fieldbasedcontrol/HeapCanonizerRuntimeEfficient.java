@@ -18,7 +18,7 @@ import java.util.Set;
 // TODO: Change its name to heap traversal
 public class HeapCanonizerRuntimeEfficient {
 	
-	protected FieldExtensions extensions;
+	protected FieldExtensionsStrings extensions;
 	
 	private boolean extendedExtensions;
 
@@ -26,11 +26,11 @@ public class HeapCanonizerRuntimeEfficient {
 	
 	private CanonicalHeapStore store;
 	
-	public HeapCanonizerRuntimeEfficient(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizerRuntimeEfficient(FieldExtensionsStrings extensions, boolean ignorePrimitive) {
 		this(extensions, ignorePrimitive, null);
 	}
 
-	public HeapCanonizerRuntimeEfficient(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizerRuntimeEfficient(FieldExtensionsStrings extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		this.extensions = extensions;
 		this.ignorePrimitive = ignorePrimitive;
@@ -40,7 +40,7 @@ public class HeapCanonizerRuntimeEfficient {
 	}
 	
 
-	public FieldExtensions getExtensions() {
+	public FieldExtensionsStrings getExtensions() {
 		return extensions; 
 	}
 

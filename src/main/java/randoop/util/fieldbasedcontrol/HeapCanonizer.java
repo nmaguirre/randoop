@@ -30,7 +30,7 @@ public abstract class HeapCanonizer {
 	// For each class name stores the last index assigned to an object of the class
 	protected Map<String, Integer> lastIndex;
 	private Map<String, List<Field>> classFields;
-	protected FieldExtensions extensions;
+	protected FieldExtensionsStrings extensions;
 	private boolean extendedExtensions;
 	protected boolean ignorePrimitive;
 	
@@ -87,7 +87,7 @@ public abstract class HeapCanonizer {
 		this(extensions, true);
 	}
 	*/
-	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizer(FieldExtensionsStrings extensions, boolean ignorePrimitive) {
 		classFields = new HashMap<String, List<Field>>();
 		this.extensions = extensions;
 		this.ignorePrimitive = ignorePrimitive;
@@ -115,7 +115,7 @@ public abstract class HeapCanonizer {
 		fieldBasedGenByClasses = false;
 	}
 	
-	public HeapCanonizer(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizer(FieldExtensionsStrings extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		classFields = new HashMap<String, List<Field>>();
 		this.extensions = extensions;
@@ -181,7 +181,7 @@ public abstract class HeapCanonizer {
 	}
 
 
-	public FieldExtensions getExtensions() {
+	public FieldExtensionsStrings getExtensions() {
 		return extensions; 
 	}
 

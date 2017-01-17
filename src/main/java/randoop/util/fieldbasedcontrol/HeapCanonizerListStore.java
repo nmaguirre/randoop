@@ -23,12 +23,12 @@ public class HeapCanonizerListStore extends HeapCanonizerExtensions {
 	private Map<String, List<Object>> store;
 	
 
-	public HeapCanonizerListStore(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizerListStore(FieldExtensionsStrings extensions, boolean ignorePrimitive) {
 		super(extensions, ignorePrimitive);
 	}
 	
 
-	public HeapCanonizerListStore(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizerListStore(FieldExtensionsStrings extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		super(extensions, ignorePrimitive, fieldBasedGenClassnames);
 	}

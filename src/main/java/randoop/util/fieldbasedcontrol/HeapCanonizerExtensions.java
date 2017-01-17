@@ -27,12 +27,12 @@ import java.util.TreeSet;
 public abstract class HeapCanonizerExtensions extends HeapCanonizer {
 	
 
-	public HeapCanonizerExtensions(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizerExtensions(FieldExtensionsStrings extensions, boolean ignorePrimitive) {
 		super(extensions, ignorePrimitive);
 	}
 	
 	
-	public HeapCanonizerExtensions(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizerExtensions(FieldExtensionsStrings extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		super(extensions, ignorePrimitive, fieldBasedGenClassnames);
 	}

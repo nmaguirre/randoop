@@ -259,7 +259,7 @@ public class ForwardGenerator extends AbstractGenerator {
        				// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
           			FieldBasedGenLog.logLine("> New field extensions: ");
            			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) {
-           				FieldBasedGenLog.logLine("> Extensions size :" + canonizer.getExtensions().size());
+           				FieldBasedGenLog.logLine("> Extensions size: " + canonizer.getExtensions().size());
         				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
            			}
            			else 

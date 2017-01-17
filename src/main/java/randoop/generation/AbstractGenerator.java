@@ -18,7 +18,7 @@ import randoop.util.SimpleList;
 import randoop.util.Timer;
 import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
-import randoop.util.fieldbasedcontrol.FieldExtensions;
+import randoop.util.fieldbasedcontrol.FieldExtensionsStrings;
 import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
@@ -216,11 +216,11 @@ public abstract class AbstractGenerator {
   public HeapCanonizerRuntimeEfficient canonizer;
 
   public void initCanonizer() {
-	  canonizer = new HeapCanonizerRuntimeEfficient(new FieldExtensions(), field_based_gen_ignore_primitive);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(new FieldExtensionsStrings(), field_based_gen_ignore_primitive);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizerRuntimeEfficient(new FieldExtensions(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(new FieldExtensionsStrings(), field_based_gen_ignore_primitive, fieldBasedGenClassnames);  
   }
   
 

@@ -29,11 +29,11 @@ public class HeapCanonizerMapStore extends HeapCanonizerExtensions {
 	private Map<String, Map<Object, Integer>> store;
 
 	
-	public HeapCanonizerMapStore(FieldExtensions extensions, boolean ignorePrimitive) {
+	public HeapCanonizerMapStore(FieldExtensionsStrings extensions, boolean ignorePrimitive) {
 		super(extensions, ignorePrimitive);
 	}
 	
-	public HeapCanonizerMapStore(FieldExtensions extensions, boolean ignorePrimitive,
+	public HeapCanonizerMapStore(FieldExtensionsStrings extensions, boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
 		super(extensions, ignorePrimitive, fieldBasedGenClassnames);
 	}
