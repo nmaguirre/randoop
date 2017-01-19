@@ -127,13 +127,17 @@ public class HeapCanonizerRuntimeEfficient {
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
 	public boolean traverseBreadthFirstAndEnlargeExtensions(Object root) {
+		if (root == null) return false;
 		store.clear();
 		extendedExtensions = false;
   	
-  		CanonizerObject croot = store.addObject(root);
+		/*
+		CanonizerObject croot = store.addObject(root);
 		if (croot.ignored() || croot.primitive() || croot.isNull()) 
 			return false;
-
+		*/
+		
+		CanonizerObject croot = store.addObject(new DummyHeapRoot(root));
   		LinkedList<CanonizerObject> toVisit = new LinkedList<>();
   		toVisit.addLast(croot);
 

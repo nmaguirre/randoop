@@ -1,8 +1,9 @@
 package randoop.util.fieldbasedcontrol;
 
-import java.lang.reflect.Array;
+//import java.lang.reflect.Array;
 
 public class DummyHeapRoot {
+	/*
 	private Object[] heaproot;
 		
 	public DummyHeapRoot(Object newroot) {
@@ -14,6 +15,13 @@ public class DummyHeapRoot {
 		}
 		else
 			heaproot = new Object[] { newroot };
+	}
+	*/
+	
+	private Object theroot;
+	
+	public DummyHeapRoot(Object theroot) {
+		this.theroot = theroot;
 	}
 
 }

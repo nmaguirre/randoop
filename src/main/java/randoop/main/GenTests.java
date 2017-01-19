@@ -113,6 +113,8 @@ public class GenTests extends GenInputsAbstract {
           ForwardGenerator.class,
           AbstractGenerator.class);
 
+  public static Set<String> field_based_gen_classes;
+
   public GenTests() {
     super(command, pitch, commandGrammar, where, summary, notes, input, output, example, options);
   }
@@ -167,7 +169,7 @@ public class GenTests extends GenInputsAbstract {
     if (AbstractGenerator.field_based_gen == null || 
     		AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED) {
 
-    	if (AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage != 0 || 
+    	if (AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage != 1 || 
     			AbstractGenerator.field_based_gen_weighted_selection == true ||
     			AbstractGenerator.field_based_gen_ignore_primitive == true || 
     			GenInputsAbstract.field_based_gen_classlist != null ||
@@ -223,14 +225,14 @@ public class GenTests extends GenInputsAbstract {
     // get names of classes under test
     Set<String> classnames = GenInputsAbstract.getClassnamesFromArgs();
    
-    Set<String> field_based_gen_classnames = null;
+    field_based_gen_classes = null;
     if (GenInputsAbstract.field_based_gen_classlist != null) { 
-    	field_based_gen_classnames = GenInputsAbstract.getFieldBasedGenClassnamesFromArgs();
+    	field_based_gen_classes = GenInputsAbstract.getFieldBasedGenClassnamesFromArgs();
     
     	if (FieldBasedGenLog.isLoggingOn()) {
     		FieldBasedGenLog.logLine("> Field based generation using classes from file: " + GenInputsAbstract.field_based_gen_classlist.getAbsolutePath() + ". Classes read: ");
     	
-    		for (String s: field_based_gen_classnames) {
+    		for (String s: field_based_gen_classes) {
     			FieldBasedGenLog.logLine(s);
     		}
     	}
@@ -344,15 +346,6 @@ public class GenTests extends GenInputsAbstract {
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
-    // FIXME: PABLO: Very ugly hack to initialize the canonizer. 
-    if (AbstractGenerator.field_based_gen != FieldBasedGenType.DISABLED) {
-    	if (GenInputsAbstract.field_based_gen_classlist == null)
-    		explorer.initCanonizer();
-    	else {
-    		explorer.initCanonizer(field_based_gen_classnames);
-    	}
-    }
-    
     
     /*
      * setup for check generation

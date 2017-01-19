@@ -14,6 +14,7 @@ import randoop.NormalExecution;
 import randoop.SubTypeSet;
 import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.main.GenInputsAbstract;
+import randoop.main.GenTests;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.Operation;
 import randoop.operation.TypedOperation;
@@ -137,7 +138,27 @@ public class ForwardGenerator extends AbstractGenerator {
     // PABLO: Initialized operation weights for random selection
     setInitialOperationWeights();
     
+    
+    // FIXME: PABLO: Very ugly hack to initialize the canonizer. 
+    if (field_based_gen != FieldBasedGenType.DISABLED) {
+    	if (GenInputsAbstract.field_based_gen_classlist == null)
+    		initCanonizer();
+    	else {
+    		initCanonizer(GenTests.field_based_gen_classes);
+    	}
+    }
+    
     initializeRuntimePrimitivesSeen();
+    
+	if (FieldBasedGenLog.isLoggingOn()) {
+		// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
+		FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
+		if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
+			FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+		else 
+			FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
+	}
+
   }
   
   
@@ -156,6 +177,16 @@ public class ForwardGenerator extends AbstractGenerator {
     for (Sequence s : componentManager.getAllPrimitiveSequences()) {
       ExecutableSequence es = new ExecutableSequence(s);
       es.execute(new DummyVisitor(), new DummyCheckGenerator());
+		
+      if (field_based_gen != FieldBasedGenType.DISABLED) {
+		  try {
+			es.enlargeExtensionsFast(canonizer, this);
+		  } catch (CanonizationErrorException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		  }
+      }
+      
       NormalExecution e = (NormalExecution) es.getResult(0);
       Object runtimeValue = e.getRuntimeValue();
       runtimePrimitivesSeen.add(runtimeValue);
@@ -259,17 +290,16 @@ public class ForwardGenerator extends AbstractGenerator {
     	    		if (FieldBasedGenLog.isLoggingOn())
     	    			FieldBasedGenLog.logLine("> Minimized sequences stored as subsumed by the current test");
     	    	}
-    	    	
+           		
            		if (FieldBasedGenLog.isLoggingOn()) {
-       				// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
-          			FieldBasedGenLog.logLine("> New field extensions: ");
-           			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) {
-           				FieldBasedGenLog.logLine("> Extensions size: " + canonizer.getExtensions().size());
-        				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
-           			}
+           			// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
+           			FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
+           			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
+           				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
            			else 
-           				FieldBasedGenLog.logLine("> Extensions size (" + canonizer.getExtensions().size() + ") exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
+           				FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
            		}
+    	    	
             }
     		
 		}

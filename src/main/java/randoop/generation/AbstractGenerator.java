@@ -505,8 +505,7 @@ public abstract class AbstractGenerator {
         num_failing_sequences++;
       }
       
-      // TODO: If we are going to throw away a test because it didn't contribute to the extensions, do it before 
-      // any of the checks below are performed to improve performance.
+
       if (outputTest.test(eSeq)) {
     	  
         if (!eSeq.hasInvalidBehavior()) {
@@ -521,7 +520,10 @@ public abstract class AbstractGenerator {
 
         	} else {
         		
-        		if (field_based_gen_keep_non_contributing_tests_percentage == 1 || (eSeq.isNormalExecution() && eSeq.enlargesExtensions) || !eSeq.isNormalExecution()) {
+        		if (field_based_gen == FieldBasedGenType.DISABLED ||
+        				field_based_gen_keep_non_contributing_tests_percentage == 1 || 
+        				(eSeq.isNormalExecution() && eSeq.enlargesExtensions) 
+        				/*|| !eSeq.isNormalExecution()*/) {
             		if (FieldBasedGenLog.isLoggingOn()) {
             			if (eSeq.isNormalExecution())
             				FieldBasedGenLog.logLine("> Current sequence saved as a regression test");

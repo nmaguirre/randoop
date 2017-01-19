@@ -480,7 +480,7 @@ public class ExecutableSequence {
 		  if (!stmt.getOutputType().isVoid()) {
 			  Object obj = statementResult;
 			  
-			  if (obj != null && !CanonicalRepresentation.isObjectPrimitive(obj)) {
+			  if (obj != null /*&& !CanonicalRepresentation.isObjectPrimitive(obj)*/) {
 			  	  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj)) {
 		           	  if (FieldBasedGenLog.isLoggingOn()) {
 	        	    		FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
@@ -495,9 +495,9 @@ public class ExecutableSequence {
 		  }
 	
 		  // Cover the field values belonging to all the current method's parameters
-		  if (inputVariables.length > 0) {
+		  if (inputVariables != null && inputVariables.length > 0) {
 				for (int j=0; j<inputVariables.length; j++) {
-					if (inputVariables[j] != null && !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])) {
+					if (inputVariables[j] != null /*&& !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])*/) {
 	        	    	if (canonizer.traverseBreadthFirstAndEnlargeExtensions(inputVariables[j])) {
 	        	    		if (FieldBasedGenLog.isLoggingOn()) {
 	        	    			FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
