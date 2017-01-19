@@ -523,7 +523,7 @@ public abstract class AbstractGenerator {
         		if (field_based_gen == FieldBasedGenType.DISABLED ||
         				field_based_gen_keep_non_contributing_tests_percentage == 1 || 
         				(eSeq.isNormalExecution() && eSeq.enlargesExtensions) 
-        				/*|| !eSeq.isNormalExecution()*/) {
+        				|| !eSeq.isNormalExecution()) {
             		if (FieldBasedGenLog.isLoggingOn()) {
             			if (eSeq.isNormalExecution())
             				FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
