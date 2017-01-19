@@ -62,7 +62,7 @@ public class ProgressDisplay extends Thread {
     return "Progress update: test inputs generated="
         + generator.num_sequences_generated
         + ", didn't pass field based filtering="
-        + generator.fieldBasedDroppedSeq
+        + generator.notPassingFieldBasedFilter
         + ", failing inputs="
         + generator.num_failing_sequences
         + "      ("

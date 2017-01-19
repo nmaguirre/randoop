@@ -1,6 +1,8 @@
 package randoop.util.fieldbasedcontrol;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 import java.util.ArrayList;
@@ -268,6 +270,8 @@ public class CanonicalHeapStore {
   				|| clazz == Long.class
   				|| clazz == String.class
   				|| clazz == Integer.class
+  				|| clazz == BigInteger.class
+  				|| clazz == BigDecimal.class
   				|| clazz == Float.class
   				|| clazz == Byte.class
   				|| clazz == Character.class

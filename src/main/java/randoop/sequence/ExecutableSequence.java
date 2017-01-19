@@ -470,8 +470,6 @@ public class ExecutableSequence {
   }
   
   
-
-  
   
   private boolean enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 	  boolean extendedExtensions = false;	
@@ -701,7 +699,7 @@ public class ExecutableSequence {
     
     
     // TODO PABLO: Maybe we don't delete the checks to detect flaky tests as soon as possible?
-    checks = null;
+    // checks = null;
     executionResults.theList.clear();
     
     for (int i = 0; i < sequence.size(); i++) {
@@ -733,6 +731,13 @@ public class ExecutableSequence {
 			  enlargesExtensions = true;
   	  }
 	  
+	  if (enlargesExtensions && i < this.sequence.size() -1) {
+		  System.out.println("Importante: Aca funciona la idea de minimizacion!!!!");
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine("Importante: Aca funciona la idea de minimizacion!!!!");
+		  
+	  }
+	  
     }
     	
     if (AbstractGenerator.field_based_gen_weighted_selection) {
@@ -747,7 +752,7 @@ public class ExecutableSequence {
     	}
     }
     
-    checks = checkgen.visit(this);
+    //checks = checkgen.visit(this);
     
     return enlargesExtensions;
   }

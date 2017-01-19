@@ -46,7 +46,8 @@ import java.util.Set;
 public abstract class AbstractGenerator {
 	
  
-  public int fieldBasedDroppedSeq = 0;
+  public int notPassingFieldBasedFilter = 0;
+  public int fieldBasedDroppedSeqs = 0;
 	
   public enum FieldBasedGenType {
 	    /** Field based generation is disabled */
@@ -76,17 +77,20 @@ public abstract class AbstractGenerator {
   
   @Option("Keep a percentage of the tests that did not contribute to the field extensions")
   public static float field_based_gen_keep_non_contributing_tests_percentage = 1;
+  protected boolean coinFlipRes = false;
   
   @Option("Activate regression tests to try to find bugs in the different implementations of the field extensions. "
   		+ "When active it slowdowns the analysis a lot. Only for debug purposes")
   public static boolean field_based_gen_differential_runtime_checks = false;
 
- @Option("Only consider arrays with up to this number of elements for augmenting the extensions")
+  @Option("Only consider arrays with up to this number of elements for augmenting the extensions")
   public static int field_based_gen_max_array = 10000;
 
- @Option("Only store up to this number of objects for each individual class during canonization")
+  @Option("Only store up to this number of objects for each individual class during canonization")
   public static int field_based_gen_max_objects = 100000;
 
+  @Option("Disable randoop's collections and arrays generation heuristic")
+  public static boolean disable_collections_generation_heuristic = true;
 
 
 //   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
@@ -529,7 +533,7 @@ public abstract class AbstractGenerator {
         			stored = true;
         		}
         		else {
-	        		if (Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage)) {
+	        		if (coinFlipRes) {
 	        			
 						if (FieldBasedGenLog.isLoggingOn()) {
 							FieldBasedGenLog.logLine("> Coin flip result: true");
@@ -544,6 +548,7 @@ public abstract class AbstractGenerator {
 						stored = true;
 	        			
 	        		} else{
+	        			fieldBasedDroppedSeqs++;
 						if (FieldBasedGenLog.isLoggingOn()) {
 							FieldBasedGenLog.logLine("> Coin flip result: false");
 							FieldBasedGenLog.logLine("> Current sequence dropped");
@@ -610,8 +615,6 @@ public abstract class AbstractGenerator {
       }
     }
     
-    System.out.println("Tests not augmenting extensions: " + fieldBasedDroppedSeq);
-
 
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();
@@ -619,6 +622,14 @@ public abstract class AbstractGenerator {
     }
 
     if (!GenInputsAbstract.noprogressdisplay) {
+      if (FieldBasedGenLog.isLoggingOn()) {
+    	FieldBasedGenLog.logLine("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
+    	FieldBasedGenLog.logLine("Field based dropped tests: " + fieldBasedDroppedSeqs);
+      }
+
+      System.out.println();
+   	  System.out.println("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
+      System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
       System.out.println();
       System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
       System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());

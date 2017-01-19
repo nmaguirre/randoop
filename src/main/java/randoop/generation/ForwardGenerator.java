@@ -216,10 +216,15 @@ public class ForwardGenerator extends AbstractGenerator {
 	    		eSeq.enlargeExtensionsMin(canonizer, checkGenerator, this);
 	    		
     		if (!eSeq.enlargesExtensions) {
-        	    fieldBasedDroppedSeq++;
+        	    notPassingFieldBasedFilter++;
         		eSeq.sequence.clearAllActiveFlags();
 
-   	    		processSequence(eSeq);
+        		if (field_based_gen_keep_non_contributing_tests_percentage != 1)
+        			coinFlipRes = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
+
+        		if (field_based_gen_keep_non_contributing_tests_percentage == 1 || coinFlipRes)
+        			processSequence(eSeq);
+
            		if (FieldBasedGenLog.isLoggingOn()) 
            			FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
         	}
@@ -635,6 +640,9 @@ public class ForwardGenerator extends AbstractGenerator {
         }
         if (!looksLikeObjToString && !tooLongString && runtimePrimitivesSeen.add(runtimeValue)) {
           // Have not seen this value before; add it to the component set.
+          if (FieldBasedGenLog.isLoggingOn()) 
+        	  FieldBasedGenLog.logLine("> New primitive value stored: " + runtimeValue.toString());
+        	  
           componentManager.addGeneratedSequence(Sequence.createSequenceForPrimitive(runtimeValue));
         }
       } else {
@@ -996,7 +1004,8 @@ public class ForwardGenerator extends AbstractGenerator {
       // case below
       // is by far the most common.
 
-      if (inputType.isArray()) {
+      if (!disable_collections_generation_heuristic && 
+    		  inputType.isArray()) {
 
         // 1. If T=inputTypes[i] is an array type, ask the component manager for
         // all sequences
@@ -1010,7 +1019,8 @@ public class ForwardGenerator extends AbstractGenerator {
             HelperSequenceCreator.createArraySequence(componentManager, inputType);
         l = new ListOfLists<>(l1, l2);
 
-      } else if (inputType.isParameterized()
+      } else if (!disable_collections_generation_heuristic && 
+    		  inputType.isParameterized()
           && ((InstantiatedType) inputType)
               .getGenericClassType()
               .isSubtypeOf(JDKTypes.COLLECTION_TYPE)) {

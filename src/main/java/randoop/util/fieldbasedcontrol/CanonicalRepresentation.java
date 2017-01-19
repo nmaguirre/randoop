@@ -2,6 +2,8 @@ package randoop.util.fieldbasedcontrol;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.Set;
 
@@ -364,6 +366,8 @@ public class CanonicalRepresentation {
   				|| clazz == Character.class
   				|| clazz == Double.class
   				|| clazz == Boolean.class
+  				|| clazz == BigInteger.class
+  				|| clazz == BigDecimal.class
   				// || clazz == Date.class
   				|| clazz == Object.class
 		  		|| clazz.isEnum()
