@@ -9,6 +9,74 @@ import org.junit.Test;
 
 public class JChartNewTests {
 
+
+
+@Test
+
+	public void test328() throws Throwable {
+		java.lang.Number[][] number_array_array2 = new java.lang.Number[][] {  };
+		org.jfree.data.category.CategoryDataset categoryDataset3 = org.jfree.data.general.DatasetUtilities.createCategoryDataset("TimePeriodAnchor.MIDDLE", "RectangleAnchor.BOTTOM", number_array_array2);
+		org.jfree.data.Range range5 = org.jfree.data.general.DatasetUtilities.iterateRangeBounds(categoryDataset3, true);
+		org.jfree.chart.plot.MultiplePiePlot multiplePiePlot6 = new org.jfree.chart.plot.MultiplePiePlot(categoryDataset3);
+		org.jfree.data.Range range7 = org.jfree.data.general.DatasetUtilities.iterateRangeBounds(categoryDataset3);
+		org.jfree.data.general.PieDataset pieDataset9 = org.jfree.data.general.DatasetUtilities.createPieDatasetForRow(categoryDataset3, 4);
+		org.jfree.chart.ui.ProjectInfo projectInfo10 = org.jfree.chart.JFreeChart.INFO;
+		java.lang.String str11 = projectInfo10.toString();
+		//System.out.println(str11);
+		java.util.List list12 = projectInfo10.getContributors();
+		//System.out.println(str11);
+		java.util.List list13 = projectInfo10.getContributors();
+		// The following exception was thrown during execution in test generation
+		try {
+			org.jfree.data.Range range15 = org.jfree.data.general.DatasetUtilities.findRangeBounds(categoryDataset3, list13, true);
+			org.junit.Assert.fail("Expected exception of type java.lang.ClassCastException");
+		} catch (java.lang.ClassCastException e) {
+			// Expected exception.
+			if (! e.getClass().getCanonicalName().equals("java.lang.ClassCastException")) {
+				org.junit.Assert.fail("Expected exception of type java.lang.ClassCastException, got " + e.getClass().getCanonicalName());
+			}
+		}
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertNotNull(number_array_array2);
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertNotNull(categoryDataset3);
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertNull(range5);
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertNull(range7);
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertNotNull(pieDataset9);
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertNotNull(projectInfo10);
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertTrue("'" + str11 + "' != '" + "JFreeChart version 1.2.0-pre.\n(C)opyright 2000-2008, by Object Refinery Limited and Contributors.\n\nFor terms of use, see the licence below.\n\nFURTHER INFORMATION:\nCONTRIBUTORS:Eric Alexander (-).Richard Atkinson (richard_c_atkinson@ntlworld.com).David Basten (-).David Berry (-).Chris Boek (-).Zoheb Borbora (-).Anthony Boulestreau (-).Jeremy Bowman (-).Nicolas Brodu (-).Jody Brownell (-).David Browning (-).Soren Caspersen (-).Chuanhao Chiu (-).Brian Cole (-).Pascal Collet (-).Martin Cordova (-).Paolo Cova (-).Greg Darke (-).Mike Duffy (-).Don Elliott (-).David Forslund (-).Jonathan Gabbai (-).David Gilbert (david.gilbert@object-refinery.com).Serge V. Grachov (-).Daniel Gredler (-).Hans-Jurgen Greiner (-).Joao Guilherme Del Valle (-).Aiman Han (-).Cameron Hayne (-).Martin Hoeller (-).Jon Iles (-).Wolfgang Irler (-).Sergei Ivanov (-).Adriaan Joubert (-).Darren Jung (-).Xun Kang (-).Bill Kelemen (-).Norbert Kiesel (-).Peter Kolb (-).Gideon Krause (-).Pierre-Marie Le Biot (-).Arnaud Lelievre (-).Wolfgang Lenhard (-).David Li (-).Yan Liu (-).Tin Luu (-).Craig MacFarlane (-).Achilleus Mantzios (-).Thomas Meier (-).Jim Moore (-).Jonathan Nash (-).Barak Naveh (-).David M. O'Donnell (-).Krzysztof Paz (-).Eric Penfold (-).Tomer Peretz (-).Diego Pierangeli (-).Xavier Poinsard (-).Andrzej Porebski (-).Viktor Rajewski (-).Eduardo Ramalho (-).Michael Rauch (-).Cameron Riley (-).Klaus Rheinwald (-).Dan Rivett (d.rivett@ukonline.co.uk).Scott Sams (-).Michel Santos (-).Thierry Saura (-).Andreas Schneider (-).Jean-Luc SCHWAB (-).Bryan Scott (-).Tobias Selb (-).Darshan Shah (-).Mofeed Shahin (-).Michael Siemer (-).Pady Srinivasan (-).Greg Steckman (-).Gerald Struck (-).Roger Studner (-).Irv Thomae (-).Eric Thomas (-).Jess Thrysoee (-).Rich Unger (-).Daniel van Enckevort (-).Laurence Vanhelsuwe (-).Sylvain Vieujot (-).Ulrich Voigt (-).Jelai Wang (-).Mark Watson (www.markwatson.com).Alex Weber (-).Matthew Wright (-).Benoit Xhenseval (-).Christian W. Zuckschwerdt (Christian.Zuckschwerdt@Informatik.Uni-Oldenburg.de).Hari (-).Sam (oldman) (-).\nOTHER LIBRARIES USED BY JFreeChart:None\nJFreeChart LICENCE TERMS:\nLengthConstraintType.FIXED"+ "'", str11.equals("JFreeChart version 1.2.0-pre.\n(C)opyright 2000-2008, by Object Refinery Limited and Contributors.\n\nFor terms of use, see the licence below.\n\nFURTHER INFORMATION:\nCONTRIBUTORS:Eric Alexander (-).Richard Atkinson (richard_c_atkinson@ntlworld.com).David Basten (-).David Berry (-).Chris Boek (-).Zoheb Borbora (-).Anthony Boulestreau (-).Jeremy Bowman (-).Nicolas Brodu (-).Jody Brownell (-).David Browning (-).Soren Caspersen (-).Chuanhao Chiu (-).Brian Cole (-).Pascal Collet (-).Martin Cordova (-).Paolo Cova (-).Greg Darke (-).Mike Duffy (-).Don Elliott (-).David Forslund (-).Jonathan Gabbai (-).David Gilbert (david.gilbert@object-refinery.com).Serge V. Grachov (-).Daniel Gredler (-).Hans-Jurgen Greiner (-).Joao Guilherme Del Valle (-).Aiman Han (-).Cameron Hayne (-).Martin Hoeller (-).Jon Iles (-).Wolfgang Irler (-).Sergei Ivanov (-).Adriaan Joubert (-).Darren Jung (-).Xun Kang (-).Bill Kelemen (-).Norbert Kiesel (-).Peter Kolb (-).Gideon Krause (-).Pierre-Marie Le Biot (-).Arnaud Lelievre (-).Wolfgang Lenhard (-).David Li (-).Yan Liu (-).Tin Luu (-).Craig MacFarlane (-).Achilleus Mantzios (-).Thomas Meier (-).Jim Moore (-).Jonathan Nash (-).Barak Naveh (-).David M. O'Donnell (-).Krzysztof Paz (-).Eric Penfold (-).Tomer Peretz (-).Diego Pierangeli (-).Xavier Poinsard (-).Andrzej Porebski (-).Viktor Rajewski (-).Eduardo Ramalho (-).Michael Rauch (-).Cameron Riley (-).Klaus Rheinwald (-).Dan Rivett (d.rivett@ukonline.co.uk).Scott Sams (-).Michel Santos (-).Thierry Saura (-).Andreas Schneider (-).Jean-Luc SCHWAB (-).Bryan Scott (-).Tobias Selb (-).Darshan Shah (-).Mofeed Shahin (-).Michael Siemer (-).Pady Srinivasan (-).Greg Steckman (-).Gerald Struck (-).Roger Studner (-).Irv Thomae (-).Eric Thomas (-).Jess Thrysoee (-).Rich Unger (-).Daniel van Enckevort (-).Laurence Vanhelsuwe (-).Sylvain Vieujot (-).Ulrich Voigt (-).Jelai Wang (-).Mark Watson (www.markwatson.com).Alex Weber (-).Matthew Wright (-).Benoit Xhenseval (-).Christian W. Zuckschwerdt (Christian.Zuckschwerdt@Informatik.Uni-Oldenburg.de).Hari (-).Sam (oldman) (-).\nOTHER LIBRARIES USED BY JFreeChart:None\nJFreeChart LICENCE TERMS:\nLengthConstraintType.FIXED"));
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertNotNull(list12);
+		// Regression assertion (captures the current behavior of the code)
+		org.junit.Assert.assertNotNull(list13);
+	}
+
+
+	@Test
+	public void test150() throws Throwable {
+	  org.jfree.chart.ui.ProjectInfo projectInfo0 = org.jfree.chart.JFreeChart.INFO;
+	  java.awt.Image image1 = projectInfo0.getLogo();
+	  java.util.List list2 = projectInfo0.getContributors();
+	  java.lang.String str3 = projectInfo0.getLicenceName();
+	  projectInfo0.addOptionalLibrary("RectangleEdge.TOP");
+	  // Regression assertion (captures the current behavior of the code)
+	  org.junit.Assert.assertNotNull(projectInfo0);
+	  // Regression assertion (captures the current behavior of the code)
+	  org.junit.Assert.assertNotNull(image1);
+	  // Regression assertion (captures the current behavior of the code)
+	  org.junit.Assert.assertNotNull(list2);
+	//System.out.println(str3);
+	  // Regression assertion (captures the current behavior of the code)
+	  org.junit.Assert.assertTrue("'" + str3 + "' != '" + "Rotation.ANTICLOCKWISE"+ "'", str3.equals("Rotation.ANTICLOCKWISE"));
+	}
+	
+	
+	
 	@Test
 	public void arrayTooLarge() throws IOException {
 		FieldExtensionsStrings fe2 = new FieldExtensionsStrings();

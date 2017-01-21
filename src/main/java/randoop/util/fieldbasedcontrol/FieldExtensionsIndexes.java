@@ -53,14 +53,16 @@ public class FieldExtensionsIndexes {
 		}
 		
 		if (o2.primitive()) {
+			/*
 			if (o2.cc.cls == String.class) {
 				String toStore = ((String)o2.obj);
-				if (toStore.length() > CanonicalRepresentation.MAX_STRING_SIZE)
-					toStore = toStore.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
+				if (toStore.length() >= store.maxStringLength)
+					toStore = toStore.substring(0, store.maxStringLength); 
 				extended = m3.add(toStore);
 			} 
 			else 
-				extended = m3.add(o2.obj.toString());
+			*/
+			extended = m3.add(o2.obj.toString());
 		}
 		else
 			extended = m3.add(o2.index);

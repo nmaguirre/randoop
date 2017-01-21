@@ -83,14 +83,23 @@ public abstract class AbstractGenerator {
   		+ "When active it slowdowns the analysis a lot. Only for debug purposes")
   public static boolean field_based_gen_differential_runtime_checks = false;
 
+  @Option("Only consider strings with up to this number of elements for augmenting the extensions")
+  public static int field_based_gen_max_string_length = 1000;
+
   @Option("Only consider arrays with up to this number of elements for augmenting the extensions")
-  public static int field_based_gen_max_array = 10000;
+  public static int field_based_gen_max_array = 1000;
+
+  @Option("Only store up to this number of objects during canonization")
+  public static int field_based_gen_max_objects = 1000;
 
   @Option("Only store up to this number of objects for each individual class during canonization")
-  public static int field_based_gen_max_objects = 100000;
+  public static int field_based_gen_max_class_objects = 10000;
+
+  @Option("Drop tests exceeding object/array/string limits")
+  public static boolean field_based_gen_drop_tests_exceeding_limits = false;
 
   @Option("Disable randoop's collections and arrays generation heuristic")
-  public static boolean disable_collections_generation_heuristic = true;
+  public static boolean disable_collections_generation_heuristic = false;
 
 
 //   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
@@ -232,11 +241,11 @@ public abstract class AbstractGenerator {
   public HeapCanonizerRuntimeEfficient canonizer;
 
   public void initCanonizer() {
-	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, field_based_gen_max_objects, field_based_gen_max_array);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_drop_tests_exceeding_limits);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames, field_based_gen_max_objects, field_based_gen_max_array);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_drop_tests_exceeding_limits);  
   }
   
 

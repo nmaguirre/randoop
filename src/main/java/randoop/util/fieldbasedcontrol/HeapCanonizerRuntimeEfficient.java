@@ -27,35 +27,39 @@ public class HeapCanonizerRuntimeEfficient {
 	
 	public CanonicalHeapStore store;
 	
-	private static final int DEFAULT_MAX_OBJECTS = 100000;
-	private static final int DEFAULT_MAX_ARRAY = 10000;
-	private int maxObjects;
+	private static final int DEFAULT_MAX_OBJECTS = 10000;
+	private static final int DEFAULT_MAX_CLASS_OBJECTS = 1000;
+	private static final int DEFAULT_MAX_ARRAY = 1000;
+	private static final int DEFAULT_MAX_STRING = 1000;
 	private int maxArray;
+	private int maxStringLength;
+	private boolean dropTestsExceedingLimits;
 		
 	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive) {
-		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_ARRAY);
+		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_CLASS_OBJECTS, DEFAULT_MAX_STRING, DEFAULT_MAX_ARRAY, false);
 	}
 
 	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive,
 			Set<String> fieldBasedGenClassnames) {
-		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_ARRAY);
+		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_CLASS_OBJECTS, DEFAULT_MAX_STRING, DEFAULT_MAX_ARRAY, false);
 	}
 	
-	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive, int maxObjects, int maxArray) {
-		this(ignorePrimitive, null, maxObjects, maxArray);
+	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive, int maxGlobalObjects, int maxClassObjects, int maxStringLength, int maxArray, boolean dropTestsExceedingLimits) {
+		this(ignorePrimitive, null, maxGlobalObjects, maxClassObjects, maxStringLength, maxArray, dropTestsExceedingLimits);
 	}
 	
 	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive,
-			Set<String> fieldBasedGenClassnames, int maxObjects, int maxArray) {
+			Set<String> fieldBasedGenClassnames, int maxGlobalObjects, int maxClassObjects, int maxStringLength, int maxArray, boolean dropTestsExceedingLimits) {
 		this.ignorePrimitive = ignorePrimitive;
-		this.store = new CanonicalHeapStore(maxObjects);
+		this.dropTestsExceedingLimits = dropTestsExceedingLimits;
+		this.store = new CanonicalHeapStore(maxGlobalObjects, maxClassObjects, maxStringLength, dropTestsExceedingLimits);
 		if (fieldBasedGenClassnames != null)
 			store.setFieldBasedGenByClasses(fieldBasedGenClassnames);
 		
 		if (AbstractGenerator.field_based_gen_differential_runtime_checks)
 			activateReadableExtensions();
 		
-		this.maxObjects = maxObjects;
+		this.maxStringLength = maxStringLength;
 		this.maxArray = maxArray;
 	}
 	
@@ -85,9 +89,9 @@ public class HeapCanonizerRuntimeEfficient {
    			tgtString = store.getNullRepresentation();
    		else if (tgt.primitive()) {
 			tgtString = tgt.obj.toString();
-				// trim string values to length maxStringSize
-			if (tgt.cc.cls == String.class && tgtString.length() > CanonicalRepresentation.MAX_STRING_SIZE)
-				tgtString = tgtString.substring(0, CanonicalRepresentation.MAX_STRING_SIZE);
+				// trim string values to max string length
+			if (tgt.cc.cls == String.class && tgtString.length() >= maxStringLength)
+				tgtString = tgtString.substring(0, maxStringLength);
     	}
     	else {
     		String tgtcls = tgt.cc.name;
@@ -126,7 +130,7 @@ public class HeapCanonizerRuntimeEfficient {
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public boolean traverseBreadthFirstAndEnlargeExtensions(Object root) {
+	public Boolean traverseBreadthFirstAndEnlargeExtensions(Object root) {
 		if (root == null) return false;
 		store.clear();
 		extendedExtensions = false;
@@ -165,8 +169,8 @@ public class HeapCanonizerRuntimeEfficient {
 					if (!newcobj.ignored() && !newcobj.visited() && !newcobj.primitive() && !newcobj.isNull())
 						toVisit.add(newcobj);
 
-					CanonizerField arrayDummy = store.canonizeArrayField(cobj.cc, i);
-					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, arrayDummy))
+					CanonizerField arrDummyFld = store.canonizeArrayField(cobj.cc, i);
+					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, arrDummyFld))
 						extendedExtensions = true; 
 				}
 			}

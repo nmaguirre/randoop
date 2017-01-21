@@ -345,7 +345,9 @@ public class ExecutableSequence {
 
     visitor.visitAfterSequence(this);
 
+    
    	checks = gen.visit(this);
+  
   }
   
   

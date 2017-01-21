@@ -19,8 +19,16 @@ public class CanonicalHeapStore {
 	public FieldExtensionsIndexes extensions;
 	
 	// Max number of stored objects for each (non-primitive) individual class
-	private int maxObjects;
+	private int maxClassObjects;
 	
+	// Max total number of stored objects for (non-primitive) classes
+	private int maxGlobalObjects;
+	
+	// Max number of characters for string objects
+	public int maxStringLength;
+	
+	private boolean dropTestsExceedingLimits;
+
 	private static boolean fieldBasedGenByClasses = false;
 	List<String> ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
 			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun."});
@@ -35,8 +43,11 @@ public class CanonicalHeapStore {
 		return instance;
 	}*/
 	
-	public CanonicalHeapStore(int maxObjects) {
-		this.maxObjects = maxObjects;
+	public CanonicalHeapStore(int maxGlobalObjects, int maxClassObjects, int maxStringLength, boolean dropTestsExceedingLimits) {
+		this.maxGlobalObjects = maxGlobalObjects;
+		this.maxClassObjects = maxClassObjects;
+		this.maxStringLength = maxStringLength;
+		this.dropTestsExceedingLimits = dropTestsExceedingLimits;
 		this.extensions = new FieldExtensionsIndexes(this);
 	}
 
@@ -154,7 +165,6 @@ public class CanonicalHeapStore {
 		}
 	}
 
-	public final Integer MAX_STRING_SIZE = 50;
 	
 	public Map<Class, CanonizerClass> classes = new HashMap<Class, CanonizerClass>();
 	public ArrayList<CanonizerClass> indexToClass = new ArrayList<CanonizerClass>();
@@ -163,6 +173,8 @@ public class CanonicalHeapStore {
 	// For each class index stores a list of the objects corresponding to the class.
 	// The position of the object in the list corresponds to the object's index in the canonization
 	private ArrayList<LinkedList<CanonizerObject>> store = new ArrayList<>();
+
+	private int storeSize;
 	
 	
 	
@@ -304,6 +316,8 @@ public class CanonicalHeapStore {
 	}
 
 	public CanonizerObject addObject(Object obj) {
+
+		
 		Class<?> objcls; 
 		if (obj == null) {
 			objcls = DummyNullClass.class;
@@ -313,6 +327,21 @@ public class CanonicalHeapStore {
 		}
 		
 		CanonizerClass cc = canonizeClass(objcls);
+
+		if (cc.cls == String.class && ((String)obj).length() >= maxStringLength) {
+			
+			if (dropTestsExceedingLimits) {
+				String message = "> FIELD BASED GENERATION WARNING: Max string length (" + maxStringLength + ") exceeded";
+				System.out.println(message);
+				if (FieldBasedGenLog.isLoggingOn()) 
+					FieldBasedGenLog.logLine(message);
+				
+				return null; 
+			}
+			
+			return new CanonizerObject(((String)obj).substring(0, maxStringLength), cc, -1);
+			
+		}
 
 		// if the class is ignored we just return a dummy object
 		if (obj == null || cc.ignored || cc.primitive) return new CanonizerObject(obj, cc, -1);
@@ -326,8 +355,18 @@ public class CanonicalHeapStore {
 			}
 		}
 		
-		if (l.size() > maxObjects) {
-			String message = "> FIELD BASED GENERATION WARNING: Number of objects limit (" + maxObjects + ") exceeded for class " + cc.name;
+		storeSize++;
+		if (storeSize > maxGlobalObjects) {
+			String message = "> FIELD BASED GENERATION WARNING: Max number of objects limit (" + maxGlobalObjects + ") exceeded";
+			System.out.println(message);
+			if (FieldBasedGenLog.isLoggingOn()) 
+				FieldBasedGenLog.logLine(message);
+			
+			return null;
+		}	
+		
+		if (l.size() > maxClassObjects) {
+			String message = "> FIELD BASED GENERATION WARNING: Number of objects limit (" + maxClassObjects + ") exceeded for class " + cc.name;
 			System.out.println(message);
 			if (FieldBasedGenLog.isLoggingOn()) 
 				FieldBasedGenLog.logLine(message);
@@ -342,5 +381,10 @@ public class CanonicalHeapStore {
 		return res;
 	}
 
+	
+	
+	
+	
+	
 
 }
