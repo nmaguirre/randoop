@@ -79,6 +79,11 @@ public abstract class AbstractGenerator {
   public static float field_based_gen_keep_non_contributing_tests_percentage = 1;
   protected boolean coinFlipRes = false;
   
+  @Option("Keep a percentage of the negative tests generated")
+  public static float keep_negative_tests_percentage = 1;
+  private int negativeTestsGen;
+  private int negativeTestsDropped;
+  
   @Option("Activate regression tests to try to find bugs in the different implementations of the field extensions. "
   		+ "When active it slowdowns the analysis a lot. Only for debug purposes")
   public static boolean field_based_gen_differential_runtime_checks = false;
@@ -95,8 +100,9 @@ public abstract class AbstractGenerator {
   @Option("Only store up to this number of objects for each individual class during canonization")
   public static int field_based_gen_max_class_objects = 10000;
 
-  @Option("Drop tests exceeding object/array/string limits")
-  public static boolean field_based_gen_drop_tests_exceeding_limits = false;
+  @Option("Set to false to not allow tests exceeding object/array/string limits to be used as inputs for "
+  		+ "other tests")
+  public static boolean field_based_gen_tests_exceeding_limits_as_inputs = true;
 
   @Option("Disable randoop's collections and arrays generation heuristic")
   public static boolean disable_collections_generation_heuristic = false;
@@ -241,11 +247,11 @@ public abstract class AbstractGenerator {
   public HeapCanonizerRuntimeEfficient canonizer;
 
   public void initCanonizer() {
-	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_drop_tests_exceeding_limits);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_tests_exceeding_limits_as_inputs);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_drop_tests_exceeding_limits);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_tests_exceeding_limits_as_inputs);  
   }
   
 
@@ -533,15 +539,41 @@ public abstract class AbstractGenerator {
         				field_based_gen_keep_non_contributing_tests_percentage == 1 || 
         				(eSeq.isNormalExecution() && eSeq.enlargesExtensions) 
         				|| !eSeq.isNormalExecution()) {
-            		if (FieldBasedGenLog.isLoggingOn()) {
-            			if (eSeq.isNormalExecution())
+        			
+           			if (eSeq.isNormalExecution()) {
+           				if (FieldBasedGenLog.isLoggingOn()) 
             				FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
-            			else
-            				FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+						 outRegressionSeqs.add(eSeq);
+						 stored = true;
+           			}
+           			else {
+        				negativeTestsGen++;
+        				if (keep_negative_tests_percentage == 1) {
+        					if (FieldBasedGenLog.isLoggingOn()) 
+        						FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+							outRegressionSeqs.add(eSeq);
+							stored = true;
+        				} 
+        				else {
+        					if (Randomness.weighedCoinFlip(keep_negative_tests_percentage)) {
+        						if (FieldBasedGenLog.isLoggingOn()) {
+        							FieldBasedGenLog.logLine("> Coin flip result: true");
+        							FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+        						}
+       						
+        						outRegressionSeqs.add(eSeq);
+        						stored = true;
+       						}
+       						else {
+         						if (FieldBasedGenLog.isLoggingOn()) {
+        							FieldBasedGenLog.logLine("> Coin flip result: false");
+        							FieldBasedGenLog.logLine("> Current sequence dropped");
+        						}
+        						stored = false;
+       						}
+        				}
             		}
         			
-        			outRegressionSeqs.add(eSeq);
-        			stored = true;
         		}
         		else {
 	        		if (coinFlipRes) {
@@ -569,30 +601,11 @@ public abstract class AbstractGenerator {
 	        		}
         		}
         		
-        		/*
-        		// Execution of the current sequence was successful 
-        		if (field_based_gen_keep_non_contributing_tests_percentage != 1 && eSeq.isNormalExecution() && !eSeq.enlargesExtensions) {
-        			stored = false;
-        			if (FieldBasedGenLog.isLoggingOn())
-        				FieldBasedGenLog.logLine("> Current sequence and subsumption candidates discarded");
-        		}
-        		else {
-            		if (FieldBasedGenLog.isLoggingOn()) {
-            			if (eSeq.isNormalExecution())
-            				FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
-            			else
-            				FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
-            		}
-        			
-        			outRegressionSeqs.add(eSeq);
-        			stored = true;
-        		}
-        		*/
-        		
         	}
 
         	// If the sequence was stored there are subsumed sequences, save them
-        	if (field_based_gen_keep_non_contributing_tests_percentage != 1 && stored) {
+        	if ((field_based_gen_keep_non_contributing_tests_percentage != 1 || 
+        			keep_negative_tests_percentage != 1) && stored) {
         		for (Sequence is : subsumed_candidates) {
         			subsumed_sequences.add(is);
         		}
@@ -601,7 +614,8 @@ public abstract class AbstractGenerator {
         			FieldBasedGenLog.logLine("> The candidates for subsumed sequences are now saved as subsumed");	
         	}
         	
-         	if (field_based_gen_keep_non_contributing_tests_percentage != 1 && !stored) {
+         	if ((field_based_gen_keep_non_contributing_tests_percentage != 1 ||
+         			keep_negative_tests_percentage != 1) && !stored) {
         		if (FieldBasedGenLog.isLoggingOn()) 
         			FieldBasedGenLog.logLine("> The candidates for subsumed sequences are dropped");	
          	}
@@ -641,6 +655,7 @@ public abstract class AbstractGenerator {
       System.out.println();
    	  System.out.println("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
       System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
+      System.out.println("Negative tests generated: " + negativeTestsGen);
       System.out.println();
       System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
       System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());

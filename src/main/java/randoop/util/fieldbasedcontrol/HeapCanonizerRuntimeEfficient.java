@@ -19,6 +19,8 @@ import randoop.generation.AbstractGenerator;
 
 public class HeapCanonizerRuntimeEfficient {
 	
+	public enum ExtendedExtensionsResult { EXTENDED, NOT_EXTENDED, LIMITS_EXCEEDED };
+	
 	public FieldExtensionsStrings readableExtensions = null;
 	
 	private boolean extendedExtensions;
@@ -106,12 +108,12 @@ public class HeapCanonizerRuntimeEfficient {
     // TODO: This method belongs to the store?
 	// Returns a pair (b1, b2) where b1 iff the extensions were enlarged by this call, and
 	// b2 iff tgt is an object visited for the first time in this call
-	protected boolean addToExtensions(CanonizerObject src, CanonizerObject tgt, CanonizerField fld) {
+	protected boolean addToExtensions(CanonizerObject src, CanonizerObject tgt, CanonizerField fld, FieldExtensionsIndexes extensions) {
 		
 		if (ignorePrimitive && (tgt.primitive() || tgt.isNull()))
 			return false;
 		
-		boolean newRes = store.extensions.addPairToField(fld, src, tgt);
+		boolean newRes = extensions.addPairToField(fld, src, tgt);
 
 		if (readableExtensions != null) {
 			boolean oldRes = addToReadableExtensions(src, tgt, fld); 
@@ -127,11 +129,26 @@ public class HeapCanonizerRuntimeEfficient {
 	}
 
 	
+	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root) {
+		if (!dropTestsExceedingLimits)
+			return traverseBreadthFirstAndEnlargeExtensions(root, store.extensions);
+		else {
+			FieldExtensionsIndexes currHeapExt = new FieldExtensionsIndexes(store, true);
+			if (traverseBreadthFirstAndEnlargeExtensions(root, currHeapExt) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+				return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+			
+			if (store.extensions.addAllPairs(currHeapExt))
+				return ExtendedExtensionsResult.EXTENDED;
+			else
+				return ExtendedExtensionsResult.NOT_EXTENDED;
+		}	
+	}
+	
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public Boolean traverseBreadthFirstAndEnlargeExtensions(Object root) {
-		if (root == null) return false;
+	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root, FieldExtensionsIndexes extensions) {
+		if (root == null) return ExtendedExtensionsResult.NOT_EXTENDED;
 		store.clear();
 		extendedExtensions = false;
   	
@@ -158,19 +175,27 @@ public class HeapCanonizerRuntimeEfficient {
 					System.out.println(message);
 					if (FieldBasedGenLog.isLoggingOn()) 
 						FieldBasedGenLog.logLine(message);
+					
+					if (dropTestsExceedingLimits)
+						return ExtendedExtensionsResult.LIMITS_EXCEEDED;
 				}
 				for (int i = 0; i < length; i++) {
 					
 					Object target = Array.get(cobj.obj, i);
 					CanonizerObject newcobj = store.addObject(target);
 					// Max number of stored objects for the class exceeded
-					if (newcobj == null) continue;
+					if (newcobj == null) {
+						if (dropTestsExceedingLimits)
+							return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+						else
+							continue;
+					}
 
 					if (!newcobj.ignored() && !newcobj.visited() && !newcobj.primitive() && !newcobj.isNull())
 						toVisit.add(newcobj);
 
 					CanonizerField arrDummyFld = store.canonizeArrayField(cobj.cc, i);
-					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, arrDummyFld))
+					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, arrDummyFld, extensions))
 						extendedExtensions = true; 
 				}
 			}
@@ -190,12 +215,17 @@ public class HeapCanonizerRuntimeEfficient {
 
 					CanonizerObject newcobj = store.addObject(target);
 					// Max number of stored objects for the class exceeded
-					if (newcobj == null) continue;
+					if (newcobj == null) {
+						if (dropTestsExceedingLimits)
+							return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+						else
+							continue;
+					}
 					
 					if (!newcobj.ignored() && !newcobj.visited() && !newcobj.primitive() && !newcobj.isNull())
 						toVisit.add(newcobj);
 
-					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, cf))
+					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, cf, extensions))
 						extendedExtensions = true; 
 				}
 			}
@@ -209,7 +239,11 @@ public class HeapCanonizerRuntimeEfficient {
 			}
 		}	
   		
-  		return extendedExtensions;
+		if (extendedExtensions)
+			return ExtendedExtensionsResult.EXTENDED;
+		else
+			return ExtendedExtensionsResult.NOT_EXTENDED;
+		
 	}
 	
 	

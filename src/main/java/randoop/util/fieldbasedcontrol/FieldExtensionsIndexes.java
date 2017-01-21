@@ -14,58 +14,68 @@ import java.util.Set;
 public class FieldExtensionsIndexes {
 	
 	private int size = 0;
-	
 	private CanonicalHeapStore store;
+	private boolean syncWithStore;
 	
-	public FieldExtensionsIndexes(CanonicalHeapStore store) {
+	public FieldExtensionsIndexes(CanonicalHeapStore store, boolean syncWithStore) {
 		this.store = store;
+		this.syncWithStore = syncWithStore;
+	}
+		public FieldExtensionsIndexes(CanonicalHeapStore store) {
+		this.store = store;
+		this.syncWithStore = false;
 	}
 	
-	private ArrayList<Map<Integer, Map<Integer, Map<Integer, Set<Object>>>>> extensions = new ArrayList<>();
+	private ArrayList<Map<Integer, Map<Integer, Map<Integer, Set<String>>>>> extensions = new ArrayList<>();
 
 	public void addField() {
-		extensions.add(new HashMap<Integer, Map<Integer,Map<Integer,Set<Object>>>>());
+		extensions.add(new HashMap<Integer, Map<Integer,Map<Integer,Set<String>>>>());
+	}
+	
+	private void syncFieldsWithStore() {
+		while (store.fields.size() > extensions.size()) {
+			addField();
+		}
 	}
 	
 	public boolean addPairToField(CanonizerField field, CanonizerObject o1, CanonizerObject o2) {
+		
 		CanonizerClass c1 = o1.cc;
 		CanonizerClass c2 = o2.cc; 
+			
+		if (o2.primitive()) 
+			return addPairToField(field.index, c1.index, c2.index, o1.index, o2.toString());
+		else
+			return addPairToField(field.index, c1.index, c2.index, o1.index, o2.index.toString());
+	}
 		
+		
+	public boolean addPairToField(Integer fieldIndex, Integer c1Index, Integer c2Index, Integer o1Index, String o2) {		
+
+		if (syncWithStore) syncFieldsWithStore();
+	
 		boolean extended;
-		Map<Integer, Map<Integer,Map<Integer,Set<Object>>>> m = extensions.get(field.index);	
+		Map<Integer, Map<Integer,Map<Integer,Set<String>>>> m = extensions.get(fieldIndex);	
 		
-		Map<Integer,Map<Integer,Set<Object>>> m1 = m.get(c1.index);
+		Map<Integer,Map<Integer,Set<String>>> m1 = m.get(c1Index);
 		if (m1 == null) {
 			m1 = new HashMap<>();
-			m.put(c1.index, m1);
+			m.put(c1Index, m1);
 		}
 		
-		Map<Integer,Set<Object>> m2 = m1.get(c2.index);
+		Map<Integer,Set<String>> m2 = m1.get(c2Index);
 		if (m2 == null) {
 			m2 = new HashMap<>();
-			m1.put(c2.index, m2);
+			m1.put(c2Index, m2);
 		}
 		
-		Set<Object> m3 = m2.get(o1.index);
+		Set<String> m3 = m2.get(o1Index);
 		if (m3 == null) {
 			m3 = new HashSet<>();
-			m2.put(o1.index, m3);
+			m2.put(o1Index, m3);
 		}
 		
-		if (o2.primitive()) {
-			/*
-			if (o2.cc.cls == String.class) {
-				String toStore = ((String)o2.obj);
-				if (toStore.length() >= store.maxStringLength)
-					toStore = toStore.substring(0, store.maxStringLength); 
-				extended = m3.add(toStore);
-			} 
-			else 
-			*/
-			extended = m3.add(o2.obj.toString());
-		}
-		else
-			extended = m3.add(o2.index);
+		extended = m3.add(o2);
 			
 		if (extended) size++;
 		
@@ -79,19 +89,19 @@ public class FieldExtensionsIndexes {
 
 			res += store.fields.get(i).name + ":{";
 
-			Map<Integer, Map<Integer,Map<Integer,Set<Object>>>> m = extensions.get(i);      
+			Map<Integer, Map<Integer,Map<Integer,Set<String>>>> m = extensions.get(i);      
 			for (Integer c1: m.keySet()) {
 				CanonizerClass srccls = store.indexToClass.get(c1);
 
-				Map<Integer,Map<Integer,Set<Object>>> m1 = m.get(c1);
+				Map<Integer,Map<Integer,Set<String>>> m1 = m.get(c1);
 				for (Integer c2: m1.keySet()) {
 					CanonizerClass tgtcls = store.indexToClass.get(c2);
 
-					Map<Integer,Set<Object>> m2 = m1.get(c2);
+					Map<Integer,Set<String>> m2 = m1.get(c2);
 					for (Integer o1: m2.keySet()) {
 
-						Set<Object> m3 = m2.get(o1);
-						for (Object o2: m3) {
+						Set<String> m3 = m2.get(o1);
+						for (String o2: m3) {
 							res += "(" + srccls.name + o1.toString() + ", ";
 
 							if (tgtcls.cls == DummyNullClass.class)
@@ -99,7 +109,7 @@ public class FieldExtensionsIndexes {
 							else {
 								if (!tgtcls.primitive) 
 									res += tgtcls.name;
-								res += o2.toString();
+								res += o2;
 							}
 							res += "), ";
 
@@ -125,19 +135,19 @@ public class FieldExtensionsIndexes {
 			//			res += store.fields.get(i).name + ":{";
 			String field = store.fields.get(i).name;
 
-			Map<Integer, Map<Integer,Map<Integer,Set<Object>>>> m = extensions.get(i);	
+			Map<Integer, Map<Integer,Map<Integer,Set<String>>>> m = extensions.get(i);	
 			for (Integer c1: m.keySet()) {
 				CanonizerClass srccls = store.indexToClass.get(c1);
 				
-				Map<Integer,Map<Integer,Set<Object>>> m1 = m.get(c1);
+				Map<Integer,Map<Integer,Set<String>>> m1 = m.get(c1);
 				for (Integer c2: m1.keySet()) {
 					CanonizerClass tgtcls = store.indexToClass.get(c2);
 
-					Map<Integer,Set<Object>> m2 = m1.get(c2);
+					Map<Integer,Set<String>> m2 = m1.get(c2);
 					for (Integer o1: m2.keySet()) {
 
-						Set<Object> m3 = m2.get(o1);
-						for (Object o2: m3) {
+						Set<String> m3 = m2.get(o1);
+						for (String o2: m3) {
 							String src = srccls.name + o1.toString();
 							String tgt = "";
 
@@ -146,7 +156,7 @@ public class FieldExtensionsIndexes {
 							else {
 								if (!tgtcls.primitive) 
 									tgt = tgtcls.name;
-								tgt += o2.toString();
+								tgt += o2;
 							}
 							stringsExt.addPairToField(field, src, tgt);
 						}
@@ -199,6 +209,40 @@ public class FieldExtensionsIndexes {
 		} else if (!extensions.equals(other.extensions))
 			return false;
 		return true;
+	}
+	
+	
+	public boolean addAllPairs(FieldExtensionsIndexes currHeapExt) {
+
+		boolean added = false;
+		for (int i = 0; i < currHeapExt.extensions.size(); i++) {
+
+			Map<Integer, Map<Integer,Map<Integer,Set<String>>>> m = currHeapExt.extensions.get(i);      
+			for (Integer c1: m.keySet()) {
+
+				Map<Integer,Map<Integer,Set<String>>> m1 = m.get(c1);
+				for (Integer c2: m1.keySet()) {
+
+					Map<Integer,Set<String>> m2 = m1.get(c2);
+					for (Integer o1: m2.keySet()) {
+
+						Set<String> m3 = m2.get(o1);
+						for (String o2: m3) {
+
+							if (addPairToField(i, c1, c2, o1, o2))
+								added = true;
+
+						}
+
+					}
+
+				}
+
+			}
+
+		}	
+		
+		return added;
 	}
 	
 

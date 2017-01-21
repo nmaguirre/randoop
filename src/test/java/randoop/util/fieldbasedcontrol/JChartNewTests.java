@@ -9,10 +9,16 @@ import org.junit.Test;
 
 public class JChartNewTests {
 
+	@Test
+	public void notNullPointer() throws Throwable {
+		java.util.TimeZone timeZone105 = org.jfree.chart.axis.SegmentedTimeline.DEFAULT_TIME_ZONE;
+	     org.jfree.chart.axis.DateAxis dateAxis106 = new org.jfree.chart.axis.DateAxis("0", timeZone105);
+	     java.util.TimeZone timeZone108 = org.jfree.chart.axis.SegmentedTimeline.DEFAULT_TIME_ZONE;
+	     org.jfree.chart.axis.DateAxis dateAxis109 = new org.jfree.chart.axis.DateAxis("hi!", timeZone108);
+	}
 
 
-@Test
-
+	@Test
 	public void test328() throws Throwable {
 		java.lang.Number[][] number_array_array2 = new java.lang.Number[][] {  };
 		org.jfree.data.category.CategoryDataset categoryDataset3 = org.jfree.data.general.DatasetUtilities.createCategoryDataset("TimePeriodAnchor.MIDDLE", "RectangleAnchor.BOTTOM", number_array_array2);

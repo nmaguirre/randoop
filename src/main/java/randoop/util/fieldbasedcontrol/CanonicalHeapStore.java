@@ -315,8 +315,8 @@ public class CanonicalHeapStore {
 		}
 	}
 
+	// Returns null when an object cannot be added due to the given limits
 	public CanonizerObject addObject(Object obj) {
-
 		
 		Class<?> objcls; 
 		if (obj == null) {
@@ -379,12 +379,8 @@ public class CanonicalHeapStore {
 		res.visited = false;
 
 		return res;
+
 	}
 
-	
-	
-	
-	
-	
 
 }
