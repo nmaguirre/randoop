@@ -22,6 +22,7 @@ import randoop.util.fieldbasedcontrol.FieldExtensionsStrings;
 import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
+import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -47,6 +48,7 @@ public abstract class AbstractGenerator {
 	
  
   public int notPassingFieldBasedFilter = 0;
+  public int seqsExceedingLimits = 0;
   public int fieldBasedDroppedSeqs = 0;
 	
   public enum FieldBasedGenType {
@@ -102,7 +104,7 @@ public abstract class AbstractGenerator {
 
   @Option("Set to false to not allow tests exceeding object/array/string limits to be used as inputs for "
   		+ "other tests")
-  public static boolean field_based_gen_tests_exceeding_limits_as_inputs = true;
+  public static boolean field_based_gen_drop_tests_exceeding_object_limits = false;
 
   @Option("Disable randoop's collections and arrays generation heuristic")
   public static boolean disable_collections_generation_heuristic = false;
@@ -247,11 +249,11 @@ public abstract class AbstractGenerator {
   public HeapCanonizerRuntimeEfficient canonizer;
 
   public void initCanonizer() {
-	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_tests_exceeding_limits_as_inputs);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_drop_tests_exceeding_object_limits);  
   }
   
   public void initCanonizer(Set<String> fieldBasedGenClassnames) {
-	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_tests_exceeding_limits_as_inputs);  
+	  canonizer = new HeapCanonizerRuntimeEfficient(field_based_gen_ignore_primitive, fieldBasedGenClassnames, field_based_gen_max_objects, field_based_gen_max_class_objects, field_based_gen_max_string_length, field_based_gen_max_array, field_based_gen_drop_tests_exceeding_object_limits);  
   }
   
 
@@ -537,7 +539,7 @@ public abstract class AbstractGenerator {
         		
         		if (field_based_gen == FieldBasedGenType.DISABLED ||
         				field_based_gen_keep_non_contributing_tests_percentage == 1 || 
-        				(eSeq.isNormalExecution() && eSeq.enlargesExtensions) 
+        				(eSeq.isNormalExecution() && eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) 
         				|| !eSeq.isNormalExecution()) {
         			
            			if (eSeq.isNormalExecution()) {
@@ -654,8 +656,10 @@ public abstract class AbstractGenerator {
 
       System.out.println();
    	  System.out.println("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
+      System.out.println("Tests excceding limits: " + seqsExceedingLimits);
       System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
       System.out.println("Negative tests generated: " + negativeTestsGen);
+      System.out.println("Negative tests discarded: " + negativeTestsDropped);
       System.out.println();
       System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
       System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());

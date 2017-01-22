@@ -23,9 +23,7 @@ import randoop.NormalExecution;
 import randoop.NotExecuted;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.ForwardGenerator;
-import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.main.GenInputsAbstract;
-import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedOperation;
 import randoop.test.Check;
 import randoop.test.TestCheckGenerator;
@@ -34,11 +32,11 @@ import randoop.types.Type;
 import randoop.types.ReferenceType;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
-import randoop.util.fieldbasedcontrol.CanonicalRepresentation;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
-import randoop.util.fieldbasedcontrol.HeapCanonizer;
+import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
+import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -109,7 +107,7 @@ public class ExecutableSequence {
   // public boolean normalExecution;
 //  private boolean DIFFERENTIAL = false;
 //  private boolean DEBUG = false;
-  public boolean enlargesExtensions = false;
+  public ExtendedExtensionsResult enlargesExtensions = null;
   public boolean canonizationError = false;
 	
   /** The underlying sequence. */
@@ -443,7 +441,7 @@ public class ExecutableSequence {
   
   
   
-  public boolean enlargeExtensionsFast(HeapCanonizerRuntimeEfficient canonizer, ForwardGenerator generator) throws CanonizationErrorException {
+  public ExtendedExtensionsResult enlargeExtensionsFast(HeapCanonizerRuntimeEfficient canonizer, ForwardGenerator generator) throws CanonizationErrorException {
 	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
 	// for attempting to enlarge field extensions
 	int lastStmtIndex = this.sequence.size()-1;
@@ -453,18 +451,19 @@ public class ExecutableSequence {
     // make sure statement executed
 	ExecutionOutcome statementResult = getResult(lastStmtIndex);
 	
-	enlargesExtensions = false;
-
+	enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
 	
-	if (enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer))
-		enlargesExtensions = true;
+	if (!AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits) 
+		enlargesExtensions = enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
+	else 
+		enlargesExtensions = enlargeExtensionsLimits(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
 	
 	// Update last method's weight
 	if (AbstractGenerator.field_based_gen_weighted_selection) {
 	    Statement stmt = sequence.getStatement(lastStmtIndex);		
-		if (enlargesExtensions)
+		if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED)
 			increaseOpearationWeight(stmt, generator);
-		else
+		else if (enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED);
 			decreaseOpearationWeight(stmt, generator);
 	}
 	
@@ -473,8 +472,8 @@ public class ExecutableSequence {
   
   
   
-  private boolean enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
-	  boolean extendedExtensions = false;	
+  private ExtendedExtensionsResult enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	  ExtendedExtensionsResult enlargesExt = ExtendedExtensionsResult.NOT_EXTENDED;
 	  
 	  try {
 		  Statement stmt = sequence.getStatement(i);
@@ -483,14 +482,14 @@ public class ExecutableSequence {
 			  Object obj = statementResult;
 			  
 			  if (obj != null /*&& !CanonicalRepresentation.isObjectPrimitive(obj)*/) {
-			  	  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj)) {
+			  	  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj) == ExtendedExtensionsResult.EXTENDED) {
 		           	  if (FieldBasedGenLog.isLoggingOn()) {
 	        	    		FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 	        	    				+ stmt.toString() + " (index " + i + ")");
 		           	  }
 
 			  		  //sequence.addActiveVar(i, varIndex);
-			  		  extendedExtensions = true;
+		           	  enlargesExt = ExtendedExtensionsResult.EXTENDED;
 			  	  }
 			  }
 			  varIndex++;
@@ -500,14 +499,14 @@ public class ExecutableSequence {
 		  if (inputVariables != null && inputVariables.length > 0) {
 				for (int j=0; j<inputVariables.length; j++) {
 					if (inputVariables[j] != null /*&& !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])*/) {
-	        	    	if (canonizer.traverseBreadthFirstAndEnlargeExtensions(inputVariables[j])) {
+	        	    	if (canonizer.traverseBreadthFirstAndEnlargeExtensions(inputVariables[j]) == ExtendedExtensionsResult.EXTENDED) {
 	        	    		if (FieldBasedGenLog.isLoggingOn()) {
 	        	    			FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 	        	    					+ stmt.toString() + " (index " + i + ")");
 	        	    		}
 
 	        	    		//sequence.addActiveVar(i, varIndex);		        	    		
-	        	    		extendedExtensions = true;
+	        	    		enlargesExt = ExtendedExtensionsResult.EXTENDED;
 	        	    	}
 					}
 					varIndex++;
@@ -515,6 +514,7 @@ public class ExecutableSequence {
 		  }
 		  
 		  // Set active variable flags for minimization
+		  /*
 		  if (extendedExtensions && AbstractGenerator.field_based_gen == FieldBasedGenType.MIN)  {
 			  varIndex = 0;
 
@@ -549,6 +549,58 @@ public class ExecutableSequence {
 				  }
 			  }
 			  
+		  }*/
+		  
+	  }	catch (Exception e) {
+		  e.printStackTrace();
+		  throw new CanonizationErrorException("ERROR: Exception during heap canonization");
+	  }
+	  
+	  return enlargesExt;
+  }
+  
+  
+  
+  
+  
+  private ExtendedExtensionsResult enlargeExtensionsLimits(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	  ExtendedExtensionsResult res = ExtendedExtensionsResult.NOT_EXTENDED;
+
+	  try {
+		  Statement stmt = sequence.getStatement(i);
+		  List<Object> parameters = new LinkedList<>();
+		  if (!stmt.getOutputType().isVoid())
+			  parameters.add(statementResult);
+		  for (int j=0; j<inputVariables.length; j++) {
+			  parameters.add(inputVariables[j]);
+		  }
+
+		  List<FieldExtensionsIndexes> extensions = new LinkedList<>();
+		  for (Object o: parameters) {
+			  if (o != null) {
+				  FieldExtensionsIndexes ext = new FieldExtensionsIndexes(canonizer.store, true);
+				  res = canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext);
+				  if (res == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+					  return res; 
+
+				  extensions.add(ext);
+			  }
+			  else 
+				  extensions.add(null);
+
+		  }
+
+		  int varIndex = 0;
+		  for (FieldExtensionsIndexes ext: extensions) {
+			  if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
+				  if (FieldBasedGenLog.isLoggingOn()) {
+					  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+							  + stmt.toString() + " (index " + i + ")");
+				  }
+
+				  res = ExtendedExtensionsResult.EXTENDED;
+			  }
+			  varIndex++;
 		  }
 		  
 	  }	catch (Exception e) {
@@ -556,8 +608,9 @@ public class ExecutableSequence {
 		  throw new CanonizationErrorException("ERROR: Exception during heap canonization");
 	  }
 	  
-	  return extendedExtensions;
+	  return res;
   }
+  
 
   
   private boolean enlargeExtensionsPrecise(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
@@ -688,9 +741,10 @@ public class ExecutableSequence {
   }
 
   
-  public boolean enlargeExtensionsMin(HeapCanonizerRuntimeEfficient canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
-
-	enlargesExtensions = false;
+  
+  public ExtendedExtensionsResult enlargeExtensionsMin(HeapCanonizerRuntimeEfficient canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
+	enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
+/*
 	//	seqnum++;
 	
 	// FIXME: Figure out how to do this more efficiently.
@@ -755,7 +809,7 @@ public class ExecutableSequence {
     }
     
     //checks = checkgen.visit(this);
-    
+    */
     return enlargesExtensions;
   }
   

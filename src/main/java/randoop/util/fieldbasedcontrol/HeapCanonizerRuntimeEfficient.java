@@ -128,21 +128,12 @@ public class HeapCanonizerRuntimeEfficient {
 		return newRes;
 	}
 
-	
+
+
 	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root) {
-		if (!dropTestsExceedingLimits)
-			return traverseBreadthFirstAndEnlargeExtensions(root, store.extensions);
-		else {
-			FieldExtensionsIndexes currHeapExt = new FieldExtensionsIndexes(store, true);
-			if (traverseBreadthFirstAndEnlargeExtensions(root, currHeapExt) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
-				return ExtendedExtensionsResult.LIMITS_EXCEEDED;
-			
-			if (store.extensions.addAllPairs(currHeapExt))
-				return ExtendedExtensionsResult.EXTENDED;
-			else
-				return ExtendedExtensionsResult.NOT_EXTENDED;
-		}	
+		return traverseBreadthFirstAndEnlargeExtensions(root, store.extensions);
 	}
+	
 	
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 

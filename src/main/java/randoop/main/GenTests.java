@@ -192,7 +192,11 @@ public class GenTests extends GenInputsAbstract {
 		System.out.println("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
 		System.out.println("> Field Based Generation Option: --field-based-gen-max-objects=" + AbstractGenerator.field_based_gen_max_objects);
 		System.out.println("> Field Based Generation Option: --field-based-gen-max-array=" + AbstractGenerator.field_based_gen_max_array);
+		System.out.println("> Field Based Generation Option: --field-based-gen-max-string-length=" + AbstractGenerator.field_based_gen_max_string_length);
 		System.out.println("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
+		System.out.println("> Field Based Generation Option: --field-based-gen-drop-tests-exceeding-object-limits=" + AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits);
+		System.out.println("> Field Based Generation Option: --field-based-gen-keep-negative-tests-percentage=" + AbstractGenerator.keep_negative_tests_percentage);
+		System.out.println("> Field Based Generation Option: --field-based-gen-disable-collections-generation-heuristic=" + AbstractGenerator.disable_collections_generation_heuristic);
 		System.out.println("> Field Based Generation Option: --field-based-gen-weighted-selection=" + AbstractGenerator.field_based_gen_weighted_selection);
 		System.out.println("> Field Based Generation Option: --weight-increment=" + AbstractGenerator.weight_increment);
 		System.out.println("> Field Based Generation Option: --weight-decrement=" + AbstractGenerator.weight_decrement);
@@ -200,7 +204,7 @@ public class GenTests extends GenInputsAbstract {
 		System.out.println("> Field Based Generation Option: --larger-weight=" + AbstractGenerator.larger_weight);
 		System.out.println("> Field Based Generation Option: --starting-weight=" + AbstractGenerator.starting_weight);
 	}
-    
+	
     
     // PABLO: If logging is on, print information
 	if (FieldBasedGenLog.isLoggingOn()) {
@@ -210,10 +214,11 @@ public class GenTests extends GenInputsAbstract {
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-objects=" + AbstractGenerator.field_based_gen_max_objects);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-array=" + AbstractGenerator.field_based_gen_max_array);
-
-		//FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-precise-canonization=" + AbstractGenerator.field_based_gen_precise_canonization);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-string-length=" + AbstractGenerator.field_based_gen_max_string_length);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
-
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-drop-tests-exceeding-object-limits=" + AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-negative-tests-percentage=" + AbstractGenerator.keep_negative_tests_percentage);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-disable-collections-generation-heuristic=" + AbstractGenerator.disable_collections_generation_heuristic);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-weighted-selection=" + AbstractGenerator.field_based_gen_weighted_selection);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --weight-increment=" + AbstractGenerator.weight_increment);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --weight-decrement=" + AbstractGenerator.weight_decrement);

@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
+
 import randoop.BugInRandoopException;
 import randoop.DummyVisitor;
 import randoop.Globals;
@@ -38,6 +40,7 @@ import randoop.util.SimpleList;
 import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
+import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
 
 
 /**
@@ -246,7 +249,7 @@ public class ForwardGenerator extends AbstractGenerator {
 	    	else
 	    		eSeq.enlargeExtensionsMin(canonizer, checkGenerator, this);
 	    		
-    		if (!eSeq.enlargesExtensions) {
+    		if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
         	    notPassingFieldBasedFilter++;
         		eSeq.sequence.clearAllActiveFlags();
 
@@ -259,6 +262,17 @@ public class ForwardGenerator extends AbstractGenerator {
            		if (FieldBasedGenLog.isLoggingOn()) 
            			FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
         	}
+    		else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
+        	    notPassingFieldBasedFilter++;
+    			seqsExceedingLimits++;
+        		eSeq.sequence.clearAllActiveFlags();
+
+        		if (field_based_gen_keep_non_contributing_tests_percentage != 1)
+        			coinFlipRes = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
+
+           		if (FieldBasedGenLog.isLoggingOn()) 
+           			FieldBasedGenLog.logLine("> The current sequence exceeded the given object limits");
+    		}
         	else {
 
            		if (FieldBasedGenLog.isLoggingOn())

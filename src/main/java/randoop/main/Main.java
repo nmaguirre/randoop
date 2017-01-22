@@ -61,19 +61,23 @@ public class Main {
     boolean success = false;
     try {
 
-      long startTime = System.nanoTime(); // reset start time.
+      long startTime = System.currentTimeMillis(); // reset start time.
      
       success = handler.handle(args2);
       
-      long endTime = System.nanoTime();
-      
-      
+      long endTime = System.currentTimeMillis() - startTime;
       
       if (!success) {
         System.err.println("The command you issued returned a failing status flag.");
       }
 
-      System.out.println("Total execution time: " + (endTime - startTime) / 1000000 + " seconds");
+      System.out.println("Total execution time: " + (endTime / 1000) + " s");
+
+      long sec = (endTime / 1000) % 60;
+      long min = ((endTime / 1000) / 60) % 60;
+      long hr = (((endTime / 1000) / 60) / 60);
+
+      System.out.println("Total execution time: " + hr + "h " + min + "m " + sec + " s");
       
     } catch (RandoopTextuiException e) {
 
