@@ -9,6 +9,24 @@ import org.junit.Test;
 
 public class JChartNewTests {
 
+
+	@Test
+	public void notSoLargeNumberOfObjects() throws Throwable {
+
+		java.util.TimeZone timeZone1 = org.jfree.chart.axis.SegmentedTimeline.NO_DST_TIME_ZONE;
+		org.jfree.chart.axis.DateAxis dateAxis2 = new org.jfree.chart.axis.DateAxis("{0}: ({1}, {2})", timeZone1);
+	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(false, 10000, 1000, 1000, 1000, true);
+//	    canonizer3.activateReadableExtensions();
+	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(dateAxis2);
+	    System.out.println(canonizer3.store.extensions.size());
+		canonizer3.traverseBreadthFirstAndEnlargeExtensions(timeZone1); 
+	    System.out.println(canonizer3.store.extensions.size());
+    
+	    
+	}
+
+
+
 	@Test
 	public void notNullPointer() throws Throwable {
 		java.util.TimeZone timeZone105 = org.jfree.chart.axis.SegmentedTimeline.DEFAULT_TIME_ZONE;

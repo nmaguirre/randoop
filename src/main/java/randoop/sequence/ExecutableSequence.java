@@ -579,9 +579,8 @@ public class ExecutableSequence {
 		  for (Object o: parameters) {
 			  if (o != null) {
 				  FieldExtensionsIndexes ext = new FieldExtensionsIndexes(canonizer.store, true);
-				  res = canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext);
-				  if (res == ExtendedExtensionsResult.LIMITS_EXCEEDED)
-					  return res; 
+				  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+					  return ExtendedExtensionsResult.LIMITS_EXCEEDED; 
 
 				  extensions.add(ext);
 			  }

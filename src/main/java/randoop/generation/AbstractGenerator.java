@@ -97,10 +97,10 @@ public abstract class AbstractGenerator {
   public static int field_based_gen_max_array = 1000;
 
   @Option("Only store up to this number of objects during canonization")
-  public static int field_based_gen_max_objects = 1000;
+  public static int field_based_gen_max_objects = 10000;
 
   @Option("Only store up to this number of objects for each individual class during canonization")
-  public static int field_based_gen_max_class_objects = 10000;
+  public static int field_based_gen_max_class_objects = 1000;
 
   @Option("Set to false to not allow tests exceeding object/array/string limits to be used as inputs for "
   		+ "other tests")

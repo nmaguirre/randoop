@@ -77,7 +77,7 @@ public class Main {
       long min = ((endTime / 1000) / 60) % 60;
       long hr = (((endTime / 1000) / 60) / 60);
 
-      System.out.println("Total execution time: " + hr + "h " + min + "m " + sec + " s");
+      System.out.println("Total execution time: " + hr + "h" + min + "m" + sec + "s");
       
     } catch (RandoopTextuiException e) {
 

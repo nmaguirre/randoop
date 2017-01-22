@@ -44,7 +44,7 @@ public class FieldExtensionsIndexes {
 		CanonizerClass c2 = o2.cc; 
 			
 		if (o2.primitive()) 
-			return addPairToField(field.index, c1.index, c2.index, o1.index, o2.toString());
+			return addPairToField(field.index, c1.index, c2.index, o1.index, o2.obj.toString());
 		else
 			return addPairToField(field.index, c1.index, c2.index, o1.index, o2.index.toString());
 	}

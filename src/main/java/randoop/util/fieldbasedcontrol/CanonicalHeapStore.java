@@ -313,6 +313,7 @@ public class CanonicalHeapStore {
 		for (List<CanonizerObject> l: store) {
 			l.clear();
 		}
+		storeSize = 0;
 	}
 
 	// Returns null when an object cannot be added due to the given limits
@@ -331,7 +332,9 @@ public class CanonicalHeapStore {
 		if (cc.cls == String.class && ((String)obj).length() >= maxStringLength) {
 			
 			if (dropTestsExceedingLimits) {
-				String message = "> FIELD BASED GENERATION WARNING: Max string length (" + maxStringLength + ") exceeded";
+				String message = "> FIELD BASED GENERATION WARNING: Max string length (" + maxStringLength + ") exceeded. "
+						+ "String: " + ((String)obj).substring(0, Math.min(((String)obj).length(), 100)) + "[...]" + 
+						". Length: " + ((String)obj).length();
 				System.out.println(message);
 				if (FieldBasedGenLog.isLoggingOn()) 
 					FieldBasedGenLog.logLine(message);
@@ -355,9 +358,8 @@ public class CanonicalHeapStore {
 			}
 		}
 		
-		storeSize++;
 		if (storeSize > maxGlobalObjects) {
-			String message = "> FIELD BASED GENERATION WARNING: Max number of objects limit (" + maxGlobalObjects + ") exceeded";
+			String message = "> FIELD BASED GENERATION WARNING: Max global number of objects limit (" + maxGlobalObjects + ") exceeded";
 			System.out.println(message);
 			if (FieldBasedGenLog.isLoggingOn()) 
 				FieldBasedGenLog.logLine(message);
@@ -377,6 +379,7 @@ public class CanonicalHeapStore {
 		CanonizerObject res = new CanonizerObject(obj, cc, l.size());
 		l.add(res);
 		res.visited = false;
+		storeSize++;
 
 		return res;
 

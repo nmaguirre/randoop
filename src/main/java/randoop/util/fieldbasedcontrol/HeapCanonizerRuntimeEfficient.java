@@ -23,8 +23,6 @@ public class HeapCanonizerRuntimeEfficient {
 	
 	public FieldExtensionsStrings readableExtensions = null;
 	
-	private boolean extendedExtensions;
-
 	protected boolean ignorePrimitive;
 	
 	public CanonicalHeapStore store;
@@ -141,8 +139,8 @@ public class HeapCanonizerRuntimeEfficient {
 	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root, FieldExtensionsIndexes extensions) {
 		if (root == null) return ExtendedExtensionsResult.NOT_EXTENDED;
 		store.clear();
-		extendedExtensions = false;
   	
+		ExtendedExtensionsResult extended = ExtendedExtensionsResult.NOT_EXTENDED;
 		/*
 		CanonizerObject croot = store.addObject(root);
 		if (croot.ignored() || croot.primitive() || croot.isNull()) 
@@ -187,7 +185,7 @@ public class HeapCanonizerRuntimeEfficient {
 
 					CanonizerField arrDummyFld = store.canonizeArrayField(cobj.cc, i);
 					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, arrDummyFld, extensions))
-						extendedExtensions = true; 
+						extended = ExtendedExtensionsResult.EXTENDED; 
 				}
 			}
 			else {
@@ -217,7 +215,7 @@ public class HeapCanonizerRuntimeEfficient {
 						toVisit.add(newcobj);
 
 					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, cf, extensions))
-						extendedExtensions = true; 
+						extended = ExtendedExtensionsResult.EXTENDED;
 				}
 			}
 		}
@@ -230,19 +228,16 @@ public class HeapCanonizerRuntimeEfficient {
 			}
 		}	
   		
-		if (extendedExtensions)
-			return ExtendedExtensionsResult.EXTENDED;
-		else
-			return ExtendedExtensionsResult.NOT_EXTENDED;
-		
+		return extended;
 	}
 	
 	
+	/*
 	// Returns true iff the last canonization enlarged the extensions
 	public boolean extensionsExtended() {
 		return extendedExtensions;
 	}
-	
+	*/
 	
 	
 
