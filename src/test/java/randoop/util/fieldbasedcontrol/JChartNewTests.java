@@ -9,6 +9,24 @@ import org.junit.Test;
 
 public class JChartNewTests {
 
+	@Test
+	public void flakyTest() throws Throwable {
+		org.jfree.chart.axis.SegmentedTimeline segmentedTimeline3 = new org.jfree.chart.axis.SegmentedTimeline(0L, (-1), (int)(short)100);
+		long long5 = segmentedTimeline3.getTimeFromLong((long)10);
+		// during test generation this statement threw an exception of type java.lang.NullPointerException in error
+		segmentedTimeline3.addBaseTimelineException((long)(short)1);	
+	}
+	
+	
+	@Test
+	public void flakyTest2() throws Throwable {
+		org.jfree.chart.axis.SegmentedTimeline segmentedTimeline3 = new org.jfree.chart.axis.SegmentedTimeline(0L, (-1), (int)(short)100);
+		long long5 = segmentedTimeline3.getTimeFromLong((long)10);
+		long long6 = segmentedTimeline3.getSegmentSize();
+		// during test generation this statement threw an exception of type java.lang.NullPointerException in error
+		segmentedTimeline3.addBaseTimelineExclusions((long)4, 1484578799999L);
+	}
+	
 
 	@Test
 	public void notSoLargeNumberOfObjects() throws Throwable {

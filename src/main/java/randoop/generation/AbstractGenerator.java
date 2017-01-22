@@ -625,11 +625,29 @@ public abstract class AbstractGenerator {
 
         }
         else {
-        	System.out.println("> Sequence with invalid behavior:");
-        	System.out.println(eSeq.sequence.toCodeString());
+        	System.out.println("> ERROR: Sequence with invalid behavior:");
+        	System.out.println(eSeq.toCodeString());
+      		if (FieldBasedGenLog.isLoggingOn()) {
+    			FieldBasedGenLog.logLine("> ERROR: Sequence with invalid behaviour:");
+    			FieldBasedGenLog.logLine(eSeq.toCodeString());
+      		}
         }
 
       }
+      else {
+    	  System.out.println("> ERROR: Failing sequence:");
+    	  System.out.println(eSeq.toCodeString());
+    	  
+  		if (FieldBasedGenLog.isLoggingOn()) {
+			FieldBasedGenLog.logLine("> ERROR: Failing sequence:");
+			FieldBasedGenLog.logLine(eSeq.toCodeString());
+			
+  		}
+  		
+      }
+     
+      
+      
 
       if (dump_sequences) {
         System.out.printf("Sequence after execution:%n%s%n", eSeq.toString());
