@@ -96,6 +96,7 @@ public class OperationModel {
     classLiteralMap = new MultiMap<>();
     annotatedTestValues = new LinkedHashSet<>();
     contracts = new ContractSet();
+    /*
     contracts.add(EqualsReflexive.getInstance());
     contracts.add(EqualsSymmetric.getInstance());
     contracts.add(EqualsHashcode.getInstance());
@@ -107,7 +108,7 @@ public class OperationModel {
     contracts.add(CompareToEquals.getInstance());
     contracts.add(CompareToSubs.getInstance());
     contracts.add(CompareToTransitive.getInstance());
-
+	*/
     exercisedClasses = new LinkedHashSet<>();
     operations = new TreeSet<>();
   }
