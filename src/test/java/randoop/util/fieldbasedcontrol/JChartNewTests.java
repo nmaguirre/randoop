@@ -9,6 +9,203 @@ import org.junit.Test;
 
 public class JChartNewTests {
 
+	  @Test
+	  public void test00112() throws Throwable {
+	
+		  /*
+	org.jfree.chart.renderer.RenderAttributes renderAttributes1 = new org.jfree.chart.renderer.RenderAttributes(true);
+	// during test generation this statement threw an exception of type java.lang.NullPointerException in error
+	java.lang.Boolean b4 = renderAttributes1.isLabelVisible(0, 0);
+	  	*/
+	  }
+	  
+	  
+	  
+	     @Test
+	     public void test11137() throws Throwable {
+	   
+	   
+	  	     org.jfree.chart.renderer.category.BarRenderer barRenderer0 = new org.jfree.chart.renderer.category.BarRenderer();
+	  	     barRenderer0.setSeriesCreateEntities(0, (java.lang.Boolean)false);
+	  	     boolean b4 = barRenderer0.getShadowsVisible();
+	  	     
+	  	     // Regression assertion (captures the current behavior of the code)
+	  	     org.junit.Assert.assertTrue(b4 == false);
+	  	     
+	     }
+	  
+	  
+	  
+	
+	     @Test
+	     public void test137() throws Throwable {
+	   
+	   
+	  	     org.jfree.chart.renderer.category.BarRenderer barRenderer0 = new org.jfree.chart.renderer.category.BarRenderer();
+	  	     barRenderer0.setSeriesCreateEntities(0, (java.lang.Boolean)false);
+	  	     boolean b4 = barRenderer0.getShadowsVisible();
+	  	     org.jfree.chart.urls.CategoryURLGenerator categoryURLGenerator6 = null;
+	  	     barRenderer0.setSeriesURLGenerator(1, categoryURLGenerator6, false);
+	  	     double d9 = barRenderer0.getShadowYOffset();
+	  	     
+	  	     // Regression assertion (captures the current behavior of the code)
+	  	     org.junit.Assert.assertTrue(b4 == false);
+	  	     
+	  	     // Regression assertion (captures the current behavior of the code)
+	  	     org.junit.Assert.assertTrue(d9 == 4.0d);
+	   
+	     }
+
+	  @Test
+	  public void test002() throws Throwable {
+
+	    org.jfree.chart.renderer.category.LineAndShapeRenderer lineAndShapeRenderer2 = new org.jfree.chart.renderer.category.LineAndShapeRenderer(false, false);
+	    java.awt.Stroke stroke3 = lineAndShapeRenderer2.getBaseStroke();
+	    java.awt.Font font7 = lineAndShapeRenderer2.getItemLabelFont((int)(byte)1, (int)'#', false);
+	    lineAndShapeRenderer2.setDataBoundsIncludesVisibleSeriesOnly(false);
+	    org.jfree.chart.labels.CategoryToolTipGenerator categoryToolTipGenerator10 = null;
+	    lineAndShapeRenderer2.setBaseToolTipGenerator(categoryToolTipGenerator10);
+	    org.jfree.chart.labels.ItemLabelPosition itemLabelPosition15 = lineAndShapeRenderer2.getNegativeItemLabelPosition(10, 0, false);
+	    java.awt.Font font16 = lineAndShapeRenderer2.getBaseLegendTextFont();
+	    java.awt.Graphics2D graphics2D17 = null;
+	    org.jfree.chart.renderer.category.CategoryItemRendererState categoryItemRendererState18 = null;
+	    java.awt.geom.Rectangle2D rectangle2D19 = null;
+	    org.jfree.data.category.CategoryDataset categoryDataset20 = null;
+	    org.jfree.chart.axis.CategoryAxis categoryAxis21 = new org.jfree.chart.axis.CategoryAxis();
+	    org.jfree.chart.plot.Plot plot22 = null;
+	    categoryAxis21.setPlot(plot22);
+	    java.awt.Graphics2D graphics2D24 = null;
+	    java.awt.geom.Rectangle2D rectangle2D26 = null;
+	    org.jfree.chart.util.RectangleEdge rectangleEdge27 = null;
+	    org.jfree.chart.axis.AxisState axisState28 = null;
+	    categoryAxis21.drawTickMarks(graphics2D24, (double)(short)10, rectangle2D26, rectangleEdge27, axisState28);
+	    java.awt.Font font30 = categoryAxis21.getLabelFont();
+	    org.jfree.chart.axis.ValueAxis valueAxis31 = null;
+	    org.jfree.chart.renderer.category.LineAndShapeRenderer lineAndShapeRenderer34 = new org.jfree.chart.renderer.category.LineAndShapeRenderer(false, false);
+	    java.awt.Stroke stroke35 = lineAndShapeRenderer34.getBaseStroke();
+	    boolean b36 = lineAndShapeRenderer34.getAutoPopulateSeriesShape();
+	    org.jfree.chart.labels.ItemLabelPosition itemLabelPosition37 = lineAndShapeRenderer34.getBasePositiveItemLabelPosition();
+	    org.jfree.chart.plot.CategoryPlot categoryPlot38 = new org.jfree.chart.plot.CategoryPlot(categoryDataset20, categoryAxis21, valueAxis31, (org.jfree.chart.renderer.category.CategoryItemRenderer)lineAndShapeRenderer34);
+	    java.awt.Graphics2D graphics2D39 = null;
+	    java.awt.geom.Rectangle2D rectangle2D40 = null;
+	    org.jfree.chart.plot.PlotRenderingInfo plotRenderingInfo42 = null;
+	    org.jfree.chart.plot.CategoryCrosshairState categoryCrosshairState43 = null;
+	    boolean b44 = categoryPlot38.render(graphics2D39, rectangle2D40, 128, plotRenderingInfo42, categoryCrosshairState43);
+	    boolean b45 = categoryPlot38.isRangeZeroBaselineVisible();
+	    org.jfree.chart.renderer.category.CategoryItemRenderer categoryItemRenderer47 = categoryPlot38.getRenderer((int)(byte)100);
+	    java.awt.Font font48 = org.jfree.chart.plot.CategoryPlot.DEFAULT_VALUE_LABEL_FONT;
+	    categoryPlot38.setNoDataMessageFont(font48);
+	    org.jfree.chart.axis.CategoryAxis categoryAxis50 = null;
+	    org.jfree.chart.axis.ValueAxis valueAxis51 = null;
+	    org.jfree.data.category.DefaultCategoryDataset defaultCategoryDataset52 = new org.jfree.data.category.DefaultCategoryDataset();
+	    defaultCategoryDataset52.setValue((double)'#', (java.lang.Comparable)"-3,-3,3,3", (java.lang.Comparable)(short)0);
+	    int i57 = defaultCategoryDataset52.getRowCount();
+	    lineAndShapeRenderer2.drawItem(graphics2D17, categoryItemRendererState18, rectangle2D19, categoryPlot38, categoryAxis50, valueAxis51, (org.jfree.data.category.CategoryDataset)defaultCategoryDataset52, (-4194112), (int)'a', false, 8);
+	    org.jfree.chart.event.PlotChangeListener plotChangeListener63 = null;
+	    categoryPlot38.addChangeListener(plotChangeListener63);
+	    org.jfree.chart.plot.Marker marker65 = null;
+	    org.jfree.chart.util.Layer layer66 = null;
+	    // The following exception was thrown during execution in test generation
+	    try {
+	    categoryPlot38.addRangeMarker(marker65, layer66);
+	      org.junit.Assert.fail("Expected exception of type java.lang.NullPointerException");
+	    } catch (java.lang.NullPointerException e) {
+	      // Expected exception.
+	      if (! e.getClass().getCanonicalName().equals("java.lang.NullPointerException")) {
+	        org.junit.Assert.fail("Expected exception of type java.lang.NullPointerException, got " + e.getClass().getCanonicalName());
+	      }
+	    }
+	    
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNotNull(stroke3);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNotNull(font7);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNotNull(itemLabelPosition15);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNull(font16);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNotNull(font30);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNotNull(stroke35);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertTrue(b36 == true);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNotNull(itemLabelPosition37);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertTrue(b44 == false);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertTrue(b45 == false);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNull(categoryItemRenderer47);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNotNull(font48);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertTrue(i57 == 1);
+
+	  }
+
+	
+
+  @Test
+  public void test181() throws Throwable {
+
+
+
+    org.jfree.chart.ui.BasicProjectInfo basicProjectInfo0 = new org.jfree.chart.ui.BasicProjectInfo();
+    basicProjectInfo0.addOptionalLibrary("");
+    org.jfree.chart.ui.BasicProjectInfo basicProjectInfo7 = new org.jfree.chart.ui.BasicProjectInfo("item", "PieLabelLinkStyle.CUBIC_CURVE", "[100.0, 1.0]", "hi!");
+    org.jfree.chart.axis.AxisLocation axisLocation8 = org.jfree.chart.axis.AxisLocation.BOTTOM_OR_RIGHT;
+    boolean b9 = basicProjectInfo7.equals((java.lang.Object)axisLocation8);
+    basicProjectInfo0.addOptionalLibrary((org.jfree.chart.ui.Library)basicProjectInfo7);
+    java.lang.String str11 = basicProjectInfo7.getInfo();
+    java.lang.String str12 = basicProjectInfo7.getVersion();
+    org.jfree.chart.ui.ProjectInfo projectInfo13 = org.jfree.chart.JFreeChart.INFO;
+    basicProjectInfo7.addOptionalLibrary((org.jfree.chart.ui.Library)projectInfo13);
+    projectInfo13.addOptionalLibrary("Size2D[width=0.0, height=0.0]");
+    // The following exception was thrown during execution in test generation
+    try {
+    java.lang.String str17 = projectInfo13.toString();
+      org.junit.Assert.fail("Expected exception of type java.lang.ClassCastException");
+    } catch (java.lang.ClassCastException e) {
+      // Expected exception.
+      if (! e.getClass().getCanonicalName().equals("java.lang.ClassCastException")) {
+        org.junit.Assert.fail("Expected exception of type java.lang.ClassCastException, got " + e.getClass().getCanonicalName());
+      }
+    }
+    
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertNotNull(axisLocation8);
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertTrue(b9 == false);
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertTrue("'" + str11 + "' != '" + "hi!"+ "'", str11.equals("hi!"));
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertTrue("'" + str12 + "' != '" + "PieLabelLinkStyle.CUBIC_CURVE"+ "'", str12.equals("PieLabelLinkStyle.CUBIC_CURVE"));
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertNotNull(projectInfo13);
+
+  }	
+	
+	
 	@Test
 	public void flakyTest() throws Throwable {
 		org.jfree.chart.axis.SegmentedTimeline segmentedTimeline3 = new org.jfree.chart.axis.SegmentedTimeline(0L, (-1), (int)(short)100);
@@ -40,9 +237,7 @@ public class JChartNewTests {
 		canonizer3.traverseBreadthFirstAndEnlargeExtensions(timeZone1); 
 	    System.out.println(canonizer3.store.extensions.size());
     
-	    
 	}
-
 
 
 	@Test

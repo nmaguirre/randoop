@@ -256,9 +256,8 @@ public class ForwardGenerator extends AbstractGenerator {
         		if (field_based_gen_keep_non_contributing_tests_percentage != 1)
         			coinFlipRes = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
 
-        		/* 
         		if (field_based_gen_keep_non_contributing_tests_percentage == 1 || coinFlipRes)
-        			processSequence(eSeq); */
+        			processSequence(eSeq);
 
            		if (FieldBasedGenLog.isLoggingOn()) 
            			FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");

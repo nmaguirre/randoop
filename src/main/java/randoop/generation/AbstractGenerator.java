@@ -668,8 +668,12 @@ public abstract class AbstractGenerator {
 
     if (!GenInputsAbstract.noprogressdisplay) {
       if (FieldBasedGenLog.isLoggingOn()) {
-    	FieldBasedGenLog.logLine("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
-    	FieldBasedGenLog.logLine("Field based dropped tests: " + fieldBasedDroppedSeqs);
+    	  System.out.println("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
+    	  System.out.println("Tests excceding limits: " + seqsExceedingLimits);
+    	  System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
+    	  System.out.println("Negative tests generated: " + negativeTestsGen);
+    	  System.out.println("Negative tests discarded: " + negativeTestsDropped);
+    	  System.out.println();
       }
 
       System.out.println();

@@ -24,6 +24,7 @@ import randoop.NotExecuted;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.ForwardGenerator;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedOperation;
 import randoop.test.Check;
 import randoop.test.TestCheckGenerator;
@@ -481,7 +482,7 @@ public class ExecutableSequence {
 		  if (!stmt.getOutputType().isVoid()) {
 			  Object obj = statementResult;
 			  
-			  if (obj != null /*&& !CanonicalRepresentation.isObjectPrimitive(obj)*/) {
+			  if (obj != null && !isObjectPrimtive(obj)/*&& !CanonicalRepresentation.isObjectPrimitive(obj)*/) {
 			  	  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj) == ExtendedExtensionsResult.EXTENDED) {
 		           	  if (FieldBasedGenLog.isLoggingOn()) {
 	        	    		FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
@@ -498,7 +499,7 @@ public class ExecutableSequence {
 		  // Cover the field values belonging to all the current method's parameters
 		  if (inputVariables != null && inputVariables.length > 0) {
 				for (int j=0; j<inputVariables.length; j++) {
-					if (inputVariables[j] != null /*&& !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])*/) {
+					if (inputVariables[j] != null && !isObjectPrimtive(inputVariables[j]) /*&& !CanonicalRepresentation.isObjectPrimitive(inputVariables[j])*/) {
 	        	    	if (canonizer.traverseBreadthFirstAndEnlargeExtensions(inputVariables[j]) == ExtendedExtensionsResult.EXTENDED) {
 	        	    		if (FieldBasedGenLog.isLoggingOn()) {
 	        	    			FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
@@ -561,6 +562,10 @@ public class ExecutableSequence {
   
   
   
+  private boolean isObjectPrimtive(Object o) {
+	  Class<?> objectClass = o.getClass();
+	  return NonreceiverTerm.isNonreceiverType(objectClass) || objectClass.equals(Class.class) || objectClass.equals(Object.class);
+  }
   
   
   private ExtendedExtensionsResult enlargeExtensionsLimits(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
@@ -568,7 +573,7 @@ public class ExecutableSequence {
 
 	  try {
 		  Statement stmt = sequence.getStatement(i);
-		  List<Object> parameters = new LinkedList<>();
+		  List<Object> parameters = new ArrayList<>();
 		  if (!stmt.getOutputType().isVoid())
 			  parameters.add(statementResult);
 		  for (int j=0; j<inputVariables.length; j++) {
@@ -577,7 +582,7 @@ public class ExecutableSequence {
 
 		  List<FieldExtensionsIndexes> extensions = new LinkedList<>();
 		  for (Object o: parameters) {
-			  if (o != null) {
+			  if (o != null && !isObjectPrimtive(o)) {
 				  FieldExtensionsIndexes ext = new FieldExtensionsIndexes(canonizer.store, true);
 				  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
 					  return ExtendedExtensionsResult.LIMITS_EXCEEDED; 
@@ -592,15 +597,15 @@ public class ExecutableSequence {
 		  int varIndex = 0;
 		  for (FieldExtensionsIndexes ext: extensions) {
 			  if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
-				  if (FieldBasedGenLog.isLoggingOn()) {
+				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 							  + stmt.toString() + " (index " + i + ")");
-				  }
 
 				  res = ExtendedExtensionsResult.EXTENDED;
 			  }
 			  varIndex++;
 		  }
+		  
 		  
 	  }	catch (Exception e) {
 		  e.printStackTrace();
