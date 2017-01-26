@@ -281,18 +281,19 @@ public class ForwardGenerator extends AbstractGenerator {
            		if (field_based_gen == FieldBasedGenType.FAST) {
     	    		processSequence(eSeq);
 
-    	    		if (eSeq.sequence.hasActiveFlags()) {
+    	    		if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection)
+    	    			componentManager.addFieldBasedActiveSequence(eSeq.sequence);
+    	    		else
     	    			componentManager.addGeneratedSequence(eSeq.sequence);
-
-    	    			if (FieldBasedGenLog.isLoggingOn())
-    	    				FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
-    	    		}
+   	    			
+    	    		if (FieldBasedGenLog.isLoggingOn())
+    	    			FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
     	    	}
     	    	else {
     	    		// FIXME: This method should only consider indexes belonging to the minimized sequences. 
     	            processSequence(eSeq);
 
-    	            List<Sequence> minSeq = componentManager.addFieldBasedActiveSequences(eSeq.sequence);
+    	            List<Sequence> minSeq = componentManager.addFieldBasedActiveSubsequences(eSeq.sequence);
     		    	
     		    	// The minimized sequences recently generated are subsumed by the whole test
     	            for (Sequence s: minSeq) {

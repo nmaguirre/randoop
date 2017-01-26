@@ -187,7 +187,7 @@ public final class Sequence implements WeightedElement {
   
   
   // PABLO: statement i -> list active variables in statement i   
-  private Map<Integer, List<Integer>> activeVars;
+  private Map<Integer, List<Integer>> activeVars = new HashMap<>();
   
   
   public void addActiveVar(int stmtIndex, int varIndex) {
@@ -498,7 +498,7 @@ public final class Sequence implements WeightedElement {
     this.activeFlags = new BitSet(this.size());
     setAllActiveFlags();
     
-    this.activeVars = new HashMap<Integer, List<Integer>>();
+    //this.activeVars = new HashMap<Integer, List<Integer>>();
     //this.lastStmtActiveVars = new LinkedList<Integer>();
     
     /*for (int i = 0; i < this.size(); i++) 

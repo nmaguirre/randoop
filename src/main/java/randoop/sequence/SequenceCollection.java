@@ -171,34 +171,30 @@ public class SequenceCollection {
     checkRep();
   }
   
-  /*
-  public void addFieldBased(Sequence sequence) {
-    List<Type> formalTypes = sequence.getTypesForLastStatement();
-    List<Variable> arguments = sequence.getVariablesOfLastStatement();
-    assert formalTypes.size() == arguments.size();
-    /*
-    System.out.println("> Sequence");
-	System.out.println(sequence.toCodeString());
-    
-	for (Integer i: sequence.getLastStmtActiveVars()) {
-		Variable argument = arguments.get(i);
-		/*
-		System.out.println("  > Adding subsequence for index: " + i);
-		System.out.println("  > Variable: " + argument.toString());
-		
-		assert formalTypes.get(i).isAssignableFrom(argument.getType())
-		      : formalTypes.get(i).getName()
-		          + " should be assignable from "
-		          + argument.getType().getName();
-	    Type type = formalTypes.get(i);
-	    typeSet.add(type);
-	    updateCompatibleMap(sequence, type);
-	}
-    
-    checkRep();
-  }
-*/
   
+  public void addFieldBased(Sequence sequence) {
+	  List<Type> formalTypes = sequence.getTypesForLastStatement();
+	  List<Variable> arguments = sequence.getVariablesOfLastStatement();
+	  assert formalTypes.size() == arguments.size();
+
+	  // All the active vars are figured out during precise minimization
+	  for (Integer i: sequence.getActiveVars(sequence.size()-1)) {
+		  Variable argument = arguments.get(i);
+		  assert formalTypes.get(i).isAssignableFrom(argument.getType())
+		  : formalTypes.get(i).getName()
+		  + " should be assignable from "
+		  + argument.getType().getName();
+
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine("> Current subsequence active var: " + argument.toString() + " , index " + i);
+
+		  Type type = formalTypes.get(i);
+		  typeSet.add(type);
+		  updateCompatibleMap(sequence, type);
+	  }
+
+	  checkRep();
+  }
   
   
   // PABLO: Save the subsequences that were active according to the extensions

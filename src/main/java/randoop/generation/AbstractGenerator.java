@@ -104,11 +104,14 @@ public abstract class AbstractGenerator {
 
   @Option("Set to false to not allow tests exceeding object/array/string limits to be used as inputs for "
   		+ "other tests")
-  public static boolean field_based_gen_drop_tests_exceeding_object_limits = false;
+  public static boolean field_based_gen_drop_tests_exceeding_object_limits = true;
 
   @Option("Disable randoop's collections and arrays generation heuristic")
   public static boolean disable_collections_generation_heuristic = false;
 
+  @Option("Allows field based generation to detect precisely which objects enlarge the extensions."
+  		+ " This may negatively affect runtime performance.")
+  public static boolean field_based_gen_precise_enlarging_objects_detection = true;
 
 //   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
 //  public static boolean field_based_gen_precise_canonization = true;

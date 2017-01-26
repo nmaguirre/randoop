@@ -39,9 +39,7 @@ public class VectorsDifferentialTests {
 	    FieldExtensionsIndexes fe4 = canonizer3.getExtensions();
 	    fe4.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext4.txt");
 	        
-	    assertTrue(fe1.equals(fe2));
-	    assertTrue(fe2.equals(fe3));
-	    assertTrue(fe3.size() == fe4.size()); 
+	    assertTrue(fe3.equals(fe4.toFieldExtensionsStrings()));
   	}    
 
     @Test
@@ -82,9 +80,7 @@ public class VectorsDifferentialTests {
 	    FieldExtensionsIndexes fe4 = canonizer3.getExtensions();
 	    fe4.toFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext4.txt");
 	        
-	    assertTrue(fe1.equals(fe2));
-	    assertTrue(fe2.equals(fe3));
-	    assertTrue(fe3.size() == fe4.size());
+	    assertTrue(fe3.equals(fe4.toFieldExtensionsStrings()));
    
     }
 	

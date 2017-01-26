@@ -1,25 +1,13 @@
 package randoop.util.fieldbasedcontrol;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import org.jfree.data.xy.XYDataset;
 import org.junit.Test;
 
+
 public class JChartNewTests {
 
-	  @Test
-	  public void test00112() throws Throwable {
-	
-		  /*
-	org.jfree.chart.renderer.RenderAttributes renderAttributes1 = new org.jfree.chart.renderer.RenderAttributes(true);
-	// during test generation this statement threw an exception of type java.lang.NullPointerException in error
-	java.lang.Boolean b4 = renderAttributes1.isLabelVisible(0, 0);
-	  	*/
-	  }
-	  
-	  
 	  
 	     @Test
 	     public void test11137() throws Throwable {

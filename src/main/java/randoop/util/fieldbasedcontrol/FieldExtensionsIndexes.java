@@ -82,6 +82,30 @@ public class FieldExtensionsIndexes {
 		return extended;
 	}
 	
+	
+	public boolean fieldContainsPair(Integer fieldIndex, Integer c1Index, Integer c2Index, Integer o1Index, String o2) {		
+
+		if (syncWithStore) syncFieldsWithStore();
+	
+		boolean extended;
+		Map<Integer, Map<Integer,Map<Integer,Set<String>>>> m = extensions.get(fieldIndex);	
+		
+		Map<Integer,Map<Integer,Set<String>>> m1 = m.get(c1Index);
+		if (m1 == null) 
+			return false;
+		
+		Map<Integer,Set<String>> m2 = m1.get(c2Index);
+		if (m2 == null)
+			return false;
+		
+		Set<String> m3 = m2.get(o1Index);
+		if (m3 == null) 
+			return false;
+		
+		return m3.contains(o2);
+	}
+	
+	
 	public String toString() {
 		String res = "";
 
@@ -245,5 +269,37 @@ public class FieldExtensionsIndexes {
 		return added;
 	}
 	
+	
+	public boolean testEnlarges(FieldExtensionsIndexes other) {
+
+		for (int i = 0; i < other.extensions.size(); i++) {
+
+			Map<Integer, Map<Integer,Map<Integer,Set<String>>>> m = other.extensions.get(i);      
+			for (Integer c1: m.keySet()) {
+
+				Map<Integer,Map<Integer,Set<String>>> m1 = m.get(c1);
+				for (Integer c2: m1.keySet()) {
+
+					Map<Integer,Set<String>> m2 = m1.get(c2);
+					for (Integer o1: m2.keySet()) {
+
+						Set<String> m3 = m2.get(o1);
+						for (String o2: m3) {
+
+							if (!fieldContainsPair(i, c1, c2, o1, o2))
+								return true;
+
+						}
+
+					}
+
+				}
+
+			}
+
+		}	
+		
+		return false;
+	}
 
 }

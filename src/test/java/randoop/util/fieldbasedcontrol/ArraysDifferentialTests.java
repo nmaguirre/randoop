@@ -36,9 +36,7 @@ public class ArraysDifferentialTests {
 	    FieldExtensionsIndexes fe4 = canonizer3.getExtensions();
 	    fe4.toFile("src/test/java/randoop/util/fieldbasedcontrol/strarrextnew4.txt");
 	        
-	    assertTrue(fe1.equals(fe2));
-	    assertTrue(fe2.equals(fe3));
-	    assertTrue(fe3.size() == fe4.size()); 
+	    assertTrue(fe3.equals(fe4.toFieldExtensionsStrings()));
 	  }
 	    
 	    
@@ -70,9 +68,7 @@ public class ArraysDifferentialTests {
 	    FieldExtensionsIndexes fe4 = canonizer3.getExtensions();
 	    fe4.toFile("src/test/java/randoop/util/fieldbasedcontrol/intarrext4.txt");
 	        
-	    assertTrue(fe1.equals(fe2));
-	    assertTrue(fe2.equals(fe3));
-	    assertTrue(fe3.size() == fe4.size()); 
+	    assertTrue(fe3.equals(fe4.toFieldExtensionsStrings()));
 	  
 	  }
 	  
@@ -104,9 +100,7 @@ public class ArraysDifferentialTests {
 	    FieldExtensionsIndexes fe4 = canonizer3.getExtensions();
 	    fe4.toFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext4.txt");
 	        
-	    assertTrue(fe1.equals(fe2));
-	    assertTrue(fe2.equals(fe3));
-	    assertTrue(fe3.size() == fe4.size()); 
+	    assertTrue(fe3.equals(fe4.toFieldExtensionsStrings()));
 
 	  }
 

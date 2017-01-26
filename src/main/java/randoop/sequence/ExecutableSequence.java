@@ -454,10 +454,11 @@ public class ExecutableSequence {
 	
 	enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
 	
-	if (!AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits) 
+/*	if (!AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits) 
 		enlargesExtensions = enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
-	else 
-		enlargesExtensions = enlargeExtensionsLimits(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
+	else */
+
+	enlargesExtensions = enlargeExtensionsLimits(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
 	
 	// Update last method's weight
 	if (AbstractGenerator.field_based_gen_weighted_selection) {
@@ -580,7 +581,7 @@ public class ExecutableSequence {
 			  parameters.add(inputVariables[j]);
 		  }
 
-		  List<FieldExtensionsIndexes> extensions = new LinkedList<>();
+		  List<FieldExtensionsIndexes> extensions = new ArrayList<>();
 		  for (Object o: parameters) {
 			  if (o != null && !isObjectPrimtive(o)) {
 				  FieldExtensionsIndexes ext = new FieldExtensionsIndexes(canonizer.store, true);
@@ -593,18 +594,58 @@ public class ExecutableSequence {
 				  extensions.add(null);
 
 		  }
+		  
+		  if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
+			  
+			  int varIndex = 0;
+			  for (FieldExtensionsIndexes ext: extensions) {
+				  if (ext != null && canonizer.store.extensions.testEnlarges(ext)) {
+					  if (FieldBasedGenLog.isLoggingOn())
+						  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+								  + stmt.toString() + " (index " + i + ")");
 
-		  int varIndex = 0;
-		  for (FieldExtensionsIndexes ext: extensions) {
-			  if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
-				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
-							  + stmt.toString() + " (index " + i + ")");
-
-				  res = ExtendedExtensionsResult.EXTENDED;
+					  sequence.addActiveVar(i, varIndex);
+					  res = ExtendedExtensionsResult.EXTENDED;
+				  }
+				  varIndex++;
 			  }
-			  varIndex++;
+			  
+			  if (sequence.getActiveVars(i) != null) {
+				  for (Integer extIndex: sequence.getActiveVars(i)) 
+					 canonizer.store.extensions.addAllPairs(extensions.get(extIndex));
+			  }
+			  
 		  }
+		  else {
+		  
+			  int varIndex = 0;
+			  for (FieldExtensionsIndexes ext: extensions) {
+				  if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
+					  if (FieldBasedGenLog.isLoggingOn())
+						  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+								  + stmt.toString() + " (index " + i + ")");
+
+					  res = ExtendedExtensionsResult.EXTENDED;
+				  }
+				  varIndex++;
+			  }
+
+		  }
+		  
+		  
+		  if (AbstractGenerator.field_based_gen_differential_runtime_checks) {
+			if (!canonizer.readableExtensions.equals(canonizer.store.extensions.toFieldExtensionsStrings())) {
+				if (FieldBasedGenLog.isLoggingOn()) {
+					FieldBasedGenLog.logLine("Differential extensions:");
+					FieldBasedGenLog.logLine(canonizer.readableExtensions.toString());
+					FieldBasedGenLog.logLine("Real extensions:");
+					FieldBasedGenLog.logLine(canonizer.store.extensions.toFieldExtensionsStrings().toString());
+				}
+				
+				System.out.println("ERROR: Differential test failed. Different versions of the extensions differ");
+				throw new RuntimeException("ERROR: Differential test failed. Different versions of the extensions differ");
+			}
+		  }	
 		  
 		  
 	  }	catch (Exception e) {

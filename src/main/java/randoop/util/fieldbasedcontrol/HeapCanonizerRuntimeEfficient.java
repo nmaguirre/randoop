@@ -116,10 +116,10 @@ public class HeapCanonizerRuntimeEfficient {
 		if (readableExtensions != null) {
 			boolean oldRes = addToReadableExtensions(src, tgt, fld); 
 			
-			if (oldRes != newRes) { 
-				System.out.println("ERROR: Differential test failed when adding to the extensions");
-				throw new RuntimeException("ERROR: Differential test failed when adding to the extensions");
-			}
+//			if (oldRes != newRes) { 
+//				System.out.println("ERROR: Differential test failed when adding to the extensions");
+//				throw new RuntimeException("ERROR: Differential test failed when adding to the extensions");
+//			}
 				
 		}	
 
@@ -220,6 +220,7 @@ public class HeapCanonizerRuntimeEfficient {
 			}
 		}
   		
+  		/*
 		if (readableExtensions != null) {
 			
 			if (!readableExtensions.equals(store.extensions.toFieldExtensionsStrings())) {
@@ -227,6 +228,7 @@ public class HeapCanonizerRuntimeEfficient {
 				throw new RuntimeException("ERROR: Differential test failed. Different versions of the extensions differ");
 			}
 		}	
+  		*/
   		
 		return extended;
 	}
