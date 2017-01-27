@@ -191,6 +191,7 @@ public class GenTests extends GenInputsAbstract {
 		System.out.println("> Field Based Generation Option: --field-based-gen=" + AbstractGenerator.field_based_gen.toString());
 		System.out.println("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
 		System.out.println("> Field Based Generation Option: --field-based-gen-max-objects=" + AbstractGenerator.field_based_gen_max_objects);
+		System.out.println("> Field Based Generation Option: --field-based-gen-max-class-objects=" + AbstractGenerator.field_based_gen_max_class_objects);
 		System.out.println("> Field Based Generation Option: --field-based-gen-max-array=" + AbstractGenerator.field_based_gen_max_array);
 		System.out.println("> Field Based Generation Option: --field-based-gen-max-string-length=" + AbstractGenerator.field_based_gen_max_string_length);
 		System.out.println("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
@@ -214,6 +215,7 @@ public class GenTests extends GenInputsAbstract {
 		
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-objects=" + AbstractGenerator.field_based_gen_max_objects);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-class-objects=" + AbstractGenerator.field_based_gen_max_class_objects);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-array=" + AbstractGenerator.field_based_gen_max_array);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-string-length=" + AbstractGenerator.field_based_gen_max_string_length);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);

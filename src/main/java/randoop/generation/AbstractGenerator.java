@@ -91,27 +91,27 @@ public abstract class AbstractGenerator {
   public static boolean field_based_gen_differential_runtime_checks = false;
 
   @Option("Only consider strings with up to this number of elements for augmenting the extensions")
-  public static int field_based_gen_max_string_length = 1000;
+  public static int field_based_gen_max_string_length = 10000;
 
   @Option("Only consider arrays with up to this number of elements for augmenting the extensions")
-  public static int field_based_gen_max_array = 1000;
+  public static int field_based_gen_max_array = 10000;
 
   @Option("Only store up to this number of objects during canonization")
-  public static int field_based_gen_max_objects = 10000;
+  public static int field_based_gen_max_objects = 100000;
 
   @Option("Only store up to this number of objects for each individual class during canonization")
-  public static int field_based_gen_max_class_objects = 1000;
+  public static int field_based_gen_max_class_objects = 10000;
 
   @Option("Set to false to not allow tests exceeding object/array/string limits to be used as inputs for "
   		+ "other tests")
-  public static boolean field_based_gen_drop_tests_exceeding_object_limits = true;
+  public static boolean field_based_gen_drop_tests_exceeding_object_limits = false;
 
   @Option("Disable randoop's collections and arrays generation heuristic")
   public static boolean disable_collections_generation_heuristic = false;
 
   @Option("Allows field based generation to detect precisely which objects enlarge the extensions."
   		+ " This may negatively affect runtime performance.")
-  public static boolean field_based_gen_precise_enlarging_objects_detection = true;
+  public static boolean field_based_gen_precise_enlarging_objects_detection = false;
 
 //   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
 //  public static boolean field_based_gen_precise_canonization = true;
