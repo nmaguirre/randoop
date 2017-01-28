@@ -460,14 +460,19 @@ public class ExecutableSequence {
 
 	enlargesExtensions = enlargeExtensionsLimits(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
 	
+	if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED)
+		generator.modifierOps.add(sequence.getStatement(lastStmtIndex).getOperation());
+	
 	// Update last method's weight
 	if (AbstractGenerator.field_based_gen_weighted_selection) {
-	    Statement stmt = sequence.getStatement(lastStmtIndex);		
+	    Statement stmt = sequence.getStatement(lastStmtIndex);	
 		if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED)
 			increaseOpearationWeight(stmt, generator);
 		else if (enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED);
 			decreaseOpearationWeight(stmt, generator);
 	}
+	
+	
 	
 	return enlargesExtensions;
   }

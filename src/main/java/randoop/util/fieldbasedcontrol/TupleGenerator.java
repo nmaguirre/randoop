@@ -42,7 +42,9 @@ public class TupleGenerator<T> {
 	
 	
 	public ArrayList<T> next() {
-
+		
+		// System.out.println("Indexes: " + currTupleIndexes.toString() + ", sizes:" + tupleIndexesLimits.toString());
+		
 		ArrayList<T> res = new ArrayList<>();
 		for (int i = 0; i < takeFrom.size(); i++) {
 			res.add(i, takeFrom.get(i).get(currTupleIndexes.get(i)));
@@ -57,7 +59,7 @@ public class TupleGenerator<T> {
 	private void moveToNext() {
 
 		int i = 0; 
-		while (i < currTupleIndexes.size() && currTupleIndexes.get(i) == tupleIndexesLimits.get(i)) {
+		while (i < currTupleIndexes.size() && currTupleIndexes.get(i).equals(tupleIndexesLimits.get(i))) {
 			currTupleIndexes.set(i, 0);
 			i++; 
 		}

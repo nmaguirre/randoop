@@ -140,6 +140,7 @@ public class ForwardGenerator extends AbstractGenerator {
     
     // PABLO: Initialized operation weights for random selection
     setInitialOperationWeights();
+    initModifierOperationsHash();
     
     
     // FIXME: PABLO: Very ugly hack to initialize the canonizer. 
