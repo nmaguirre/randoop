@@ -7,8 +7,14 @@ import org.junit.Test;
 
 
 public class JChartNewTests {
-
-	  
+	
+	@Test
+    public void test1113() throws Throwable {
+		System.out.println((int)' ');
+		System.out.println((int)'#');
+		
+	}
+	
 	     @Test
 	     public void test11137() throws Throwable {
 	   

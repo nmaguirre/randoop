@@ -697,7 +697,7 @@ public abstract class AbstractGenerator {
 				FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier by the field based approach, don't use it to build additional tests");
 			 
 			//System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
-     		continue;
+     		//continue;
     	}
    	
     	if (operation.isConstructorCall()) {
@@ -716,12 +716,10 @@ public abstract class AbstractGenerator {
     		allParams.add(sequences);
 
     		if (FieldBasedGenLog.isLoggingOn()) {
-    			if (!inputType.isPrimitive()) {
-					FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
-					FieldBasedGenLog.logLine("> Sequences for this type: ");
-					for (int j = 0; j < sequences.size(); j++) 
-						FieldBasedGenLog.logLine(sequences.get(j).toCodeString());
-    			}
+				FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
+				FieldBasedGenLog.logLine("> Sequences for this type: ");
+				for (int j = 0; j < sequences.size(); j++) 
+					FieldBasedGenLog.logLine(sequences.get(j).toCodeString());
     		}
 
     	}
@@ -774,6 +772,7 @@ public abstract class AbstractGenerator {
     		if (error) continue;
 
     		InputsAndSuccessFlag isequences = new InputsAndSuccessFlag(true, sequences, variables);
+    		
     		Sequence concatSeq = Sequence.concatenate(isequences.sequences);
     		// Figure out input variables.
     		List<Variable> inputs = new ArrayList<>();
@@ -787,11 +786,15 @@ public abstract class AbstractGenerator {
     		if (FieldBasedGenLog.isLoggingOn())
     			FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
 
+    		ExecutableSequence newExecutableSequence = new ExecutableSequence(newSequence);
+    		outRegressionSeqs.add(newExecutableSequence);
     		genFirstAdditionalSeqs++;
-    		// Execute newSequence and add it to outRegressionSeqs if execution succeeds
+    		// TODO: Execute newSequence and add it to outRegressionSeqs if execution succeeds
 
     		// Add newSequence's inputs to subsumed_sequences
-    		
+    		for (Sequence subsumed: isequences.sequences) {
+    			subsumed_sequences.add(subsumed);
+    		}	
     	}
 
     }
