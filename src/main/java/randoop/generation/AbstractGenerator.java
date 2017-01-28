@@ -9,8 +9,17 @@ import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
+import randoop.sequence.Statement;
+import randoop.sequence.Variable;
 import randoop.test.TestCheckGenerator;
+import randoop.types.InstantiatedType;
+import randoop.types.JDKTypes;
+import randoop.types.Type;
+import randoop.types.TypeTuple;
+import randoop.util.ArrayListSimpleList;
+import randoop.util.ListOfLists;
 import randoop.util.Log;
+import randoop.util.MultiMap;
 import randoop.util.ProgressDisplay;
 import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
@@ -23,6 +32,7 @@ import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
+import randoop.util.fieldbasedcontrol.TupleGenerator;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -663,6 +673,112 @@ public abstract class AbstractGenerator {
       }
     }
     
+    
+    if (FieldBasedGenLog.isLoggingOn())
+    	FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach starting");
+
+    int genFirstAdditionalSeqs = 0;
+    
+    // Generation first field based approach
+    for (TypedOperation operation: operations) {
+
+    	if (FieldBasedGenLog.isLoggingOn())
+    		FieldBasedGenLog.logLine("> Operation: " + operation.toString());
+    	
+    	if (operation.isConstructorCall()) {
+    		if (FieldBasedGenLog.isLoggingOn())
+    			FieldBasedGenLog.logLine("> The current operation is a constructor, moving to the next one");
+    		continue;
+    	}
+    		
+    	TypeTuple inputTypes = operation.getInputTypes();
+
+    	ArrayList<SimpleList<Sequence>> allParams = new ArrayList<>();
+    	for (int i = 0; i < inputTypes.size(); i++) {
+
+    		Type inputType = inputTypes.get(i);
+    		SimpleList<Sequence> sequences = componentManager.getSequencesForType(operation, i);
+    		allParams.add(sequences);
+
+    		if (FieldBasedGenLog.isLoggingOn()) {
+    			if (!inputType.isPrimitive()) {
+					FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
+					FieldBasedGenLog.logLine("> Sequences for this type: ");
+					for (int j = 0; j < sequences.size(); j++) 
+						FieldBasedGenLog.logLine(sequences.get(j).toCodeString());
+    			}
+    		}
+
+    	}
+
+    	TupleGenerator<Sequence> tupleGen = new TupleGenerator<>(allParams);
+    	while (tupleGen.hasNext()) {
+
+    		List<Sequence> sequences = new ArrayList<>();
+    		int totStatements = 0;
+    		List<Integer> variables = new ArrayList<>();
+
+    		if (FieldBasedGenLog.isLoggingOn())
+    			FieldBasedGenLog.logLine("> Current tuple: ");
+
+    		int i = 0;
+    		boolean error = false;
+    		for (Sequence chosenSeq: tupleGen.next()) {
+    			
+        		if (FieldBasedGenLog.isLoggingOn())
+        			FieldBasedGenLog.logLine(chosenSeq.toCodeString() + "(" + inputTypes.get(i) + "),"); 			
+    			
+    			Variable randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputTypes.get(i));
+    			if (randomVariable == null) {
+    				throw new BugInRandoopException("type: " + inputTypes.get(i) + ", sequence: " + chosenSeq);
+    			}
+
+    			// Fail, if we were unlucky and selected a null or primitive value as the
+    			// receiver for a method call.
+    			if (i == 0
+    					&& operation.isMessage()
+    					&& !(operation.isStatic())
+    					&& (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
+    							|| randomVariable.getType().isPrimitive())) {
+
+    				error = true;
+    				break;
+    			}
+
+    			variables.add(totStatements + randomVariable.index);
+    			sequences.add(chosenSeq);
+    			totStatements += chosenSeq.size();
+
+    			i++;
+    		}
+
+    		if (error) continue;
+
+    		InputsAndSuccessFlag isequences = new InputsAndSuccessFlag(true, sequences, variables);
+    		Sequence concatSeq = Sequence.concatenate(isequences.sequences);
+    		// Figure out input variables.
+    		List<Variable> inputs = new ArrayList<>();
+    		for (Integer oneinput : isequences.indices) {
+    			Variable v = concatSeq.getVariable(oneinput);
+    			inputs.add(v);
+    		}
+
+    		Sequence newSequence = concatSeq.extend(operation, inputs);
+    		
+    		if (FieldBasedGenLog.isLoggingOn())
+    			FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
+
+    		genFirstAdditionalSeqs++;
+    		// Execute newSequence and add it to outRegressionSeqs if execution succeeds
+
+    		// Add newSequence's inputs to subsumed_sequences
+    		
+    	}
+
+    }
+
+
+    
 
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();
@@ -671,15 +787,17 @@ public abstract class AbstractGenerator {
 
     if (!GenInputsAbstract.noprogressdisplay) {
       if (FieldBasedGenLog.isLoggingOn()) {
-    	  System.out.println("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
-    	  System.out.println("Tests excceding limits: " + seqsExceedingLimits);
-    	  System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
-    	  System.out.println("Negative tests generated: " + negativeTestsGen);
-    	  System.out.println("Negative tests discarded: " + negativeTestsDropped);
-    	  System.out.println();
+    	  FieldBasedGenLog.logLine("Additional sequences generated by the second stage of the generation first approach: " + genFirstAdditionalSeqs); 
+    	  FieldBasedGenLog.logLine("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
+    	  FieldBasedGenLog.logLine("Tests excceding limits: " + seqsExceedingLimits);
+    	  FieldBasedGenLog.logLine("Field based dropped tests: " + fieldBasedDroppedSeqs);
+    	  FieldBasedGenLog.logLine("Negative tests generated: " + negativeTestsGen);
+    	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
+    	  FieldBasedGenLog.logLine("");
       }
 
       System.out.println();
+   	  System.out.println("Additional sequences generated by the second stage of the generation first approach: " + genFirstAdditionalSeqs); 
    	  System.out.println("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
       System.out.println("Tests excceding limits: " + seqsExceedingLimits);
       System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);

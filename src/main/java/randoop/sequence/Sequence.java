@@ -700,6 +700,23 @@ public final class Sequence implements WeightedElement {
     if (possibleIndices.isEmpty()) return null;
     return Randomness.randomMember(possibleIndices);
   }
+  
+  public List<Variable> allVariablesForTypeLastStatement(Type type) {
+    if (type == null) throw new IllegalArgumentException("type cannot be null.");
+    List<Variable> possibleIndices = new ArrayList<>(this.lastStatementVariables.size());
+    for (Variable i : this.lastStatementVariables) {
+      Statement s = statements.get(i.index);
+      if (type.isAssignableFrom(s.getOutputType())) {
+        possibleIndices.add(i);
+      }
+    }
+    if (possibleIndices.isEmpty()) return null;
+    return possibleIndices;
+  }
+
+  
+  
+  
 
   void checkIndex(int i) {
     if (i < 0 || i > size() - 1) throw new IllegalArgumentException();
