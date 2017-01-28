@@ -31,7 +31,8 @@ public class CanonicalHeapStore {
 
 	private static boolean fieldBasedGenByClasses = false;
 	List<String> ignoredClasses = Arrays.asList(new String [] {"java.io.", "java.nio.",
-			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun."});
+			"java.lang.reflect.", "java.net.", "java.security.", "java.beans.", "sun.", "com.sun.", 
+			"java.util.concurrent."});
 	private static Set<Integer> fieldBasedGenClasses;
 	private static Set<Integer> fieldBasedGenClassesAndParents;
 
