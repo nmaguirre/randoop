@@ -32,6 +32,7 @@ import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
+import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.fieldbasedcontrol.TupleGenerator;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
 import randoop.util.predicate.AlwaysFalse;
@@ -326,6 +327,12 @@ public abstract class AbstractGenerator {
   public List<ExecutableSequence> outRegressionSeqs = new ArrayList<>();
 
   /**
+   * The list of regression sequences to be output as JUnit tests. May include
+   * subsequences of other sequences in the list.
+   */
+  public List<ExecutableSequence> positiveRegressionSeqs = new ArrayList<>();
+
+  /**
    * A filter to determine whether a sequence should be added to the output
    * sequence lists.
    */
@@ -541,7 +548,6 @@ public abstract class AbstractGenerator {
       if (eSeq.hasFailure()) {
         num_failing_sequences++;
       }
-      
 
       if (outputTest.test(eSeq)) {
     	  
@@ -564,9 +570,11 @@ public abstract class AbstractGenerator {
         			
            			if (eSeq.isNormalExecution()) {
            				if (FieldBasedGenLog.isLoggingOn()) 
-            				FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
-						 outRegressionSeqs.add(eSeq);
-						 stored = true;
+           					FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
+           				
+           				outRegressionSeqs.add(eSeq);
+           				positiveRegressionSeqs.add(eSeq);
+           				stored = true;
            			}
            			else {
         				negativeTestsGen++;
@@ -666,9 +674,6 @@ public abstract class AbstractGenerator {
   		
       }
      
-      
-      
-
       if (dump_sequences) {
         System.out.printf("Sequence after execution:%n%s%n", eSeq.toString());
         System.out.printf("allSequences.size() = %d%n", numGeneratedSequences());
@@ -680,13 +685,263 @@ public abstract class AbstractGenerator {
       }
     }
     
-    
     if (FieldBasedGenLog.isLoggingOn())
     	FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach starting");
 
     int genFirstAdditionalSeqs = 0;
     
-    // Generation first field based approach
+    // Generation first add one of each observer operation to the end of the sequence
+    for (ExecutableSequence eSeq: positiveRegressionSeqs) {
+    	
+    	Sequence newSeq = eSeq.sequence;
+    	int lastIndex = newSeq.size() - 1;
+
+       	if (FieldBasedGenLog.isLoggingOn())
+       		FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + newSeq.toCodeString());
+
+       	TypedOperation seqLastStmtOp = newSeq.getStatement(lastIndex).getOperation();
+       	
+    	TypeTuple seqLastStmtInputTypes = seqLastStmtOp.getInputTypes();
+    	
+    	TypeTuple seqLastStmtOutputTypes = new TypeTuple();
+    	if (!seqLastStmtOp.getOutputType().isVoid() && !seqLastStmtOp.getOutputType().isPrimitive())
+    		seqLastStmtOutputTypes.list.add(seqLastStmtOp.getOutputType());
+    	for (int i = 0; i < seqLastStmtInputTypes.size(); i++)
+    		seqLastStmtOutputTypes.list.add(seqLastStmtInputTypes.get(i));
+    	
+        for (TypedOperation operation: operations) {
+        	
+        	if (FieldBasedGenLog.isLoggingOn())
+        		FieldBasedGenLog.logLine("> Operation: " + operation.toString());
+
+         	if (modifierOps.contains(operation)) {
+    			 if (FieldBasedGenLog.isLoggingOn())
+    				FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier by the field based approach, don't use it to extend tests");
+    			 
+    			//System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
+         		continue;
+        	}
+       	
+        	if (operation.isConstructorCall()) {
+        		if (FieldBasedGenLog.isLoggingOn())
+        			FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
+        		continue;
+        	}
+        	
+        	TypeTuple inputTypes = operation.getInputTypes();
+        	
+        	// The first integer of the tuple is the index of the variable chosen from newSeq, 
+        	// the second integer is the corresponding index of a compatible type in operation
+        	Tuple<Integer, Integer> connection = getRandomConnectionBetweenTuples(seqLastStmtOutputTypes, inputTypes);
+        	
+        	if (connection == null) continue;
+        	
+            List<Sequence> sequences = new ArrayList<>();
+            int totStatements = 0;
+            List<Integer> variables = new ArrayList<>();
+            
+        	boolean error = false;
+        	for (int i = 0; i < inputTypes.size(); i++) {
+        		Type inputType = inputTypes.get(i);
+        		if (FieldBasedGenLog.isLoggingOn()) 
+    				FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
+
+        		Sequence chosenSeq;
+        		if (i == connection.getSecond()) {
+        			chosenSeq = newSeq; 
+
+        			if (FieldBasedGenLog.isLoggingOn()) 
+        				FieldBasedGenLog.logLine("> Sequence to be extended selected: ");
+        		}
+        		else {
+        			SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
+        			if (l.isEmpty()) {
+						error = true;
+						break;
+        			}
+
+        			chosenSeq = Randomness.randomMember(l);
+
+        			if (FieldBasedGenLog.isLoggingOn()) 
+        				FieldBasedGenLog.logLine("> Random sequence selected: ");
+        		}
+
+				if (FieldBasedGenLog.isLoggingOn()) 
+					FieldBasedGenLog.logLine(chosenSeq.toCodeString());
+
+        	    // Now, find values that satisfy the constraint set.
+        	    Variable randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);
+
+        	      if (randomVariable == null) {
+        	        throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
+        	      }
+
+        	      // Fail, if we were unlucky and selected a null or primitive value as the
+        	      // receiver for a method call.
+        	      if (i == 0
+        	          && operation.isMessage()
+        	          && !(operation.isStatic())
+        	          && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
+        	              || randomVariable.getType().isPrimitive())) {
+
+      				error = true;
+      				break;
+      			}
+
+        	    variables.add(totStatements + randomVariable.index);
+        	    sequences.add(chosenSeq);
+        	    totStatements += chosenSeq.size();
+        	}
+    	
+    		if (error) continue;
+    		InputsAndSuccessFlag isequences = new InputsAndSuccessFlag(true, sequences, variables);
+    		
+    		Sequence concatSeq = Sequence.concatenate(isequences.sequences);
+    		// Figure out input variables.
+    		List<Variable> inputs = new ArrayList<>();
+    		for (Integer oneinput : isequences.indices) {
+    			Variable v = concatSeq.getVariable(oneinput);
+    			inputs.add(v);
+    		}
+
+    		Sequence newSequence = concatSeq.extend(operation, inputs);
+    		
+    		if (FieldBasedGenLog.isLoggingOn())
+    			FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
+
+    		ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
+    		executeExtendedSequence(eSeq2ndPhase);
+    		num_sequences_generated++;
+   			genFirstAdditionalSeqs++;
+
+    		if (eSeq2ndPhase.hasFailure()) {
+    			num_failing_sequences++;
+    		}
+
+    		if (outputTest.test(eSeq2ndPhase)) {
+
+    			if (!eSeq2ndPhase.hasInvalidBehavior()) {
+    				if (eSeq2ndPhase.hasFailure()) {
+    					outErrorSeqs.add(eSeq2ndPhase);
+
+    					if (FieldBasedGenLog.isLoggingOn()) 
+    						FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
+    				} 
+    				else {
+    					if (eSeq2ndPhase.isNormalExecution()) {
+    						if (FieldBasedGenLog.isLoggingOn()) 
+    							FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
+           				
+    						outRegressionSeqs.add(eSeq2ndPhase);
+    					}
+    					else {
+    						if (FieldBasedGenLog.isLoggingOn()) 
+        						FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+
+							outRegressionSeqs.add(eSeq2ndPhase);
+        				} 
+    					// Add newSequence's inputs to subsumed_sequences
+    					for (Sequence subsumed: isequences.sequences) {
+    						subsumed_sequences.add(subsumed);
+    					}	
+    				}
+    			}
+    			else {
+    				System.out.println("> ERROR: Sequence with invalid behavior in the second phase:");
+    				System.out.println(eSeq2ndPhase.toCodeString());
+    				if (FieldBasedGenLog.isLoggingOn()) {
+    					FieldBasedGenLog.logLine("> ERROR: Sequence with invalid behaviour in the second phase:");
+    					FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
+    				}
+    			}
+    		}
+    		else {
+    			System.out.println("> ERROR: Failing sequence in the second phase:");
+    			System.out.println(eSeq2ndPhase.toCodeString());
+    			if (FieldBasedGenLog.isLoggingOn()) {
+    				FieldBasedGenLog.logLine("> ERROR: Failing sequence in the second phase:");
+    				FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
+    			}
+    		}
+
+        }
+    }
+
+
+    if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
+      progressDisplay.display();
+      progressDisplay.shouldStop = true;
+    }
+
+    if (!GenInputsAbstract.noprogressdisplay) {
+      if (FieldBasedGenLog.isLoggingOn()) {
+    	  FieldBasedGenLog.logLine("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
+    	  FieldBasedGenLog.logLine("Tests excceding limits: " + seqsExceedingLimits);
+    	  FieldBasedGenLog.logLine("Field based dropped tests: " + fieldBasedDroppedSeqs);
+    	  FieldBasedGenLog.logLine("Negative tests generated: " + negativeTestsGen);
+    	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
+    	  FieldBasedGenLog.logLine("Sequences added in the second phase: " + genFirstAdditionalSeqs); 
+    	  FieldBasedGenLog.logLine("");
+      }
+
+      System.out.println();
+   	  System.out.println("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
+      System.out.println("Tests excceding limits: " + seqsExceedingLimits);
+      System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
+      System.out.println("Negative tests generated: " + negativeTestsGen);
+      System.out.println("Negative tests discarded: " + negativeTestsDropped);
+   	  System.out.println("Sequences added in the second phase: " + genFirstAdditionalSeqs); 
+      System.out.println();
+      System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
+      System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());
+      System.out.println();
+      System.out.println(
+          "Average method execution time (normal termination):      "
+              + String.format("%.3g", ReflectionExecutor.normalExecAvgMillis()));
+      System.out.println(
+          "Average method execution time (exceptional termination): "
+              + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
+    }
+
+    // Notify listeners that exploration is ending.
+    if (listenerMgr != null) {
+      listenerMgr.explorationEnd();
+    }
+  }
+        			
+        			
+  private Tuple<Integer, Integer> getRandomConnectionBetweenTuples(TypeTuple seqLastStmtInputTypes, TypeTuple inputTypes) {
+	  
+	  List<Tuple<Integer, Integer>> l = new ArrayList<>();
+	  for (int i = 0; i < seqLastStmtInputTypes.size(); i++) {
+		  if (seqLastStmtInputTypes.get(i).isPrimitive()) continue;
+
+		  for (int j = 0; j < inputTypes.size(); j++) {
+			  if (inputTypes.get(j).isPrimitive()) continue;
+
+			  if (seqLastStmtInputTypes.get(i).equals(inputTypes.get(j))) 
+				  l.add(new Tuple<Integer, Integer>(i,j));
+		  }
+	  }
+
+	  if (FieldBasedGenLog.isLoggingOn()) 
+    	  FieldBasedGenLog.logLine("> Connections among tuples: " + l.toString()); 
+	  
+	  if (l.isEmpty())
+		  return null;
+	  else {
+		  Tuple<Integer, Integer> res = Randomness.randomMember(l);
+
+		  if (FieldBasedGenLog.isLoggingOn()) 
+			  FieldBasedGenLog.logLine("> Selected connection: " + res.toString()); 
+	
+		  return res;
+	  }
+  }
+  
+     // Generation first field all combinations approach
+        
+    /*
     for (TypedOperation operation: operations) {
     	
     	if (FieldBasedGenLog.isLoggingOn())
@@ -797,49 +1052,10 @@ public abstract class AbstractGenerator {
     		}	
     	}
 
-    }
-
-
-    if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
-      progressDisplay.display();
-      progressDisplay.shouldStop = true;
-    }
-
-    if (!GenInputsAbstract.noprogressdisplay) {
-      if (FieldBasedGenLog.isLoggingOn()) {
-    	  FieldBasedGenLog.logLine("Sequences added in the second stage: " + genFirstAdditionalSeqs); 
-    	  FieldBasedGenLog.logLine("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
-    	  FieldBasedGenLog.logLine("Tests excceding limits: " + seqsExceedingLimits);
-    	  FieldBasedGenLog.logLine("Field based dropped tests: " + fieldBasedDroppedSeqs);
-    	  FieldBasedGenLog.logLine("Negative tests generated: " + negativeTestsGen);
-    	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
-    	  FieldBasedGenLog.logLine("");
-      }
-
-      System.out.println();
-   	  System.out.println("Sequences added in the second stage: " + genFirstAdditionalSeqs); 
-   	  System.out.println("Tests not augmenting extensions: " + notPassingFieldBasedFilter);
-      System.out.println("Tests excceding limits: " + seqsExceedingLimits);
-      System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
-      System.out.println("Negative tests generated: " + negativeTestsGen);
-      System.out.println("Negative tests discarded: " + negativeTestsDropped);
-      System.out.println();
-      System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
-      System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());
-      System.out.println();
-      System.out.println(
-          "Average method execution time (normal termination):      "
-              + String.format("%.3g", ReflectionExecutor.normalExecAvgMillis()));
-      System.out.println(
-          "Average method execution time (exceptional termination): "
-              + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
-    }
-
-    // Notify listeners that exploration is ending.
-    if (listenerMgr != null) {
-      listenerMgr.explorationEnd();
-    }
-  }
+    }*/
+    
+    
+  
 
   /**
    * Return all sequences generated by this object.
@@ -916,5 +1132,10 @@ public abstract class AbstractGenerator {
   protected void setFieldBasedSequences(List<Sequence> s) {
 	fbSeq = s;
   }
+
+public ExecutableSequence executeExtendedSequence(ExecutableSequence eSeq) {
+	// TODO Auto-generated method stub
+	return null;
+}
 }
 

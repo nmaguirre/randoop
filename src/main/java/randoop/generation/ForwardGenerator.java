@@ -197,6 +197,53 @@ public class ForwardGenerator extends AbstractGenerator {
     }
   }
   
+    @Override
+  public ExecutableSequence executeExtendedSequence(ExecutableSequence eSeq) {
+
+    long startTime = System.nanoTime();
+
+    if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
+      componentManager.clearGeneratedSequences();
+    }
+
+    if (eSeq == null) {
+      return null;
+    }
+
+    if (GenInputsAbstract.dontexecute) {
+      this.componentManager.addGeneratedSequence(eSeq.sequence);
+      return null;
+    }
+
+    setCurrentSequence(eSeq.sequence);
+
+    long endTime = System.nanoTime();
+    
+    long gentime = endTime - startTime;
+    startTime = endTime; // reset start time.
+    
+	eSeq.execute(executionVisitor, checkGenerator);
+
+	if (FieldBasedGenLog.isLoggingOn()) {
+		FieldBasedGenLog.logLine("> Executed current sequence: ");
+		FieldBasedGenLog.logLine(eSeq.sequence.toCodeString());
+	}
+	
+	endTime = System.nanoTime();
+	eSeq.exectime = endTime - startTime;
+	startTime = endTime; // reset start time.
+    
+   	
+    endTime = System.nanoTime();
+    gentime += endTime - startTime;
+    eSeq.gentime = gentime;
+
+    return eSeq;
+  }
+
+  
+  
+  
   
   @Override
   public ExecutableSequence step() {
