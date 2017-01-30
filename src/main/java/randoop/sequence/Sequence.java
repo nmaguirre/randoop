@@ -188,6 +188,10 @@ public final class Sequence implements WeightedElement {
   
   // PABLO: statement i -> list active variables in statement i   
   private Map<Integer, List<Integer>> activeVars = new HashMap<>();
+
+private List<Type> ithStatementTypes;
+
+private List<Variable> ithStatementVariables;
   
   
   public void addActiveVar(int stmtIndex, int varIndex) {
@@ -506,6 +510,49 @@ public final class Sequence implements WeightedElement {
     
     checkRep();
   }
+  
+  
+  
+
+  // Set lastStatementVariables and lastStatementTypes to their appropriate
+  // values. See documentation for these fields for more info.
+  public void computeIthStatementInfo(int ithStatementIndex) {
+    this.ithStatementTypes = new ArrayList<>();
+    this.ithStatementVariables = new ArrayList<>();
+
+    if (!this.statements.isEmpty()) {
+      Statement ithStatement = this.statements.get(ithStatementIndex);
+
+      // Process return value
+      if (!ithStatement.getOutputType().isVoid()) {
+        ithStatementTypes.add(ithStatement.getOutputType());
+        ithStatementVariables.add(new Variable(this, ithStatementIndex));
+      }
+
+      // Process input arguments.
+      if (ithStatement.inputs.size() != ithStatement.getInputTypes().size()) {
+        throw new RuntimeException(
+            ithStatement.inputs
+                + ", "
+                + ithStatement.getInputTypes()
+                + ", "
+                + ithStatement.toString());
+      }
+
+      List<Variable> v = this.getInputs(ithStatementIndex);
+      if (v.size() != ithStatement.getInputTypes().size()) {
+        throw new RuntimeException();
+      }
+
+      for (int i = 0; i < v.size(); i++) {
+        Variable actualArgument = v.get(i);
+        assert ithStatement.getInputTypes().get(i).isAssignableFrom(actualArgument.getType());
+        ithStatementTypes.add(actualArgument.getType());
+        ithStatementVariables.add(actualArgument);
+      }
+    }
+  }
+  
 
   // Set lastStatementVariables and lastStatementTypes to their appropriate
   // values. See documentation for these fields for more info.

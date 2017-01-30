@@ -91,11 +91,11 @@ public abstract class AbstractGenerator {
   public static boolean field_based_gen_ignore_primitive = false;
   
   @Option("Keep a percentage of the tests that did not contribute to the field extensions")
-  public static float field_based_gen_keep_non_contributing_tests_percentage = 1;
+  public static float field_based_gen_keep_non_contributing_tests_percentage = 0;
   protected boolean coinFlipRes = false;
   
   @Option("Keep a percentage of the negative tests generated")
-  public static float keep_negative_tests_percentage = 1;
+  public static float keep_negative_tests_percentage = 0;
   private int negativeTestsGen;
   private int negativeTestsDropped;
   
@@ -124,7 +124,7 @@ public abstract class AbstractGenerator {
 
   @Option("Allows field based generation to detect precisely which objects enlarge the extensions."
   		+ " This may negatively affect runtime performance.")
-  public static boolean field_based_gen_precise_enlarging_objects_detection = false;
+  public static boolean field_based_gen_precise_enlarging_objects_detection = true;
 
 //   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
 //  public static boolean field_based_gen_precise_canonization = true;
@@ -599,6 +599,7 @@ public abstract class AbstractGenerator {
         							FieldBasedGenLog.logLine("> Coin flip result: false");
         							FieldBasedGenLog.logLine("> Current sequence dropped");
         						}
+         						negativeTestsDropped++;
         						stored = false;
        						}
         				}
@@ -693,35 +694,32 @@ public abstract class AbstractGenerator {
     // Generation first add one of each observer operation to the end of the sequence
     for (ExecutableSequence eSeq: positiveRegressionSeqs) {
     	
-    	Sequence newSeq = eSeq.sequence;
-    	int lastIndex = newSeq.size() - 1;
-
-       	if (FieldBasedGenLog.isLoggingOn())
-       		FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + newSeq.toCodeString());
-
-       	TypedOperation seqLastStmtOp = newSeq.getStatement(lastIndex).getOperation();
-       	
-    	TypeTuple seqLastStmtInputTypes = seqLastStmtOp.getInputTypes();
-    	
-    	TypeTuple seqLastStmtOutputTypes = new TypeTuple();
-    	if (!seqLastStmtOp.getOutputType().isVoid() && !seqLastStmtOp.getOutputType().isPrimitive())
-    		seqLastStmtOutputTypes.list.add(seqLastStmtOp.getOutputType());
-    	for (int i = 0; i < seqLastStmtInputTypes.size(); i++)
-    		seqLastStmtOutputTypes.list.add(seqLastStmtInputTypes.get(i));
-    	
+    	Sequence origSeq = eSeq.sequence;
+   	
+    	Sequence newSeq = origSeq;
         for (TypedOperation operation: operations) {
-        	
+
+   	    	int lastIndex = newSeq.size() - 1;
+
+   	    	if (FieldBasedGenLog.isLoggingOn())
+   	    		FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + newSeq.toCodeString());
+
+			TypedOperation seqLastStmtOp = newSeq.getStatement(lastIndex).getOperation();
+			TypeTuple seqLastStmtInputTypes = seqLastStmtOp.getInputTypes();
+			TypeTuple seqLastStmtOutputTypes = new TypeTuple();
+			if (!seqLastStmtOp.getOutputType().isVoid() && !seqLastStmtOp.getOutputType().isPrimitive())
+				seqLastStmtOutputTypes.list.add(seqLastStmtOp.getOutputType());
+			for (int i = 0; i < seqLastStmtInputTypes.size(); i++)
+				seqLastStmtOutputTypes.list.add(seqLastStmtInputTypes.get(i));
+ 
         	if (FieldBasedGenLog.isLoggingOn())
         		FieldBasedGenLog.logLine("> Operation: " + operation.toString());
-
          	if (modifierOps.contains(operation)) {
     			 if (FieldBasedGenLog.isLoggingOn())
     				FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier by the field based approach, don't use it to extend tests");
-    			 
     			//System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
          		continue;
         	}
-       	
         	if (operation.isConstructorCall()) {
         		if (FieldBasedGenLog.isLoggingOn())
         			FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
@@ -729,11 +727,9 @@ public abstract class AbstractGenerator {
         	}
         	
         	TypeTuple inputTypes = operation.getInputTypes();
-        	
         	// The first integer of the tuple is the index of the variable chosen from newSeq, 
         	// the second integer is the corresponding index of a compatible type in operation
         	Tuple<Integer, Integer> connection = getRandomConnectionBetweenTuples(seqLastStmtOutputTypes, inputTypes);
-        	
         	if (connection == null) continue;
         	
             List<Sequence> sequences = new ArrayList<>();
@@ -828,17 +824,16 @@ public abstract class AbstractGenerator {
     						FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
     				} 
     				else {
+   						outRegressionSeqs.add(eSeq2ndPhase);
     					if (eSeq2ndPhase.isNormalExecution()) {
     						if (FieldBasedGenLog.isLoggingOn()) 
     							FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
-           				
-    						outRegressionSeqs.add(eSeq2ndPhase);
+    						// continue extending this sequence;
+    						newSeq = eSeq2ndPhase.sequence;
     					}
     					else {
     						if (FieldBasedGenLog.isLoggingOn()) 
         						FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
-
-							outRegressionSeqs.add(eSeq2ndPhase);
         				} 
     					// Add newSequence's inputs to subsumed_sequences
     					for (Sequence subsumed: isequences.sequences) {
