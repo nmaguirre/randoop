@@ -500,4 +500,29 @@ public abstract class TypedOperation implements Operation {
   public boolean isUncheckedCast() {
     return operation.isUncheckedCast();
   }
+
+  private enum FBExecutionState { NOT_EXECUTED, MODIFIER, OBSERVER };
+  
+  private FBExecutionState fbExecState = FBExecutionState.NOT_EXECUTED;
+  
+	public boolean notExecuted() {
+		return fbExecState == FBExecutionState.NOT_EXECUTED;
+	}
+
+	public boolean isObserver() {
+		return fbExecState == FBExecutionState.OBSERVER;
+	}
+
+	public void setModifier() {
+		fbExecState = FBExecutionState.MODIFIER;
+	}
+
+	public boolean isModifier() {
+		return fbExecState == FBExecutionState.MODIFIER;
+	}
+
+	public void setObserver() {
+		fbExecState = FBExecutionState.OBSERVER;
+	}
+
 }

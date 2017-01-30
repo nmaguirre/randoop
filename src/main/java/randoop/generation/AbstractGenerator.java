@@ -32,6 +32,7 @@ import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
+import randoop.util.fieldbasedcontrol.RandomPerm;
 import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.fieldbasedcontrol.TupleGenerator;
 import randoop.util.fieldbasedcontrol.HeapCanonizer;
@@ -191,7 +192,7 @@ public abstract class AbstractGenerator {
    * specifies the universe of operations from which sequences are generated.
    */
   public List<TypedOperation> operations;
-  public Set<TypedOperation> modifierOps;
+//  public Set<TypedOperation> modifierOps;
   
   protected Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
 
@@ -213,9 +214,10 @@ public abstract class AbstractGenerator {
 	  sumOfWeights = starting_weight * operations.size();	  
   }
   
-  public void initModifierOperationsHash() {
+/*  public void initModifierOperationsHash() {
 	  modifierOps = new HashSet<>();
   }
+  */
   
   public void increaseWeight(TypedOperation t) {
 	Integer currValue = operationsWeight.get(t);
@@ -689,15 +691,21 @@ public abstract class AbstractGenerator {
     if (FieldBasedGenLog.isLoggingOn())
     	FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach starting");
 
-    int genFirstAdditionalSeqs = 0;
+    int genFirstAdditionalPositiveSeqs = 0;
+    int genFirstAdditionalNegativeSeqs = 0;
+    int genFirstAdditionalErrorSeqs = 0;
     
+    ArrayList<TypedOperation> operationsPermutable = new ArrayList<>(operations);
     // Generation first add one of each observer operation to the end of the sequence
     for (ExecutableSequence eSeq: positiveRegressionSeqs) {
     	
     	Sequence origSeq = eSeq.sequence;
    	
     	Sequence newSeq = origSeq;
-        for (TypedOperation operation: operations) {
+
+    	RandomPerm.randomPermutation(operationsPermutable);
+    	// Should randomly mix the operations list each time we do this to avoid always the same execution order.
+        for (TypedOperation operation: operationsPermutable) {
 
    	    	int lastIndex = newSeq.size() - 1;
 
@@ -714,7 +722,8 @@ public abstract class AbstractGenerator {
  
         	if (FieldBasedGenLog.isLoggingOn())
         		FieldBasedGenLog.logLine("> Operation: " + operation.toString());
-         	if (modifierOps.contains(operation)) {
+
+         	if (!operation.isObserver()) {
     			 if (FieldBasedGenLog.isLoggingOn())
     				FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier by the field based approach, don't use it to extend tests");
     			//System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
@@ -808,7 +817,6 @@ public abstract class AbstractGenerator {
     		ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
     		executeExtendedSequence(eSeq2ndPhase);
     		num_sequences_generated++;
-   			genFirstAdditionalSeqs++;
 
     		if (eSeq2ndPhase.hasFailure()) {
     			num_failing_sequences++;
@@ -819,6 +827,7 @@ public abstract class AbstractGenerator {
     			if (!eSeq2ndPhase.hasInvalidBehavior()) {
     				if (eSeq2ndPhase.hasFailure()) {
     					outErrorSeqs.add(eSeq2ndPhase);
+    					genFirstAdditionalErrorSeqs++;
 
     					if (FieldBasedGenLog.isLoggingOn()) 
     						FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
@@ -830,11 +839,13 @@ public abstract class AbstractGenerator {
     							FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
     						// continue extending this sequence;
     						newSeq = eSeq2ndPhase.sequence;
+    						genFirstAdditionalPositiveSeqs++;
     					}
     					else {
     						if (FieldBasedGenLog.isLoggingOn()) 
         						FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
-        				} 
+    						genFirstAdditionalNegativeSeqs++;
+    					} 
     					// Add newSequence's inputs to subsumed_sequences
     					for (Sequence subsumed: isequences.sequences) {
     						subsumed_sequences.add(subsumed);
@@ -848,6 +859,7 @@ public abstract class AbstractGenerator {
     					FieldBasedGenLog.logLine("> ERROR: Sequence with invalid behaviour in the second phase:");
     					FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
     				}
+    				genFirstAdditionalErrorSeqs++;
     			}
     		}
     		else {
@@ -857,6 +869,7 @@ public abstract class AbstractGenerator {
     				FieldBasedGenLog.logLine("> ERROR: Failing sequence in the second phase:");
     				FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
     			}
+    			genFirstAdditionalErrorSeqs++;
     		}
 
         }
@@ -875,7 +888,10 @@ public abstract class AbstractGenerator {
     	  FieldBasedGenLog.logLine("Field based dropped tests: " + fieldBasedDroppedSeqs);
     	  FieldBasedGenLog.logLine("Negative tests generated: " + negativeTestsGen);
     	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
-    	  FieldBasedGenLog.logLine("Sequences added in the second phase: " + genFirstAdditionalSeqs); 
+    	  FieldBasedGenLog.logLine("Positive sequences added in the second phase: " + genFirstAdditionalPositiveSeqs); 
+    	  FieldBasedGenLog.logLine("Negative sequences added in the second phase: " + genFirstAdditionalNegativeSeqs); 
+    	  FieldBasedGenLog.logLine("Error sequences added in the second phase: " + genFirstAdditionalErrorSeqs); 
+    	  FieldBasedGenLog.logLine("Total sequences added in the second phase: " + (genFirstAdditionalPositiveSeqs + genFirstAdditionalNegativeSeqs + genFirstAdditionalErrorSeqs)); 
     	  FieldBasedGenLog.logLine("");
       }
 
@@ -885,7 +901,10 @@ public abstract class AbstractGenerator {
       System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
       System.out.println("Negative tests generated: " + negativeTestsGen);
       System.out.println("Negative tests discarded: " + negativeTestsDropped);
-   	  System.out.println("Sequences added in the second phase: " + genFirstAdditionalSeqs); 
+	  System.out.println("Positive sequences added in the second phase: " + genFirstAdditionalPositiveSeqs); 
+	  System.out.println("Negative sequences added in the second phase: " + genFirstAdditionalNegativeSeqs); 
+	  System.out.println("Error sequences added in the second phase: " + genFirstAdditionalErrorSeqs); 
+	  System.out.println("Total sequences added in the second phase: " + (genFirstAdditionalPositiveSeqs + genFirstAdditionalNegativeSeqs + genFirstAdditionalErrorSeqs)); 
       System.out.println();
       System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
       System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());
