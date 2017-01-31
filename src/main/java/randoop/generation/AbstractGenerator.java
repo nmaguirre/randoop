@@ -14,6 +14,7 @@ import randoop.sequence.Variable;
 import randoop.test.TestCheckGenerator;
 import randoop.types.InstantiatedType;
 import randoop.types.JDKTypes;
+import randoop.types.PrimitiveType;
 import randoop.types.Type;
 import randoop.types.TypeTuple;
 import randoop.util.ArrayListSimpleList;
@@ -60,6 +61,8 @@ import java.util.Set;
  */
 public abstract class AbstractGenerator {
 	
+  protected Set<Sequence> allSequences;
+
  
   public int notPassingFieldBasedFilter = 0;
   public int seqsExceedingLimits = 0;
@@ -650,26 +653,33 @@ public abstract class AbstractGenerator {
     	if (op.isObserver())
     		operationsPermutable.add(op);
 
+
+    
     // Generation first add one of each observer operation to the end of the sequence
     for (ExecutableSequence eSeq: positiveRegressionSeqs) {
     	
-    	Sequence origSeq = eSeq.sequence;
+//    	Sequence origSeq = eSeq.sequence;
    	
-    	Sequence newSeq = origSeq;
+    	ExecutableSequence neweSeq = eSeq;
 
     	RandomPerm.randomPermutation(operationsPermutable);
     	// Should randomly mix the operations list each time we do this to avoid always the same execution order.
         for (TypedOperation operation: operationsPermutable) {
+        	
+        	
 
-   	    	int lastIndex = newSeq.size() - 1;
+   	    	int lastIndex = neweSeq.sequence.size() - 1;
 
    	    	if (FieldBasedGenLog.isLoggingOn())
-   	    		FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + newSeq.toCodeString());
+   	    		FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
 
-			TypedOperation seqLastStmtOp = newSeq.getStatement(lastIndex).getOperation();
+			TypedOperation seqLastStmtOp = neweSeq.sequence.getStatement(lastIndex).getOperation();
+			
 			TypeTuple seqLastStmtInputTypes = seqLastStmtOp.getInputTypes();
 			TypeTuple seqLastStmtOutputTypes = new TypeTuple();
-			if (!seqLastStmtOp.getOutputType().isVoid() && !seqLastStmtOp.getOutputType().isPrimitive())
+
+			List<Boolean> isLastStmtVarActive = neweSeq.getLastStmtActiveVars();
+			if (!seqLastStmtOp.getOutputType().isVoid())
 				seqLastStmtOutputTypes.list.add(seqLastStmtOp.getOutputType());
 			for (int i = 0; i < seqLastStmtInputTypes.size(); i++)
 				seqLastStmtOutputTypes.list.add(seqLastStmtInputTypes.get(i));
@@ -690,10 +700,43 @@ public abstract class AbstractGenerator {
         		continue;
         	}
         	
-        	TypeTuple inputTypes = operation.getInputTypes();
+        /*	
+
+        	System.out.print("\nSequence last stmt output types");
+        	System.out.print(seqLastStmtOutputTypes.toString());
+        	for (int k = 0; k < seqLastStmtOutputTypes.size(); k++) {
+        		Type t = seqLastStmtOutputTypes.get(k);
+        		System.out.println("Type: " + t.toString());
+        		for (Type match: componentManager.getTypeMatches(t)) {
+        			System.out.println("  Matches: " + match.toString());
+        		}
+        		
+        	}
+        	
+        	System.out.print("\nOperation input types");
+         	System.out.print(inputTypes.toString());
+        	for (int k = 0; k < inputTypes.size(); k++) {
+        		Type t = inputTypes.get(k);
+        		if (t.toString().equals("java.lang.Object")) {
+
+        			SimpleList<Sequence> sl = componentManager.getSequencesForType(t);
+        			System.out.println(sl.toString());
+        			
+        		}
+        		
+        		System.out.println("Type: " + t.toString());
+        		for (Type match: componentManager.getTypeMatches(t)) {
+        			System.out.println("  Matches: " + match.toString());
+        		}
+        		
+        	}
+        	*/
+        	
+        	
         	// The first integer of the tuple is the index of the variable chosen from newSeq, 
         	// the second integer is the corresponding index of a compatible type in operation
-        	Tuple<Integer, Integer> connection = getRandomConnectionBetweenTuples(seqLastStmtOutputTypes, inputTypes);
+        	TypeTuple inputTypes = operation.getInputTypes();
+        	Tuple<Integer, Integer> connection = getRandomConnectionBetweenTypeTuples(seqLastStmtOutputTypes, isLastStmtVarActive, inputTypes);
         	if (connection == null) continue;
         	
             List<Sequence> sequences = new ArrayList<>();
@@ -708,7 +751,7 @@ public abstract class AbstractGenerator {
 
         		Sequence chosenSeq;
         		if (i == connection.getSecond()) {
-        			chosenSeq = newSeq; 
+        			chosenSeq = neweSeq.sequence; 
 
         			if (FieldBasedGenLog.isLoggingOn()) 
         				FieldBasedGenLog.logLine("> Sequence to be extended selected: ");
@@ -771,25 +814,24 @@ public abstract class AbstractGenerator {
 
     		num_sequences_generated++;
     		
-    		/*
     	    if (this.allSequences.contains(newSequence)) {
     	        if (Log.isLoggingOn()) {
     	          Log.logLine("Sequence discarded because the same sequence was previously created.");
     	        }
     	        
     	        if (FieldBasedGenLog.isLoggingOn())
-    	        	FieldBasedGenLog.logLine("> ERROR: the following sequence was generated twice in the second phase \n" + newSequence.toCodeString()); 
+    	        	FieldBasedGenLog.logLine("> The current sequence was generated twice in the second phase \n"); 
    	        
     	        continue;
     	    }
 
     	    this.allSequences.add(newSequence);	
-			*/
     		
     		ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
     		executeExtendedSequence(eSeq2ndPhase);
 
     		if (operation.isModifier()) {
+				FieldBasedGenLog.logLine("> Operation " + operation.toString() + " was incorrectly flagged as observer in the first phase. Discarding test" ); 
     			operationBadTag++;
     			continue;
     		}
@@ -814,7 +856,7 @@ public abstract class AbstractGenerator {
     						if (FieldBasedGenLog.isLoggingOn()) 
     							FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
     						// continue extending this sequence;
-    						newSeq = eSeq2ndPhase.sequence;
+    						neweSeq = eSeq2ndPhase;
     						genFirstAdditionalPositiveSeqs++;
     					}
     					else {
@@ -864,11 +906,19 @@ public abstract class AbstractGenerator {
     	  FieldBasedGenLog.logLine("Field based dropped tests: " + fieldBasedDroppedSeqs);
     	  FieldBasedGenLog.logLine("Negative tests generated: " + negativeTestsGen);
     	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
-    	  FieldBasedGenLog.logLine("Operations wrongly deemed modifiers in the first phase: " + operationBadTag); 
+    	  FieldBasedGenLog.logLine("Operations incorrectly deemed modifiers in the first phase: " + operationBadTag); 
     	  FieldBasedGenLog.logLine("Positive sequences added in the second phase: " + genFirstAdditionalPositiveSeqs); 
     	  FieldBasedGenLog.logLine("Negative sequences added in the second phase: " + genFirstAdditionalNegativeSeqs); 
     	  FieldBasedGenLog.logLine("Error sequences added in the second phase: " + genFirstAdditionalErrorSeqs); 
     	  FieldBasedGenLog.logLine("Total sequences added in the second phase: " + (genFirstAdditionalPositiveSeqs + genFirstAdditionalNegativeSeqs + genFirstAdditionalErrorSeqs)); 
+    	  FieldBasedGenLog.logLine("\nModifier operations: "); 
+    	  for (TypedOperation op: operations)
+    		  if (op.isModifier())
+    			  FieldBasedGenLog.logLine(op.toString());
+    	  FieldBasedGenLog.logLine("\nObserver operations: "); 
+    	  for (TypedOperation op: operations)
+    		  if (op.isObserver())
+    			  FieldBasedGenLog.logLine(op.toString());
     	  FieldBasedGenLog.logLine("");
       }
 
@@ -901,22 +951,25 @@ public abstract class AbstractGenerator {
     }
   }
         			
+  
+  SubTypeSet typeSet = new SubTypeSet(false);
         			
-  private Tuple<Integer, Integer> getRandomConnectionBetweenTuples(TypeTuple seqLastStmtInputTypes, TypeTuple inputTypes) {
+  private Tuple<Integer, Integer> getRandomConnectionBetweenTypeTuples(TypeTuple seqLastStmtOutputTypes, List<Boolean> isLastStmtVarActive, TypeTuple inputTypes) {
 	  
 	  List<Tuple<Integer, Integer>> l = new ArrayList<>();
-	  for (int i = 0; i < seqLastStmtInputTypes.size(); i++) {
-		  if (seqLastStmtInputTypes.get(i).isPrimitive() ||
-				  seqLastStmtInputTypes.get(i).isBoxedPrimitive())
-				  continue;
+	  for (int i = 0; i < seqLastStmtOutputTypes.size(); i++) {
+		  if (!isLastStmtVarActive.get(i)) 
+			  continue;
 
 		  for (int j = 0; j < inputTypes.size(); j++) {
-			  if (inputTypes.get(j).isPrimitive() || 
-				  inputTypes.get(j).isBoxedPrimitive())
-				  continue;
 
-			  if (seqLastStmtInputTypes.get(i).equals(inputTypes.get(j))) 
+			  if (inputTypes.get(j).isAssignableFrom(seqLastStmtOutputTypes.get(i))) {
+				  if (FieldBasedGenLog.isLoggingOn()) 
+					  FieldBasedGenLog.logLine("> Type " + inputTypes.get(j).toString() + " (index " + j + ")"
+					  		+ " is assignable from " + seqLastStmtOutputTypes.get(i) + " (index " + i + ")"); 
+				  
 				  l.add(new Tuple<Integer, Integer>(i,j));
+			  }
 		  }
 	  }
 

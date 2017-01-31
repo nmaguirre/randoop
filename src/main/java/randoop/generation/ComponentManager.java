@@ -73,6 +73,12 @@ public class ComponentManager {
   // May be null, which represents no package literals present.
   private PackageLiterals packageLiterals = null;
 
+  
+  public Set<Type> getTypeMatches(Type type) {
+	  return gralComponents.getTypeMatches(type);
+  }
+  
+  
   /**
    * Create an empty component manager, with an empty seed sequence set.
    */

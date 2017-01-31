@@ -307,6 +307,12 @@ public class SequenceCollection {
     }
     return selector;
   }
+  
+  public Set<Type> getTypeMatches(Type type) {
+	  return typeSet.getMatches(type);
+  }
+  
+  
 
   /**
    * Returns the set of all sequences in this collection.

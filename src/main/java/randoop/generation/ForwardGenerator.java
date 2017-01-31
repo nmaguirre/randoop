@@ -62,7 +62,7 @@ public class ForwardGenerator extends AbstractGenerator {
    * The set of ALL sequences ever generated, including sequences that were
    * executed and then discarded.
    */
-  private final Set<Sequence> allSequences;
+//  private final Set<Sequence> allSequences;
   private final Set<TypedOperation> observers;
 
   

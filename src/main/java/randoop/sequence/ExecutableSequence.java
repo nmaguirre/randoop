@@ -335,10 +335,10 @@ public class ExecutableSequence {
     			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer for now"); 
     		  else
     			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is a modifier"); 
-    	  
-    		  if (sequence.size() > 1 && op.notExecuted() || op.isObserver())
-				  lastStmtFormerExt = createExtensionsForAllObjects(i, null, inputVariables, canonizer);
-    	  }
+     	  }
+
+		  if (sequence.size() > 1 && (op.notExecuted() || op.isObserver()))
+			  lastStmtFormerExt = createExtensionsForAllObjects(i, null, inputVariables, canonizer);
       }
       
       visitor.visitBeforeStatement(this, i);
@@ -375,8 +375,8 @@ public class ExecutableSequence {
 					  if (lastStmtNextExt.get(j) != null) { 							  
 						  if (FieldBasedGenLog.isLoggingOn())
 							  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
-						  
-							op.setModifier();
+
+						  op.setModifier();
 						  break;
 					  }
 				  }
@@ -656,10 +656,9 @@ public class ExecutableSequence {
 
 		  List<Object> parameters = new ArrayList<>();
 
-		  if (statementResult == null || stmt.getOutputType().isVoid())
-			  parameters.add(null);
-		  else
+		  if (!stmt.getOutputType().isVoid()) {
 			  parameters.add(statementResult);
+		  }
 
 		  for (int j=0; j<inputVariables.length; j++) {
 			  parameters.add(inputVariables[j]);
@@ -686,7 +685,20 @@ public class ExecutableSequence {
 	  }
 	  
    }
-
+   
+   public boolean lastStatementVarIsPrimitive(int varIndex) {
+	   return lastStmtNextExt.get(varIndex) == null;
+   }
+   
+   public List<Boolean> getLastStmtActiveVars() {
+	   List<Boolean> res = new ArrayList<>();
+	   for (FieldExtensionsIndexes fe: lastStmtNextExt)
+		   res.add(fe != null);
+	   
+	   return res;
+   }
+   
+   
    public void tryToEnlargeExtensions(HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 	   if (lastStmtNextExt == null) {
 		   enlargesExtensions = ExtendedExtensionsResult.LIMITS_EXCEEDED;
@@ -699,9 +711,6 @@ public class ExecutableSequence {
 	   if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
 
 		   int varIndex = 0;
-		   int extIndex = 0;
-		   LinkedList<Integer> extendsIndexes = new LinkedList<>();
-		   boolean first = true;
 		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
 			   if (ext != null && canonizer.store.extensions.testEnlarges(ext)) {
 				   if (FieldBasedGenLog.isLoggingOn())
@@ -710,29 +719,19 @@ public class ExecutableSequence {
 
 				   sequence.addActiveVar(index, varIndex);
 				   enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
-				   extendsIndexes.add(extIndex);
 			   }
 			   
-			   if (first) {
-				   if (!stmt.getOutputType().isVoid())
-					   varIndex++;
-
-				   first = false;
-			   }
-			   else 
-				   varIndex++;
-			   extIndex++;
+			   varIndex++;
 		   }
 
-		   for (Integer i: extendsIndexes) {
+		   if (sequence.getActiveVars(index) != null)
+			   for (Integer i: sequence.getActiveVars(index))
 				   canonizer.store.extensions.addAllPairs(lastStmtNextExt.get(i));
-		   }
 
 	   }
 	   else {
 
 		   int varIndex = 0;
-		   boolean first = true;
 		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
 			   if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
 				   if (FieldBasedGenLog.isLoggingOn())
@@ -742,14 +741,7 @@ public class ExecutableSequence {
 				   enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
 			   }
 
-			   if (first) {
-				   if (!stmt.getOutputType().isVoid())
-					   varIndex++;
-
-				   first = false;
-			   }
-			   else 
-				   varIndex++;
+			   varIndex++;
 		   }
 
 	   }
@@ -1357,4 +1349,6 @@ public class ExecutableSequence {
   public boolean coversClass(Class<?> c) {
     return executionResults.getCoveredClasses().contains(c);
   }
+
+
 }
