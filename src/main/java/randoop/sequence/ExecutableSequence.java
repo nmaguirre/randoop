@@ -22,6 +22,7 @@ import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.NotExecuted;
 import randoop.generation.AbstractGenerator;
+import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.generation.ForwardGenerator;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
@@ -265,7 +266,7 @@ public class ExecutableSequence {
  * @throws CanonizationErrorException 
    */
   public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
-    execute(visitor, gen, true, canonizer);
+	  execute(visitor, gen, true, canonizer);
   }
   
   /**
@@ -302,7 +303,7 @@ public class ExecutableSequence {
  * @param canonizer 
  * @throws CanonizationErrorException 
    */
-  private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+  private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, HeapCanonizerRuntimeEfficient canonizer)  throws CanonizationErrorException {
 
     visitor.initialize(this);
 
@@ -325,20 +326,19 @@ public class ExecutableSequence {
       inputVariables = getRuntimeInputs(executionResults.theList, inputs);
 
       TypedOperation op = null;
-      if (sequence.size() > 1 && 
-    		  i == sequence.size() - 1) {
+      if (i == sequence.size() - 1) {
     	  op = sequence.getStatement(i).getOperation();
-    	  if (op.notExecuted() || op.isObserver())
-    		  lastStmtFormerExt = createExtensionsForAllObjects(i, null, inputVariables, canonizer);
-
-		   if (FieldBasedGenLog.isLoggingOn()) {
-			  if (op.notExecuted())
-				  System.out.println("> Operation " + op.getName() + " was never executed"); 
-			  else if (op.isObserver())
-				  System.out.println("> Operation " + op.getName() + " is an observer for now"); 
-			  else
-				  System.out.println("> Operation " + op.getName() + " is a modifier"); 
-		  }
+     	  if (FieldBasedGenLog.isLoggingOn()) {
+    		  if (op.notExecuted())
+    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " was never executed"); 
+    		  else if (op.isObserver())
+    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer for now"); 
+    		  else
+    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is a modifier"); 
+    	  
+    		  if (sequence.size() > 1 && op.notExecuted() || op.isObserver())
+				  lastStmtFormerExt = createExtensionsForAllObjects(i, null, inputVariables, canonizer);
+    	  }
       }
       
       visitor.visitBeforeStatement(this, i);
@@ -364,31 +364,52 @@ public class ExecutableSequence {
               msg + ((ExceptionalExecution) statementResult).getException().getMessage());
         }
       }
-
-	  if (sequence.size() > 1 && 
-			  i == sequence.size() - 1 && 
-			  statementResult instanceof NormalExecution) {
+      
+      if (i == sequence.size() - 1 && statementResult instanceof NormalExecution) {
+      
 		  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
-
-		  if (lastStmtFormerExt != null && lastStmtNextExt != null) {
-			  for (int j = 0; j < lastStmtNextExt.size(); j++) {
-				  if (!lastStmtFormerExt.get(j).equals(lastStmtNextExt.get(j))) {
-					  if (FieldBasedGenLog.isLoggingOn())
-						  System.out.println("> Operation " + op.getName() + " flagged as modifier");
-					  
-					  op.setModifier();
-					  break;
+		  
+		  if (!op.isModifier()) { 
+			  if (sequence.size() == 1) {
+				  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+					  if (lastStmtNextExt.get(j) != null) { 							  
+						  if (FieldBasedGenLog.isLoggingOn())
+							  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+						  
+							op.setModifier();
+						  break;
+					  }
 				  }
 			  }
+			  else { //sequence.size() > 1 
+					  assert lastStmtFormerExt.size() == lastStmtNextExt.size();
+					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+						  assert !(lastStmtFormerExt.get(j) != null && lastStmtNextExt.get(j) == null);
+						  
+						  if (lastStmtFormerExt.get(j) == null && lastStmtNextExt.get(j) == null)
+							  continue;
+						  else {
+							  if (!lastStmtNextExt.get(j).equals(lastStmtFormerExt.get(j))) {
+								  if (FieldBasedGenLog.isLoggingOn())
+									  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+							  
+								  op.setModifier();
+								  // if (AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED || secondPhase)
+								  break;
+							  }
+						  }
+					  }
+			  }
+
 			  if (!op.isModifier()) {
 				  // If it's not a modifier, mark the current action as an observer 
 				  if (FieldBasedGenLog.isLoggingOn())
-					  System.out.println("> Operation " + op.getName() + " flagged as observer");
+					  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
 
 				  op.setObserver();
 			  }
 		  }
-		  
+
       }
       
       visitor.visitAfterStatement(this, i);
@@ -632,9 +653,14 @@ public class ExecutableSequence {
 
 	  try {
 		  Statement stmt = sequence.getStatement(i);
+
 		  List<Object> parameters = new ArrayList<>();
-		  if (statementResult == null || !stmt.getOutputType().isVoid())
+
+		  if (statementResult == null || stmt.getOutputType().isVoid())
+			  parameters.add(null);
+		  else
 			  parameters.add(statementResult);
+
 		  for (int j=0; j<inputVariables.length; j++) {
 			  parameters.add(inputVariables[j]);
 		  }
@@ -673,6 +699,9 @@ public class ExecutableSequence {
 	   if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
 
 		   int varIndex = 0;
+		   int extIndex = 0;
+		   LinkedList<Integer> extendsIndexes = new LinkedList<>();
+		   boolean first = true;
 		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
 			   if (ext != null && canonizer.store.extensions.testEnlarges(ext)) {
 				   if (FieldBasedGenLog.isLoggingOn())
@@ -681,19 +710,29 @@ public class ExecutableSequence {
 
 				   sequence.addActiveVar(index, varIndex);
 				   enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
+				   extendsIndexes.add(extIndex);
 			   }
-			   varIndex++;
+			   
+			   if (first) {
+				   if (!stmt.getOutputType().isVoid())
+					   varIndex++;
+
+				   first = false;
+			   }
+			   else 
+				   varIndex++;
+			   extIndex++;
 		   }
 
-		   if (sequence.getActiveVars(index) != null) {
-			   for (Integer extIndex: sequence.getActiveVars(index)) 
-				   canonizer.store.extensions.addAllPairs(lastStmtNextExt.get(extIndex));
+		   for (Integer i: extendsIndexes) {
+				   canonizer.store.extensions.addAllPairs(lastStmtNextExt.get(i));
 		   }
 
 	   }
 	   else {
 
 		   int varIndex = 0;
+		   boolean first = true;
 		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
 			   if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
 				   if (FieldBasedGenLog.isLoggingOn())
@@ -702,7 +741,15 @@ public class ExecutableSequence {
 
 				   enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
 			   }
-			   varIndex++;
+
+			   if (first) {
+				   if (!stmt.getOutputType().isVoid())
+					   varIndex++;
+
+				   first = false;
+			   }
+			   else 
+				   varIndex++;
 		   }
 
 	   }

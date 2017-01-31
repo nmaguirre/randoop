@@ -91,12 +91,12 @@ public abstract class AbstractGenerator {
   @Option("Ignore primitive values in the construction of field extensions")
   public static boolean field_based_gen_ignore_primitive = false;
   
-  @Option("Keep a percentage of the tests that did not contribute to the field extensions")
-  public static float field_based_gen_keep_non_contributing_tests_percentage = 0;
-  protected boolean coinFlipRes = false;
+//  @Option("Keep a percentage of the tests that did not contribute to the field extensions")
+//  public static float field_based_gen_keep_non_contributing_tests_percentage = 0;
+  protected boolean keepNonContributingSeq = false;
   
-  @Option("Keep a percentage of the negative tests generated")
-  public static float keep_negative_tests_percentage = 0;
+//  @Option("Keep a percentage of the negative tests generated")
+//  public static float keep_negative_tests_percentage = 1;
   private int negativeTestsGen;
   private int negativeTestsDropped;
   
@@ -348,6 +348,8 @@ public abstract class AbstractGenerator {
 
   protected List<Sequence> fbSeq;
 
+  protected int operationBadTag;
+
   /**
    * Constructs a generator with the given parameters.
    *
@@ -554,11 +556,9 @@ public abstract class AbstractGenerator {
       if (outputTest.test(eSeq)) {
     	  
         if (!eSeq.hasInvalidBehavior()) {
-        	boolean stored = false;
 
         	if (eSeq.hasFailure() || eSeq.canonizationError) {
         		outErrorSeqs.add(eSeq);
-        		stored = true;
 
         		if (FieldBasedGenLog.isLoggingOn()) 
         			FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
@@ -566,9 +566,10 @@ public abstract class AbstractGenerator {
         	} else {
         		
         		if (field_based_gen == FieldBasedGenType.DISABLED ||
-        				field_based_gen_keep_non_contributing_tests_percentage == 1 || 
-        				(eSeq.isNormalExecution() && eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) 
-        				|| !eSeq.isNormalExecution()) {
+        				//field_based_gen_keep_non_contributing_tests_percentage == 1 || 
+        				(eSeq.isNormalExecution() && eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) ||
+        				keepNonContributingSeq ||
+        				!eSeq.isNormalExecution()) {
         			
            			if (eSeq.isNormalExecution()) {
            				if (FieldBasedGenLog.isLoggingOn()) 
@@ -576,83 +577,32 @@ public abstract class AbstractGenerator {
            				
            				outRegressionSeqs.add(eSeq);
            				positiveRegressionSeqs.add(eSeq);
-           				stored = true;
            			}
            			else {
         				negativeTestsGen++;
-        				if (keep_negative_tests_percentage == 1) {
-        					if (FieldBasedGenLog.isLoggingOn()) 
-        						FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
-							outRegressionSeqs.add(eSeq);
-							stored = true;
-        				} 
-        				else {
-        					if (Randomness.weighedCoinFlip(keep_negative_tests_percentage)) {
-        						if (FieldBasedGenLog.isLoggingOn()) {
-        							FieldBasedGenLog.logLine("> Coin flip result: true");
-        							FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
-        						}
-       						
-        						outRegressionSeqs.add(eSeq);
-        						stored = true;
-       						}
-       						else {
-         						if (FieldBasedGenLog.isLoggingOn()) {
-        							FieldBasedGenLog.logLine("> Coin flip result: false");
-        							FieldBasedGenLog.logLine("> Current sequence dropped");
-        						}
-         						negativeTestsDropped++;
-        						stored = false;
-       						}
-        				}
+						if (FieldBasedGenLog.isLoggingOn()) 
+							FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+						outRegressionSeqs.add(eSeq);
             		}
         			
+					for (Sequence is : subsumed_candidates) {
+						subsumed_sequences.add(is);
+					}
+
+					if (FieldBasedGenLog.isLoggingOn()) 
+						FieldBasedGenLog.logLine("> The candidates for subsumed sequences are now saved as subsumed");	
         		}
         		else {
-	        		if (coinFlipRes) {
-	        			
-						if (FieldBasedGenLog.isLoggingOn()) {
-							FieldBasedGenLog.logLine("> Coin flip result: true");
-							
-							if (eSeq.isNormalExecution())
-								FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
-							else
-								FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
-						}
+        			fieldBasedDroppedSeqs++;
+					if (FieldBasedGenLog.isLoggingOn()) {
+						FieldBasedGenLog.logLine("> Current sequence dropped");
+						FieldBasedGenLog.logLine("> The candidates for subsumed sequences are now dropped");	
+					}
 						
-						outRegressionSeqs.add(eSeq);
-						stored = true;
-	        			
-	        		} else{
-	        			fieldBasedDroppedSeqs++;
-						if (FieldBasedGenLog.isLoggingOn()) {
-							FieldBasedGenLog.logLine("> Coin flip result: false");
-							FieldBasedGenLog.logLine("> Current sequence dropped");
-						}
-						
-						stored = false;
-	        		}
         		}
-        		
-        	}
-
-        	// If the sequence was stored there are subsumed sequences, save them
-        	if ((field_based_gen_keep_non_contributing_tests_percentage != 1 || 
-        			keep_negative_tests_percentage != 1) && stored) {
-        		for (Sequence is : subsumed_candidates) {
-        			subsumed_sequences.add(is);
-        		}
-
-        		if (FieldBasedGenLog.isLoggingOn()) 
-        			FieldBasedGenLog.logLine("> The candidates for subsumed sequences are now saved as subsumed");	
-        	}
         	
-         	if ((field_based_gen_keep_non_contributing_tests_percentage != 1 ||
-         			keep_negative_tests_percentage != 1) && !stored) {
-        		if (FieldBasedGenLog.isLoggingOn()) 
-        			FieldBasedGenLog.logLine("> The candidates for subsumed sequences are dropped");	
-         	}
-       	
+        	}
+
 
         }
         else {
@@ -695,7 +645,11 @@ public abstract class AbstractGenerator {
     int genFirstAdditionalNegativeSeqs = 0;
     int genFirstAdditionalErrorSeqs = 0;
     
-    ArrayList<TypedOperation> operationsPermutable = new ArrayList<>(operations);
+    ArrayList<TypedOperation> operationsPermutable = new ArrayList<>();
+    for (TypedOperation op: operations)
+    	if (op.isObserver())
+    		operationsPermutable.add(op);
+
     // Generation first add one of each observer operation to the end of the sequence
     for (ExecutableSequence eSeq: positiveRegressionSeqs) {
     	
@@ -725,10 +679,11 @@ public abstract class AbstractGenerator {
 
          	if (!operation.isObserver()) {
     			 if (FieldBasedGenLog.isLoggingOn())
-    				FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier by the field based approach, don't use it to extend tests");
+    				FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore");
     			//System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
          		continue;
         	}
+        	
         	if (operation.isConstructorCall()) {
         		if (FieldBasedGenLog.isLoggingOn())
         			FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
@@ -814,9 +769,30 @@ public abstract class AbstractGenerator {
     		if (FieldBasedGenLog.isLoggingOn())
     			FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
 
+    		num_sequences_generated++;
+    		
+    		/*
+    	    if (this.allSequences.contains(newSequence)) {
+    	        if (Log.isLoggingOn()) {
+    	          Log.logLine("Sequence discarded because the same sequence was previously created.");
+    	        }
+    	        
+    	        if (FieldBasedGenLog.isLoggingOn())
+    	        	FieldBasedGenLog.logLine("> ERROR: the following sequence was generated twice in the second phase \n" + newSequence.toCodeString()); 
+   	        
+    	        continue;
+    	    }
+
+    	    this.allSequences.add(newSequence);	
+			*/
+    		
     		ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
     		executeExtendedSequence(eSeq2ndPhase);
-    		num_sequences_generated++;
+
+    		if (operation.isModifier()) {
+    			operationBadTag++;
+    			continue;
+    		}
 
     		if (eSeq2ndPhase.hasFailure()) {
     			num_failing_sequences++;
@@ -888,6 +864,7 @@ public abstract class AbstractGenerator {
     	  FieldBasedGenLog.logLine("Field based dropped tests: " + fieldBasedDroppedSeqs);
     	  FieldBasedGenLog.logLine("Negative tests generated: " + negativeTestsGen);
     	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
+    	  FieldBasedGenLog.logLine("Operations wrongly deemed modifiers in the first phase: " + operationBadTag); 
     	  FieldBasedGenLog.logLine("Positive sequences added in the second phase: " + genFirstAdditionalPositiveSeqs); 
     	  FieldBasedGenLog.logLine("Negative sequences added in the second phase: " + genFirstAdditionalNegativeSeqs); 
     	  FieldBasedGenLog.logLine("Error sequences added in the second phase: " + genFirstAdditionalErrorSeqs); 
@@ -901,6 +878,7 @@ public abstract class AbstractGenerator {
       System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
       System.out.println("Negative tests generated: " + negativeTestsGen);
       System.out.println("Negative tests discarded: " + negativeTestsDropped);
+      System.out.println("Operations wrongly deemed modifiers in the first phase: " + operationBadTag); 
 	  System.out.println("Positive sequences added in the second phase: " + genFirstAdditionalPositiveSeqs); 
 	  System.out.println("Negative sequences added in the second phase: " + genFirstAdditionalNegativeSeqs); 
 	  System.out.println("Error sequences added in the second phase: " + genFirstAdditionalErrorSeqs); 
@@ -928,10 +906,14 @@ public abstract class AbstractGenerator {
 	  
 	  List<Tuple<Integer, Integer>> l = new ArrayList<>();
 	  for (int i = 0; i < seqLastStmtInputTypes.size(); i++) {
-		  if (seqLastStmtInputTypes.get(i).isPrimitive()) continue;
+		  if (seqLastStmtInputTypes.get(i).isPrimitive() ||
+				  seqLastStmtInputTypes.get(i).isBoxedPrimitive())
+				  continue;
 
 		  for (int j = 0; j < inputTypes.size(); j++) {
-			  if (inputTypes.get(j).isPrimitive()) continue;
+			  if (inputTypes.get(j).isPrimitive() || 
+				  inputTypes.get(j).isBoxedPrimitive())
+				  continue;
 
 			  if (seqLastStmtInputTypes.get(i).equals(inputTypes.get(j))) 
 				  l.add(new Tuple<Integer, Integer>(i,j));

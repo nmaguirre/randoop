@@ -204,6 +204,7 @@ public class ForwardGenerator extends AbstractGenerator {
 
     long startTime = System.nanoTime();
 
+    /*
     if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
       componentManager.clearGeneratedSequences();
     }
@@ -216,6 +217,7 @@ public class ForwardGenerator extends AbstractGenerator {
       this.componentManager.addGeneratedSequence(eSeq.sequence);
       return null;
     }
+    */
 
     setCurrentSequence(eSeq.sequence);
 
@@ -279,6 +281,7 @@ public class ForwardGenerator extends AbstractGenerator {
     long gentime = endTime - startTime;
     startTime = endTime; // reset start time.
     
+    keepNonContributingSeq = false;
 	try {
 		eSeq.execute(executionVisitor, checkGenerator, canonizer);
 		endTime = System.nanoTime();
@@ -301,29 +304,35 @@ public class ForwardGenerator extends AbstractGenerator {
 				notPassingFieldBasedFilter++;
 				eSeq.sequence.clearAllActiveFlags();
 
-				if (eSeq.sequence.getStatement(eSeq.sequence.size()).getOperation().isModifier())
+				if (eSeq.sequence.getStatement(eSeq.sequence.size() - 1).getOperation().isModifier()) {
 					// Always save sequences that end in modifiers as regression tests,
 					// even if they don't contribute to the extensions
-					coinFlipRes = true;
-				else if (field_based_gen_keep_non_contributing_tests_percentage != 1)
-					coinFlipRes = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
-
-				if (field_based_gen_keep_non_contributing_tests_percentage == 1 || coinFlipRes)
 					processSequence(eSeq);
+					keepNonContributingSeq = true;
 
-				   if (FieldBasedGenLog.isLoggingOn()) 
-					   FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
+					if (FieldBasedGenLog.isLoggingOn()) 
+						FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions but will be saved"
+								+ " because it ends with a modifier");
+				}
+				else {
+					keepNonContributingSeq = false;
+					if (FieldBasedGenLog.isLoggingOn()) 
+						FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions and it will be dropped"
+								+ " because it ends with an observer");
+				}
 			}
 			else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
+				/*
 				notPassingFieldBasedFilter++;
 				seqsExceedingLimits++;
 				eSeq.sequence.clearAllActiveFlags();
 
 				if (field_based_gen_keep_non_contributing_tests_percentage != 1)
-					coinFlipRes = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
+					keepNonContributingSeq = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
 
 				   if (FieldBasedGenLog.isLoggingOn()) 
 					   FieldBasedGenLog.logLine("> The current sequence exceeded the given object limits");
+			   */
 			}
 			else {
 				   if (FieldBasedGenLog.isLoggingOn())
@@ -353,7 +362,7 @@ public class ForwardGenerator extends AbstractGenerator {
 	   	}
 		else {
 		   if (FieldBasedGenLog.isLoggingOn()) 
-			   FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions.");
+			   FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions");
 			
 			// Original randoop behavior when field_based_gen is disabled, or the current sequence produced an error
 			processSequence(eSeq);
@@ -851,16 +860,19 @@ public class ForwardGenerator extends AbstractGenerator {
     	FieldBasedGenLog.logLine("\n\n>> New sequence constructed");
  
     // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
-    if (field_based_gen_keep_non_contributing_tests_percentage != 1 || keep_negative_tests_percentage != 1) {
-    	// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
-    	// test enlarges the field extensions
-    	if (FieldBasedGenLog.isLoggingOn())
-    		FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
+//    if (field_based_gen_keep_non_contributing_tests_percentage != 1 || keep_negative_tests_percentage != 1) {
     	
-    	subsumed_candidates = new LinkedHashSet<>();
- 	    for (Sequence is : sequences.sequences) {
-	      subsumed_candidates.add(is);
-	    }
+	// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
+	// test is saved later
+	if (FieldBasedGenLog.isLoggingOn())
+		FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
+	
+	subsumed_candidates = new LinkedHashSet<>();
+	 for (Sequence is : sequences.sequences) {
+	  subsumed_candidates.add(is);
+	}
+ 	    
+ 	/*
     }
     else {
    		if (FieldBasedGenLog.isLoggingOn()) 
@@ -871,6 +883,7 @@ public class ForwardGenerator extends AbstractGenerator {
 	      subsumed_sequences.add(is);
 	    }
     }
+    */
 
     return new ExecutableSequence(newSequence);
   }
