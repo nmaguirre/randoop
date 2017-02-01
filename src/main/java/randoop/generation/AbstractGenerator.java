@@ -108,7 +108,7 @@ public abstract class AbstractGenerator {
   public static boolean field_based_gen_differential_runtime_checks = false;
 
   @Option("Only consider strings with up to this number of elements for augmenting the extensions")
-  public static int field_based_gen_max_string_length = 10000;
+  public static int field_based_gen_max_string_length = 1000;
 
   @Option("Only consider arrays with up to this number of elements for augmenting the extensions")
   public static int field_based_gen_max_array = 10000;
@@ -556,6 +556,7 @@ public abstract class AbstractGenerator {
         num_failing_sequences++;
       }
 
+      eSeq.clearLastStmtExtensions();
       if (outputTest.test(eSeq)) {
     	  
         if (!eSeq.hasInvalidBehavior()) {
@@ -568,9 +569,7 @@ public abstract class AbstractGenerator {
 
         	} else {
         		
-        		if (field_based_gen == FieldBasedGenType.DISABLED ||
-        				//field_based_gen_keep_non_contributing_tests_percentage == 1 || 
-        				(eSeq.isNormalExecution() && eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) ||
+        		if ((field_based_gen == FieldBasedGenType.FAST && eSeq.isNormalExecution() && eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) ||
         				keepNonContributingSeq ||
         				!eSeq.isNormalExecution()) {
         			
@@ -665,8 +664,6 @@ public abstract class AbstractGenerator {
     	RandomPerm.randomPermutation(operationsPermutable);
     	// Should randomly mix the operations list each time we do this to avoid always the same execution order.
         for (TypedOperation operation: operationsPermutable) {
-        	
-        	
 
    	    	int lastIndex = neweSeq.sequence.size() - 1;
 
@@ -809,6 +806,19 @@ public abstract class AbstractGenerator {
 
     		Sequence newSequence = concatSeq.extend(operation, inputs);
     		
+			// Discard if sequence is larger than size limit
+			if (newSequence.size() > GenInputsAbstract.maxsize) {
+			  if (Log.isLoggingOn()) {
+				Log.logLine(
+					"Sequence discarded because size "
+						+ newSequence.size()
+						+ " exceeds maximum allowed size "
+						+ GenInputsAbstract.maxsize);
+			  }
+			  // This sequence is already too large, continue with the next sequence
+			  break;
+			}
+    		
     		if (FieldBasedGenLog.isLoggingOn())
     			FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
 
@@ -826,9 +836,10 @@ public abstract class AbstractGenerator {
     	    }
 
     	    this.allSequences.add(newSequence);	
-    		
+   		
     		ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
     		executeExtendedSequence(eSeq2ndPhase);
+    		eSeq2ndPhase.clearLastStmtExtensions();
 
     		if (operation.isModifier()) {
 				FieldBasedGenLog.logLine("> Operation " + operation.toString() + " was incorrectly flagged as observer in the first phase. Discarding test" ); 
@@ -928,11 +939,21 @@ public abstract class AbstractGenerator {
       System.out.println("Field based dropped tests: " + fieldBasedDroppedSeqs);
       System.out.println("Negative tests generated: " + negativeTestsGen);
       System.out.println("Negative tests discarded: " + negativeTestsDropped);
-      System.out.println("Operations wrongly deemed modifiers in the first phase: " + operationBadTag); 
+      System.out.println("Operations incorrectly deemed observers in the first phase: " + operationBadTag); 
 	  System.out.println("Positive sequences added in the second phase: " + genFirstAdditionalPositiveSeqs); 
 	  System.out.println("Negative sequences added in the second phase: " + genFirstAdditionalNegativeSeqs); 
 	  System.out.println("Error sequences added in the second phase: " + genFirstAdditionalErrorSeqs); 
 	  System.out.println("Total sequences added in the second phase: " + (genFirstAdditionalPositiveSeqs + genFirstAdditionalNegativeSeqs + genFirstAdditionalErrorSeqs)); 
+	  System.out.println("\nModifier operations: "); 
+	  for (TypedOperation op: operations)
+		  if (op.isModifier())
+			  System.out.print(op.getName() + ",");
+	  System.out.println("\nObserver operations: "); 
+	  for (TypedOperation op: operations)
+		  if (op.isObserver())
+			  System.out.print(op.getName() + ",");
+	  System.out.println(""); 
+	  
       System.out.println();
       System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
       System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());
@@ -952,8 +973,6 @@ public abstract class AbstractGenerator {
   }
         			
   
-  SubTypeSet typeSet = new SubTypeSet(false);
-        			
   private Tuple<Integer, Integer> getRandomConnectionBetweenTypeTuples(TypeTuple seqLastStmtOutputTypes, List<Boolean> isLastStmtVarActive, TypeTuple inputTypes) {
 	  
 	  List<Tuple<Integer, Integer>> l = new ArrayList<>();

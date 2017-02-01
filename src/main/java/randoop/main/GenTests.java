@@ -168,6 +168,7 @@ public class GenTests extends GenInputsAbstract {
     */
     
     // Check that the configuration options of the field based generation approach are ok 
+    /*
     if (AbstractGenerator.field_based_gen == null || 
     		AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED) {
 
@@ -187,9 +188,10 @@ public class GenTests extends GenInputsAbstract {
     		System.exit(1);
     	}
     }
+    */
     
 
-	if (AbstractGenerator.field_based_gen != null) {
+	//if (AbstractGenerator.field_based_gen != null) {
 		System.out.println("> Field Based Generation Option: --field-based-gen=" + AbstractGenerator.field_based_gen.toString());
 		System.out.println("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
 		System.out.println("> Field Based Generation Option: --field-based-gen-max-objects=" + AbstractGenerator.field_based_gen_max_objects);
@@ -207,13 +209,13 @@ public class GenTests extends GenInputsAbstract {
 		System.out.println("> Field Based Generation Option: --smaller-weight=" + AbstractGenerator.smaller_weight);
 		System.out.println("> Field Based Generation Option: --larger-weight=" + AbstractGenerator.larger_weight);
 		System.out.println("> Field Based Generation Option: --starting-weight=" + AbstractGenerator.starting_weight);
-	}
+	//}
 	
     
     // PABLO: If logging is on, print information
 	if (FieldBasedGenLog.isLoggingOn()) {
-		if (AbstractGenerator.field_based_gen != null) 
-			FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen=" + AbstractGenerator.field_based_gen.toString());
+		//if (AbstractGenerator.field_based_gen != null) 
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen=" + AbstractGenerator.field_based_gen.toString());
 		
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-ignore-primitive=" + AbstractGenerator.field_based_gen_ignore_primitive);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-objects=" + AbstractGenerator.field_based_gen_max_objects);

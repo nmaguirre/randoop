@@ -368,6 +368,7 @@ public class ExecutableSequence {
       if (i == sequence.size() - 1 && statementResult instanceof NormalExecution) {
       
 		  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
+		  createLastStmtActiveVars();
 		  
 		  if (!op.isModifier()) { 
 			  if (sequence.size() == 1) {
@@ -422,6 +423,10 @@ public class ExecutableSequence {
   
   }
   
+  public void clearLastStmtExtensions() {
+	 lastStmtFormerExt = null;
+	 lastStmtNextExt = null;
+  }
   
   public void toFile(String filename) throws IOException {
 	try (Writer writer = new BufferedWriter(new FileWriter(filename))) {
@@ -689,13 +694,17 @@ public class ExecutableSequence {
    public boolean lastStatementVarIsPrimitive(int varIndex) {
 	   return lastStmtNextExt.get(varIndex) == null;
    }
+
+   private List<Boolean> lastStmtActiveVars;
+
+   public List<Boolean> getLastStmtActiveVars() { 
+	   return lastStmtActiveVars;
+   }
    
-   public List<Boolean> getLastStmtActiveVars() {
-	   List<Boolean> res = new ArrayList<>();
+   public void createLastStmtActiveVars() {
+	   lastStmtActiveVars = new ArrayList<>();
 	   for (FieldExtensionsIndexes fe: lastStmtNextExt)
-		   res.add(fe != null);
-	   
-	   return res;
+		   lastStmtActiveVars.add(fe != null);
    }
    
    
