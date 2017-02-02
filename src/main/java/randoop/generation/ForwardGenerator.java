@@ -281,7 +281,7 @@ public class ForwardGenerator extends AbstractGenerator {
     long gentime = endTime - startTime;
     startTime = endTime; // reset start time.
     
-    keepNonContributingSeq = false;
+    sequenceEndsWithObserver = false;
 	try {
 		eSeq.execute(executionVisitor, checkGenerator, canonizer);
 		endTime = System.nanoTime();
@@ -309,7 +309,7 @@ public class ForwardGenerator extends AbstractGenerator {
 						// Always save sequences that end in modifiers as regression tests,
 						// even if they don't contribute to the extensions
 						processSequence(eSeq);
-						keepNonContributingSeq = true;
+						sequenceEndsWithObserver = false;
 
 						if (FieldBasedGenLog.isLoggingOn()) 
 							FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions but will be saved"
@@ -318,7 +318,7 @@ public class ForwardGenerator extends AbstractGenerator {
 					else {
 						testsNotExtendingExt++;
 						processSequence(eSeq);
-						keepNonContributingSeq = false;
+						sequenceEndsWithObserver = true;
 						if (FieldBasedGenLog.isLoggingOn()) 
 							FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions and it will be dropped"
 									+ " because it ends with an observer");
@@ -369,7 +369,7 @@ public class ForwardGenerator extends AbstractGenerator {
 					// Always save sequences that end in modifiers as regression tests,
 					// even if they don't contribute to the extensions
 					processSequence(eSeq);
-					keepNonContributingSeq = true;
+					sequenceEndsWithObserver = false;
 					
 					if (eSeq.sequence.hasActiveFlags()) 
 						  componentManager.addGeneratedSequence(eSeq.sequence);
@@ -380,7 +380,7 @@ public class ForwardGenerator extends AbstractGenerator {
 				}
 				else {
 					processSequence(eSeq);
-					keepNonContributingSeq = false;
+					sequenceEndsWithObserver = true;
 					if (FieldBasedGenLog.isLoggingOn()) 
 						FieldBasedGenLog.logLine("> The current sequence it will be dropped"
 								+ " because it ends with an observer");
@@ -393,7 +393,7 @@ public class ForwardGenerator extends AbstractGenerator {
 		   if (FieldBasedGenLog.isLoggingOn()) 
 			   FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions");
 			
-		    keepNonContributingSeq = true;
+		    sequenceEndsWithObserver = false;
 			// Original randoop behavior when field_based_gen is disabled, or the current sequence produced an error
 			processSequence(eSeq);
 		
