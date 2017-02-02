@@ -302,10 +302,10 @@ public class ForwardGenerator extends AbstractGenerator {
 				eSeq.tryToEnlargeExtensions(canonizer);
 					
 				if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
-					notPassingFieldBasedFilter++;
 					eSeq.sequence.clearAllActiveFlags();
 
 					if (eSeq.sequence.getStatement(eSeq.sequence.size() - 1).getOperation().isModifier()) {
+						testsNotExtendingExtEndingInMod++;
 						// Always save sequences that end in modifiers as regression tests,
 						// even if they don't contribute to the extensions
 						processSequence(eSeq);
@@ -316,6 +316,7 @@ public class ForwardGenerator extends AbstractGenerator {
 									+ " because it ends with a modifier");
 					}
 					else {
+						testsNotExtendingExt++;
 						processSequence(eSeq);
 						keepNonContributingSeq = false;
 						if (FieldBasedGenLog.isLoggingOn()) 
@@ -338,30 +339,29 @@ public class ForwardGenerator extends AbstractGenerator {
 				   */
 				}
 				else {
-					   if (FieldBasedGenLog.isLoggingOn())
-						   FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
+					testsExtendingExt++;
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
 
-						processSequence(eSeq);
+					processSequence(eSeq);
 
-						if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection)
-							componentManager.addFieldBasedActiveSequence(eSeq.sequence);
-						else
-							componentManager.addGeneratedSequence(eSeq.sequence);
-						   
-						if (FieldBasedGenLog.isLoggingOn())
-							FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
-					   
-					   if (FieldBasedGenLog.isLoggingOn()) {
-						   // Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
-						   FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
-						   if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
-							   FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
-						   else 
-							   FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
-					   }
-					
+					if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection)
+						componentManager.addFieldBasedActiveSequence(eSeq.sequence);
+					else
+						componentManager.addGeneratedSequence(eSeq.sequence);
+
+					if (FieldBasedGenLog.isLoggingOn())
+						FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
+
+					if (FieldBasedGenLog.isLoggingOn()) {
+						// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
+						FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
+						if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
+							FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+						else 
+							FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
+					}
 				}		
-			
 			}
 	   		else { 
 	   			// Field based gen disabled
