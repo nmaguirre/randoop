@@ -89,7 +89,9 @@ public class ForwardGenerator extends AbstractGenerator {
   // of sequences. This set is used to tell if a new primitive value has
   // been generated, to add the value to the components.
   private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
-  
+
+
+ 
 
 
   public ForwardGenerator(
@@ -282,6 +284,7 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
     
     sequenceEndsWithObserver = false;
+    lastStmtGenNewValue = false;
 	try {
 		eSeq.execute(executionVisitor, checkGenerator, canonizer);
 		endTime = System.nanoTime();
@@ -303,25 +306,19 @@ public class ForwardGenerator extends AbstractGenerator {
 					
 				if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
 					eSeq.sequence.clearAllActiveFlags();
+					processSequence(eSeq);
+					testsNotExtendingExt++;
 
 					if (eSeq.sequence.getStatement(eSeq.sequence.size() - 1).getOperation().isModifier()) {
-						testsNotExtendingExtEndingInMod++;
-						// Always save sequences that end in modifiers as regression tests,
-						// even if they don't contribute to the extensions
-						processSequence(eSeq);
+						//testsNotExtendingExtEndingInMod++;
 						sequenceEndsWithObserver = false;
-
 						if (FieldBasedGenLog.isLoggingOn()) 
-							FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions but will be saved"
-									+ " because it ends with a modifier");
+							FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
 					}
 					else {
-						testsNotExtendingExt++;
-						processSequence(eSeq);
 						sequenceEndsWithObserver = true;
 						if (FieldBasedGenLog.isLoggingOn()) 
-							FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions and it will be dropped"
-									+ " because it ends with an observer");
+							FieldBasedGenLog.logLine("> The current sequence ends with an observer");
 					}
 				}
 				else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
@@ -364,41 +361,40 @@ public class ForwardGenerator extends AbstractGenerator {
 				}		
 			}
 	   		else { 
-	   			// Field based gen disabled
+				processSequence(eSeq);
+
+	   			// Field based gen disabled  
 				if (eSeq.sequence.getStatement(eSeq.sequence.size() - 1).getOperation().isModifier()) {
 					// Always save sequences that end in modifiers as regression tests,
 					// even if they don't contribute to the extensions
-					processSequence(eSeq);
 					sequenceEndsWithObserver = false;
 					
 					if (eSeq.sequence.hasActiveFlags()) 
 						  componentManager.addGeneratedSequence(eSeq.sequence);
 
 					if (FieldBasedGenLog.isLoggingOn()) 
-						FieldBasedGenLog.logLine("> The current sequence will be saved"
-								+ " because it ends with a modifier");
+						FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
 				}
 				else {
-					processSequence(eSeq);
 					sequenceEndsWithObserver = true;
 					if (FieldBasedGenLog.isLoggingOn()) 
-						FieldBasedGenLog.logLine("> The current sequence it will be dropped"
-								+ " because it ends with an observer");
+						FieldBasedGenLog.logLine("> The current sequence ends with an observer");
 				}
 	
 	   		}
 	   		
 	   	}
 		else {
-		   if (FieldBasedGenLog.isLoggingOn()) 
-			   FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions");
-			
-		    sequenceEndsWithObserver = false;
+			// Execution finished with errors/failures 
+			if (FieldBasedGenLog.isLoggingOn()) 
+				FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions");
+
+			sequenceEndsWithObserver = false;
 			// Original randoop behavior when field_based_gen is disabled, or the current sequence produced an error
 			processSequence(eSeq);
-		
+
 			if (eSeq.sequence.hasActiveFlags()) 
-			  componentManager.addGeneratedSequence(eSeq.sequence);
+				componentManager.addGeneratedSequence(eSeq.sequence);
 		}
 	   	
 	}	
@@ -761,6 +757,9 @@ public class ForwardGenerator extends AbstractGenerator {
         	  FieldBasedGenLog.logLine("> New primitive value stored: " + runtimeValue.toString());
         	  
           componentManager.addGeneratedSequence(Sequence.createSequenceForPrimitive(runtimeValue));
+          
+          if (i == seq.sequence.size() - 1) lastStmtGenNewValue = true;
+          
         }
       } else {
         if (Log.isLoggingOn()) {
