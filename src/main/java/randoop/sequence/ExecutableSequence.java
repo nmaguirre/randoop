@@ -255,9 +255,16 @@ public class ExecutableSequence {
     return oneStatement.toString();
   }
   
-  
-  
-  
+
+  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen) {
+	  try {
+		  execute(visitor, gen, true, null);
+	  } catch (CanonizationErrorException e) {
+		  // TODO Auto-generated catch block
+		  e.printStackTrace();
+	  }
+  }
+
   
   
   /**
@@ -372,7 +379,12 @@ public class ExecutableSequence {
       
       if (canonizer != null && i == sequence.size() - 1 && statementResult instanceof NormalExecution) {
       
+    	  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+    	  
 		  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
+		  
+    	  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+		  
 		  createLastStmtActiveVars();
 		  
 		  if (!op.isModifier()) { 

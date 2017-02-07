@@ -1075,15 +1075,15 @@ private int genFirstAdditionalObsErrorSeqs;
 			  boolean error = false;
 			  for (int i = 0; i < inputTypes.size(); i++) {
 				  Type inputType = inputTypes.get(i);
-				  if (FieldBasedGenLog.isLoggingOn()) 
-					  FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
+				  /* if (FieldBasedGenLog.isLoggingOn()) 
+					  FieldBasedGenLog.logLine("> Input type: " + inputType.toString()); */
 
 				  Sequence chosenSeq;
 				  if (i == connection.getSecond()) {
 					  chosenSeq = neweSeq.sequence; 
 
-					  if (FieldBasedGenLog.isLoggingOn()) 
-						  FieldBasedGenLog.logLine("> Sequence to be extended selected: ");
+					  /* if (FieldBasedGenLog.isLoggingOn()) 
+						  FieldBasedGenLog.logLine("> Sequence to be extended selected: "); */
 				  }
 				  else {
 					  SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
@@ -1094,12 +1094,12 @@ private int genFirstAdditionalObsErrorSeqs;
 
 					  chosenSeq = Randomness.randomMember(l);
 
-					  if (FieldBasedGenLog.isLoggingOn()) 
-						  FieldBasedGenLog.logLine("> Random sequence selected: ");
+					  /* if (FieldBasedGenLog.isLoggingOn()) 
+						  FieldBasedGenLog.logLine("> Random sequence selected: "); */
 				  }
 
-				  if (FieldBasedGenLog.isLoggingOn()) 
-					  FieldBasedGenLog.logLine(chosenSeq.toCodeString());
+				  /* if (FieldBasedGenLog.isLoggingOn()) 
+					  FieldBasedGenLog.logLine(chosenSeq.toCodeString()); */
 
 				  // Now, find values that satisfy the constraint set.
 				  Variable randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);

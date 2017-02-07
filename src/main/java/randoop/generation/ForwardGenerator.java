@@ -253,9 +253,7 @@ public class ForwardGenerator extends AbstractGenerator {
   }
 
   
-  
-  
-  
+ 
   @Override
   public ExecutableSequence step() {
 
@@ -289,10 +287,12 @@ public class ForwardGenerator extends AbstractGenerator {
 		eSeq.exectime = endTime - startTime;
 		startTime = endTime; // reset start time.
 
+		/*
 		if (FieldBasedGenLog.isLoggingOn()) {
 			FieldBasedGenLog.logLine("> Executed current sequence: ");
 			FieldBasedGenLog.logLine(eSeq.sequence.toCodeString());
 		}
+		*/
 	
 	   	if (eSeq.isNormalExecution()) {
 	   		if (FieldBasedGenLog.isLoggingOn()) 
@@ -301,10 +301,13 @@ public class ForwardGenerator extends AbstractGenerator {
 	   		if (field_based_gen == FieldBasedGenType.FAST) {
 				// Field based filtering is only done on non error sequences
 	   			
+   				eSeq.tryToEnlargeExtensions(canonizer);
+	   			/*
 	   			if (!eSeq.endsWithObserver)
 	   				eSeq.tryToEnlargeExtensions(canonizer);
 	   			else
 	   				eSeq.enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
+	   			*/
 					
 				if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
 					eSeq.sequence.clearAllActiveFlags();

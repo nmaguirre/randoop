@@ -227,9 +227,9 @@ public class JChartNewTests {
 	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(false, 10000, 1000, 1000, 1000, true);
 //	    canonizer3.activateReadableExtensions();
 	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(dateAxis2);
-	    System.out.println(canonizer3.store.extensions.size());
+	    System.out.println(canonizer3.getExtensions().size());
 		canonizer3.traverseBreadthFirstAndEnlargeExtensions(timeZone1); 
-	    System.out.println(canonizer3.store.extensions.size());
+	    System.out.println(canonizer3.getExtensions().size());
     
 	}
 
