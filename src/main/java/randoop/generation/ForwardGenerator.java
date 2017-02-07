@@ -180,7 +180,7 @@ public class ForwardGenerator extends AbstractGenerator {
     for (Sequence s : componentManager.getAllPrimitiveSequences()) {
       ExecutableSequence es = new ExecutableSequence(s);
       try {
-		es.execute(new DummyVisitor(), new DummyCheckGenerator(), canonizer);
+		es.execute(new DummyVisitor(), new DummyCheckGenerator(), null);
       } catch (CanonizationErrorException e2) {
 			// Should never happen 
 			e2.printStackTrace();
@@ -283,8 +283,6 @@ public class ForwardGenerator extends AbstractGenerator {
     long gentime = endTime - startTime;
     startTime = endTime; // reset start time.
     
-    sequenceEndsWithObserver = false;
-    lastStmtGenNewValue = false;
 	try {
 		eSeq.execute(executionVisitor, checkGenerator, canonizer);
 		endTime = System.nanoTime();
@@ -302,27 +300,19 @@ public class ForwardGenerator extends AbstractGenerator {
 	   		
 	   		if (field_based_gen == FieldBasedGenType.FAST) {
 				// Field based filtering is only done on non error sequences
-				eSeq.tryToEnlargeExtensions(canonizer);
+	   			
+	   			if (!eSeq.endsWithObserver)
+	   				eSeq.tryToEnlargeExtensions(canonizer);
+	   			else
+	   				eSeq.enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
 					
 				if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
 					eSeq.sequence.clearAllActiveFlags();
 					processSequence(eSeq);
 					testsNotExtendingExt++;
-
-					if (eSeq.sequence.getStatement(eSeq.sequence.size() - 1).getOperation().isModifier()) {
-						//testsNotExtendingExtEndingInMod++;
-						sequenceEndsWithObserver = false;
-						if (FieldBasedGenLog.isLoggingOn()) 
-							FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
-					}
-					else {
-						sequenceEndsWithObserver = true;
-						if (FieldBasedGenLog.isLoggingOn()) 
-							FieldBasedGenLog.logLine("> The current sequence ends with an observer");
-					}
 				}
 				else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
-					assert false : "ERROR in field based generation, limits exceeded.";
+					assert false : "ERROR in field based generation, limits exceeded not implemented";
 					/*
 					notPassingFieldBasedFilter++;
 					seqsExceedingLimits++;
@@ -362,25 +352,14 @@ public class ForwardGenerator extends AbstractGenerator {
 			}
 	   		else { 
 				processSequence(eSeq);
-
 	   			// Field based gen disabled  
-				if (eSeq.sequence.getStatement(eSeq.sequence.size() - 1).getOperation().isModifier()) {
-					// Always save sequences that end in modifiers as regression tests,
-					// even if they don't contribute to the extensions
-					sequenceEndsWithObserver = false;
-					
+				if (!eSeq.endsWithObserver) {
 					if (eSeq.sequence.hasActiveFlags()) 
 						  componentManager.addGeneratedSequence(eSeq.sequence);
-
-					if (FieldBasedGenLog.isLoggingOn()) 
-						FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
 				}
-				else {
-					sequenceEndsWithObserver = true;
+				else 
 					if (FieldBasedGenLog.isLoggingOn()) 
 						FieldBasedGenLog.logLine("> The current sequence ends with an observer");
-				}
-	
 	   		}
 	   		
 	   	}
@@ -389,8 +368,7 @@ public class ForwardGenerator extends AbstractGenerator {
 			if (FieldBasedGenLog.isLoggingOn()) 
 				FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions");
 
-			sequenceEndsWithObserver = false;
-			// Original randoop behavior when field_based_gen is disabled, or the current sequence produced an error
+			// Original randoop behavior when the current sequence produces an error
 			processSequence(eSeq);
 
 			if (eSeq.sequence.hasActiveFlags()) 
@@ -757,9 +735,6 @@ public class ForwardGenerator extends AbstractGenerator {
         	  FieldBasedGenLog.logLine("> New primitive value stored: " + runtimeValue.toString());
         	  
           componentManager.addGeneratedSequence(Sequence.createSequenceForPrimitive(runtimeValue));
-          
-          if (i == seq.sequence.size() - 1) lastStmtGenNewValue = true;
-          
         }
       } else {
         if (Log.isLoggingOn()) {

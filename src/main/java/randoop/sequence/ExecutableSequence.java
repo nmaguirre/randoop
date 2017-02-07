@@ -37,6 +37,7 @@ import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
+import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
 
@@ -111,6 +112,8 @@ public class ExecutableSequence {
 //  private boolean DEBUG = false;
   public ExtendedExtensionsResult enlargesExtensions = null;
   public boolean canonizationError = false;
+  public boolean endsWithObserverReturningNewValue;
+  public boolean endsWithObserver;
 	
   private List<FieldExtensionsIndexes> lastStmtFormerExt;
   private List<FieldExtensionsIndexes> lastStmtNextExt;
@@ -154,6 +157,7 @@ public class ExecutableSequence {
   private static PrintStream ps_output_buffer = new PrintStream(output_buffer);
 
   private IdentityMultiMap<Object, Variable> variableMap;
+
 
 
   
@@ -317,6 +321,7 @@ public class ExecutableSequence {
     
     lastStmtFormerExt = null;
     lastStmtNextExt = null;
+    endsWithObserverReturningNewValue = false;
     for (int i = 0; i < this.sequence.size(); i++) {
 
       // Find and collect the input values to i-th statement.
@@ -326,7 +331,7 @@ public class ExecutableSequence {
       inputVariables = getRuntimeInputs(executionResults.theList, inputs);
 
       TypedOperation op = null;
-      if (i == sequence.size() - 1) {
+      if (canonizer != null && i == sequence.size() - 1) {
     	  op = sequence.getStatement(i).getOperation();
      	  if (FieldBasedGenLog.isLoggingOn()) {
     		  if (op.notExecuted())
@@ -365,7 +370,7 @@ public class ExecutableSequence {
         }
       }
       
-      if (i == sequence.size() - 1 && statementResult instanceof NormalExecution) {
+      if (canonizer != null && i == sequence.size() - 1 && statementResult instanceof NormalExecution) {
       
 		  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
 		  createLastStmtActiveVars();
@@ -407,9 +412,33 @@ public class ExecutableSequence {
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
 
+				  if (!op.getOutputType().isVoid()) {
+					  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+					  if (obj != null && isObjectPrimtive(obj)) {
+						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
+							  endsWithObserverReturningNewValue = true;
+
+							  if (FieldBasedGenLog.isLoggingOn())
+								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " was added to primitive field bounds");				
+						  }
+						  else 
+							  if (FieldBasedGenLog.isLoggingOn())
+								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " already belongs to primitive field bounds");				
+					  }
+				  }
+
 				  op.setObserver();
 			  }
 		  }
+
+		  if (op.isObserver()) {
+			  endsWithObserver = true;
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
+		  }
+		  else
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
 
       }
       
@@ -423,9 +452,13 @@ public class ExecutableSequence {
   
   }
   
-  public void clearLastStmtExtensions() {
+  public void clearLastStmtExtensionsAndExecutionResults() {
 	 lastStmtFormerExt = null;
 	 lastStmtNextExt = null;
+	 executionResults.theList.clear();
+//	 for (int i = 0; i < sequence.size(); i++) {
+//		 executionResults.theList.add(NotExecuted.create());
+//	 }
   }
   
   public void toFile(String filename) throws IOException {
@@ -672,7 +705,7 @@ public class ExecutableSequence {
 		  List<FieldExtensionsIndexes> extensions = new ArrayList<>();
 		  for (Object o: parameters) {
 			  if (o != null && !isObjectPrimtive(o)) {
-				  FieldExtensionsIndexes ext = new FieldExtensionsIndexes(canonizer.store, true);
+				  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
 				  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
 					  return null; 
 
@@ -721,7 +754,7 @@ public class ExecutableSequence {
 
 		   int varIndex = 0;
 		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
-			   if (ext != null && canonizer.store.extensions.testEnlarges(ext)) {
+			   if (ext != null && canonizer.getExtensions().testEnlarges(ext)) {
 				   if (FieldBasedGenLog.isLoggingOn())
 					   FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 							   + stmt.toString() + " (index " + index + ")");
@@ -735,14 +768,14 @@ public class ExecutableSequence {
 
 		   if (sequence.getActiveVars(index) != null)
 			   for (Integer i: sequence.getActiveVars(index))
-				   canonizer.store.extensions.addAllPairs(lastStmtNextExt.get(i));
+				   canonizer.getExtensions().addAllPairs(lastStmtNextExt.get(i));
 
 	   }
 	   else {
 
 		   int varIndex = 0;
 		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
-			   if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
+			   if (ext != null && canonizer.getExtensions().addAllPairs(ext)) {
 				   if (FieldBasedGenLog.isLoggingOn())
 					   FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 							   + stmt.toString() + " (index " + index + ")");
@@ -757,12 +790,12 @@ public class ExecutableSequence {
 
 
 	   if (AbstractGenerator.field_based_gen_differential_runtime_checks) {
-		   if (!canonizer.readableExtensions.equals(canonizer.store.extensions.toFieldExtensionsStrings())) {
+		   if (!canonizer.readableExtensions.equals(canonizer.getExtensions().toFieldExtensionsStrings())) {
 			   if (FieldBasedGenLog.isLoggingOn()) {
 				   FieldBasedGenLog.logLine("Differential extensions:");
 				   FieldBasedGenLog.logLine(canonizer.readableExtensions.toString());
 				   FieldBasedGenLog.logLine("Real extensions:");
-				   FieldBasedGenLog.logLine(canonizer.store.extensions.toFieldExtensionsStrings().toString());
+				   FieldBasedGenLog.logLine(canonizer.getExtensions().toFieldExtensionsStrings().toString());
 			   }
 
 			   System.out.println("ERROR: Differential test failed. Different versions of the extensions differ");
@@ -785,7 +818,7 @@ public class ExecutableSequence {
 			  
 		  int varIndex = 0;
 		  for (FieldExtensionsIndexes ext: extensions) {
-			  if (ext != null && canonizer.store.extensions.testEnlarges(ext)) {
+			  if (ext != null && canonizer.getExtensions().testEnlarges(ext)) {
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 							  + stmt.toString() + " (index " + i + ")");
@@ -798,7 +831,7 @@ public class ExecutableSequence {
 		  
 		  if (sequence.getActiveVars(i) != null) {
 			  for (Integer extIndex: sequence.getActiveVars(i)) 
-				 canonizer.store.extensions.addAllPairs(extensions.get(extIndex));
+				 canonizer.getExtensions().addAllPairs(extensions.get(extIndex));
 		  }
 		  
 	  }
@@ -806,7 +839,7 @@ public class ExecutableSequence {
 	  
 		  int varIndex = 0;
 		  for (FieldExtensionsIndexes ext: extensions) {
-			  if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
+			  if (ext != null && canonizer.getExtensions().addAllPairs(ext)) {
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 							  + stmt.toString() + " (index " + i + ")");
@@ -820,12 +853,12 @@ public class ExecutableSequence {
 	  
 	  
 	  if (AbstractGenerator.field_based_gen_differential_runtime_checks) {
-		if (!canonizer.readableExtensions.equals(canonizer.store.extensions.toFieldExtensionsStrings())) {
+		if (!canonizer.readableExtensions.equals(canonizer.getExtensions().toFieldExtensionsStrings())) {
 			if (FieldBasedGenLog.isLoggingOn()) {
 				FieldBasedGenLog.logLine("Differential extensions:");
 				FieldBasedGenLog.logLine(canonizer.readableExtensions.toString());
 				FieldBasedGenLog.logLine("Real extensions:");
-				FieldBasedGenLog.logLine(canonizer.store.extensions.toFieldExtensionsStrings().toString());
+				FieldBasedGenLog.logLine(canonizer.getExtensions().toFieldExtensionsStrings().toString());
 			}
 			
 			System.out.println("ERROR: Differential test failed. Different versions of the extensions differ");

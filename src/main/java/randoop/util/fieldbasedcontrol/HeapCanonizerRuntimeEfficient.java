@@ -34,6 +34,10 @@ public class HeapCanonizerRuntimeEfficient {
 	private int maxArray;
 	private int maxStringLength;
 	private boolean dropTestsExceedingLimits;
+	// To canonize non primitive objects
+	public FieldExtensionsIndexes extensions;
+	// To canonize primitive values 
+	public FieldExtensionsIndexes primitiveExtensions;
 		
 	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive) {
 		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_CLASS_OBJECTS, DEFAULT_MAX_STRING, DEFAULT_MAX_ARRAY, false);
@@ -61,13 +65,18 @@ public class HeapCanonizerRuntimeEfficient {
 		
 		this.maxStringLength = maxStringLength;
 		this.maxArray = maxArray;
+		this.extensions = new FieldExtensionsIndexesMap(store);
+		this.primitiveExtensions = new FieldExtensionsIndexesMap(store);
 	}
 	
 	
 	public FieldExtensionsIndexes getExtensions() {
-		return store.extensions; 
+		return extensions; 
 	}
 
+	public FieldExtensionsIndexes getPrimitiveExtensions() {
+		return primitiveExtensions; 
+	}
 	
 	public void activateReadableExtensions() {
 		readableExtensions = new FieldExtensionsStrings();
@@ -129,7 +138,7 @@ public class HeapCanonizerRuntimeEfficient {
 
 
 	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root) {
-		return traverseBreadthFirstAndEnlargeExtensions(root, store.extensions);
+		return traverseBreadthFirstAndEnlargeExtensions(root, extensions);
 	}
 	
 	

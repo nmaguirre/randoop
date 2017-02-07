@@ -16,7 +16,10 @@ public class CanonicalHeapStore {
 	
 	//private static CanonicalHeapStore instance;
 	
-	public FieldExtensionsIndexes extensions;
+	// To canonize non primitive objects
+//	public FieldExtensionsIndexes extensions;
+	// To canonize primitive values 
+//	public FieldExtensionsIndexes primitiveExtensions;
 	
 	// Max number of stored objects for each (non-primitive) individual class
 	private int maxClassObjects;
@@ -48,7 +51,7 @@ public class CanonicalHeapStore {
 		this.maxClassObjects = maxClassObjects;
 		this.maxStringLength = maxStringLength;
 		this.dropTestsExceedingLimits = dropTestsExceedingLimits;
-		this.extensions = new FieldExtensionsIndexes(this);
+
 	}
 
 	private boolean isIgnoredFieldType(CanonizerClass cc) {
@@ -191,7 +194,8 @@ public class CanonicalHeapStore {
 		cf = new CanonizerField(arrType.name + pos, fields.size());
 		m1.put(pos, cf);
 		fields.add(cf);
-		extensions.addField();
+		//extensions.addField();
+		//primitiveExtensions.addField();
 		
 		if (FieldBasedGenLog.isLoggingOn()) 
 			FieldBasedGenLog.logLine("> Stored array field " + cf.name + " with index " + cf.index);
@@ -258,7 +262,8 @@ public class CanonicalHeapStore {
 			CanonizerField cf = new CanonizerField(f, cc, fields.size()); 
 			fields.add(cf);
 			cc.addField(cf);
-			extensions.addField();
+			//extensions.addField();
+			//primitiveExtensions.addField();
 			
 			if (FieldBasedGenLog.isLoggingOn()) 
 				FieldBasedGenLog.logLine("Stored field " + cf.name + " with index " + cf.index + 
