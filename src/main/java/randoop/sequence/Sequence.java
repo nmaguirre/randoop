@@ -105,7 +105,7 @@ public final class Sequence implements WeightedElement {
    *
    * @return the variables used in the last statement of this sequence
    */
-  List<Variable> getVariablesOfLastStatement() {
+  public List<Variable> getVariablesOfLastStatement() {
     return this.lastStatementVariables;
   }
 
@@ -116,7 +116,7 @@ public final class Sequence implements WeightedElement {
    *
    * @return the types of the variables in the last statement of this sequence
    */
-  List<Type> getTypesForLastStatement() {
+  public List<Type> getTypesForLastStatement() {
     return this.lastStatementTypes;
   }
 
