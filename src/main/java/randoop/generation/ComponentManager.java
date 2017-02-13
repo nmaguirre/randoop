@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import randoop.operation.TypedClassOperation;
@@ -16,6 +17,7 @@ import randoop.types.ClassOrInterfaceType;
 import randoop.types.JavaTypes;
 import randoop.types.PrimitiveType;
 import randoop.types.Type;
+import randoop.util.ArrayListSimpleList;
 import randoop.util.ListOfLists;
 import randoop.util.SimpleList;
 
@@ -49,6 +51,10 @@ public class ComponentManager {
   // Is never null. Contains both general components
   // and seed sequences.
   private SequenceCollection gralComponents;
+  
+  public Map<Type, ArrayListSimpleList<Sequence>> getSequenceMap() {
+	  return gralComponents.getSequenceMap();
+  }
 
   /**
    * The subset of the sequences that were given pre-generation to the component

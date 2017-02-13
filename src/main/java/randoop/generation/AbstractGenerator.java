@@ -27,7 +27,9 @@ import randoop.util.ReflectionExecutor;
 import randoop.util.SimpleList;
 import randoop.util.Timer;
 import randoop.util.WeightedElement;
+import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
+import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.FieldExtensionsStrings;
 import randoop.util.fieldbasedcontrol.HeapCanonizerListStore;
 import randoop.util.fieldbasedcontrol.HeapCanonizerMapStore;
@@ -145,6 +147,8 @@ public abstract class AbstractGenerator {
   @Option("Max times an observer must be used in tests to flag it final.")
   public static int field_based_gen_observer_executions_before_final = 7;
 
+  @Option("Count the number of different objects generated during the first phase. Don't perform the second phase.")
+  public static boolean field_based_gen_count_objects = false; 
 
 //   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
 //  public static boolean field_based_gen_precise_canonization = true;
@@ -679,25 +683,72 @@ private int genFirstAdditionalObsErrorSeqs;
       }
     }
     
-    genFirstAdditionalPositiveSeqs = 0;
-    genFirstAdditionalNegativeSeqs = 0;
-    genFirstAdditionalErrorSeqs = 0;
-    
-    ArrayList<TypedOperation> operationsPermutable = new ArrayList<>();
-    for (TypedOperation op: operations)
-    	if (op.isObserver())
-    		operationsPermutable.add(op);
+    if (!field_based_gen_count_objects) {
+		genFirstAdditionalPositiveSeqs = 0;
+		genFirstAdditionalNegativeSeqs = 0;
+		genFirstAdditionalErrorSeqs = 0;
+		
+		ArrayList<TypedOperation> operationsPermutable = new ArrayList<>();
+		for (TypedOperation op: operations)
+			if (op.isObserver())
+				operationsPermutable.add(op);
 
-    
-    if (FieldBasedGenLog.isLoggingOn())
-    	FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with modifiers starting");
-
-    extendModifierTestsWithObserverOps(positiveRegressionSeqs, operationsPermutable, false, false);
-
-    if (field_based_gen_save_observers) {
+		
 		if (FieldBasedGenLog.isLoggingOn())
-			FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with observers starting");
-    	extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
+			FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with modifiers starting");
+
+		extendModifierTestsWithObserverOps(positiveRegressionSeqs, operationsPermutable, false, false);
+
+		if (field_based_gen_save_observers) {
+			if (FieldBasedGenLog.isLoggingOn())
+				FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with observers starting");
+			extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
+		}
+    }
+    else {
+ 		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("\n\n>> Starting to count objects generated during the first phase.");
+		System.out.println("\n\n>> Starting to count objects generated during the first phase.");
+
+ 		Map<Type, ArrayListSimpleList<Sequence>> sequenceMap = componentManager.getSequenceMap();
+ 		for (Type type: sequenceMap.keySet()) {
+ 			ArrayListSimpleList<Sequence> currListSeq = sequenceMap.get(type);
+ 			Set<FieldExtensionsIndexes> currExtSet = new HashSet<>();
+ 			for (int k = 0; k < currListSeq.size(); k++) {
+
+ 				ExecutableSequence eSeq = new ExecutableSequence(currListSeq.get(k));
+ 				try {
+					eSeq.execute(executionVisitor, checkGenerator, canonizer);
+				} catch (CanonizationErrorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+ 				if (!eSeq.isNormalExecution()) {
+ 					System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
+ 					continue;
+ 				}
+
+ 				List<Type> lastStmtTypes = eSeq.sequence.getTypesForLastStatement();
+ 				List<FieldExtensionsIndexes> lastStmtExt = null;
+ 				try {
+					lastStmtExt = eSeq.canonizeLastStatementObjects(canonizer);
+				} catch (CanonizationErrorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+ 				for (int j = 0; j < lastStmtTypes.size(); j++) {
+ 					if (lastStmtTypes.get(j).equals(type)) {
+ 						currExtSet.add(lastStmtExt.get(j));
+ 					}
+ 				}
+
+ 			}
+ 			if (FieldBasedGenLog.isLoggingOn())
+ 				FieldBasedGenLog.logLine("Type: " + type.toString() + ", objects count: " + currExtSet.size());
+ 			System.out.println("Type: " + type.toString() + ", objects count: " + currExtSet.size());
+ 		}
+
+
     }
 
     

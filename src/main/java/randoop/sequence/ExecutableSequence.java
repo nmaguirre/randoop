@@ -591,6 +591,27 @@ public class ExecutableSequence {
   
   
   
+   public List<FieldExtensionsIndexes> canonizeLastStatementObjects(HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
+	// for attempting to enlarge field extensions
+	int lastStmtIndex = this.sequence.size()-1;
+	List<Variable> inputs = sequence.getInputs(lastStmtIndex);
+	Object[] inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+
+    // make sure statement executed
+	ExecutionOutcome statementResult = getResult(lastStmtIndex);
+	
+	enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
+	
+/*	if (!AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits) 
+		enlargesExtensions = enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
+	else */
+
+	return createExtensionsForAllObjectsIncludingPrimitives(lastStmtIndex, statementResult, inputVariables, canonizer);
+   }
+  
+  
+  
   public ExtendedExtensionsResult enlargeExtensionsFast(HeapCanonizerRuntimeEfficient canonizer, ForwardGenerator generator) throws CanonizationErrorException {
 	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
 	// for attempting to enlarge field extensions
@@ -722,6 +743,44 @@ public class ExecutableSequence {
   private boolean isObjectPrimtive(Object o) {
 	  Class<?> objectClass = o.getClass();
 	  return NonreceiverTerm.isNonreceiverType(objectClass) || objectClass.equals(Class.class) || objectClass.equals(Object.class);
+  }
+
+  
+  private List<FieldExtensionsIndexes> createExtensionsForAllObjectsIncludingPrimitives(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+
+	  try {
+		  Statement stmt = sequence.getStatement(i);
+
+		  List<Object> parameters = new ArrayList<>();
+
+		  if (!stmt.getOutputType().isVoid()) {
+			  parameters.add(statementResult);
+		  }
+
+		  for (int j=0; j<inputVariables.length; j++) {
+			  parameters.add(inputVariables[j]);
+		  }
+
+		  List<FieldExtensionsIndexes> extensions = new ArrayList<>();
+		  for (Object o: parameters) {
+			  if (o != null) {
+				  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
+				  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+					  return null; 
+
+				  extensions.add(ext);
+			  }
+			  else 
+				  extensions.add(null);
+		  }
+		  
+		 return extensions; 
+		  
+	  }	catch (Exception e) {
+		  e.printStackTrace();
+		  throw new CanonizationErrorException("ERROR: Exception during heap canonization");
+	  }
+	  
   }
   
 

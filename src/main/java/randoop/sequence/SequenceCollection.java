@@ -58,6 +58,10 @@ public class SequenceCollection {
 
   // We make it a list to make it easier to pick out an element at random.
   private Map<Type, ArrayListSimpleList<Sequence>> sequenceMap = new LinkedHashMap<>();
+  
+  public Map<Type, ArrayListSimpleList<Sequence>> getSequenceMap() {
+	  return sequenceMap;
+  }
 
   private SubTypeSet typeSet = new SubTypeSet(false);
 
