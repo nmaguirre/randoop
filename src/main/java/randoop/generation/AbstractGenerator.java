@@ -136,6 +136,16 @@ public abstract class AbstractGenerator {
   @Option("Save tests ending with observers.")
   public static boolean field_based_gen_save_observers = true;
 
+  @Option("Number of negative tests to save during the second phase.")
+  public static int field_based_gen_negative_observers_per_test = 0; 
+  
+  @Option("Max number of observers to be added to each test.")
+  public static int field_based_gen_observers_per_test = 100; 
+  
+  @Option("Max times an observer must be used in tests to flag it final.")
+  public static int field_based_gen_observer_executions_before_final = 7;
+
+
 //   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
 //  public static boolean field_based_gen_precise_canonization = true;
   
@@ -682,234 +692,15 @@ private int genFirstAdditionalObsErrorSeqs;
     if (FieldBasedGenLog.isLoggingOn())
     	FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with modifiers starting");
 
-    // secondPhase(positiveRegressionSeqs, operationsPermutable, false, false);
-
-    secondPhaseNew(positiveRegressionSeqs, operationsPermutable, false, false);
+    extendModifierTestsWithObserverOps(positiveRegressionSeqs, operationsPermutable, false, false);
 
     if (field_based_gen_save_observers) {
 		if (FieldBasedGenLog.isLoggingOn())
 			FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with observers starting");
-    	secondPhase(observerRegressionSeqs, operationsPermutable, true, true);
+    	extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
     }
 
     
-//    // Generation first add one of each observer operation to the end of the sequence
-//    for (ExecutableSequence eSeq: positiveRegressionSeqs) {
-//    	
-////    	Sequence origSeq = eSeq.sequence;
-//   	
-//    	ExecutableSequence neweSeq = eSeq;
-//
-//    	RandomPerm.randomPermutation(operationsPermutable);
-//    	// Should randomly mix the operations list each time we do this to avoid always the same execution order.
-//        for (TypedOperation operation: operationsPermutable) {
-//
-//   	    	int lastIndex = neweSeq.sequence.size() - 1;
-//
-//   	    	if (FieldBasedGenLog.isLoggingOn())
-//   	    		FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
-//
-//			TypedOperation seqLastStmtOp = neweSeq.sequence.getStatement(lastIndex).getOperation();
-//			
-//			TypeTuple seqLastStmtInputTypes = seqLastStmtOp.getInputTypes();
-//			TypeTuple seqLastStmtOutputTypes = new TypeTuple();
-//
-//			List<Boolean> isLastStmtVarActive = neweSeq.getLastStmtActiveVars();
-//			if (!seqLastStmtOp.getOutputType().isVoid())
-//				seqLastStmtOutputTypes.list.add(seqLastStmtOp.getOutputType());
-//			for (int i = 0; i < seqLastStmtInputTypes.size(); i++)
-//				seqLastStmtOutputTypes.list.add(seqLastStmtInputTypes.get(i));
-// 
-//        	if (FieldBasedGenLog.isLoggingOn())
-//        		FieldBasedGenLog.logLine("> Operation: " + operation.toString());
-//
-//         	if (!operation.isObserver()) {
-//    			 if (FieldBasedGenLog.isLoggingOn())
-//    				FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore");
-//    			//System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
-//         		continue;
-//        	}
-//        	
-//        	if (operation.isConstructorCall()) {
-//        		if (FieldBasedGenLog.isLoggingOn())
-//        			FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
-//        		continue;
-//        	}
-//        	
-//        	// The first integer of the tuple is the index of the variable chosen from newSeq, 
-//        	// the second integer is the corresponding index of a compatible type in operation
-//        	TypeTuple inputTypes = operation.getInputTypes();
-//        	Tuple<Integer, Integer> connection = getRandomConnectionBetweenTypeTuples(seqLastStmtOutputTypes, isLastStmtVarActive, inputTypes);
-//        	if (connection == null) continue;
-//        	
-//            List<Sequence> sequences = new ArrayList<>();
-//            int totStatements = 0;
-//            List<Integer> variables = new ArrayList<>();
-//            
-//        	boolean error = false;
-//        	for (int i = 0; i < inputTypes.size(); i++) {
-//        		Type inputType = inputTypes.get(i);
-//        		if (FieldBasedGenLog.isLoggingOn()) 
-//    				FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
-//
-//        		Sequence chosenSeq;
-//        		if (i == connection.getSecond()) {
-//        			chosenSeq = neweSeq.sequence; 
-//
-//        			if (FieldBasedGenLog.isLoggingOn()) 
-//        				FieldBasedGenLog.logLine("> Sequence to be extended selected: ");
-//        		}
-//        		else {
-//        			SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
-//        			if (l.isEmpty()) {
-//						error = true;
-//						break;
-//        			}
-//
-//        			chosenSeq = Randomness.randomMember(l);
-//
-//        			if (FieldBasedGenLog.isLoggingOn()) 
-//        				FieldBasedGenLog.logLine("> Random sequence selected: ");
-//        		}
-//
-//				if (FieldBasedGenLog.isLoggingOn()) 
-//					FieldBasedGenLog.logLine(chosenSeq.toCodeString());
-//
-//        	    // Now, find values that satisfy the constraint set.
-//        	    Variable randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);
-//
-//        	      if (randomVariable == null) {
-//        	        throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
-//        	      }
-//
-//        	      // Fail, if we were unlucky and selected a null or primitive value as the
-//        	      // receiver for a method call.
-//        	      if (i == 0
-//        	          && operation.isMessage()
-//        	          && !(operation.isStatic())
-//        	          && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
-//        	              || randomVariable.getType().isPrimitive())) {
-//
-//      				error = true;
-//      				break;
-//      			}
-//
-//        	    variables.add(totStatements + randomVariable.index);
-//        	    sequences.add(chosenSeq);
-//        	    totStatements += chosenSeq.size();
-//        	}
-//    	
-//    		if (error) continue;
-//    		InputsAndSuccessFlag isequences = new InputsAndSuccessFlag(true, sequences, variables);
-//    		
-//    		Sequence concatSeq = Sequence.concatenate(isequences.sequences);
-//    		// Figure out input variables.
-//    		List<Variable> inputs = new ArrayList<>();
-//    		for (Integer oneinput : isequences.indices) {
-//    			Variable v = concatSeq.getVariable(oneinput);
-//    			inputs.add(v);
-//    		}
-//
-//    		Sequence newSequence = concatSeq.extend(operation, inputs);
-//    		
-//			// Discard if sequence is larger than size limit
-//			if (newSequence.size() > GenInputsAbstract.maxsize) {
-//			  if (Log.isLoggingOn()) {
-//				Log.logLine(
-//					"Sequence discarded because size "
-//						+ newSequence.size()
-//						+ " exceeds maximum allowed size "
-//						+ GenInputsAbstract.maxsize);
-//			  }
-//			  // This sequence is already too large, continue with the next sequence
-//			  break;
-//			}
-//    		
-//    		if (FieldBasedGenLog.isLoggingOn())
-//    			FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
-//
-//    		num_sequences_generated++;
-//    		
-//    	    if (this.allSequences.contains(newSequence)) {
-//    	        if (Log.isLoggingOn()) {
-//    	          Log.logLine("Sequence discarded because the same sequence was previously created.");
-//    	        }
-//    	        
-//    	        if (FieldBasedGenLog.isLoggingOn())
-//    	        	FieldBasedGenLog.logLine("> The current sequence was generated twice in the second phase \n"); 
-//   	        
-//    	        continue;
-//    	    }
-//
-//    	    this.allSequences.add(newSequence);	
-//   		
-//    		ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
-//   		    setCurrentSequence(eSeq2ndPhase.sequence);
-//   		    executeExtendedSequence(eSeq2ndPhase);
-//    		eSeq2ndPhase.clearLastStmtExtensions();
-//
-//    		if (operation.isModifier()) {
-//				FieldBasedGenLog.logLine("> Operation " + operation.toString() + " was incorrectly flagged as observer in the first phase. Discarding test" ); 
-//    			operationBadTag++;
-//    			continue;
-//    		}
-//
-//    		if (eSeq2ndPhase.hasFailure()) {
-//    			num_failing_sequences++;
-//    		}
-//
-//    		if (outputTest.test(eSeq2ndPhase)) {
-//
-//    			if (!eSeq2ndPhase.hasInvalidBehavior()) {
-//    				if (eSeq2ndPhase.hasFailure()) {
-//    					outErrorSeqs.add(eSeq2ndPhase);
-//    					genFirstAdditionalErrorSeqs++;
-//
-//    					if (FieldBasedGenLog.isLoggingOn()) 
-//    						FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
-//    				} 
-//    				else {
-//   						outRegressionSeqs.add(eSeq2ndPhase);
-//    					if (eSeq2ndPhase.isNormalExecution()) {
-//    						if (FieldBasedGenLog.isLoggingOn()) 
-//    							FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
-//    						// continue extending this sequence;
-//    						neweSeq = eSeq2ndPhase;
-//    						genFirstAdditionalPositiveSeqs++;
-//    					}
-//    					else {
-//    						if (FieldBasedGenLog.isLoggingOn()) 
-//        						FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
-//    						genFirstAdditionalNegativeSeqs++;
-//    					} 
-//    					// Add newSequence's inputs to subsumed_sequences
-//    					for (Sequence subsumed: isequences.sequences) {
-//    						subsumed_sequences.add(subsumed);
-//    					}	
-//    				}
-//    			}
-//    			else {
-//    				System.out.println("> ERROR: Sequence with invalid behavior in the second phase:");
-//    				System.out.println(eSeq2ndPhase.toCodeString());
-//    				if (FieldBasedGenLog.isLoggingOn()) {
-//    					FieldBasedGenLog.logLine("> ERROR: Sequence with invalid behaviour in the second phase:");
-//    					FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
-//    				}
-//    				genFirstAdditionalErrorSeqs++;
-//    			}
-//    		}
-//    		else {
-//    			System.out.println("> ERROR: Failing sequence in the second phase:");
-//    			System.out.println(eSeq2ndPhase.toCodeString());
-//    			if (FieldBasedGenLog.isLoggingOn()) {
-//    				FieldBasedGenLog.logLine("> ERROR: Failing sequence in the second phase:");
-//    				FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
-//    			}
-//    			genFirstAdditionalErrorSeqs++;
-//    		}
-//
-//        }
-//    }
 
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();
@@ -918,12 +709,15 @@ private int genFirstAdditionalObsErrorSeqs;
     
     int mod = 0;
     int obs = 0;
+    int finalobs = 0;
     int notexec = 0;
     for (TypedOperation op: operations)
     	if (op.isModifier())
     		mod++;
     	else if (op.isObserver())
     		obs++;
+    	else if (op.isFinalObserver())
+    		finalobs++;
     	else
     		notexec++; 
 
@@ -937,6 +731,7 @@ private int genFirstAdditionalObsErrorSeqs;
     	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
     	  FieldBasedGenLog.logLine("Observer tests generated: " + observerTestsGen);
     	  FieldBasedGenLog.logLine("Observer tests discarded: " + observerTestsDropped);
+    	  FieldBasedGenLog.logLine("Total tests generated: " + (modifierTestsGen + (observerTestsGen - observerTestsDropped) + (negativeTestsGen - negativeTestsDropped)));
     	  FieldBasedGenLog.logLine("Tests excceding limits: " + seqsExceedingLimits);
     	  FieldBasedGenLog.logLine("> Second phase stats:");
 		  FieldBasedGenLog.logLine("Operations incorrectly deemed observers in the first phase: " + operationBadTag); 
@@ -950,6 +745,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  FieldBasedGenLog.logLine("Total sequences observed in the third phase (observers): " + (genFirstAdditionalObsPositiveSeqs + genFirstAdditionalObsNegativeSeqs + genFirstAdditionalObsErrorSeqs)); 
     	  FieldBasedGenLog.logLine("Modifier operations: " + mod); 
     	  FieldBasedGenLog.logLine("Observer operations: " + obs); 
+    	  FieldBasedGenLog.logLine("Final observer operations: " + finalobs); 
     	  FieldBasedGenLog.logLine("Not executed operations: " + notexec); 
     	  FieldBasedGenLog.logLine("");
     	  FieldBasedGenLog.logLine("\nModifier operations: "); 
@@ -958,7 +754,7 @@ private int genFirstAdditionalObsErrorSeqs;
     			  FieldBasedGenLog.log(op.getName() + ",");
     	  FieldBasedGenLog.logLine("\nObserver operations: "); 
     	  for (TypedOperation op: operations)
-    		  if (op.isObserver())
+    		  if (op.isObserver() || op.isFinalObserver())
     			  FieldBasedGenLog.log(op.getName() + ",");
     	  FieldBasedGenLog.logLine("\nNot executed operations: "); 
     	  for (TypedOperation op: operations)
@@ -975,6 +771,7 @@ private int genFirstAdditionalObsErrorSeqs;
    	  System.out.println("Negative tests discarded: " + negativeTestsDropped);
    	  System.out.println("Observer tests generated: " + observerTestsGen);
    	  System.out.println("Observer tests discarded: " + observerTestsDropped);
+   	  System.out.println("Total tests generated: " + (modifierTestsGen + (observerTestsGen - observerTestsDropped) + (negativeTestsGen - negativeTestsDropped)));
    	  System.out.println("Tests excceding limits: " + seqsExceedingLimits);
    	  System.out.println("> Second phase stats:");
       System.out.println("Operations incorrectly deemed observers in the first phase: " + operationBadTag); 
@@ -988,6 +785,7 @@ private int genFirstAdditionalObsErrorSeqs;
 	  System.out.println("Total sequences observed in the third phase (observers): " + (genFirstAdditionalObsPositiveSeqs + genFirstAdditionalObsNegativeSeqs + genFirstAdditionalObsErrorSeqs)); 
    	  System.out.println("Modifier operations: " + mod); 
    	  System.out.println("Observer operations: " + obs); 
+   	  System.out.println("Final observer operations: " + finalobs); 
    	  System.out.println("Not executed operations: " + notexec); 
 	  System.out.println(""); 
 	  
@@ -1011,7 +809,7 @@ private int genFirstAdditionalObsErrorSeqs;
         			
   
 
-  private void secondPhaseNew(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendPrimitive, boolean observers) {
+  private void extendModifierTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendPrimitive, boolean observers) {
 	  // Generation first add one of each observer operation to the end of the sequence
 	  for (ExecutableSequence eSeq: sequencesToExtend) {
 		  // TODO: If the sequence ends with a method incorrectly deemed modifier continue to the next sequence
@@ -1020,232 +818,288 @@ private int genFirstAdditionalObsErrorSeqs;
 		  List<Boolean> isLastStmtVarActive = eSeq.getLastStmtActiveVars();
 		  assert seqLastStmtTypes.size() == isLastStmtVarActive.size();
 		  
+		  List<Integer> candidates = new ArrayList<>();
 		  for (int j = 0; j < seqLastStmtTypes.size(); j++) {
-			  if (!isLastStmtVarActive.get(j)) continue;
-				  		  
-			  ExecutableSequence neweSeq = eSeq;
-			  Type observedType = seqLastStmtTypes.get(j);
-			  int observedIndex = j;
+			  if (isLastStmtVarActive.get(j)) 
+				  candidates.add(j);
+		  }
+
+		  if (candidates.isEmpty()) {
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> Current sequence cannot be extended\n" + eSeq.sequence.toCodeString());
 			  
-			  if (FieldBasedGenLog.isLoggingOn())
-				  FieldBasedGenLog.logLine("\n> Sequence to be extended:\n " + neweSeq.sequence.toCodeString());
+			  continue;
+		  }
+		  
+		  int j = Randomness.randomMember(candidates);
+		  
+		  // for (int j = 0; j < seqLastStmtTypes.size(); j++) {
+			  // if (!isLastStmtVarActive.get(j)) continue;
+				  		  
+		  ExecutableSequence neweSeq = eSeq;
+		  Type observedType = seqLastStmtTypes.get(j);
+		  int observedIndex = j;
 
-			  RandomPerm.randomPermutation(operationsPermutable);
-			  // Should randomly mix the operations list each time we do this to avoid always the same execution order.
-			  for (TypedOperation operation: operationsPermutable) {
+		  if (FieldBasedGenLog.isLoggingOn()) {
+			  FieldBasedGenLog.logLine("\n> Sequence to extend:\n " + neweSeq.sequence.toCodeString());
+			  FieldBasedGenLog.logLine("> Type to extend: " + observedType);
+			  FieldBasedGenLog.logLine("> Index of type to extend: " + observedIndex);
+		  }
+				  
+		  int currTestNegativeObservers = 0;
+		  int currTestObservers = 0;
+		  RandomPerm.randomPermutation(operationsPermutable);
+		  // Should randomly mix the operations list each time we do this to avoid always the same execution order.
+		  for (TypedOperation operation: operationsPermutable) {
 
-				  if (stopSecondPhase()) { 
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
-					  System.out.println("WARNING: Second Phase stopped due to time constraints");
-					  return;
-				  }
-
+			  if (currTestObservers > field_based_gen_observers_per_test) {
 				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("> Operation: " + operation.toString());
+					  FieldBasedGenLog.logLine("> Maximum number of observers exceeded for the current test. Continue with the next test");
 
-				  if (!operation.isObserver()) {
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore");
-					  //System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
-					  continue;
-				  }
+				  break;
+			  }
+			  
+			  if (stopSecondPhase()) { 
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
+				  System.out.println("WARNING: Second Phase stopped due to time constraints");
+				  return;
+			  }
+			  
+			  
+			  if (FieldBasedGenLog.isLoggingOn()) {
+				  FieldBasedGenLog.logLine("\n> Sequence being extended:\n " + neweSeq.sequence.toCodeString());
+				  FieldBasedGenLog.logLine("> Observed type: " + observedType);
+				  FieldBasedGenLog.logLine("> Observed index: " + observedIndex);
+			  }
+		  
+		  
+			  if (FieldBasedGenLog.isLoggingOn())
+				  FieldBasedGenLog.logLine("> Operation: " + operation.toString());
 
-				  if (operation.isConstructorCall()) {
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
-					  continue;
-				  }
+			  if (!operation.isObserver() && !operation.isFinalObserver()) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore");
+				  //System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
+				  continue;
+			  }
 
-				  // The first integer of the tuple is the index of the variable chosen from newSeq, 
-				  // the second integer is the corresponding index of a compatible type in operation
-				  TypeTuple inputTypes = operation.getInputTypes();
-				  Integer opIndex = getRandomConnectionBetweenTypes(observedType, inputTypes);
-				  if (opIndex == null) {
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("> The operation cannot observe type " + observedType);
-					  continue;
-				  }
+			  if (operation.isConstructorCall()) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
+				  continue;
+			  }
 
-				  List<Sequence> sequences = new ArrayList<>();
-				  int totStatements = 0;
-				  List<Integer> variables = new ArrayList<>();
-				  boolean error = false;
-				  for (int i = 0; i < inputTypes.size(); i++) {
-					  Type inputType = inputTypes.get(i);
-					  Variable randomVariable;
-					  
+			  // The first integer of the tuple is the index of the variable chosen from newSeq, 
+			  // the second integer is the corresponding index of a compatible type in operation
+			  TypeTuple inputTypes = operation.getInputTypes();
+			  Integer opIndex = getRandomConnectionBetweenTypes(observedType, inputTypes);
+			  if (opIndex == null) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> The operation cannot observe type " + observedType);
+				  continue;
+			  }
+
+			  List<Sequence> sequences = new ArrayList<>();
+			  int totStatements = 0;
+			  List<Integer> variables = new ArrayList<>();
+			  boolean error = false;
+			  for (int i = 0; i < inputTypes.size(); i++) {
+				  Type inputType = inputTypes.get(i);
+				  Variable randomVariable;
+				  
+				  if (FieldBasedGenLog.isLoggingOn()) 
+					  FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
+
+				  Sequence chosenSeq;
+				  if (i == opIndex) {
+					  chosenSeq = neweSeq.sequence; 
+					  randomVariable = chosenSeq.getVariablesOfLastStatement().get(observedIndex);
+
 					  if (FieldBasedGenLog.isLoggingOn()) 
-						  FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
-
-					  Sequence chosenSeq;
-					  if (i == opIndex) {
-						  chosenSeq = neweSeq.sequence; 
-						  randomVariable = chosenSeq.getVariablesOfLastStatement().get(observedIndex);
-
-						  if (FieldBasedGenLog.isLoggingOn()) 
-							  FieldBasedGenLog.logLine("> Current sequence selected as input: ");
-					  }
-					  else {
-						  SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
-						  if (l.isEmpty()) {
-							  error = true;
-							  break;
-						  }
-
-						  chosenSeq = Randomness.randomMember(l);
-						  randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);
-
-						  if (FieldBasedGenLog.isLoggingOn()) 
-							  FieldBasedGenLog.logLine("> Random sequence selected as input: ");
-					  }
-
-					  if (FieldBasedGenLog.isLoggingOn()) 
-						  FieldBasedGenLog.logLine(chosenSeq.toCodeString());
-
-					  // Now, find values that satisfy the constraint set.
-
-					  if (randomVariable == null) {
-						  throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
-					  }
-
-					  // Fail, if we were unlucky and selected a null or primitive value as the
-					  // receiver for a method call.
-					  if (i == 0
-							  && operation.isMessage()
-							  && !(operation.isStatic())
-							  && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
-									  || randomVariable.getType().isPrimitive())) {
-
+						  FieldBasedGenLog.logLine("> Current sequence selected as input: ");
+				  }
+				  else {
+					  SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
+					  if (l.isEmpty()) {
 						  error = true;
 						  break;
 					  }
 
-					  variables.add(totStatements + randomVariable.index);
-					  sequences.add(chosenSeq);
-					  totStatements += chosenSeq.size();
+					  chosenSeq = Randomness.randomMember(l);
+					  randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);
+
+					  if (FieldBasedGenLog.isLoggingOn()) 
+						  FieldBasedGenLog.logLine("> Random sequence selected as input: ");
+
+					  if (FieldBasedGenLog.isLoggingOn()) 
+						  FieldBasedGenLog.logLine(chosenSeq.toCodeString());
 				  }
 
-				  if (error) continue;
-				  InputsAndSuccessFlag isequences = new InputsAndSuccessFlag(true, sequences, variables);
 
-				  Sequence concatSeq = Sequence.concatenate(isequences.sequences);
-				  // Figure out input variables.
-				  List<Variable> inputs = new ArrayList<>();
-				  for (Integer oneinput : isequences.indices) {
-					  Variable v = concatSeq.getVariable(oneinput);
-					  inputs.add(v);
+				  // Now, find values that satisfy the constraint set.
+
+				  if (randomVariable == null) {
+					  throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
 				  }
 
-				  Sequence newSequence = concatSeq.extend(operation, inputs);
+				  // Fail, if we were unlucky and selected a null or primitive value as the
+				  // receiver for a method call.
+				  if (i == 0
+						  && operation.isMessage()
+						  && !(operation.isStatic())
+						  && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
+								  || randomVariable.getType().isPrimitive())) {
 
-				  // Discard if sequence is larger than size limit
-				  if (newSequence.size() > GenInputsAbstract.maxsize) {
-					  if (Log.isLoggingOn()) {
-						  Log.logLine(
-								  "Sequence discarded because size "
-										  + newSequence.size()
-										  + " exceeds maximum allowed size "
-										  + GenInputsAbstract.maxsize);
-					  }
-					  // This sequence is already too large, continue with the next sequence
+					  error = true;
 					  break;
 				  }
 
+				  variables.add(totStatements + randomVariable.index);
+				  sequences.add(chosenSeq);
+				  totStatements += chosenSeq.size();
+			  }
+
+			  if (error) continue;
+			  InputsAndSuccessFlag isequences = new InputsAndSuccessFlag(true, sequences, variables);
+
+			  Sequence concatSeq = Sequence.concatenate(isequences.sequences);
+			  // Figure out input variables.
+			  List<Variable> inputs = new ArrayList<>();
+			  for (Integer oneinput : isequences.indices) {
+				  Variable v = concatSeq.getVariable(oneinput);
+				  inputs.add(v);
+			  }
+
+			  Sequence newSequence = concatSeq.extend(operation, inputs);
+
+			  /*
+			  // Discard if sequence is larger than size limit
+			  if (newSequence.size() > GenInputsAbstract.maxsize) {
+				  if (Log.isLoggingOn()) {
+					  Log.logLine(
+							  "Sequence discarded because size "
+									  + newSequence.size()
+									  + " exceeds maximum allowed size "
+									  + GenInputsAbstract.maxsize);
+				  }
+				  // This sequence is already too large, continue with the next sequence
+				  break;
+			  }
+
+			  if (FieldBasedGenLog.isLoggingOn())
+				  FieldBasedGenLog.logLine("> Sequence to be executed: \n" + newSequence.toCodeString()); 
+			  */
+			  
+			  num_sequences_generated++;
+
+			  if (this.allSequences.contains(newSequence)) {
+				  if (Log.isLoggingOn()) {
+					  Log.logLine("Sequence discarded because the same sequence was previously created.");
+				  }
+
 				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("> Sequence to be executed: \n" + newSequence.toCodeString()); 
+					  FieldBasedGenLog.logLine("> The current sequence was generated twice in the second phase \n"); 
 
-				  num_sequences_generated++;
+				  continue;
+			  }
 
-				  if (this.allSequences.contains(newSequence)) {
-					  if (Log.isLoggingOn()) {
-						  Log.logLine("Sequence discarded because the same sequence was previously created.");
-					  }
+			  this.allSequences.add(newSequence);	
 
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("> The current sequence was generated twice in the second phase \n"); 
+			  ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
+			  setCurrentSequence(eSeq2ndPhase.sequence);
+			  executeExtendedSequence(eSeq2ndPhase);
 
-					  continue;
-				  }
+			  if (eSeq2ndPhase.isNormalExecution() && operation.isModifier()) {
+				  FieldBasedGenLog.logLine("> Operation " + operation.toString() + " was incorrectly flagged as observer in the first phase. Don't extend this test" ); 
+				  operationBadTag++;
+				  eSeq2ndPhase.clearLastStmtExtensionsAndExecutionResults();
+				  continue;
+			  }
 
-				  this.allSequences.add(newSequence);	
+			  if (eSeq2ndPhase.hasFailure()) {
+				  num_failing_sequences++;
+			  }
 
-				  ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
-				  setCurrentSequence(eSeq2ndPhase.sequence);
-				  executeExtendedSequence(eSeq2ndPhase);
+			  if (outputTest.test(eSeq2ndPhase)) {
 
-				  if (eSeq2ndPhase.isNormalExecution() && operation.isModifier()) {
-					  FieldBasedGenLog.logLine("> Operation " + operation.toString() + " was incorrectly flagged as observer in the first phase. Don't extend this test" ); 
-					  operationBadTag++;
-					  eSeq2ndPhase.clearLastStmtExtensionsAndExecutionResults();
-					  continue;
-				  }
+				  if (!eSeq2ndPhase.hasInvalidBehavior()) {
+					  if (eSeq2ndPhase.hasFailure()) {
+						  outErrorSeqs.add(eSeq2ndPhase);
+						  if (!observers)
+							  genFirstAdditionalErrorSeqs++;
+						  else
+							  genFirstAdditionalObsErrorSeqs++;
 
-				  if (eSeq2ndPhase.hasFailure()) {
-					  num_failing_sequences++;
-				  }
-
-				  if (outputTest.test(eSeq2ndPhase)) {
-
-					  if (!eSeq2ndPhase.hasInvalidBehavior()) {
-						  if (eSeq2ndPhase.hasFailure()) {
-							  outErrorSeqs.add(eSeq2ndPhase);
-							  if (!observers)
-								  genFirstAdditionalErrorSeqs++;
-							  else
-								  genFirstAdditionalObsErrorSeqs++;
-
+						  if (FieldBasedGenLog.isLoggingOn()) 
+							  FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
+					  } 
+					  else {
+						  // outRegressionSeqs.add(eSeq2ndPhase);
+						  if (eSeq2ndPhase.isNormalExecution()) {
+							  currTestObservers++;
+							  
 							  if (FieldBasedGenLog.isLoggingOn()) 
-								  FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
-						  } 
-						  else {
-							  outRegressionSeqs.add(eSeq2ndPhase);
-							  if (eSeq2ndPhase.isNormalExecution()) {
-								  if (FieldBasedGenLog.isLoggingOn()) 
-									  FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
-								  // continue extending this sequence;
-								  neweSeq = eSeq2ndPhase;
+								  FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
+							  // continue extending this sequence;
+							  neweSeq = eSeq2ndPhase;
+
+							  // opIndex was calculated over operation's input types. observedIndex must be calculated over the output types of the operation 
+							  if (operation.getOutputType().isVoid())
 								  observedIndex = opIndex;
-								  if (!observers)
-									  genFirstAdditionalPositiveSeqs++;
-								  else
-									  genFirstAdditionalObsPositiveSeqs++;
-							  }
-							  else {
+							  else
+								  observedIndex = opIndex + 1;
+
+							  assert neweSeq.sequence.getTypesForLastStatement().get(observedIndex).equals(observedType);
+							  
+							  if (!observers)
+								  genFirstAdditionalPositiveSeqs++;
+							  else
+								  genFirstAdditionalObsPositiveSeqs++;
+							  
+							  outRegressionSeqs.add(eSeq2ndPhase);
+							  // Add newSequence's inputs to subsumed_sequences
+							  for (Sequence subsumed: isequences.sequences) {
+								  subsumed_sequences.add(subsumed);
+							  }	
+							  
+						  }
+						  else {
+							  if (currTestNegativeObservers < field_based_gen_negative_observers_per_test) {
+								  currTestNegativeObservers++;
 								  if (FieldBasedGenLog.isLoggingOn()) 
 									  FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+
 								  if (!observers)
 									  genFirstAdditionalNegativeSeqs++;
 								  else
 									  genFirstAdditionalObsNegativeSeqs++;
 								  
-								  if (FieldBasedGenLog.isLoggingOn())
-									  FieldBasedGenLog.logLine("> Extended negative sequence:\n " + neweSeq.sequence.toCodeString());
-							  } 
-							  // Add newSequence's inputs to subsumed_sequences
-							  for (Sequence subsumed: isequences.sequences) {
-								  subsumed_sequences.add(subsumed);
-							  }	
-						  }
-					  }
-					  else {
-						  System.out.println("> ERROR: Sequence with invalid behavior in the second phase:");
-						  System.out.println(eSeq2ndPhase.toCodeString());
-						  if (FieldBasedGenLog.isLoggingOn()) {
-							  FieldBasedGenLog.logLine("> ERROR: Sequence with invalid behaviour in the second phase:");
-							  FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
-						  }
-						  if (!observers)
-							  genFirstAdditionalErrorSeqs++;
-						  else
-							  genFirstAdditionalObsErrorSeqs++;
+								  outRegressionSeqs.add(eSeq2ndPhase);
+								  // Add newSequence's inputs to subsumed_sequences
+								  for (Sequence subsumed: isequences.sequences) {
+									  subsumed_sequences.add(subsumed);
+								  }	
+							  }
+							  else {
+								  if (FieldBasedGenLog.isLoggingOn()) 
+									  FieldBasedGenLog.logLine("> Negative observers per test limit exceeded. Discarding current sequence");
+							  }
+							  
+						  } 
+						  /*
+						  // Add newSequence's inputs to subsumed_sequences
+						  for (Sequence subsumed: isequences.sequences) {
+							  subsumed_sequences.add(subsumed);
+						  }	
+						  */
 					  }
 				  }
 				  else {
-					  System.out.println("> ERROR: Failing sequence in the second phase:");
+					  System.out.println("> ERROR: Sequence with invalid behavior in the second phase:");
 					  System.out.println(eSeq2ndPhase.toCodeString());
 					  if (FieldBasedGenLog.isLoggingOn()) {
-						  FieldBasedGenLog.logLine("> ERROR: Failing sequence in the second phase:");
+						  FieldBasedGenLog.logLine("> ERROR: Sequence with invalid behaviour in the second phase:");
 						  FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
 					  }
 					  if (!observers)
@@ -1253,22 +1107,33 @@ private int genFirstAdditionalObsErrorSeqs;
 					  else
 						  genFirstAdditionalObsErrorSeqs++;
 				  }
-				  eSeq2ndPhase.clearLastStmtExtensionsAndExecutionResults();
-
 			  }
-			  
-			  if (FieldBasedGenLog.isLoggingOn())
-				  FieldBasedGenLog.logLine("\n> Extended sequence:\n " + neweSeq.sequence.toCodeString());
-		  
+			  else {
+				  System.out.println("> ERROR: Failing sequence in the second phase:");
+				  System.out.println(eSeq2ndPhase.toCodeString());
+				  if (FieldBasedGenLog.isLoggingOn()) {
+					  FieldBasedGenLog.logLine("> ERROR: Failing sequence in the second phase:");
+					  FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
+				  }
+				  if (!observers)
+					  genFirstAdditionalErrorSeqs++;
+				  else
+					  genFirstAdditionalObsErrorSeqs++;
+			  }
+			  eSeq2ndPhase.clearLastStmtExtensionsAndExecutionResults();
+
 		  }
+		  
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine("\n> Extended sequence:\n " + neweSeq.sequence.toCodeString());
+		  
+		  //}
 	  }
   } 
   
   
   
-  
-  
-  private void secondPhase(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendPrimitive, boolean observers) {
+  private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendPrimitive, boolean observers) {
 	  // Generation first add one of each observer operation to the end of the sequence
 	  for (ExecutableSequence eSeq: sequencesToExtend) {
 
@@ -1276,11 +1141,19 @@ private int genFirstAdditionalObsErrorSeqs;
 
 		  // TODO: If the sequence ends with a method incorrectly deemed modifier continue to the next sequence
 		  // Implement a method to get the last method of a sequence.
-		  
+		  int currTestNegativeObservers = 0;
+		  int currTestObservers = 0;
 		  RandomPerm.randomPermutation(operationsPermutable);
 		  // Should randomly mix the operations list each time we do this to avoid always the same execution order.
 		  for (TypedOperation operation: operationsPermutable) {
 
+			  if (currTestObservers > field_based_gen_observers_per_test) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Maximum number of observers exceeded for the current test. Continue with the next test");
+
+				  break;
+			  }
+			  
 			  if (stopSecondPhase()) { 
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
@@ -1309,7 +1182,7 @@ private int genFirstAdditionalObsErrorSeqs;
 			  if (FieldBasedGenLog.isLoggingOn())
 				  FieldBasedGenLog.logLine("> Operation: " + operation.toString());
 
-			  if (!operation.isObserver()) {
+			  if (!operation.isObserver() && !operation.isFinalObserver()) {
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore");
 				  //System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
@@ -1398,6 +1271,7 @@ private int genFirstAdditionalObsErrorSeqs;
 
 			  Sequence newSequence = concatSeq.extend(operation, inputs);
 
+			  /*
 			  // Discard if sequence is larger than size limit
 			  if (newSequence.size() > GenInputsAbstract.maxsize) {
 				  if (Log.isLoggingOn()) {
@@ -1410,6 +1284,7 @@ private int genFirstAdditionalObsErrorSeqs;
 				  // This sequence is already too large, continue with the next sequence
 				  break;
 			  }
+			  */
 
 			  if (FieldBasedGenLog.isLoggingOn())
 				  FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
@@ -1458,8 +1333,10 @@ private int genFirstAdditionalObsErrorSeqs;
 							  FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
 					  } 
 					  else {
-						  outRegressionSeqs.add(eSeq2ndPhase);
+						  //outRegressionSeqs.add(eSeq2ndPhase);
 						  if (eSeq2ndPhase.isNormalExecution()) {
+							  currTestObservers++;
+							  
 							  if (FieldBasedGenLog.isLoggingOn()) 
 								  FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
 							  // continue extending this sequence;
@@ -1468,19 +1345,37 @@ private int genFirstAdditionalObsErrorSeqs;
 								  genFirstAdditionalPositiveSeqs++;
 							  else
 								  genFirstAdditionalObsPositiveSeqs++;
+
+							  outRegressionSeqs.add(eSeq2ndPhase);
+							  // Add newSequence's inputs to subsumed_sequences
+							  for (Sequence subsumed: isequences.sequences) {
+								  subsumed_sequences.add(subsumed);
+							  }	
 						  }
 						  else {
-							  if (FieldBasedGenLog.isLoggingOn()) 
-								  FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
-							  if (!observers)
-								  genFirstAdditionalNegativeSeqs++;
-							  else
-								  genFirstAdditionalObsNegativeSeqs++;
+							  if (currTestNegativeObservers < field_based_gen_negative_observers_per_test) {
+								  currTestNegativeObservers++;
+								  if (FieldBasedGenLog.isLoggingOn()) 
+									  FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+
+								  if (!observers)
+									  genFirstAdditionalNegativeSeqs++;
+								  else
+									  genFirstAdditionalObsNegativeSeqs++;
+								  
+								  outRegressionSeqs.add(eSeq2ndPhase);
+								  // Add newSequence's inputs to subsumed_sequences
+								  for (Sequence subsumed: isequences.sequences) {
+									  subsumed_sequences.add(subsumed);
+								  }	
+							  }
+							  else {
+								  if (FieldBasedGenLog.isLoggingOn()) 
+									  FieldBasedGenLog.logLine("> Negative observers per test limit exceeded. Discarding current sequence");
+							  }
+							  
 						  } 
-						  // Add newSequence's inputs to subsumed_sequences
-						  for (Sequence subsumed: isequences.sequences) {
-							  subsumed_sequences.add(subsumed);
-						  }	
+						  
 					  }
 				  }
 				  else {
@@ -1515,6 +1410,225 @@ private int genFirstAdditionalObsErrorSeqs;
   }
   
   
+// Second phase all combinations  
+//// Generation first add one of each observer operation to the end of the sequence
+//for (ExecutableSequence eSeq: positiveRegressionSeqs) {
+//	
+////	Sequence origSeq = eSeq.sequence;
+//	
+//	ExecutableSequence neweSeq = eSeq;
+//
+//	RandomPerm.randomPermutation(operationsPermutable);
+//	// Should randomly mix the operations list each time we do this to avoid always the same execution order.
+//    for (TypedOperation operation: operationsPermutable) {
+//
+//	    	int lastIndex = neweSeq.sequence.size() - 1;
+//
+//	    	if (FieldBasedGenLog.isLoggingOn())
+//	    		FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
+//
+//		TypedOperation seqLastStmtOp = neweSeq.sequence.getStatement(lastIndex).getOperation();
+//		
+//		TypeTuple seqLastStmtInputTypes = seqLastStmtOp.getInputTypes();
+//		TypeTuple seqLastStmtOutputTypes = new TypeTuple();
+//
+//		List<Boolean> isLastStmtVarActive = neweSeq.getLastStmtActiveVars();
+//		if (!seqLastStmtOp.getOutputType().isVoid())
+//			seqLastStmtOutputTypes.list.add(seqLastStmtOp.getOutputType());
+//		for (int i = 0; i < seqLastStmtInputTypes.size(); i++)
+//			seqLastStmtOutputTypes.list.add(seqLastStmtInputTypes.get(i));
+//
+//    	if (FieldBasedGenLog.isLoggingOn())
+//    		FieldBasedGenLog.logLine("> Operation: " + operation.toString());
+//
+//     	if (!operation.isObserver()) {
+//			 if (FieldBasedGenLog.isLoggingOn())
+//				FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore");
+//			//System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
+//     		continue;
+//    	}
+//    	
+//    	if (operation.isConstructorCall()) {
+//    		if (FieldBasedGenLog.isLoggingOn())
+//    			FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
+//    		continue;
+//    	}
+//    	
+//    	// The first integer of the tuple is the index of the variable chosen from newSeq, 
+//    	// the second integer is the corresponding index of a compatible type in operation
+//    	TypeTuple inputTypes = operation.getInputTypes();
+//    	Tuple<Integer, Integer> connection = getRandomConnectionBetweenTypeTuples(seqLastStmtOutputTypes, isLastStmtVarActive, inputTypes);
+//    	if (connection == null) continue;
+//    	
+//        List<Sequence> sequences = new ArrayList<>();
+//        int totStatements = 0;
+//        List<Integer> variables = new ArrayList<>();
+//        
+//    	boolean error = false;
+//    	for (int i = 0; i < inputTypes.size(); i++) {
+//    		Type inputType = inputTypes.get(i);
+//    		if (FieldBasedGenLog.isLoggingOn()) 
+//				FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
+//
+//    		Sequence chosenSeq;
+//    		if (i == connection.getSecond()) {
+//    			chosenSeq = neweSeq.sequence; 
+//
+//    			if (FieldBasedGenLog.isLoggingOn()) 
+//    				FieldBasedGenLog.logLine("> Sequence to be extended selected: ");
+//    		}
+//    		else {
+//    			SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
+//    			if (l.isEmpty()) {
+//					error = true;
+//					break;
+//    			}
+//
+//    			chosenSeq = Randomness.randomMember(l);
+//
+//    			if (FieldBasedGenLog.isLoggingOn()) 
+//    				FieldBasedGenLog.logLine("> Random sequence selected: ");
+//    		}
+//
+//			if (FieldBasedGenLog.isLoggingOn()) 
+//				FieldBasedGenLog.logLine(chosenSeq.toCodeString());
+//
+//    	    // Now, find values that satisfy the constraint set.
+//    	    Variable randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);
+//
+//    	      if (randomVariable == null) {
+//    	        throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
+//    	      }
+//
+//    	      // Fail, if we were unlucky and selected a null or primitive value as the
+//    	      // receiver for a method call.
+//    	      if (i == 0
+//    	          && operation.isMessage()
+//    	          && !(operation.isStatic())
+//    	          && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
+//    	              || randomVariable.getType().isPrimitive())) {
+//
+//  				error = true;
+//  				break;
+//  			}
+//
+//    	    variables.add(totStatements + randomVariable.index);
+//    	    sequences.add(chosenSeq);
+//    	    totStatements += chosenSeq.size();
+//    	}
+//	
+//		if (error) continue;
+//		InputsAndSuccessFlag isequences = new InputsAndSuccessFlag(true, sequences, variables);
+//		
+//		Sequence concatSeq = Sequence.concatenate(isequences.sequences);
+//		// Figure out input variables.
+//		List<Variable> inputs = new ArrayList<>();
+//		for (Integer oneinput : isequences.indices) {
+//			Variable v = concatSeq.getVariable(oneinput);
+//			inputs.add(v);
+//		}
+//
+//		Sequence newSequence = concatSeq.extend(operation, inputs);
+//		
+//		// Discard if sequence is larger than size limit
+//		if (newSequence.size() > GenInputsAbstract.maxsize) {
+//		  if (Log.isLoggingOn()) {
+//			Log.logLine(
+//				"Sequence discarded because size "
+//					+ newSequence.size()
+//					+ " exceeds maximum allowed size "
+//					+ GenInputsAbstract.maxsize);
+//		  }
+//		  // This sequence is already too large, continue with the next sequence
+//		  break;
+//		}
+//		
+//		if (FieldBasedGenLog.isLoggingOn())
+//			FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
+//
+//		num_sequences_generated++;
+//		
+//	    if (this.allSequences.contains(newSequence)) {
+//	        if (Log.isLoggingOn()) {
+//	          Log.logLine("Sequence discarded because the same sequence was previously created.");
+//	        }
+//	        
+//	        if (FieldBasedGenLog.isLoggingOn())
+//	        	FieldBasedGenLog.logLine("> The current sequence was generated twice in the second phase \n"); 
+//	        
+//	        continue;
+//	    }
+//
+//	    this.allSequences.add(newSequence);	
+//		
+//		ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
+//		    setCurrentSequence(eSeq2ndPhase.sequence);
+//		    executeExtendedSequence(eSeq2ndPhase);
+//		eSeq2ndPhase.clearLastStmtExtensions();
+//
+//		if (operation.isModifier()) {
+//			FieldBasedGenLog.logLine("> Operation " + operation.toString() + " was incorrectly flagged as observer in the first phase. Discarding test" ); 
+//			operationBadTag++;
+//			continue;
+//		}
+//
+//		if (eSeq2ndPhase.hasFailure()) {
+//			num_failing_sequences++;
+//		}
+//
+//		if (outputTest.test(eSeq2ndPhase)) {
+//
+//			if (!eSeq2ndPhase.hasInvalidBehavior()) {
+//				if (eSeq2ndPhase.hasFailure()) {
+//					outErrorSeqs.add(eSeq2ndPhase);
+//					genFirstAdditionalErrorSeqs++;
+//
+//					if (FieldBasedGenLog.isLoggingOn()) 
+//						FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
+//				} 
+//				else {
+//						outRegressionSeqs.add(eSeq2ndPhase);
+//					if (eSeq2ndPhase.isNormalExecution()) {
+//						if (FieldBasedGenLog.isLoggingOn()) 
+//							FieldBasedGenLog.logLine("> Current sequence saved as a regression test");
+//						// continue extending this sequence;
+//						neweSeq = eSeq2ndPhase;
+//						genFirstAdditionalPositiveSeqs++;
+//					}
+//					else {
+//						if (FieldBasedGenLog.isLoggingOn()) 
+//    						FieldBasedGenLog.logLine("> Current sequence saved as a negative regression test");
+//						genFirstAdditionalNegativeSeqs++;
+//					} 
+//					// Add newSequence's inputs to subsumed_sequences
+//					for (Sequence subsumed: isequences.sequences) {
+//						subsumed_sequences.add(subsumed);
+//					}	
+//				}
+//			}
+//			else {
+//				System.out.println("> ERROR: Sequence with invalid behavior in the second phase:");
+//				System.out.println(eSeq2ndPhase.toCodeString());
+//				if (FieldBasedGenLog.isLoggingOn()) {
+//					FieldBasedGenLog.logLine("> ERROR: Sequence with invalid behaviour in the second phase:");
+//					FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
+//				}
+//				genFirstAdditionalErrorSeqs++;
+//			}
+//		}
+//		else {
+//			System.out.println("> ERROR: Failing sequence in the second phase:");
+//			System.out.println(eSeq2ndPhase.toCodeString());
+//			if (FieldBasedGenLog.isLoggingOn()) {
+//				FieldBasedGenLog.logLine("> ERROR: Failing sequence in the second phase:");
+//				FieldBasedGenLog.logLine(eSeq2ndPhase.toCodeString());
+//			}
+//			genFirstAdditionalErrorSeqs++;
+//		}
+//
+//    }
+//}
+
   
   
   private Integer getRandomConnectionBetweenTypes(Type observedType, TypeTuple inputTypes) {
@@ -1523,8 +1637,10 @@ private int genFirstAdditionalObsErrorSeqs;
 
 	  for (int j = 0; j < inputTypes.size(); j++) {
 		  if (inputTypes.get(j).isAssignableFrom(observedType)) {
+//		  if (inputTypes.get(j).equals(observedType)) {
 			  if (FieldBasedGenLog.isLoggingOn()) 
 				  FieldBasedGenLog.logLine("> Type " + inputTypes.get(j).toString() + " (index " + j + ")"
+//						  + " is equal to " + observedType.toString()); 
 						  + " is assignable from " + observedType.toString()); 
 			  
 			  l.add(j);

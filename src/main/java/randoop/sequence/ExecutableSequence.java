@@ -258,7 +258,7 @@ public class ExecutableSequence {
 
   public void execute(ExecutionVisitor visitor, TestCheckGenerator gen) {
 	  try {
-		  execute(visitor, gen, true, null);
+		  execute(visitor, gen, true, null, false);
 	  } catch (CanonizationErrorException e) {
 		  // TODO Auto-generated catch block
 		  e.printStackTrace();
@@ -277,8 +277,14 @@ public class ExecutableSequence {
  * @throws CanonizationErrorException 
    */
   public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
-	  execute(visitor, gen, true, canonizer);
+	  execute(visitor, gen, true, canonizer, false);
   }
+  
+  
+   public void executeSecondPhase(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	  execute(visitor, gen, true, canonizer, true);
+  }
+
   
   /**
    * Execute this sequence, invoking the given visitor as the execution unfolds.
@@ -314,7 +320,7 @@ public class ExecutableSequence {
  * @param canonizer 
  * @throws CanonizationErrorException 
    */
-  private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, HeapCanonizerRuntimeEfficient canonizer)  throws CanonizationErrorException {
+  private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, HeapCanonizerRuntimeEfficient canonizer, boolean secondPhase)  throws CanonizationErrorException {
 
     visitor.initialize(this);
 
@@ -329,6 +335,7 @@ public class ExecutableSequence {
     lastStmtFormerExt = null;
     lastStmtNextExt = null;
     endsWithObserverReturningNewValue = false;
+    endsWithObserver = false;
     for (int i = 0; i < this.sequence.size(); i++) {
 
       // Find and collect the input values to i-th statement.
@@ -345,12 +352,14 @@ public class ExecutableSequence {
     			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " was never executed"); 
     		  else if (op.isObserver())
     			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer for now"); 
+    		  else if (op.isFinalObserver())
+    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer"); 
     		  else
     			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is a modifier"); 
      	  }
 
-		  if (sequence.size() > 1 && (op.notExecuted() || op.isObserver()))
-			  lastStmtFormerExt = createExtensionsForAllObjects(i, null, inputVariables, canonizer);
+		  if (sequence.size() > 1 && !op.isFinalObserver() && (op.notExecuted() || op.isObserver()))
+			  lastStmtFormerExt = createExtensionsForAllObjects(i, null, inputVariables, canonizer, true);
       }
       
       visitor.visitBeforeStatement(this, i);
@@ -378,53 +387,59 @@ public class ExecutableSequence {
       }
       
       if (canonizer != null && i == sequence.size() - 1 && statementResult instanceof NormalExecution) {
-      
-    	  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
     	  
-		  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
+    	  if (op.isFinalObserver()) {
+			   if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, false);
+			  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+			  
+			  createLastStmtActiveVars();
+    	  } 
+    	  else {
+			  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, true);
+			  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+			  
+			  createLastStmtActiveVars();
 		  
-    	  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
-		  
-		  createLastStmtActiveVars();
-		  
-		  if (!op.isModifier()) { 
-			  if (sequence.size() == 1) {
-				  for (int j = 0; j < lastStmtNextExt.size(); j++) {
-					  if (lastStmtNextExt.get(j) != null) { 							  
-						  if (FieldBasedGenLog.isLoggingOn())
-							  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+			  // check if the current op is an observer or a modifier
+			  if (!op.isModifier()) { 
+				  if (sequence.size() == 1) {
+					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+						  if (lastStmtNextExt.get(j) != null) { 							  
+							  if (FieldBasedGenLog.isLoggingOn())
+								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
 
-						  op.setModifier();
-						  break;
+							  op.setModifier();
+							  break;
+						  }
 					  }
 				  }
-			  }
-			  else { //sequence.size() > 1 
+				  else { //sequence.size() > 1 
 					  assert lastStmtFormerExt.size() == lastStmtNextExt.size();
 					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
 						  assert !(lastStmtFormerExt.get(j) != null && lastStmtNextExt.get(j) == null);
-						  
+
 						  if (lastStmtFormerExt.get(j) == null && lastStmtNextExt.get(j) == null)
 							  continue;
 						  else {
 							  if (!lastStmtNextExt.get(j).equals(lastStmtFormerExt.get(j))) {
 								  if (FieldBasedGenLog.isLoggingOn())
 									  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
-							  
+
 								  op.setModifier();
 								  // if (AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED || secondPhase)
 								  break;
 							  }
 						  }
 					  }
+				  }
 			  }
 
+			  // If it's not a modifier, mark the current action as an observer or final observer
 			  if (!op.isModifier()) {
-				  // If it's not a modifier, mark the current action as an observer 
-				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
-
-				  if (!op.getOutputType().isVoid()) {
+				  // First check if the current observer produces a new primitive value
+				  if (!secondPhase && !op.getOutputType().isVoid()) {
 					  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
 					  if (obj != null && isObjectPrimtive(obj)) {
 						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
@@ -439,19 +454,30 @@ public class ExecutableSequence {
 					  }
 				  }
 
-				  op.setObserver();
-			  }
-		  }
+				  op.timesExecuted++;
+				  if (secondPhase && op.timesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
+					  op.setFinalObserver(); 
+					  if (FieldBasedGenLog.isLoggingOn())
+						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
+				  }
+				  else {
+					  op.setObserver();
+					  if (FieldBasedGenLog.isLoggingOn())
+						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
+				  }
 
-		  if (op.isObserver()) {
-			  endsWithObserver = true;
-			  if (FieldBasedGenLog.isLoggingOn()) 
-				  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
-		  }
-		  else
+			  }
+    	  
+    	  }
+
+    	  if (!op.isModifier()) {
+    		  endsWithObserver = true;
+    		  if (FieldBasedGenLog.isLoggingOn()) 
+    			  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
+    	  }
+    	  else 
 			  if (FieldBasedGenLog.isLoggingOn()) 
 				  FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
-
       }
       
       visitor.visitAfterStatement(this, i);
@@ -699,7 +725,7 @@ public class ExecutableSequence {
   }
   
 
-   private List<FieldExtensionsIndexes> createExtensionsForAllObjects(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+   private List<FieldExtensionsIndexes> createExtensionsForAllObjects(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer, boolean canonize) throws CanonizationErrorException {
 
 	  try {
 		  Statement stmt = sequence.getStatement(i);
@@ -718,8 +744,9 @@ public class ExecutableSequence {
 		  for (Object o: parameters) {
 			  if (o != null && !isObjectPrimtive(o)) {
 				  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
-				  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
-					  return null; 
+				  if (canonize)
+					  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+						  return null; 
 
 				  extensions.add(ext);
 			  }
@@ -823,7 +850,7 @@ public class ExecutableSequence {
   private ExtendedExtensionsResult enlargeExtensionsLimits(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 
 	  ExtendedExtensionsResult res = ExtendedExtensionsResult.NOT_EXTENDED;
-	  List<FieldExtensionsIndexes> extensions = createExtensionsForAllObjects(i, statementResult, inputVariables, canonizer);
+	  List<FieldExtensionsIndexes> extensions = createExtensionsForAllObjects(i, statementResult, inputVariables, canonizer, true);
 				  
 	  Statement stmt = sequence.getStatement(i);
 	  if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {

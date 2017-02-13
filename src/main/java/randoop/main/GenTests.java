@@ -199,6 +199,9 @@ public class GenTests extends GenInputsAbstract {
 		System.out.println("> Field Based Generation Option: --field-based-gen-max-array=" + AbstractGenerator.field_based_gen_max_array);
 		System.out.println("> Field Based Generation Option: --field-based-gen-max-string-length=" + AbstractGenerator.field_based_gen_max_string_length);
 		System.out.println("> Field Based Generation Option: --field-based-gen-save-observers=" + AbstractGenerator.field_based_gen_save_observers);
+		System.out.println("> Field Based Generation Option: --field-based-gen-observers-per-test=" + AbstractGenerator.field_based_gen_observers_per_test);
+		System.out.println("> Field Based Generation Option: --field-based-gen-negative-observers-per-test=" + AbstractGenerator.field_based_gen_negative_observers_per_test);
+		System.out.println("> Field Based Generation Option: --field-based-gen-observer-executions-before-final=" + AbstractGenerator.field_based_gen_observer_executions_before_final);
 //		System.out.println("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 		System.out.println("> Field Based Generation Option: --field-based-gen-drop-tests-exceeding-object-limits=" + AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits);
 		System.out.println("> Field Based Generation Option: --field-based-gen-precise-enlarging-objects-detection=" + AbstractGenerator.field_based_gen_precise_enlarging_objects_detection);
@@ -224,6 +227,9 @@ public class GenTests extends GenInputsAbstract {
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-array=" + AbstractGenerator.field_based_gen_max_array);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-max-string-length=" + AbstractGenerator.field_based_gen_max_string_length);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-save-observers=" + AbstractGenerator.field_based_gen_save_observers);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-observers-per-test=" + AbstractGenerator.field_based_gen_observers_per_test);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-negative-observers-per-test=" + AbstractGenerator.field_based_gen_negative_observers_per_test);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-observer-executions-before-final=" + AbstractGenerator.field_based_gen_observer_executions_before_final);
 //		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-drop-tests-exceeding-object-limits=" + AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-precise-enlarging-objects-detection=" + AbstractGenerator.field_based_gen_precise_enlarging_objects_detection);

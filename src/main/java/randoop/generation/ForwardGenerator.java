@@ -229,7 +229,7 @@ public class ForwardGenerator extends AbstractGenerator {
     startTime = endTime; // reset start time.
     
 	try {
-		eSeq.execute(executionVisitor, checkGenerator, canonizer);
+		eSeq.executeSecondPhase(executionVisitor, checkGenerator, canonizer);
 	} catch (CanonizationErrorException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
@@ -864,7 +864,7 @@ public class ForwardGenerator extends AbstractGenerator {
     
     
     if (FieldBasedGenLog.isLoggingOn()) 
-    	FieldBasedGenLog.logLine("\n\n>> New sequence constructed");
+    	FieldBasedGenLog.logLine("\n\n>> New sequence constructed:\n" + newSequence.toCodeString());
  
     // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
 //    if (field_based_gen_keep_non_contributing_tests_percentage != 1 || keep_negative_tests_percentage != 1) {
