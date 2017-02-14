@@ -704,59 +704,24 @@ private int genFirstAdditionalObsErrorSeqs;
 				FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with observers starting");
 			extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
 		}
+		
+	    if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
+	        progressDisplay.display();
+	        progressDisplay.shouldStop = true;
+	      }
+		
     }
     else {
- 		if (FieldBasedGenLog.isLoggingOn())
-			FieldBasedGenLog.logLine("\n\n>> Starting to count objects generated during the first phase.");
-		System.out.println("\n\n>> Starting to count objects generated during the first phase.");
+    	
+    	if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
+    		progressDisplay.display();
+    		progressDisplay.shouldStop = true;
+    	}
 
- 		Map<Type, ArrayListSimpleList<Sequence>> sequenceMap = componentManager.getSequenceMap();
- 		for (Type type: sequenceMap.keySet()) {
- 			ArrayListSimpleList<Sequence> currListSeq = sequenceMap.get(type);
- 			Set<FieldExtensionsIndexes> currExtSet = new HashSet<>();
- 			for (int k = 0; k < currListSeq.size(); k++) {
-
- 				ExecutableSequence eSeq = new ExecutableSequence(currListSeq.get(k));
- 				try {
-					eSeq.execute(executionVisitor, checkGenerator, canonizer);
-				} catch (CanonizationErrorException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
- 				if (!eSeq.isNormalExecution()) {
- 					System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
- 					continue;
- 				}
-
- 				List<Type> lastStmtTypes = eSeq.sequence.getTypesForLastStatement();
- 				List<FieldExtensionsIndexes> lastStmtExt = null;
- 				try {
-					lastStmtExt = eSeq.canonizeLastStatementObjects(canonizer);
-				} catch (CanonizationErrorException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
- 				for (int j = 0; j < lastStmtTypes.size(); j++) {
- 					if (lastStmtTypes.get(j).equals(type)) {
- 						currExtSet.add(lastStmtExt.get(j));
- 					}
- 				}
-
- 			}
- 			if (FieldBasedGenLog.isLoggingOn())
- 				FieldBasedGenLog.logLine("Type: " + type.toString() + ", objects count: " + currExtSet.size());
- 			System.out.println("Type: " + type.toString() + ", objects count: " + currExtSet.size());
- 		}
-
+    	countNumberOfDifferentObjects();
 
     }
 
-    
-
-    if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
-      progressDisplay.display();
-      progressDisplay.shouldStop = true;
-    }
     
     int mod = 0;
     int obs = 0;
@@ -858,6 +823,54 @@ private int genFirstAdditionalObsErrorSeqs;
     }
   }
         			
+  
+  private void countNumberOfDifferentObjects() {
+	  
+  	// Count objects
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("\n\n>> Starting to count objects generated during the first phase.");
+		System.out.println("\n\n>> Starting to count objects generated during the first phase.");
+
+		Map<Type, ArrayListSimpleList<Sequence>> sequenceMap = componentManager.getSequenceMap();
+		for (Type type: sequenceMap.keySet()) {
+			ArrayListSimpleList<Sequence> currListSeq = sequenceMap.get(type);
+			Set<FieldExtensionsIndexes> currExtSet = new HashSet<>();
+			for (int k = 0; k < currListSeq.size(); k++) {
+
+				ExecutableSequence eSeq = new ExecutableSequence(currListSeq.get(k));
+				try {
+					eSeq.execute(executionVisitor, checkGenerator, canonizer);
+				} catch (CanonizationErrorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (!eSeq.isNormalExecution()) {
+					System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
+					continue;
+				}
+
+				List<Type> lastStmtTypes = eSeq.sequence.getTypesForLastStatement();
+				List<FieldExtensionsIndexes> lastStmtExt = null;
+				try {
+					lastStmtExt = eSeq.canonizeLastStatementObjects(canonizer);
+				} catch (CanonizationErrorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				for (int j = 0; j < lastStmtTypes.size(); j++) {
+					if (lastStmtTypes.get(j).equals(type)) {
+						currExtSet.add(lastStmtExt.get(j));
+					}
+				}
+
+			}
+			if (FieldBasedGenLog.isLoggingOn())
+				FieldBasedGenLog.logLine("Type: " + type.toString() + ", objects count: " + currExtSet.size());
+			System.out.println("Type: " + type.toString() + ", objects count: " + currExtSet.size());
+		}
+	  
+  }
+  
   
 
   private void extendModifierTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendPrimitive, boolean observers) {
