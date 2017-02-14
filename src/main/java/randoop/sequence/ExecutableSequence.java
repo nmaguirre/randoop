@@ -255,17 +255,112 @@ public class ExecutableSequence {
     return oneStatement.toString();
   }
   
-
+  
+  /**
+   * Executes sequence, stopping on exceptions.
+   *
+   * @param visitor
+   *          the {@link ExecutionVisitor} that collects checks from results
+   * @param gen
+   *          the check generator for tests
+   */
   public void execute(ExecutionVisitor visitor, TestCheckGenerator gen) {
+    execute(visitor, gen, true);
+  }
+
+  /**
+   * Execute this sequence, invoking the given visitor as the execution unfolds.
+   * After invoking this method, the client can query the outcome of executing
+   * each statement via the method <code>getResult(i)</code>.
+   *
+   * <ul>
+   * <li>Before the sequence is executed, clears execution results and calls
+   * <code>visitor.initialize(this)</code>.
+   * <li>Executes each statement in the sequence. Before executing each
+   * statement calls the given visitor's <code>visitBefore</code> method. After
+   * executing each statement, calls the visitor's <code>visitAfter</code>
+   * method.
+   * <li>Execution stops if one of the following conditions holds:
+   * <ul>
+   * <li>All statements in the sequences have been executed.
+   * <li>A statement's execution results in an exception and
+   * <code>stop_on_exception==true</code>.
+   * <li>A <code>null</code> input value is implicitly passed to the statement
+   * (i.e., not via explicit declaration like x = null)
+   * <li>After executing the i-th statement and calling the visitor's
+   * <code>visitAfter</code> method, a <code>ContractViolation</code> check is
+   * present at index i.
+   * </ul>
+   * </ul>
+   *
+   * @param visitor
+   *          the {@code ExecutionVisitor}
+   * @param gen
+   *          the check generator
+   * @param ignoreException
+   *          the flag to indicate exceptions should be ignored
+   */
+  private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException) {
+
+    visitor.initialize(this);
+
+    // reset execution result values
+    hasNullInput = false;
+    executionResults.theList.clear();
+    for (int i = 0; i < sequence.size(); i++) {
+      executionResults.theList.add(NotExecuted.create());
+    }
+
+    for (int i = 0; i < this.sequence.size(); i++) {
+
+      // Find and collect the input values to i-th statement.
+      List<Variable> inputs = sequence.getInputs(i);
+      Object[] inputVariables;
+
+      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+
+      visitor.visitBeforeStatement(this, i);
+      executeStatement(sequence, executionResults.theList, i, inputVariables);
+
+      // make sure statement executed
+      ExecutionOutcome statementResult = getResult(i);
+      if (statementResult instanceof NotExecuted) {
+        throw new Error("Unexecuted statement in sequence: " + this.toString());
+      }
+      // make sure no exception before final statement of sequence
+      if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
+        if (ignoreException) {
+          // this preserves previous behavior, which was simply to return if
+          // exception occurred
+          break;
+        } else {
+          String msg =
+              "Encountered exception before final statement of error-revealing test (statement "
+                  + i
+                  + "): ";
+          throw new Error(
+              msg + ((ExceptionalExecution) statementResult).getException().getMessage());
+        }
+      }
+
+      visitor.visitAfterStatement(this, i);
+    }
+
+    visitor.visitAfterSequence(this);
+
+    checks = gen.visit(this);
+  }
+  
+
+  public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen) {
 	  try {
-		  execute(visitor, gen, true, null, false);
+		  executeFB(visitor, gen, true, null, false);
 	  } catch (CanonizationErrorException e) {
 		  // TODO Auto-generated catch block
 		  e.printStackTrace();
 	  }
   }
 
-  
   
   /**
    * Executes sequence, stopping on exceptions.
@@ -276,13 +371,13 @@ public class ExecutableSequence {
    *          the check generator for tests
  * @throws CanonizationErrorException 
    */
-  public void execute(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
-	  execute(visitor, gen, true, canonizer, false);
+  public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	  executeFB(visitor, gen, true, canonizer, false);
   }
   
   
-   public void executeSecondPhase(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
-	  execute(visitor, gen, true, canonizer, true);
+   public void executeFBSecondPhase(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	  executeFB(visitor, gen, true, canonizer, true);
   }
 
   
@@ -320,7 +415,7 @@ public class ExecutableSequence {
  * @param canonizer 
  * @throws CanonizationErrorException 
    */
-  private void execute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, HeapCanonizerRuntimeEfficient canonizer, boolean secondPhase)  throws CanonizationErrorException {
+  private void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, HeapCanonizerRuntimeEfficient canonizer, boolean secondPhase)  throws CanonizationErrorException {
 
     visitor.initialize(this);
 
