@@ -22,17 +22,6 @@ public class FieldExtensionsIndexesMap implements FieldExtensionsIndexes {
 	
 	private Map<Integer, Map<Integer, Map<Integer, Map<Integer, Set<String>>>>> extensions = new HashMap<>();
 
-	/*
-	public void addField() {
-		extensions.add(new HashMap<Integer, Map<Integer,Map<Integer,Set<String>>>>());
-	}
-	
-	private void syncFieldsWithStore() {
-		while (store.fields.size() > extensions.size()) {
-			addField();
-		}
-	}
-	*/
 	
 	public boolean addPairToField(CanonizerField field, CanonizerObject o1, CanonizerObject o2) {
 		
@@ -204,15 +193,16 @@ public class FieldExtensionsIndexesMap implements FieldExtensionsIndexes {
 		return size;
 	}
 
-	/*
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
 		result = prime * result + size;
+		result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
 		return result;
-	}*/
+	}
+
 
 	@Override
 	public boolean equals(Object obj) {
@@ -267,7 +257,8 @@ public class FieldExtensionsIndexesMap implements FieldExtensionsIndexes {
 		return added;
 	}
 	
-	
+
+
 	public boolean testEnlarges(FieldExtensionsIndexes other) {
 
 		for (int i: ((FieldExtensionsIndexesMap)other).extensions.keySet()) {

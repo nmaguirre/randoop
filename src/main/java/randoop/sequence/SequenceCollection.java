@@ -317,7 +317,11 @@ public class SequenceCollection {
   }
   
   
-
+  public Set<Type> getAllTypes() {
+    return typeSet.getElements();
+  }
+  
+  
   /**
    * Returns the set of all sequences in this collection.
    *

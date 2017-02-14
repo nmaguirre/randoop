@@ -696,13 +696,11 @@ public class ExecutableSequence {
     // make sure statement executed
 	ExecutionOutcome statementResult = getResult(lastStmtIndex);
 	
-	enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
-	
 /*	if (!AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits) 
 		enlargesExtensions = enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
 	else */
 
-	return createExtensionsForAllObjectsIncludingPrimitives(lastStmtIndex, statementResult, inputVariables, canonizer);
+	return createExtensionsForAllObjectsIncludingPrimitives(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
    }
   
   

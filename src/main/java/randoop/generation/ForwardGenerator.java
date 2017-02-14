@@ -149,9 +149,8 @@ public class ForwardGenerator extends AbstractGenerator {
 //    if (field_based_gen != FieldBasedGenType.DISABLED) {
     	if (GenInputsAbstract.field_based_gen_classlist == null)
     		initCanonizer();
-    	else {
+    	else 
     		initCanonizer(GenTests.field_based_gen_classes);
-    	}
 //    }
     
     initializeRuntimePrimitivesSeen();
@@ -885,19 +884,16 @@ public class ForwardGenerator extends AbstractGenerator {
     	FieldBasedGenLog.logLine("\n\n>> New sequence constructed:\n" + newSequence.toCodeString());
  
     // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
-//    if (field_based_gen_keep_non_contributing_tests_percentage != 1 || keep_negative_tests_percentage != 1) {
-    	
-	// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
-	// test is saved later
-	if (FieldBasedGenLog.isLoggingOn())
-		FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
-	
-	subsumed_candidates = new LinkedHashSet<>();
-	 for (Sequence is : sequences.sequences) {
-	  subsumed_candidates.add(is);
-	}
- 	    
- 	/*
+    if (field_based_gen == FieldBasedGenType.FAST) {
+		// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
+		// test is saved later
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
+		
+		subsumed_candidates = new LinkedHashSet<>();
+		 for (Sequence is : sequences.sequences) {
+		  subsumed_candidates.add(is);
+		}
     }
     else {
    		if (FieldBasedGenLog.isLoggingOn()) 
@@ -908,7 +904,6 @@ public class ForwardGenerator extends AbstractGenerator {
 	      subsumed_sequences.add(is);
 	    }
     }
-    */
 
     return new ExecutableSequence(newSequence);
   }

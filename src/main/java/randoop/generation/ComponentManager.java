@@ -52,10 +52,12 @@ public class ComponentManager {
   // and seed sequences.
   private SequenceCollection gralComponents;
   
+  /*
   public Map<Type, ArrayListSimpleList<Sequence>> getSequenceMap() {
 	  return gralComponents.getSequenceMap();
   }
-
+  */
+  
   /**
    * The subset of the sequences that were given pre-generation to the component
    * manager (via its constructor).
@@ -181,6 +183,10 @@ public class ComponentManager {
    */
   Set<Sequence> getAllGeneratedSequences() {
     return gralComponents.getAllSequences();
+  }
+  
+  Set<Type> getAllGeneratedTypes() {
+	    return gralComponents.getAllTypes();
   }
 
   /**

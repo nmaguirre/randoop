@@ -711,7 +711,6 @@ private int genFirstAdditionalObsErrorSeqs;
     			if (op.isObserver())
     				operationsPermutable.add(op);
 
-
     		if (FieldBasedGenLog.isLoggingOn())
     			FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with modifiers starting");
 
@@ -832,46 +831,61 @@ private int genFirstAdditionalObsErrorSeqs;
         			
   
   private void countNumberOfDifferentObjects() {
-	  
-  	// Count objects
-		if (FieldBasedGenLog.isLoggingOn())
-			FieldBasedGenLog.logLine("\n\n>> Starting to count objects generated during the first phase.");
-		System.out.println("\n\n>> Starting to count objects generated during the first phase.");
 
-		Map<Type, ArrayListSimpleList<Sequence>> sequenceMap = componentManager.getSequenceMap();
-		for (Type type: sequenceMap.keySet()) {
-			ArrayListSimpleList<Sequence> currListSeq = sequenceMap.get(type);
-			Set<FieldExtensionsIndexes> currExtSet = new HashSet<>();
-			for (int k = 0; k < currListSeq.size(); k++) {
+	  // Count objects
+	  if (FieldBasedGenLog.isLoggingOn())
+		  FieldBasedGenLog.logLine("\n\n>> Starting to count objects generated during the first phase.");
+	  System.out.println("\n\n>> Starting to count objects generated during the first phase.");
 
-				ExecutableSequence eSeq = new ExecutableSequence(currListSeq.get(k));
-				eSeq.execute(executionVisitor, checkGenerator);
+	  for (Type type: componentManager.getAllGeneratedTypes()) {
+		  Set<Sequence> sequenceMap = componentManager.getAllGeneratedSequences();
 
-				if (!eSeq.isNormalExecution()) {
-					System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
-					continue;
-				}
+		  Set<FieldExtensionsIndexes> currExtSet = new HashSet<>();
+		  for (Sequence seq: sequenceMap) {
+			  List<Type> lastStmtTypes = seq.getTypesForLastStatement();
+			  
+			  boolean hasType = false;
+			  for (int j = 0; j < lastStmtTypes.size(); j++) {
+				  if (lastStmtTypes.get(j).equals(type)) {
+					  hasType = true;
+					  break;
+				  }
+			  }
+			  if (!hasType) continue;
 
-				List<Type> lastStmtTypes = eSeq.sequence.getTypesForLastStatement();
-				List<FieldExtensionsIndexes> lastStmtExt = null;
-				try {
-					lastStmtExt = eSeq.canonizeLastStatementObjects(canonizer);
-				} catch (CanonizationErrorException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				for (int j = 0; j < lastStmtTypes.size(); j++) {
-					if (lastStmtTypes.get(j).equals(type)) {
-						currExtSet.add(lastStmtExt.get(j));
-					}
-				}
+			  ExecutableSequence eSeq = new ExecutableSequence(seq);
+			  eSeq.execute(executionVisitor, checkGenerator);
 
-			}
+			  List<FieldExtensionsIndexes> lastStmtExt = null;
+			  try {
+				  lastStmtExt = eSeq.canonizeLastStatementObjects(canonizer);
+			  } catch (CanonizationErrorException e) {
+				  // TODO Auto-generated catch block
+				  e.printStackTrace();
+			  }
+
+			  if (!eSeq.isNormalExecution()) {
+				  System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
+				  continue;
+			  }
+
+			  for (int j = 0; j < lastStmtTypes.size(); j++) {
+				  if (lastStmtTypes.get(j).equals(type)) {
+					  if (currExtSet.add(lastStmtExt.get(j))) {
+						  if (FieldBasedGenLog.isLoggingOn())
+							  FieldBasedGenLog.logLine("> Object of type: " + type.toString() + ", extensions:\n" + lastStmtExt.get(j));
+					  }
+				  }
+			  }
+			  
+		  }
+		  /*
 			if (FieldBasedGenLog.isLoggingOn())
 				FieldBasedGenLog.logLine("Type: " + type.toString() + ", objects count: " + currExtSet.size());
-			System.out.println("Type: " + type.toString() + ", objects count: " + currExtSet.size());
-		}
-	  
+		   */
+		  System.out.println("Type: " + type.toString() + ", objects count: " + currExtSet.size());
+	  }
+
   }
   
   
