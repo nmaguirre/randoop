@@ -316,11 +316,15 @@ public class ForwardGenerator extends AbstractGenerator {
     				FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
 
     			if (field_based_gen == FieldBasedGenType.FAST) {
-    				// Field based filtering is only done on non error sequences
-
+     				// Field based filtering is only done on non error sequences
     				eSeq.tryToEnlargeExtensions(canonizer);
 
     				if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
+    					/*
+    					if (eSeq.getLastStmtOperation().isModifier())
+    						eSeq.getLastStmtOperation().timesExecutedInNotExtendingModifiers++;
+    					*/
+
     					if (FieldBasedGenLog.isLoggingOn())
     						FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
 
@@ -343,7 +347,10 @@ public class ForwardGenerator extends AbstractGenerator {
     				 */
     				}
     				else {
-    					testsExtendingExt++;
+    					if (eSeq.getLastStmtOperation().isModifier())
+    						eSeq.getLastStmtOperation().timesExecutedInExtendingModifiers++;
+
+     					testsExtendingExt++;
     					if (FieldBasedGenLog.isLoggingOn())
     						FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
 

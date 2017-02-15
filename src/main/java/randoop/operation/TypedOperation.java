@@ -503,7 +503,11 @@ public abstract class TypedOperation implements Operation {
 
   private enum FBExecutionState { NOT_EXECUTED, MODIFIER, OBSERVER, FINALOBSERVER };
   
-  public int timesExecuted = 0;
+  public int observerTimesExecuted = 0;
+  
+  public int timesExecutedInExtendingModifiers = 0;
+
+  public int timesExecutedInNotExtendingModifiers = 0;
   
   private FBExecutionState fbExecState = FBExecutionState.NOT_EXECUTED;
   

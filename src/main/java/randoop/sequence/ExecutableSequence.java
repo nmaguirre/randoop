@@ -9,7 +9,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +21,6 @@ import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.NotExecuted;
 import randoop.generation.AbstractGenerator;
-import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.generation.ForwardGenerator;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
@@ -549,8 +547,8 @@ public class ExecutableSequence {
 					  }
 				  }
 
-				  op.timesExecuted++;
-				  if (secondPhase && op.timesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
+				  op.observerTimesExecuted++;
+				  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
 					  op.setFinalObserver(); 
 					  if (FieldBasedGenLog.isLoggingOn())
 						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
@@ -585,6 +583,10 @@ public class ExecutableSequence {
   
   }
   
+  public TypedOperation getLastStmtOperation() {
+	  return sequence.getStatement(sequence.size() - 1).getOperation();
+  } 
+
   public void clearLastStmtExtensionsAndExecutionResults() {
 	 lastStmtFormerExt = null;
 	 lastStmtNextExt = null;
