@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 import org.junit.Test;
-import randoop.util.fieldbasedcontrol.HeapDump;
 
 
 public class DataStructuresDiferentialTests {
@@ -23,11 +22,6 @@ public class DataStructuresDiferentialTests {
 	l.add("hola");
 	l.add("chau");
 
-	FieldExtensionsStrings fe = new FieldExtensionsStrings();	
-    HeapDump objectDump = new HeapDump(l, fe);
-    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/llistgraph.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/llistextensions.txt");
-    
     Set<String> fbclasses = new LinkedHashSet<>();
     fbclasses.add("java.util.LinkedList");
     fbclasses.add("java.util.LinkedList.Node");
@@ -76,11 +70,6 @@ public class DataStructuresDiferentialTests {
 	l.add("chau");
 	l.add(s);
 	
-    FieldExtensionsStrings fe1 = new FieldExtensionsStrings();	
-    HeapDump objectDump = new HeapDump(l, fe1);
-    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistgraph.dot");
-    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/arrlistextensions.txt");
-    
     FieldExtensionsStrings fe2 = new FieldExtensionsStrings();
     HeapCanonizer canonizer = new HeapCanonizerMapStore(fe2, false);
     canonizer.canonizeAndEnlargeExtensions(l);

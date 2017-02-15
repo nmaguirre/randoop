@@ -13,11 +13,6 @@ public class ArraysDifferentialTests {
 		  
 		String [] l = { "abc", "a", "abc" };
 		
-		FieldExtensionsStrings fe = new FieldExtensionsStrings();
-	    HeapDump objectDump = new HeapDump(l, fe);
-	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/strarr.dot");
-	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/strarrext.txt");
-	
 	    FieldExtensionsStrings fe1 = new FieldExtensionsStrings();
 	    HeapCanonizer canonizer1 = new HeapCanonizerListStore(fe1, false);
 	    canonizer1.canonizeAndEnlargeExtensions(l);
@@ -45,10 +40,6 @@ public class ArraysDifferentialTests {
 		
 		int [] l = { 2, 3, 3, 4, 3 };
 		
-		FieldExtensionsStrings fe = new FieldExtensionsStrings();
-	    HeapDump objectDump = new HeapDump(l, fe);
-	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/intarr.dot");
-	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/intarrext.txt");
 	
 	    FieldExtensionsStrings fe1 = new FieldExtensionsStrings();
 	    HeapCanonizer canonizer1 = new HeapCanonizerListStore(fe1, false);
@@ -76,11 +67,6 @@ public class ArraysDifferentialTests {
 	  public void testArrays3() throws IllegalArgumentException, IllegalAccessException, IOException {
 		 
 		Integer [] l = { 2, 3, 3, 4, 3 };
-
-		FieldExtensionsStrings fe = new FieldExtensionsStrings();
-	    HeapDump objectDump = new HeapDump(l, fe);
-	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarr.dot");
-	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/Intarrext.txt");
 
 	    FieldExtensionsStrings fe1 = new FieldExtensionsStrings();
 	    HeapCanonizer canonizer1 = new HeapCanonizerListStore(fe1, false);
