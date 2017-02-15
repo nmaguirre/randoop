@@ -321,6 +321,9 @@ public class CanonicalHeapStore {
 		storeSize = 0;
 	}
 
+	private boolean classObjWarningShown = false;
+	private boolean totalObjWarningShown = false;
+	private boolean stringWarningShown = false;
 	// Returns null when an object cannot be added due to the given limits
 	public CanonizerObject addObject(Object obj) {
 		
@@ -337,12 +340,19 @@ public class CanonicalHeapStore {
 		if (cc.cls == String.class && ((String)obj).length() >= maxStringLength) {
 			
 			if (dropTestsExceedingLimits) {
-				String message = "> FIELD BASED GENERATION WARNING: Max string length (" + maxStringLength + ") exceeded. "
-						+ "String: " + ((String)obj).substring(0, Math.min(((String)obj).length(), 100)) + "[...]" + 
-						". Length: " + ((String)obj).length();
-				System.out.println(message);
-				if (FieldBasedGenLog.isLoggingOn()) 
+				if (!stringWarningShown) {
+					String message = "> FIELD BASED GENERATION WARNING: Max string length (" + maxStringLength + ") exceeded. "
+							+ "String: " + ((String)obj).substring(0, Math.min(((String)obj).length(), 100)) + "[...]" + 
+							". Length: " + ((String)obj).length();
+					System.out.println(message);
+					stringWarningShown = true;
+				}
+				if (FieldBasedGenLog.isLoggingOn()) {
+					String message = "> FIELD BASED GENERATION WARNING: Max string length (" + maxStringLength + ") exceeded. "
+							+ "String: " + ((String)obj).substring(0, Math.min(((String)obj).length(), 100)) + "[...]" + 
+							". Length: " + ((String)obj).length();
 					FieldBasedGenLog.logLine(message);
+				}
 				
 				return null; 
 			}
@@ -364,19 +374,29 @@ public class CanonicalHeapStore {
 		}
 		
 		if (storeSize > maxGlobalObjects) {
-			String message = "> FIELD BASED GENERATION WARNING: Max global number of objects limit (" + maxGlobalObjects + ") exceeded";
-			System.out.println(message);
-			if (FieldBasedGenLog.isLoggingOn()) 
+			if (!totalObjWarningShown) {
+				String message = "> FIELD BASED GENERATION WARNING: Max global number of objects limit (" + maxGlobalObjects + ") exceeded";
+				System.out.println(message);
+				totalObjWarningShown = true;
+			}	
+			if (FieldBasedGenLog.isLoggingOn()) {
+				String message = "> FIELD BASED GENERATION WARNING: Max global number of objects limit (" + maxGlobalObjects + ") exceeded";
 				FieldBasedGenLog.logLine(message);
+			}
 			
 			return null;
 		}	
 		
 		if (l.size() > maxClassObjects) {
-			String message = "> FIELD BASED GENERATION WARNING: Number of objects limit (" + maxClassObjects + ") exceeded for class " + cc.name;
-			System.out.println(message);
-			if (FieldBasedGenLog.isLoggingOn()) 
+			if (!classObjWarningShown) {
+				String message = "> FIELD BASED GENERATION WARNING: Number of objects limit (" + maxClassObjects + ") exceeded for class " + cc.name;
+				System.out.println(message);
+				classObjWarningShown = true;
+			}
+			if (FieldBasedGenLog.isLoggingOn()) {
+				String message = "> FIELD BASED GENERATION WARNING: Number of objects limit (" + maxClassObjects + ") exceeded for class " + cc.name;
 				FieldBasedGenLog.logLine(message);
+			}
 			
 			return null;
 		}

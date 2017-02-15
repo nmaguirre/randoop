@@ -40,6 +40,9 @@ public class HeapCanonizerRuntimeEfficient {
 	public FieldExtensionsIndexes primitiveExtensions;
 
 	public boolean saveToDifferentialExtensions;
+	
+	private boolean arrayWarningShown = false;
+	
 		
 	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive) {
 		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_CLASS_OBJECTS, DEFAULT_MAX_STRING, DEFAULT_MAX_ARRAY, false);
@@ -170,10 +173,15 @@ public class HeapCanonizerRuntimeEfficient {
 				int length = Array.getLength(cobj.obj);
 				if (length >= maxArray) {
 					length = maxArray;
-					String message = "> FIELD BASED GENERATION WARNING: Array length limit (" + maxArray + ") exceeded for class " + cobj.cc.name;
-					System.out.println(message);
-					if (FieldBasedGenLog.isLoggingOn()) 
+					if (!arrayWarningShown) {
+						String message = "> FIELD BASED GENERATION WARNING: Array length limit (" + maxArray + ") exceeded for class " + cobj.cc.name;
+						System.out.println(message);
+						arrayWarningShown = true;
+					}
+					if (FieldBasedGenLog.isLoggingOn()) {
+						String message = "> FIELD BASED GENERATION WARNING: Array length limit (" + maxArray + ") exceeded for class " + cobj.cc.name;
 						FieldBasedGenLog.logLine(message);
+					}	
 					
 					if (dropTestsExceedingLimits) {
 						store.clear();
