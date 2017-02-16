@@ -922,10 +922,8 @@ private int genFirstAdditionalObsErrorSeqs;
 			  for (int j = 0; j < lastStmtTypes.size(); j++) {
 				  if (lastStmtTypes.get(j).equals(type)) {
 					  if (currExtSet.add(lastStmtExt.get(j))) {
-						  /*
 						  if (FieldBasedGenLog.isLoggingOn())
 							  FieldBasedGenLog.logLine("> Object of type: " + type.toString() + ", extensions:\n" + lastStmtExt.get(j));
-						   */
 					  }
 				  }
 			  }
@@ -1104,7 +1102,6 @@ private int genFirstAdditionalObsErrorSeqs;
 
 			  Sequence newSequence = concatSeq.extend(operation, inputs);
 
-			  /*
 			  // Discard if sequence is larger than size limit
 			  if (newSequence.size() > GenInputsAbstract.maxsize) {
 				  if (Log.isLoggingOn()) {
@@ -1118,10 +1115,6 @@ private int genFirstAdditionalObsErrorSeqs;
 				  break;
 			  }
 
-			  if (FieldBasedGenLog.isLoggingOn())
-				  FieldBasedGenLog.logLine("> Sequence to be executed: \n" + newSequence.toCodeString()); 
-			  */
-			  
 			  num_sequences_generated++;
 
 			  if (this.allSequences.contains(newSequence)) {
@@ -1402,7 +1395,6 @@ private int genFirstAdditionalObsErrorSeqs;
 
 			  Sequence newSequence = concatSeq.extend(operation, inputs);
 
-			  /*
 			  // Discard if sequence is larger than size limit
 			  if (newSequence.size() > GenInputsAbstract.maxsize) {
 				  if (Log.isLoggingOn()) {
@@ -1415,7 +1407,6 @@ private int genFirstAdditionalObsErrorSeqs;
 				  // This sequence is already too large, continue with the next sequence
 				  break;
 			  }
-			  */
 
 			  if (FieldBasedGenLog.isLoggingOn())
 				  FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
