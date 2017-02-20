@@ -209,8 +209,63 @@ public class ForwardGenerator extends AbstractGenerator {
     }
   }
   
+  
     @Override
-  public ExecutableSequence executeExtendedSequence(ExecutableSequence eSeq) {
+  public void executeExtendedSequenceNoReexecute(ExecutableSequence eSeq, ExecutableSequence extendedSeq, int startIndex,
+		  int endIndex) {
+
+    	long startTime = System.nanoTime();
+
+    	/*
+    if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
+      componentManager.clearGeneratedSequences();
+    }
+
+    if (eSeq == null) {
+      return null;
+    }
+
+    if (GenInputsAbstract.dontexecute) {
+      this.componentManager.addGeneratedSequence(eSeq.sequence);
+      return null;
+    }
+    	 */
+
+    	setCurrentSequence(eSeq.sequence);
+
+    	long endTime = System.nanoTime();
+
+    	long gentime = endTime - startTime;
+    	startTime = endTime; // reset start time.
+
+    	try {
+    		if (extendedSeq.hasNonExecutedStatements())
+    			eSeq.executeFBSecondPhase(executionVisitor, checkGenerator, canonizer);
+    		else
+    			eSeq.executeFBSecondPhaseNoReexecute(executionVisitor, checkGenerator, canonizer, extendedSeq, startIndex, endIndex);
+    	} catch (CanonizationErrorException e) {
+    		// TODO Auto-generated catch block
+    		e.printStackTrace();
+    	}
+
+    	if (FieldBasedGenLog.isLoggingOn()) {
+    		FieldBasedGenLog.logLine("> Executed current sequence: ");
+    		FieldBasedGenLog.logLine(eSeq.sequence.toCodeString());
+    	}
+
+    	endTime = System.nanoTime();
+    	eSeq.exectime = endTime - startTime;
+    	startTime = endTime; // reset start time.
+
+
+    	endTime = System.nanoTime();
+    	gentime += endTime - startTime;
+    	eSeq.gentime = gentime;
+
+	}
+  
+    @Override
+  public void executeExtendedSequence(ExecutableSequence eSeq) {
 
     long startTime = System.nanoTime();
 
@@ -256,8 +311,7 @@ public class ForwardGenerator extends AbstractGenerator {
     endTime = System.nanoTime();
     gentime += endTime - startTime;
     eSeq.gentime = gentime;
-
-    return eSeq;
+    
   }
 
   

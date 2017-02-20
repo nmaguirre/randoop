@@ -907,6 +907,33 @@ private List<Variable> ithStatementVariables;
     }
     return new Sequence(new ListOfLists<>(statements1), newHashCode, newNetSize);
   }
+  
+  
+   /**
+   * Create a new sequence that is the concatenation of the given sequences.
+   *
+   * @param sequences
+   *          the list of sequences to concatenate
+   * @return the concatenation of the sequences in the list
+   */
+  public static Sequence concatenateAndGetIndexes(List<Sequence> sequences, Sequence indexedSeq, int [] startingIndex) {
+    List<SimpleList<Statement>> statements1 = new ArrayList<>();
+    int newHashCode = 0;
+    int newNetSize = 0;
+    int lastIndex = 0;
+    for (Sequence c : sequences) {
+      newHashCode += c.savedHashCode;
+      newNetSize += c.savedNetSize;
+      if (c.equals(indexedSeq)) {
+    	  startingIndex[0] = lastIndex;
+      }
+      lastIndex += c.size();
+      statements1.add(c.statements);
+    }
+    return new Sequence(new ListOfLists<>(statements1), newHashCode, newNetSize);
+  }
+ 
+  
 
   /**
    * The inputs for the ith statement, as indices. An index equal to x means
