@@ -312,29 +312,62 @@ public class ForwardGenerator extends AbstractGenerator {
     		startTime = endTime; // reset start time.
 
     		if (eSeq.isNormalExecution()) {
+
     			if (FieldBasedGenLog.isLoggingOn()) 
     				FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
 
-    			if (field_based_gen == FieldBasedGenType.FAST) {
-     				// Field based filtering is only done on non error sequences
-    				eSeq.tryToEnlargeExtensions(canonizer);
+    			// Field based filtering is only done on non error sequences
+    			eSeq.tryToEnlargeExtensions(canonizer);
 
-    				if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
+    			/*
+    			// Hack to always save constructor calls
+    			boolean constructor = false;
+    			if (eSeq.sequence.size() == 1 && eSeq.getLastStmtOperation().isConstructorCall()) {
+    				constructor = true;
+    				eSeq.enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
+    				if (FieldBasedGenLog.isLoggingOn()) 
+    					FieldBasedGenLog.logLine("> Saving a single constructor call, even if it doesn't enlarges field extensions");
+    			}
+    			*/
+
+    			if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) {
+
+    				if (eSeq.getLastStmtOperation().isModifier())
+    					eSeq.getLastStmtOperation().timesExecutedInExtendingModifiers++;
+
+    				testsExtendingExt++;
+    				if (FieldBasedGenLog.isLoggingOn())
+    					FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
+
+    				processSequence(eSeq);
+
+    				if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
+   						componentManager.addFieldBasedActiveSequence(eSeq.sequence);
     					/*
-    					if (eSeq.getLastStmtOperation().isModifier())
-    						eSeq.getLastStmtOperation().timesExecutedInNotExtendingModifiers++;
+    					if (!constructor)
+    						componentManager.addFieldBasedActiveSequence(eSeq.sequence);
+    					else
+    						componentManager.addGeneratedSequence(eSeq.sequence);
     					*/
-
-    					if (FieldBasedGenLog.isLoggingOn())
-    						FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
-
-    					eSeq.sequence.clearAllActiveFlags();
-    					processSequence(eSeq);
-    					testsNotExtendingExt++;
     				}
-    				else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
-    					assert false : "ERROR in field based generation, limits exceeded not implemented";
-    				/*
+    				else
+    					componentManager.addGeneratedSequence(eSeq.sequence);
+
+    				if (FieldBasedGenLog.isLoggingOn())
+    					FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
+
+    				if (FieldBasedGenLog.isLoggingOn()) {
+    					// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
+    					FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
+    					if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
+    						FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+    					else 
+    						FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
+    				}
+    			}
+    			else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
+    				assert false : "ERROR in field based generation, limits exceeded not implemented";
+    			/*
 					notPassingFieldBasedFilter++;
 					seqsExceedingLimits++;
 					eSeq.sequence.clearAllActiveFlags();
@@ -344,46 +377,21 @@ public class ForwardGenerator extends AbstractGenerator {
 
 					   if (FieldBasedGenLog.isLoggingOn()) 
 						   FieldBasedGenLog.logLine("> The current sequence exceeded the given object limits");
-    				 */
-    				}
-    				else {
-    					if (eSeq.getLastStmtOperation().isModifier())
-    						eSeq.getLastStmtOperation().timesExecutedInExtendingModifiers++;
-
-     					testsExtendingExt++;
-    					if (FieldBasedGenLog.isLoggingOn())
-    						FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
-
-    					processSequence(eSeq);
-
-    					if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection)
-    						componentManager.addFieldBasedActiveSequence(eSeq.sequence);
-    					else
-    						componentManager.addGeneratedSequence(eSeq.sequence);
-
-    					if (FieldBasedGenLog.isLoggingOn())
-    						FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
-
-    					if (FieldBasedGenLog.isLoggingOn()) {
-    						// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
-    						FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
-    						if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
-    							FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
-    						else 
-    							FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
-    					}
-    				}		
+    			 */
     			}
-    			else { 
+    			else {
+    				//     				if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
+    				/*
+    					if (eSeq.getLastStmtOperation().isModifier())
+    						eSeq.getLastStmtOperation().timesExecutedInNotExtendingModifiers++;
+    				 */
+
+    				if (FieldBasedGenLog.isLoggingOn())
+    					FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
+
+    				eSeq.sequence.clearAllActiveFlags();
     				processSequence(eSeq);
-    				// Field based gen disabled  
-    				if (!eSeq.endsWithObserver) {
-    					if (eSeq.sequence.hasActiveFlags()) 
-    						componentManager.addGeneratedSequence(eSeq.sequence);
-    				}
-    				else 
-    					if (FieldBasedGenLog.isLoggingOn()) 
-    						FieldBasedGenLog.logLine("> The current sequence ends with an observer");
+    				testsNotExtendingExt++;
     			}
 
     		}
@@ -411,6 +419,8 @@ public class ForwardGenerator extends AbstractGenerator {
     		}
     		eSeq.canonizationError = true;
     	}
+    			
+
 
 
     }
