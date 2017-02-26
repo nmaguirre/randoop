@@ -88,10 +88,7 @@ public class ForwardGenerator extends AbstractGenerator {
   // The set of all primitive values seen during generation and execution
   // of sequences. This set is used to tell if a new primitive value has
   // been generated, to add the value to the components.
-  private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
-
-
- 
+  //private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
 
 
   public ForwardGenerator(
@@ -837,7 +834,7 @@ public class ForwardGenerator extends AbstractGenerator {
   }
 
   
-  
+
   
   
  

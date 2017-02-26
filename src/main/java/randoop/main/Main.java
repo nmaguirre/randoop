@@ -2,6 +2,8 @@ package randoop.main;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import randoop.generation.AbstractGenerator;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
@@ -58,6 +60,11 @@ public class Main {
       System.exit(1);
     }
 
+    System.out.println("Locale: " + Locale.getDefault().toString());
+    System.out.println("TimeZone: " + TimeZone.getDefault().toString());
+    
+    
+    
     boolean success = false;
     try {
 

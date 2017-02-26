@@ -664,100 +664,107 @@ public class ExecutableSequence {
         }
       }
       
-      if (canonizer != null && i == sequence.size() - 1 && statementResult instanceof NormalExecution) {
-    	  
-    	  if (op.isFinalObserver()) {
-			   if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
-			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, false);
-			  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
-			  
-			  createLastStmtActiveVars();
-    	  } 
+      if (canonizer != null && i == sequence.size() - 1) {
+    	  if (statementResult instanceof NormalExecution) {
+
+    		  if (op.isFinalObserver()) {
+    			  //if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+    			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, false);
+    			  //if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+
+    			  createLastStmtActiveVars();
+    		  } 
+    		  else {
+    			  //if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+    			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, true);
+    			  //if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+
+    			  createLastStmtActiveVars();
+
+    			  // check if the current op is an observer or a modifier
+    			  if (!op.isModifier()) { 
+    				  if (sequence.size() == 1) {
+    					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+    						  if (lastStmtNextExt.get(j) != null) { 							  
+    							  if (FieldBasedGenLog.isLoggingOn())
+    								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+
+    							  op.setModifier();
+    							  break;
+    						  }
+    					  }
+    				  }
+    				  else { //sequence.size() > 1 
+    					  assert lastStmtFormerExt.size() == lastStmtNextExt.size();
+    					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+    						  assert !(lastStmtFormerExt.get(j) != null && lastStmtNextExt.get(j) == null);
+
+    						  if (lastStmtFormerExt.get(j) == null && lastStmtNextExt.get(j) == null)
+    							  continue;
+    						  else {
+    							  if (!lastStmtNextExt.get(j).equals(lastStmtFormerExt.get(j))) {
+    								  if (FieldBasedGenLog.isLoggingOn())
+    									  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+
+    								  op.setModifier();
+    								  // if (AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED || secondPhase)
+    								  break;
+    							  }
+    						  }
+    					  }
+    				  }
+    			  }
+
+    			  // If it's not a modifier, mark the current action as an observer or final observer
+    			  if (!op.isModifier()) {
+    				  // First check if the current observer produces a new primitive value
+    				  if (!secondPhase && !op.getOutputType().isVoid()) {
+    					  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+    					  if (obj != null && isObjectPrimtive(obj)) {
+    						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
+    							  endsWithObserverReturningNewValue = true;
+
+    							  if (FieldBasedGenLog.isLoggingOn())
+    								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " was added to primitive field bounds");				
+    						  }
+    						  else 
+    							  if (FieldBasedGenLog.isLoggingOn())
+    								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " already belongs to primitive field bounds");				
+    					  }
+    				  }
+
+    				  op.observerTimesExecuted++;
+    				  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
+    					  op.setFinalObserver(); 
+    					  if (FieldBasedGenLog.isLoggingOn())
+    						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
+    				  }
+    				  else {
+    					  op.setObserver();
+    					  if (FieldBasedGenLog.isLoggingOn())
+    						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
+    				  }
+
+    			  }
+
+    		  }
+
+    		  if (!op.isModifier()) {
+    			  endsWithObserver = true;
+    			  if (FieldBasedGenLog.isLoggingOn()) 
+    				  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
+    		  }
+    		  else 
+    			  if (FieldBasedGenLog.isLoggingOn()) 
+    				  FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
+    	  }
     	  else {
-			  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
-			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, true);
-			  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
-			  
-			  createLastStmtActiveVars();
-		  
-			  // check if the current op is an observer or a modifier
-			  if (!op.isModifier()) { 
-				  if (sequence.size() == 1) {
-					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
-						  if (lastStmtNextExt.get(j) != null) { 							  
-							  if (FieldBasedGenLog.isLoggingOn())
-								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
-
-							  op.setModifier();
-							  break;
-						  }
-					  }
-				  }
-				  else { //sequence.size() > 1 
-					  assert lastStmtFormerExt.size() == lastStmtNextExt.size();
-					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
-						  assert !(lastStmtFormerExt.get(j) != null && lastStmtNextExt.get(j) == null);
-
-						  if (lastStmtFormerExt.get(j) == null && lastStmtNextExt.get(j) == null)
-							  continue;
-						  else {
-							  if (!lastStmtNextExt.get(j).equals(lastStmtFormerExt.get(j))) {
-								  if (FieldBasedGenLog.isLoggingOn())
-									  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
-
-								  op.setModifier();
-								  // if (AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED || secondPhase)
-								  break;
-							  }
-						  }
-					  }
-				  }
-			  }
-
-			  // If it's not a modifier, mark the current action as an observer or final observer
-			  if (!op.isModifier()) {
-				  // First check if the current observer produces a new primitive value
-				  if (!secondPhase && !op.getOutputType().isVoid()) {
-					  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
-					  if (obj != null && isObjectPrimtive(obj)) {
-						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
-							  endsWithObserverReturningNewValue = true;
-
-							  if (FieldBasedGenLog.isLoggingOn())
-								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " was added to primitive field bounds");				
-						  }
-						  else 
-							  if (FieldBasedGenLog.isLoggingOn())
-								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " already belongs to primitive field bounds");				
-					  }
-				  }
-
-				  op.observerTimesExecuted++;
-				  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
-					  op.setFinalObserver(); 
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
-				  }
-				  else {
-					  op.setObserver();
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
-				  }
-
-			  }
-    	  
-    	  }
-
-    	  if (!op.isModifier()) {
-    		  endsWithObserver = true;
-    		  if (FieldBasedGenLog.isLoggingOn()) 
-    			  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
-    	  }
-    	  else 
-			  if (FieldBasedGenLog.isLoggingOn()) 
-				  FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
+    		  // Execution failed, if the operation is not executed mark it as an observer for the moment
+    		  if (op.notExecuted())
+    			  op.setObserver();
+       	  }
       }
-      
+    	  
       visitor.visitAfterStatement(this, i);
     }
 

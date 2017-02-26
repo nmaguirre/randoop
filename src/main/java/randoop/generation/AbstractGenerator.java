@@ -5,9 +5,12 @@ import plume.OptionGroup;
 import plume.Unpublicized;
 import randoop.*;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
+import randoop.sequence.Statement;
+import randoop.sequence.Value;
 import randoop.sequence.Variable;
 import randoop.test.TestCheckGenerator;
 import randoop.types.Type;
@@ -46,6 +49,12 @@ import java.util.Set;
  * @see ForwardGenerator
  */
 public abstract class AbstractGenerator {
+	
+  // The set of all primitive values seen during generation and execution
+  // of sequences. This set is used to tell if a new primitive value has
+  // been generated, to add the value to the components.
+  protected Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();	
+	
 	
   protected Set<Sequence> allSequences;
 
@@ -130,7 +139,7 @@ public abstract class AbstractGenerator {
   public static int field_based_gen_observers_per_test = 50; 
   
   @Option("Max times an observer must be used in tests to flag it final.")
-  public static int field_based_gen_observer_executions_before_final = 7;
+  public static int field_based_gen_observer_executions_before_final = 20;
 
   @Option("Max times a modifier can be executed in a test not extending the extensions.")
   public static int field_based_gen_max_non_extending_tests_for_modifier_ratio = 1000;
@@ -755,7 +764,7 @@ private int genFirstAdditionalObsErrorSeqs;
     		if (FieldBasedGenLog.isLoggingOn())
     			FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with modifiers starting");
 
-    		extendModifierTestsWithObserverOps(positiveRegressionSeqs, operationsPermutable, false, false);
+    		extendModifierTestsWithObserverOps(positiveRegressionSeqs, operationsPermutable, false);
 
     		if (field_based_gen_save_observers) {
     			if (FieldBasedGenLog.isLoggingOn())
@@ -956,7 +965,7 @@ private int genFirstAdditionalObsErrorSeqs;
   
   
 
-  private void extendModifierTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendPrimitive, boolean observers) {
+  private void extendModifierTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean observers) {
 	  // Generation first add one of each observer operation to the end of the sequence
 	  for (ExecutableSequence eSeq: sequencesToExtend) {
 		  // TODO: If the sequence ends with a method incorrectly deemed modifier continue to the next sequence
@@ -984,7 +993,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  int observedIndex = j;
 
 		  if (FieldBasedGenLog.isLoggingOn()) {
-			  FieldBasedGenLog.logLine("\n> Sequence to extend:\n " + neweSeq.sequence.toCodeString());
+			  FieldBasedGenLog.logLine("\n>> First phase modifier sequence to extend:\n " + neweSeq.sequence.toCodeString());
 			  FieldBasedGenLog.logLine("> Type to extend: " + observedType);
 			  FieldBasedGenLog.logLine("> Index of type to extend: " + observedIndex);
 		  }
@@ -1154,6 +1163,7 @@ private int genFirstAdditionalObsErrorSeqs;
 
 			  ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
 			  executeExtendedSequenceNoReexecute(eSeq2ndPhase, neweSeq, startIndex, endIndex);
+			  processLastSequenceStatement(eSeq2ndPhase);
 
 			  if (eSeq2ndPhase.isNormalExecution() && operation.isModifier()) {
 				  FieldBasedGenLog.logLine("> Operation " + operation.toString() + " was incorrectly flagged as observer in the first phase. Don't extend this test" ); 
@@ -1280,7 +1290,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  neweSeq.clearExecutionResults();
 		  if (!neweSeq.equals(eSeq)) {
 			  if (FieldBasedGenLog.isLoggingOn())
-				  FieldBasedGenLog.logLine("\n> Created sequence:\n " + neweSeq.sequence.toCodeString());
+				  FieldBasedGenLog.logLine("\n>> Final extended modifier sequence:\n " + neweSeq.sequence.toCodeString());
 			  outRegressionSeqs.add(neweSeq);
 		  }
 	  }
@@ -1290,11 +1300,15 @@ private int genFirstAdditionalObsErrorSeqs;
   
 
 
-private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendPrimitive, boolean observers) {
+private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendOnlyPrimitive, boolean observers) {
 	  // Generation first add one of each observer operation to the end of the sequence
 	  for (ExecutableSequence eSeq: sequencesToExtend) {
 
 		  ExecutableSequence neweSeq = eSeq;
+		  
+		  if (FieldBasedGenLog.isLoggingOn()) {
+			  FieldBasedGenLog.logLine("\n>> First phase observer sequence to extend:\n " + neweSeq.sequence.toCodeString());
+		  }
 
 		  // TODO: If the sequence ends with a method incorrectly deemed modifier continue to the next sequence
 		  // Implement a method to get the last method of a sequence.
@@ -1355,8 +1369,14 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 			  // The first integer of the tuple is the index of the variable chosen from newSeq, 
 			  // the second integer is the corresponding index of a compatible type in operation
 			  TypeTuple inputTypes = operation.getInputTypes();
-			  Tuple<Integer, Integer> connection = getRandomConnectionBetweenTypeTuples(seqLastStmtOutputTypes, isLastStmtVarActive, inputTypes, extendPrimitive);
-			  if (connection == null) continue;
+			  Tuple<Integer, Integer> connection = getRandomConnectionBetweenTypeTuples(seqLastStmtOutputTypes, isLastStmtVarActive, inputTypes, extendOnlyPrimitive);
+			  if (connection == null) {
+				  connection = getRandomConnectionBetweenTypeTuples(seqLastStmtOutputTypes, isLastStmtVarActive, inputTypes, false);
+				  if (connection == null)
+					  continue;
+			  }
+			  
+			  
 
 			  List<Sequence> sequences = new ArrayList<>();
 			  int totStatements = 0;
@@ -1472,6 +1492,7 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 
 			  ExecutableSequence eSeq2ndPhase = new ExecutableSequence(newSequence);
 			  executeExtendedSequenceNoReexecute(eSeq2ndPhase, neweSeq, startIndex, endIndex);
+			  processLastSequenceStatement(eSeq2ndPhase);
 //			  executeExtendedSequence(eSeq2ndPhase);
 
 			  if (eSeq2ndPhase.isNormalExecution() && operation.isModifier()) {
@@ -1583,12 +1604,88 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 		  neweSeq.clearExecutionResults();
 		  if (!neweSeq.equals(eSeq)) {
 			  if (FieldBasedGenLog.isLoggingOn())
-				  FieldBasedGenLog.logLine("\n> Created sequence:\n " + neweSeq.sequence.toCodeString());
+				  FieldBasedGenLog.logLine("\n>> Final extended observer sequence:\n " + neweSeq.sequence.toCodeString());
 			  outRegressionSeqs.add(neweSeq);
 		  }
 	  }
   }
   
+private void processLastSequenceStatement(ExecutableSequence seq) {
+
+	  if (!seq.isNormalExecution()) {
+		  if (Log.isLoggingOn()) {
+			  Log.logLine(
+					  "Making all indices inactive (exception thrown, or failure revealed during execution).");
+			  Log.logLine(
+					  "Statement with non-normal execution: "
+							  + seq.statementToCodeString(seq.getNonNormalExecutionIndex()));
+		  }
+		  return;
+	  }
+
+	  // Clear the active flags of some statements
+	  int i = seq.sequence.size() -1;
+
+	  // If there is no return value, clear its active flag
+	  // Cast succeeds because of isNormalExecution clause earlier in this
+	  // method.
+	  NormalExecution e = (NormalExecution) seq.getResult(i);
+	  Object runtimeValue = e.getRuntimeValue();
+	  if (runtimeValue == null) {
+		  if (Log.isLoggingOn()) {
+			  Log.logLine("Making index " + i + " inactive (value is null)");
+		  }
+		  return;
+	  }
+
+	  // If it is a call to an observer method, clear the active flag of
+	  // its receiver. (This method doesn't side effect the receiver, so
+	  // Randoop should use the other shorter sequence that produces the
+	  // receiver.)
+	  Sequence stmts = seq.sequence;
+	  Statement stmt = stmts.statements.get(i);
+	  /*
+	  if (stmt.isMethodCall() && observers.contains(stmt.getOperation())) {
+		  List<Integer> inputVars = stmts.getInputsAsAbsoluteIndices(i);
+		  int receiver = inputVars.get(0);
+		  seq.sequence.clearActiveFlag(receiver);
+	  }*/
+
+	  // If its runtime value is a primitive value, clear its active flag,
+	  // and if the value is new, add a sequence corresponding to that value.
+	  Class<?> objectClass = runtimeValue.getClass();
+	  if (NonreceiverTerm.isNonreceiverType(objectClass) && !objectClass.equals(Class.class)) {
+		  if (Log.isLoggingOn()) {
+			  Log.logLine("Making index " + i + " inactive (value is a primitive)");
+		  }
+
+		  boolean looksLikeObjToString =
+				  (runtimeValue instanceof String)
+				  && Value.looksLikeObjectToString((String) runtimeValue);
+		  boolean tooLongString =
+				  (runtimeValue instanceof String) && !Value.stringLengthOK((String) runtimeValue);
+		  if (runtimeValue instanceof Double && Double.isNaN((double) runtimeValue)) {
+			  runtimeValue = Double.NaN; // canonicalize NaN value
+		  }
+		  if (runtimeValue instanceof Float && Float.isNaN((float) runtimeValue)) {
+			  runtimeValue = Float.NaN; // canonicalize NaN value
+		  }
+		  if (!looksLikeObjToString && !tooLongString && runtimePrimitivesSeen.add(runtimeValue)) {
+			  // Have not seen this value before; add it to the component set.
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> New primitive value stored: " + runtimeValue.toString());
+
+			  componentManager.addGeneratedSequence(Sequence.createSequenceForPrimitive(runtimeValue));
+		  }
+	  } else {
+		  if (Log.isLoggingOn()) {
+			  Log.logLine("Making index " + i + " active.");
+		  }
+	  }
+
+} 
+
+
   
 // Second phase all combinations  
 //// Generation first add one of each observer operation to the end of the sequence
@@ -1845,12 +1942,12 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
   
   
   
-  private Tuple<Integer, Integer> getRandomConnectionBetweenTypeTuples(TypeTuple seqLastStmtOutputTypes, List<Boolean> isLastStmtVarActive, TypeTuple inputTypes, boolean extendPrimitive) {
+  private Tuple<Integer, Integer> getRandomConnectionBetweenTypeTuples(TypeTuple seqLastStmtOutputTypes, List<Boolean> isLastStmtVarActive, TypeTuple inputTypes, boolean extendOnlyPrimitive) {
 	  
 	  List<Tuple<Integer, Integer>> l = new ArrayList<>();
 	  for (int i = 0; i < seqLastStmtOutputTypes.size(); i++) {
-		  if (!extendPrimitive && !isLastStmtVarActive.get(i) ||
-				  extendPrimitive && isLastStmtVarActive.get(i)) 
+		  if (//!extendPrimitive && !isLastStmtVarActive.get(i) ||
+				  extendOnlyPrimitive && isLastStmtVarActive.get(i)) 
 			  continue;
 		  
 		  for (int j = 0; j < inputTypes.size(); j++) {

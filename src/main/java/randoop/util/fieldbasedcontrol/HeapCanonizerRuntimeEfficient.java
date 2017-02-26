@@ -39,7 +39,7 @@ public class HeapCanonizerRuntimeEfficient {
 	// To canonize primitive values 
 	public FieldExtensionsIndexes primitiveExtensions;
 
-	public boolean saveToDifferentialExtensions;
+	public boolean saveToDifferentialExtensions = false;
 	
 	private boolean arrayWarningShown = false;
 	
