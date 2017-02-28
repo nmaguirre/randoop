@@ -75,6 +75,12 @@ public abstract class AbstractGenerator {
 	  }
   
   
+  public enum CountType {
+	    DISABLED,
+	    EXTENSION,
+	    HASH
+  }
+  
   @OptionGroup("Field based generation")  
   @Option("Choose a field based generation approach. Field based generation can be done "
   		+ "considering only the last sentence of each test (value: FAST), or taking into"
@@ -150,16 +156,8 @@ public abstract class AbstractGenerator {
   		+ "objects generated during the first phase (and doesn't continue with the second phase.")
   public static CountType count_objects = CountType.DISABLED; 
 
-  
-  public enum CountType {
-	    DISABLED,
-	    EXTENSION,
-	    HASH
-  }
-  
-//   @Option("Use a precise, but slower heap canonization. The faster canonization relies on the HashCode method of classes under test, which might be bugged, and its use is not recommended")
-//  public static boolean field_based_gen_precise_canonization = true;
-  
+  @Option("Extend subsumed tests during the second phase.")
+  public static boolean field_based_gen_extend_subsumed = true;
   
   @Option("Increase the probabilities of randomly selecting methods that contribute more frequently to the field extensions")
   public static boolean field_based_gen_weighted_selection = false; 
@@ -934,12 +932,14 @@ private int genFirstAdditionalObsErrorSeqs;
 	  System.out.println("\n\n>> Starting to count objects generated during the first phase.");
 
 	  int allObjCount = 0;
+	  //int flakySeqs = 0;
 	  for (Type type: componentManager.getAllGeneratedTypes()) {
-		  Set<Sequence> sequenceMap = componentManager.getAllGeneratedSequences();
+		  //Set<Sequence> sequenceMap = componentManager.getAllGeneratedSequences();
+		  List<ExecutableSequence> sequenceMap = outRegressionSeqs; 
 
 		  Set<FieldExtensionsIndexes> currExtSet = new HashSet<>();
-		  for (Sequence seq: sequenceMap) {
-			  List<Type> lastStmtTypes = seq.getTypesForLastStatement();
+		  for (ExecutableSequence seq: sequenceMap) {
+			  List<Type> lastStmtTypes = seq.sequence.getTypesForLastStatement();
 			  
 			  boolean hasType = false;
 			  for (int j = 0; j < lastStmtTypes.size(); j++) {
@@ -950,8 +950,14 @@ private int genFirstAdditionalObsErrorSeqs;
 			  }
 			  if (!hasType) continue;
 
-			  ExecutableSequence eSeq = new ExecutableSequence(seq);
+			  ExecutableSequence eSeq = new ExecutableSequence(seq.sequence);
 			  eSeq.execute(executionVisitor, checkGenerator);
+
+			  if (!eSeq.isNormalExecution()) {
+				  //flakySeqs++;
+				  //System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
+				  continue;
+			  }
 
 			  List<FieldExtensionsIndexes> lastStmtExt = null;
 			  try {
@@ -961,13 +967,11 @@ private int genFirstAdditionalObsErrorSeqs;
 				  e.printStackTrace();
 			  }
 
-			  if (!eSeq.isNormalExecution()) {
-				  System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
-				  continue;
-			  }
-
 			  for (int j = 0; j < lastStmtTypes.size(); j++) {
 				  if (lastStmtTypes.get(j).equals(type)) {
+					  
+					  if (lastStmtExt.get(j) == null) continue;
+					  
 					  if (currExtSet.add(lastStmtExt.get(j))) {
 						  if (FieldBasedGenLog.isLoggingOn())
 							  FieldBasedGenLog.logLine("> Object of type: " + type.toString() + ", extensions:\n" + lastStmtExt.get(j));
@@ -982,8 +986,9 @@ private int genFirstAdditionalObsErrorSeqs;
 	  }
 	  
 	  if (FieldBasedGenLog.isLoggingOn())
-		  FieldBasedGenLog.logLine("Final count: " + allObjCount);
+		  FieldBasedGenLog.logLine("Final count: " + allObjCount); 
 	  System.out.println("Final count: " + allObjCount);
+	  //System.out.println("Flaky seqs: " + flakySeqs);
 
   }
   
@@ -995,12 +1000,15 @@ private int genFirstAdditionalObsErrorSeqs;
 	  System.out.println("\n\n>> Starting to count objects generated during the first phase.");
 
 	  int allObjCount = 0;
+	  //int flakySeqs = 0;
+	  
 	  for (Type type: componentManager.getAllGeneratedTypes()) {
-		  Set<Sequence> sequenceMap = componentManager.getAllGeneratedSequences();
+		  //Set<Sequence> sequenceMap = componentManager.getAllGeneratedSequences();
+		  List<ExecutableSequence> sequenceMap = outRegressionSeqs; 
 
 		  Set<LongPair> currHashSet = new HashSet<>();
-		  for (Sequence seq: sequenceMap) {
-			  List<Type> lastStmtTypes = seq.getTypesForLastStatement();
+		  for (ExecutableSequence seq: sequenceMap) {
+			  List<Type> lastStmtTypes = seq.sequence.getTypesForLastStatement();
 			  
 			  boolean hasType = false;
 			  for (int j = 0; j < lastStmtTypes.size(); j++) {
@@ -1011,9 +1019,15 @@ private int genFirstAdditionalObsErrorSeqs;
 			  }
 			  if (!hasType) continue;
 
-			  ExecutableSequence eSeq = new ExecutableSequence(seq);
+			  ExecutableSequence eSeq = new ExecutableSequence(seq.sequence);
 			  eSeq.execute(executionVisitor, checkGenerator);
 
+			  if (!eSeq.isNormalExecution()) {
+				  //flakySeqs++;
+				  //System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
+				  continue;
+			  }	  
+	  
 			  List<FieldExtensionsIndexes> lastStmtExt = null;
 			  try {
 				  lastStmtExt = eSeq.canonizeLastStatementObjects(canonizer);
@@ -1022,21 +1036,20 @@ private int genFirstAdditionalObsErrorSeqs;
 				  e.printStackTrace();
 			  }
 
-			  if (!eSeq.isNormalExecution()) {
-				  System.out.println("ERROR: Flaky sequence while counting objects! Continuing to the next sequence...");
-				  continue;
-			  }
-
 			  for (int j = 0; j < lastStmtTypes.size(); j++) {
 				  if (lastStmtTypes.get(j).equals(type)) {
-
 					  FieldExtensionsIndexes ext = lastStmtExt.get(j);
+
+					  if (ext == null) continue;
+
 					  LongPair hashres = new LongPair();
-					  MurmurHash3.murmurhash3_x64_128(ext.toString().getBytes(), 0, ext.toString().getBytes().length - 1, 0, hashres);
+					  byte [] bytesExt = ext.toString().getBytes();
+					  
+					  MurmurHash3.murmurhash3_x64_128(bytesExt, 0, bytesExt.length - 1, 0, hashres);
 					  
 					  if (currHashSet.add(hashres)) {
 						  if (FieldBasedGenLog.isLoggingOn())
-							  FieldBasedGenLog.logLine("> Object of type: " + type.toString() + ", extensions:\n" + lastStmtExt.get(j));
+							  FieldBasedGenLog.logLine("> Object of type: " + type.toString() + ", extensions:\n" + ext);
 					  }
 				  }
 			  }
@@ -1048,15 +1061,19 @@ private int genFirstAdditionalObsErrorSeqs;
 		  allObjCount += currHashSet.size();
 	  }
 
-	  if (FieldBasedGenLog.isLoggingOn())
-		  FieldBasedGenLog.logLine("Final count: " + allObjCount);
+	  if (FieldBasedGenLog.isLoggingOn()) 
+		  FieldBasedGenLog.logLine("Final count: " + allObjCount); 
 	  System.out.println("Final count: " + allObjCount);
+	  // System.out.println("Flaky seqs: " + flakySeqs);
 	  
   } 
 
   private void extendModifierTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean observers) {
 	  // Generation first add one of each observer operation to the end of the sequence
 	  for (ExecutableSequence eSeq: sequencesToExtend) {
+		  
+		  if (!field_based_gen_extend_subsumed && subsumed_sequences.contains(eSeq.sequence)) continue;
+		  
 		  // TODO: If the sequence ends with a method incorrectly deemed modifier continue to the next sequence
 		  // Implement a method to get the last method of a sequence.
 		  List<Type> seqLastStmtTypes = eSeq.sequence.getTypesForLastStatement();
@@ -1393,6 +1410,8 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 	  // Generation first add one of each observer operation to the end of the sequence
 	  for (ExecutableSequence eSeq: sequencesToExtend) {
 
+		  if (!field_based_gen_extend_subsumed && subsumed_sequences.contains(eSeq.sequence)) continue;
+		  
 		  ExecutableSequence neweSeq = eSeq;
 		  
 		  if (FieldBasedGenLog.isLoggingOn()) {
