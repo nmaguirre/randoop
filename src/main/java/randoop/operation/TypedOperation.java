@@ -509,6 +509,13 @@ public abstract class TypedOperation implements Operation {
 
   public int timesExecutedInNotExtendingModifiers = 0;
   
+  public int timesExecutedInObserversAddingPrimValue = 0;
+
+  public int timesExecutedInNegativeTests = 0;
+  
+  
+//  public int timesExecutedInNotExtendingModifiers = 0;
+
   private FBExecutionState fbExecState = FBExecutionState.NOT_EXECUTED;
   
 	public boolean notExecuted() {

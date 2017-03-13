@@ -85,6 +85,9 @@ public class ForwardGenerator extends AbstractGenerator {
   // For testing purposes only.
   private final List<Sequence> allsequencesAsList = new ArrayList<>();
 
+
+private int maxsize;
+
   // The set of all primitive values seen during generation and execution
   // of sequences. This set is used to tell if a new primitive value has
   // been generated, to add the value to the components.
@@ -163,6 +166,11 @@ public class ForwardGenerator extends AbstractGenerator {
 	}
 	*/
 
+    if (field_based_gen == FieldBasedGenType.FAST)
+    	this.maxsize = GenInputsAbstract.maxsize - AbstractGenerator.field_based_gen_reserved_observer_lines;
+    else
+    	this.maxsize = GenInputsAbstract.maxsize;
+    
   }
   
   
@@ -907,7 +915,7 @@ public class ForwardGenerator extends AbstractGenerator {
     }
 
     // Discard if sequence is larger than size limit
-    if (newSequence.size() > GenInputsAbstract.maxsize) {
+    if (newSequence.size() > this.maxsize) {
       if (Log.isLoggingOn()) {
         Log.logLine(
             "Sequence discarded because size "

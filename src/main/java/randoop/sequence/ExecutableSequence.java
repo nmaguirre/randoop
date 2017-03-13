@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -1039,9 +1041,13 @@ public class ExecutableSequence {
   
   private boolean isObjectPrimtive(Object o) {
 	  Class<?> objectClass = o.getClass();
-	  return NonreceiverTerm.isNonreceiverType(objectClass) || objectClass.equals(Class.class) || objectClass.equals(Object.class);
+	  return NonreceiverTerm.isNonreceiverType(objectClass) || 
+			  objectClass.equals(Class.class) || 
+			  objectClass.equals(Object.class) ||
+			  objectClass.equals(BigInteger.class) || 
+			  objectClass.equals(BigDecimal.class);
   }
-
+  
   
   private List<FieldExtensionsIndexes> createExtensionsForAllObjectsIncludingPrimitives(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 
