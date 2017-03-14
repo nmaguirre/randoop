@@ -22,6 +22,7 @@ import randoop.util.ReflectionExecutor;
 import randoop.util.SimpleList;
 import randoop.util.Timer;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
+import randoop.util.fieldbasedcontrol.CanonizerClass;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
@@ -34,10 +35,12 @@ import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -814,7 +817,7 @@ private int genFirstAdditionalObsErrorSeqs;
     		progressDisplay.display();
     		progressDisplay.shouldStop = true;
     	}
-    	countNumberOfDifferentObjectsUsingExtensions();
+    	//countNumberOfDifferentCompileTimeObjectsUsingExtensions();
     	displayStopped = true;
     }
     else if (count_objects == CountType.HASH) {
@@ -822,7 +825,7 @@ private int genFirstAdditionalObsErrorSeqs;
     		progressDisplay.display();
     		progressDisplay.shouldStop = true;
     	}
-    	countNumberOfDifferentObjectsUsingHashes();
+    	//countNumberOfDifferentCompileTimeObjectsUsingHashes();
     	displayStopped = true;
     }
     else {
@@ -985,7 +988,78 @@ private int genFirstAdditionalObsErrorSeqs;
   }
         			
   
-  private void countNumberOfDifferentObjectsUsingExtensions() {
+  public LongPair hashExtensions(FieldExtensionsIndexes ext) {
+	  LongPair hash = new LongPair();
+	  byte [] bytesExt = ext.toIndexesString().getBytes();
+	  
+	  MurmurHash3.murmurhash3_x64_128(bytesExt, 0, bytesExt.length - 1, 0, hash);
+	  
+	  return hash;
+  }
+  
+  private void countNumberOfDifferentRuntimeObjects() {
+	  // Count objects
+	  if (FieldBasedGenLog.isLoggingOn())
+		  FieldBasedGenLog.logLine("\n\n>> Starting to count objects generated during the first phase.");
+	  System.out.println("\n\n>> Starting to count objects generated during the first phase.");
+
+	  Map<CanonizerClass, Set<LongPair>> hashes = new HashMap<>();
+	  int totalObjCount = 0;
+	  List<ExecutableSequence> allsequences = outRegressionSeqs; 
+
+	  for (ExecutableSequence eSeq: allsequences) {
+		  eSeq.execute(executionVisitor, checkGenerator);
+		  if (!eSeq.isNormalExecution()) {
+			  eSeq.clearExecutionResults();
+			  continue;
+		  }
+
+		  List<Tuple<CanonizerClass, FieldExtensionsIndexes>> lastStmtExt = eSeq.canonizeLastStatementObjects(canonizer);
+		  
+		  for (Tuple<CanonizerClass, FieldExtensionsIndexes> t: lastStmtExt) {
+			  if (t == null) continue;
+
+			  CanonizerClass cc = t.getFirst();
+			  FieldExtensionsIndexes ext = t.getSecond();
+			  Set<LongPair> hs = hashes.get(cc);
+			  if (hs == null) {
+				  hs = new HashSet<LongPair>();
+				  hashes.put(cc, hs);
+			  }
+			  LongPair hash = hashExtensions(ext);
+			  
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> Type: " + cc.name + ", hash: ," + hash + " obj. ext.:\n" + ext.toString());
+			  
+			  if (hs.add(hash)) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> New object counted");
+
+				  totalObjCount++;
+			  }
+			  else {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Object was already counted before");
+			  }
+			  
+		  }
+
+		  eSeq.clearExecutionResults();
+	  }
+
+	  for (CanonizerClass cc: hashes.keySet()) {
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine("Type: " + cc.name + ", objects count: " + hashes.get(cc).size());
+		  System.out.println("Type: " + cc.name + ", objects count: " + hashes.get(cc).size());
+	  }
+
+	  if (FieldBasedGenLog.isLoggingOn())
+		  FieldBasedGenLog.logLine("Final count: " + totalObjCount); 
+	  System.out.println("Final count: " + totalObjCount);
+  }
+  
+  /*
+  private void countNumberOfDifferentCompileTimeObjectsUsingExtensions() {
 
 	  // Count objects
 	  if (FieldBasedGenLog.isLoggingOn())
@@ -1053,7 +1127,8 @@ private int genFirstAdditionalObsErrorSeqs;
 
   }
   
-  private void countNumberOfDifferentObjectsUsingHashes() {
+  /*
+  private void countNumberOfDifferentCompileTimeObjectsUsingHashes() {
 
 	  // Count objects
 	  if (FieldBasedGenLog.isLoggingOn())
@@ -1128,6 +1203,7 @@ private int genFirstAdditionalObsErrorSeqs;
 	  // System.out.println("Flaky seqs: " + flakySeqs);
 	  
   } 
+  */
 
   private void extendModifierTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean observers) {
 	  // Generation first add one of each observer operation to the end of the sequence

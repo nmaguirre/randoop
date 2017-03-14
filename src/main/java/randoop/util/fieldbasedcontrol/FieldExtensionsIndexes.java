@@ -21,5 +21,7 @@ public interface FieldExtensionsIndexes {
 	public boolean addAllPairs(FieldExtensionsIndexes currHeapExt);
 	
 	public boolean testEnlarges(FieldExtensionsIndexes other);
+	
+	public String toIndexesString();
 
 }

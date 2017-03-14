@@ -35,11 +35,13 @@ import randoop.types.ReferenceType;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
+import randoop.util.fieldbasedcontrol.CanonizerClass;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
+import randoop.util.fieldbasedcontrol.Tuple;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -892,7 +894,7 @@ public class ExecutableSequence {
   
   
   
-   public List<FieldExtensionsIndexes> canonizeLastStatementObjects(HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+   public List<Tuple<CanonizerClass, FieldExtensionsIndexes>> canonizeLastStatementObjects(HeapCanonizerRuntimeEfficient canonizer) {
 	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
 	// for attempting to enlarge field extensions
 	int lastStmtIndex = this.sequence.size()-1;
@@ -908,6 +910,9 @@ public class ExecutableSequence {
 
 	return createExtensionsForAllObjectsIncludingPrimitives(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
    }
+   
+   
+   
   
   
   
@@ -942,9 +947,7 @@ public class ExecutableSequence {
 		else if (enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED);
 			decreaseOpearationWeight(stmt, generator);
 	}
-	
-	
-	
+
 	return enlargesExtensions;
   }
   
@@ -1049,40 +1052,35 @@ public class ExecutableSequence {
   }
   
   
-  private List<FieldExtensionsIndexes> createExtensionsForAllObjectsIncludingPrimitives(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+  private List<Tuple<CanonizerClass, FieldExtensionsIndexes>> createExtensionsForAllObjectsIncludingPrimitives(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) {
 
-	  try {
-		  Statement stmt = sequence.getStatement(i);
+	  Statement stmt = sequence.getStatement(i);
 
-		  List<Object> parameters = new ArrayList<>();
+	  List<Object> parameters = new ArrayList<>();
 
-		  if (!stmt.getOutputType().isVoid()) {
-			  parameters.add(statementResult);
-		  }
-
-		  for (int j=0; j<inputVariables.length; j++) {
-			  parameters.add(inputVariables[j]);
-		  }
-
-		  List<FieldExtensionsIndexes> extensions = new ArrayList<>();
-		  for (Object o: parameters) {
-			  if (o != null) {
-				  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
-				  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
-					  return null; 
-
-				  extensions.add(ext);
-			  }
-			  else 
-				  extensions.add(null);
-		  }
-		  
-		 return extensions; 
-		  
-	  }	catch (Exception e) {
-		  e.printStackTrace();
-		  throw new CanonizationErrorException("ERROR: Exception during heap canonization");
+	  if (!stmt.getOutputType().isVoid()) {
+		  parameters.add(statementResult);
 	  }
+
+	  for (int j=0; j<inputVariables.length; j++) {
+		  parameters.add(inputVariables[j]);
+	  }
+
+	  List<Tuple<CanonizerClass, FieldExtensionsIndexes>> extensions = new ArrayList<>();
+	  for (Object o: parameters) {
+		  if (o != null) {
+			  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
+			  
+			  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+				  return null; 
+
+			  extensions.add(new Tuple<>(canonizer.store.canonizeClass(o.getClass()), ext));
+		  }
+		  else 
+			  extensions.add(null);
+	  }
+	  
+	 return extensions; 
 	  
   }
   

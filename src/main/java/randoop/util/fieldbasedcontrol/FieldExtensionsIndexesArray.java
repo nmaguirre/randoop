@@ -301,6 +301,11 @@ public class FieldExtensionsIndexesArray implements FieldExtensionsIndexes {
 		
 		return false;
 	}
+
+	@Override
+	public String toIndexesString() {
+		return null;
+	}
 	
 
 

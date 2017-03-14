@@ -48,6 +48,10 @@ public final class MurmurHash3 {
 			return false;
 		return true;
 	}
+	
+	public String toString() {
+		return String.valueOf(val1) + String.valueOf(val2);
+	}
     
   }
 

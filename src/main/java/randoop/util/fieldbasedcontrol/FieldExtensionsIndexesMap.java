@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,7 +21,7 @@ public class FieldExtensionsIndexesMap implements FieldExtensionsIndexes {
 		this.store = store;
 	}
 	
-	private Map<Integer, Map<Integer, Map<Integer, Map<Integer, Set<String>>>>> extensions = new HashMap<>();
+	private Map<Integer, Map<Integer, Map<Integer, Map<Integer, Set<String>>>>> extensions = new LinkedHashMap<>();
 
 	
 	public boolean addPairToField(CanonizerField field, CanonizerObject o1, CanonizerObject o2) {
@@ -41,19 +42,19 @@ public class FieldExtensionsIndexesMap implements FieldExtensionsIndexes {
 		Map<Integer, Map<Integer,Map<Integer,Set<String>>>> m = extensions.get(fieldIndex);	
 		
 		if (m == null) {
-			m = new HashMap<>();
+			m = new LinkedHashMap<>();
 			extensions.put(fieldIndex, m);
 		}
 		
 		Map<Integer,Map<Integer,Set<String>>> m1 = m.get(c1Index);
 		if (m1 == null) {
-			m1 = new HashMap<>();
+			m1 = new LinkedHashMap<>();
 			m.put(c1Index, m1);
 		}
 		
 		Map<Integer,Set<String>> m2 = m1.get(c2Index);
 		if (m2 == null) {
-			m2 = new HashMap<>();
+			m2 = new LinkedHashMap<>();
 			m1.put(c2Index, m2);
 		}
 		
@@ -93,6 +94,9 @@ public class FieldExtensionsIndexesMap implements FieldExtensionsIndexes {
 		return m3.contains(o2);
 	}
 	
+	public String toIndexesString() {
+		return extensions.toString();
+	}
 	
 	public String toString() {
 		String res = "";
