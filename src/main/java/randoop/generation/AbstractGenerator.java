@@ -1008,7 +1008,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  if (FieldBasedGenLog.isLoggingOn())
 			  FieldBasedGenLog.logLine("> Current sequence: \n" + eSeq.toCodeString());
 
-		  List<Tuple<CanonizerClass, FieldExtensionsIndexes>> lastStmtExt = eSeq.canonizeLastStatementObjects(canonizer);
+		  List<Tuple<CanonizerClass, FieldExtensionsIndexes>> lastStmtExt = eSeq.canonizeObjectsAfterExecution(canonizer);
 		  
 		  for (Tuple<CanonizerClass, FieldExtensionsIndexes> t: lastStmtExt) {
 			  if (t == null) continue;

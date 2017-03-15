@@ -892,23 +892,52 @@ public class ExecutableSequence {
     checks = gen.visit(this);
   }*/
   
-  
-  
-   public List<Tuple<CanonizerClass, FieldExtensionsIndexes>> canonizeLastStatementObjects(HeapCanonizerRuntimeEfficient canonizer) {
-	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
-	// for attempting to enlarge field extensions
-	int lastStmtIndex = this.sequence.size()-1;
-	List<Variable> inputs = sequence.getInputs(lastStmtIndex);
-	Object[] inputVariables = getRuntimeInputs(executionResults.theList, inputs);
 
-    // make sure statement executed
-	ExecutionOutcome statementResult = getResult(lastStmtIndex);
-	
-/*	if (!AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits) 
-		enlargesExtensions = enlargeExtensions(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
-	else */
+  
+   // Returns a list of objects for each of the variables of the sequence (including the return value), 
+   // that result from the execution of the whole sequence.
+   public List<Object> getObjectsAfterExecution() {
+	   
+	   List<Object> objectsAfterExecution = new ArrayList<>();
 
-	return createExtensionsForAllObjectsIncludingPrimitives(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
+	   int lastStmtIndex = this.sequence.size()-1;
+	   List<Variable> inputVars = sequence.getInputs(lastStmtIndex);
+	   Object[] outputObjs = getRuntimeInputs(executionResults.theList, inputVars);
+	   ExecutionOutcome statementResult = getResult(lastStmtIndex);
+	   Object runtimeResult = ((NormalExecution)statementResult).getRuntimeValue();
+
+	   Statement stmt = sequence.getStatement(lastStmtIndex);
+	   if (!stmt.getOutputType().isVoid()) {
+		   objectsAfterExecution.add(runtimeResult);
+	   }
+	   for (int j=0; j<outputObjs.length; j++) {
+		   objectsAfterExecution.add(outputObjs[j]);
+	   }
+
+	   return objectsAfterExecution;
+   }
+   
+   public List<Tuple<CanonizerClass, FieldExtensionsIndexes>> canonizeObjectsAfterExecution(HeapCanonizerRuntimeEfficient canonizer) {
+	   return canonizeObjectsAfterExecution(canonizer, true);
+   }
+   
+   public List<Tuple<CanonizerClass, FieldExtensionsIndexes>> canonizeObjectsAfterExecution(HeapCanonizerRuntimeEfficient canonizer, boolean includePrimitive) {
+
+	   List<Tuple<CanonizerClass, FieldExtensionsIndexes>> classesAndExtensions = new ArrayList<>();
+
+	   for (Object o: getObjectsAfterExecution()) {
+		   if (o == null || (!includePrimitive && isObjectPrimtive(o))) {
+			   classesAndExtensions.add(null);
+		   }
+		   else {
+			   FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
+			   if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+				   return null; 
+			   classesAndExtensions.add(new Tuple<>(canonizer.store.canonizeClass(o.getClass()), ext));
+		   }
+	   }
+
+	   return classesAndExtensions; 
    }
    
    
@@ -1049,39 +1078,6 @@ public class ExecutableSequence {
 			  objectClass.equals(Object.class) ||
 			  objectClass.equals(BigInteger.class) || 
 			  objectClass.equals(BigDecimal.class);
-  }
-  
-  
-  private List<Tuple<CanonizerClass, FieldExtensionsIndexes>> createExtensionsForAllObjectsIncludingPrimitives(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) {
-
-	  Statement stmt = sequence.getStatement(i);
-
-	  List<Object> parameters = new ArrayList<>();
-
-	  if (!stmt.getOutputType().isVoid()) {
-		  parameters.add(statementResult);
-	  }
-
-	  for (int j=0; j<inputVariables.length; j++) {
-		  parameters.add(inputVariables[j]);
-	  }
-
-	  List<Tuple<CanonizerClass, FieldExtensionsIndexes>> extensions = new ArrayList<>();
-	  for (Object o: parameters) {
-		  if (o != null) {
-			  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
-			  
-			  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
-				  return null; 
-
-			  extensions.add(new Tuple<>(canonizer.store.canonizeClass(o.getClass()), ext));
-		  }
-		  else 
-			  extensions.add(null);
-	  }
-	  
-	 return extensions; 
-	  
   }
   
 
