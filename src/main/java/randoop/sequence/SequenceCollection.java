@@ -190,7 +190,7 @@ public class SequenceCollection {
 		  + argument.getType().getName();
 
 		  if (FieldBasedGenLog.isLoggingOn())
-			  FieldBasedGenLog.logLine("> Current subsequence active var: " + argument.toString() + " , index " + i);
+			  FieldBasedGenLog.logLine("> Current sequence active var: " + argument.toString() + " , index " + i);
 
 		  Type type = formalTypes.get(i);
 		  typeSet.add(type);

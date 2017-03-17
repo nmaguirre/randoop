@@ -166,7 +166,7 @@ private int maxsize;
 	}
 	*/
 
-    if (field_based_gen == FieldBasedGenType.FAST)
+    if (field_based_gen != FieldBasedGenType.DISABLED)
     	this.maxsize = GenInputsAbstract.maxsize - AbstractGenerator.field_based_gen_reserved_observer_lines;
     else
     	this.maxsize = GenInputsAbstract.maxsize;
@@ -372,23 +372,16 @@ private int maxsize;
 
     		if (eSeq.isNormalExecution()) {
 
-    			if (FieldBasedGenLog.isLoggingOn()) 
+    			if (FieldBasedGenLog.isLoggingOn())
     				FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
 
-    			// Field based filtering is only done on non error sequences
-    			eSeq.tryToEnlargeExtensions(canonizer);
-
-    			/*
-    			// Hack to always save constructor calls
-    			boolean constructor = false;
-    			if (eSeq.sequence.size() == 1 && eSeq.getLastStmtOperation().isConstructorCall()) {
-    				constructor = true;
-    				eSeq.enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
-    				if (FieldBasedGenLog.isLoggingOn()) 
-    					FieldBasedGenLog.logLine("> Saving a single constructor call, even if it doesn't enlarges field extensions");
-    			}
-    			*/
-
+    			
+   				// Field based filtering is only done on non error sequences
+    			if (field_based_gen == FieldBasedGenType.EXTENSIONS)
+    				eSeq.tryToEnlargeExtensions(canonizer);
+   				else 
+   					addObjectsHashesToStore(eSeq);
+   				    				
     			if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) {
 
     				if (eSeq.getLastStmtOperation().isModifier())
@@ -400,22 +393,15 @@ private int maxsize;
 
     				processSequence(eSeq);
 
-    				if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
+    				if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) 
    						componentManager.addFieldBasedActiveSequence(eSeq.sequence);
-    					/*
-    					if (!constructor)
-    						componentManager.addFieldBasedActiveSequence(eSeq.sequence);
-    					else
-    						componentManager.addGeneratedSequence(eSeq.sequence);
-    					*/
-    				}
     				else
     					componentManager.addGeneratedSequence(eSeq.sequence);
 
     				if (FieldBasedGenLog.isLoggingOn())
     					FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
 
-    				if (FieldBasedGenLog.isLoggingOn()) {
+    				if (FieldBasedGenLog.isLoggingOn() && field_based_gen == FieldBasedGenType.EXTENSIONS) {
     					// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
     					FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
     					if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
@@ -426,25 +412,9 @@ private int maxsize;
     			}
     			else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
     				assert false : "ERROR in field based generation, limits exceeded not implemented";
-    			/*
-					notPassingFieldBasedFilter++;
-					seqsExceedingLimits++;
-					eSeq.sequence.clearAllActiveFlags();
-
-					if (field_based_gen_keep_non_contributing_tests_percentage != 1)
-						keepNonContributingSeq = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
-
-					   if (FieldBasedGenLog.isLoggingOn()) 
-						   FieldBasedGenLog.logLine("> The current sequence exceeded the given object limits");
-    			 */
+    				throw new RuntimeException("ERROR in field based generation, limits exceeded not implemented");
     			}
     			else {
-    				//     				if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
-    				/*
-    					if (eSeq.getLastStmtOperation().isModifier())
-    						eSeq.getLastStmtOperation().timesExecutedInNotExtendingModifiers++;
-    				 */
-
     				if (FieldBasedGenLog.isLoggingOn())
     					FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
 
@@ -960,14 +930,14 @@ private int maxsize;
     	FieldBasedGenLog.logLine("\n\n>> New sequence constructed:\n" + newSequence.toCodeString());
  
     // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
-    if (field_based_gen == FieldBasedGenType.FAST) {
+    if (field_based_gen != FieldBasedGenType.DISABLED) {
 		// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
 		// test is saved later
 		if (FieldBasedGenLog.isLoggingOn())
 			FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
 		
 		subsumed_candidates = new LinkedHashSet<>();
-		 for (Sequence is : sequences.sequences) {
+		for (Sequence is : sequences.sequences) {
 		  subsumed_candidates.add(is);
 		}
     }

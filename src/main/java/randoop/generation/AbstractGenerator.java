@@ -69,12 +69,12 @@ public abstract class AbstractGenerator {
   public enum FieldBasedGenType {
 	    /** Field based generation is disabled */
 	    DISABLED,
-	    /** Fast but not very precise field based generation */
-	    FAST,
-	    /** Field based generation with test miminization. Slower but precise */
-	    MIN,
-	    /** Field based generation with test miminization. Much slower but very precise */
-	    MINPRECISE
+	    // Field based generation
+	    EXTENSIONS,
+	    // Hashes as proxy for object equality
+	    HASHES
+//	    MIN,
+//	    MINPRECISE
 	  }
   
   
@@ -83,9 +83,8 @@ public abstract class AbstractGenerator {
 	    EXTENSION,
 	    HASH
   }
-  
-  @OptionGroup("Field based generation")  
-  @Option("Choose a field based generation approach. Field based generation can be done "
+  /*
+   @Option("Choose a field based generation approach. Field based generation can be done "
   		+ "considering only the last sentence of each test (value: FAST), or taking into"
   		+ "account all the sentences of each test (value: MIN). The latter approach can "
   		+ "be made more precise at the expense of a slower runtime (value: MINPRECISE) "
@@ -93,7 +92,14 @@ public abstract class AbstractGenerator {
   		+ "(they tend to produce better results in testing evaluation metrics)."  
   		+ "Field based generation can also be disabled (value: DISABLED)."
   		+ "")
-  public static FieldBasedGenType field_based_gen = FieldBasedGenType.FAST;
+  	*/
+ 
+  @OptionGroup("Field based generation")  
+  @Option("Select a generation approach. "
+  		+ "DISABLED: Original randoop. "
+  		+ "EXTENSIONS: Field based generation. "
+  		+ "HASHES: Use hashes as a proxy for object equality")
+  public static FieldBasedGenType field_based_gen = FieldBasedGenType.EXTENSIONS;
   
   @Option("Ignore primitive values in the construction of field extensions")
   public static boolean field_based_gen_ignore_primitive = false;
@@ -698,10 +704,11 @@ private int genFirstAdditionalObsErrorSeqs;
     	  if (outputTest.test(eSeq)) {
     		  if (!eSeq.hasInvalidBehavior()) {
     			  if (eSeq.hasFailure() || eSeq.canonizationError) {
+    				  
     				  outErrorSeqs.add(eSeq);
-
     				  if (FieldBasedGenLog.isLoggingOn()) 
     					  FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
+    			  
     			  } else {
 
     				  if ((eSeq.isNormalExecution() && eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) ||
@@ -709,7 +716,6 @@ private int genFirstAdditionalObsErrorSeqs;
     						  !eSeq.endsWithObserver) {
 
     					  if (eSeq.isNormalExecution()) { 
-
 							  modifierTestsGen++;
 							  if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED || 
 									  saveNonExtendingModifierSequence(eSeq)) {
@@ -719,18 +725,14 @@ private int genFirstAdditionalObsErrorSeqs;
 								  outRegressionSeqs.add(eSeq);
 								  positiveRegressionSeqs.add(eSeq);
 								  saveSubsumedCandidates();
-
 							  }
 							  else {
-
 								  modifierTestsDropped++;
 								  if (FieldBasedGenLog.isLoggingOn()) {
 									  FieldBasedGenLog.logLine("> The current ends with an modifier and it will be dropped");
 									  FieldBasedGenLog.logLine("> The candidates for subsumed sequences are now dropped");	
 								  }
-
 							  }
-
     					  }
     					  else {
 
@@ -808,6 +810,8 @@ private int genFirstAdditionalObsErrorSeqs;
       }
     }
     
+    // First phase ended, clean the hashStore
+    hashStore = null;
     
    	long secondPhaseStartTime = System.currentTimeMillis();
 
@@ -820,30 +824,26 @@ private int genFirstAdditionalObsErrorSeqs;
     	countNumberOfDifferentRuntimeObjects();
     	displayStopped = true;
     }
-    else {
-    	// Don't count objects and field based gen enabled, perform the second and third phase of the genfirst approach
-    	if (field_based_gen != FieldBasedGenType.DISABLED) {
-    		
-    		genFirstAdditionalPositiveSeqs = 0;
-    		genFirstAdditionalNegativeSeqs = 0;
-    		genFirstAdditionalErrorSeqs = 0;
+   	// Don't count objects and field based gen enabled, perform the second and third phase of the genfirst approach
+    else if (field_based_gen != FieldBasedGenType.DISABLED) {
+    	genFirstAdditionalPositiveSeqs = 0;
+    	genFirstAdditionalNegativeSeqs = 0;
+    	genFirstAdditionalErrorSeqs = 0;
 
-    		ArrayList<TypedOperation> operationsPermutable = new ArrayList<>();
-    		for (TypedOperation op: operations)
-    			if (op.isObserver())
-    				operationsPermutable.add(op);
+    	ArrayList<TypedOperation> operationsPermutable = new ArrayList<>();
+    	for (TypedOperation op: operations)
+    		if (op.isObserver())
+    			operationsPermutable.add(op);
 
+    	if (FieldBasedGenLog.isLoggingOn())
+    		FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with modifiers starting");
+
+    	extendModifierTestsWithObserverOps(positiveRegressionSeqs, operationsPermutable, false);
+
+    	if (field_based_gen_save_observers) {
     		if (FieldBasedGenLog.isLoggingOn())
-    			FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with modifiers starting");
-
-    		extendModifierTestsWithObserverOps(positiveRegressionSeqs, operationsPermutable, false);
-
-    		if (field_based_gen_save_observers) {
-    			if (FieldBasedGenLog.isLoggingOn())
-    				FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with observers starting");
-    			extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
-    		}
-
+    			FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with observers starting");
+    		extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
     	}
     }
 
@@ -997,9 +997,8 @@ private int genFirstAdditionalObsErrorSeqs;
 
 	  Map<CanonizerClass, Set<LongPair>> hashes = new HashMap<>();
 	  int totalObjCount = 0;
-	  List<ExecutableSequence> allsequences = outRegressionSeqs; 
 
-	  for (ExecutableSequence eSeq: allsequences) {
+	  for (ExecutableSequence eSeq: outRegressionSeqs) {
 		  eSeq.execute(executionVisitor, checkGenerator);
 		  if (!eSeq.isNormalExecution()) {
 			  eSeq.clearExecutionResults();
@@ -1051,6 +1050,75 @@ private int genFirstAdditionalObsErrorSeqs;
 		  FieldBasedGenLog.logLine("Final count: " + totalObjCount); 
 	  System.out.println("Final count: " + totalObjCount);
   }
+  
+  
+  private Map<CanonizerClass, Set<LongPair>> hashStore = new HashMap<>();
+  
+  public boolean addObjectsHashesToStore(ExecutableSequence eSeq) {
+
+	  List<Tuple<CanonizerClass, FieldExtensionsIndexes>> lastStmtExt = eSeq.canonizeObjectsAfterExecution(canonizer, false);
+	  eSeq.enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
+	  boolean result = false;
+	  
+	  int lastStmtInd = eSeq.sequence.size() -1;
+	  Statement stmt = eSeq.sequence.getStatement(lastStmtInd);
+	  int varIndex = 0;
+	  Map<CanonizerClass, Set<LongPair>> newHashes = new HashMap<>();
+	  for (Tuple<CanonizerClass, FieldExtensionsIndexes> t: lastStmtExt) {
+		  if (t == null) { 
+			  varIndex++;
+			  continue; 
+		  }
+
+		  CanonizerClass cc = t.getFirst();
+		  FieldExtensionsIndexes ext = t.getSecond();
+		  Set<LongPair> hs = hashStore.get(cc);
+		  if (hs == null) {
+			  hs = new HashSet<LongPair>();
+			  hashStore.put(cc, hs);
+		  }
+		  LongPair hash = hashExtensions(ext);
+		  
+		  if (!hs.contains(hash)) {
+			  if (FieldBasedGenLog.isLoggingOn()) {
+				  FieldBasedGenLog.logLine("> New object saved:");
+				  FieldBasedGenLog.logLine("> Type: " + cc.name + ", hash: ," + hash + " obj. ext.:\n" + ext.toString());
+			  }
+			  
+			  Set<LongPair> ns = newHashes.get(cc);
+			  if (ns == null) {
+				  ns = new HashSet<LongPair>();
+				  newHashes.put(cc, ns);
+			  }
+			  ns.add(hash);
+			  
+			  if (FieldBasedGenLog.isLoggingOn())
+				  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+					   + stmt.toString() + " (index " + lastStmtInd + ")");
+			  
+			  eSeq.sequence.addActiveVar(lastStmtInd, varIndex);
+			  eSeq.enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
+			  result = true;
+		  }
+		  else {
+			  if (FieldBasedGenLog.isLoggingOn()) {
+				  FieldBasedGenLog.logLine("> Object was already saved before:");
+				  FieldBasedGenLog.logLine("> Type: " + cc.name + ", hash: ," + hash + " obj. ext.:\n" + ext.toString());
+			  }
+		  }
+
+
+		   
+		  varIndex++;
+	  }
+	  
+	  for (CanonizerClass cc: newHashes.keySet()) 
+		  hashStore.get(cc).addAll(newHashes.get(cc));
+	  
+	  return result;
+  }
+  
+  
   
   /*
   private void countNumberOfDifferentCompileTimeObjectsUsingExtensions() {
