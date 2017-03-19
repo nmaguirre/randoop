@@ -380,7 +380,7 @@ private int maxsize;
     			if (field_based_gen == FieldBasedGenType.EXTENSIONS)
     				eSeq.tryToEnlargeExtensions(canonizer);
    				else 
-   					addObjectsHashesToStore(eSeq);
+   					addObjectHashesToStore(eSeq);
    				    				
     			if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) {
 
@@ -930,7 +930,7 @@ private int maxsize;
     	FieldBasedGenLog.logLine("\n\n>> New sequence constructed:\n" + newSequence.toCodeString());
  
     // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
-    if (field_based_gen != FieldBasedGenType.DISABLED) {
+    if (field_based_gen != FieldBasedGenType.DISABLED || (field_based_gen == FieldBasedGenType.DISABLED && drop_randoop_negative_tests)) {
 		// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
 		// test is saved later
 		if (FieldBasedGenLog.isLoggingOn())
