@@ -522,6 +522,7 @@ public class ExecutableSequence {
 								  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
 									  endsWithObserverReturningNewValue = true;
 
+									  //System.out.println("Prim ext size:" + canonizer.getPrimitiveExtensions().size());
 									  if (FieldBasedGenLog.isLoggingOn())
 										  FieldBasedGenLog.logLine("> Value " + obj.toString() + " was added to primitive field bounds");				
 								  }
