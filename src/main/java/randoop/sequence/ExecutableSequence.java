@@ -6,10 +6,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,10 +35,13 @@ import randoop.types.ReferenceType;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
+import randoop.util.fieldbasedcontrol.CanonizerClass;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
+import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
+import randoop.util.fieldbasedcontrol.Tuple;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -110,7 +114,12 @@ public class ExecutableSequence {
 //  private boolean DEBUG = false;
   public ExtendedExtensionsResult enlargesExtensions = null;
   public boolean canonizationError = false;
+  public boolean endsWithObserverReturningNewValue;
+  public boolean endsWithObserver;
 	
+  private List<FieldExtensionsIndexes> lastStmtFormerExt;
+  private List<FieldExtensionsIndexes> lastStmtNextExt;
+
   /** The underlying sequence. */
   public Sequence sequence;
 
@@ -150,6 +159,7 @@ public class ExecutableSequence {
   private static PrintStream ps_output_buffer = new PrintStream(output_buffer);
 
   private IdentityMultiMap<Object, Variable> variableMap;
+
 
 
   
@@ -248,10 +258,6 @@ public class ExecutableSequence {
   }
   
   
-  
-  
-  
-  
   /**
    * Executes sequence, stopping on exceptions.
    *
@@ -263,7 +269,7 @@ public class ExecutableSequence {
   public void execute(ExecutionVisitor visitor, TestCheckGenerator gen) {
     execute(visitor, gen, true);
   }
-  
+
   /**
    * Execute this sequence, invoking the given visitor as the execution unfolds.
    * After invoking this method, the client can query the outcome of executing
@@ -344,9 +350,456 @@ public class ExecutableSequence {
 
     visitor.visitAfterSequence(this);
 
+    checks = gen.visit(this);
+  }
+  
+
+  public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen) {
+	  try {
+		  executeFB(visitor, gen, true, null, false);
+	  } catch (CanonizationErrorException e) {
+		  // TODO Auto-generated catch block
+		  e.printStackTrace();
+	  }
+  }
+
+  
+  /**
+   * Executes sequence, stopping on exceptions.
+   *
+   * @param visitor
+   *          the {@link ExecutionVisitor} that collects checks from results
+   * @param gen
+   *          the check generator for tests
+ * @throws CanonizationErrorException 
+   */
+  public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	  executeFB(visitor, gen, true, canonizer, false);
+  }
+  
+  
+   public void executeFBSecondPhase(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	  executeFB(visitor, gen, true, canonizer, true);
+  }
+   
+    public void executeFBSecondPhaseNoReexecute(ExecutionVisitor visitor, TestCheckGenerator gen, 
+			HeapCanonizerRuntimeEfficient canonizer, ExecutableSequence extendedSeq, int startIndex, int endIndex) throws CanonizationErrorException {
+    	executeFBSecondPhaseNoReexecute(visitor, gen, true, canonizer, true, extendedSeq, startIndex, endIndex);
+    }
+  
+   public void executeFBSecondPhaseNoReexecute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, 
+			HeapCanonizerRuntimeEfficient canonizer, boolean secondPhase, ExecutableSequence extendedSeq, int startIndex, int endIndex) throws CanonizationErrorException {
+		    visitor.initialize(this);
+
+		    // reset execution result values
+		    hasNullInput = false;
+		    executionResults.theList.clear();
+		    int extendedSeqCurrInd = 0;
+		    for (int i = 0; i < sequence.size(); i++) {
+		    	if (i >= startIndex && i <= endIndex) {
+		    		// These statements were already executed in extendedSeq
+		    		executionResults.theList.add(extendedSeq.executionResults.theList.get(extendedSeqCurrInd));
+		    		extendedSeqCurrInd++;
+		    	}
+		    	else	
+		    		executionResults.theList.add(NotExecuted.create());
+		    }
+		    
+		    lastStmtFormerExt = null;
+		    lastStmtNextExt = null;
+		    endsWithObserverReturningNewValue = false;
+		    endsWithObserver = false;
+		    for (int i = 0; i < this.sequence.size(); i++) {
+		    	
+		      // These statements were already executed in extendedSeq,
+		      // do not execute them again
+		      if (i >= startIndex && i <= endIndex) continue;
+
+		      // Find and collect the input values to i-th statement.
+		      List<Variable> inputs = sequence.getInputs(i);
+		      Object[] inputVariables;
+
+		      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+
+		      TypedOperation op = null;
+		      if (canonizer != null && i == sequence.size() - 1) {
+		    	  op = sequence.getStatement(i).getOperation();
+		     	  if (FieldBasedGenLog.isLoggingOn()) {
+		    		  if (op.notExecuted())
+		    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " was never executed"); 
+		    		  else if (op.isObserver())
+		    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer for now"); 
+		    		  else if (op.isFinalObserver())
+		    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer"); 
+		    		  else
+		    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is a modifier"); 
+		     	  }
+
+				  if (sequence.size() > 1 && !op.isFinalObserver() && (op.notExecuted() || op.isObserver()))
+					  lastStmtFormerExt = createExtensionsForAllObjects(i, null, inputVariables, canonizer, true);
+		      }
+		      
+		      visitor.visitBeforeStatement(this, i);
+		      executeStatement(sequence, executionResults.theList, i, inputVariables);
+
+		      // make sure statement executed
+		      ExecutionOutcome statementResult = getResult(i);
+		      if (statementResult instanceof NotExecuted) {
+		        throw new Error("Unexecuted statement in sequence: " + this.toString());
+		      }
+		      // make sure no exception before final statement of sequence
+		      if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
+		        if (ignoreException) {
+		          // this preserves previous behavior, which was simply to return if
+		          // exception occurred
+		          break;
+		        } else {
+		          String msg =
+		              "Encountered exception before final statement of error-revealing test (statement "
+		                  + i
+		                  + "): ";
+		          throw new Error(
+		              msg + ((ExceptionalExecution) statementResult).getException().getMessage());
+		        }
+		      }
+		      
+		      if (canonizer != null && i == sequence.size() - 1 && statementResult instanceof NormalExecution) {
+		    	  
+		    	  if (op.isFinalObserver()) {
+					   if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+					  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, false);
+					  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+					  
+					  createLastStmtActiveVars();
+		    	  } 
+		    	  else {
+					  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+					  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, true);
+					  if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+					  
+					  createLastStmtActiveVars();
+				  
+					  // check if the current op is an observer or a modifier
+					  if (!op.isModifier()) { 
+						  if (sequence.size() == 1) {
+							  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+								  if (lastStmtNextExt.get(j) != null) { 							  
+									  if (FieldBasedGenLog.isLoggingOn())
+										  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+
+									  op.setModifier();
+									  break;
+								  }
+							  }
+						  }
+						  else { //sequence.size() > 1 
+							  assert lastStmtFormerExt.size() == lastStmtNextExt.size();
+							  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+								  assert !(lastStmtFormerExt.get(j) != null && lastStmtNextExt.get(j) == null);
+
+								  if (lastStmtFormerExt.get(j) == null && lastStmtNextExt.get(j) == null)
+									  continue;
+								  else {
+									  if (!lastStmtNextExt.get(j).equals(lastStmtFormerExt.get(j))) {
+										  if (FieldBasedGenLog.isLoggingOn())
+											  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+
+										  op.setModifier();
+										  // if (AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED || secondPhase)
+										  break;
+									  }
+								  }
+							  }
+						  }
+					  }
+
+					  // If it's not a modifier, mark the current action as an observer or final observer
+					  if (!op.isModifier()) {
+						  // First check if the current observer produces a new primitive value
+						  if (!secondPhase && !op.getOutputType().isVoid()) {
+							  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+							  if (obj != null && isObjectPrimtive(obj)) {
+								  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
+									  endsWithObserverReturningNewValue = true;
+
+									  //System.out.println("Prim ext size:" + canonizer.getPrimitiveExtensions().size());
+									  if (FieldBasedGenLog.isLoggingOn())
+										  FieldBasedGenLog.logLine("> Value " + obj.toString() + " was added to primitive field bounds");				
+								  }
+								  else 
+									  if (FieldBasedGenLog.isLoggingOn())
+										  FieldBasedGenLog.logLine("> Value " + obj.toString() + " already belongs to primitive field bounds");				
+							  }
+						  }
+
+						  op.observerTimesExecuted++;
+						  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
+							  op.setFinalObserver(); 
+							  if (FieldBasedGenLog.isLoggingOn())
+								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
+						  }
+						  else {
+							  op.setObserver();
+							  if (FieldBasedGenLog.isLoggingOn())
+								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
+						  }
+
+					  }
+		    	  
+		    	  }
+
+		    	  if (!op.isModifier()) {
+		    		  endsWithObserver = true;
+		    		  if (FieldBasedGenLog.isLoggingOn()) 
+		    			  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
+		    	  }
+		    	  else 
+					  if (FieldBasedGenLog.isLoggingOn()) 
+						  FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
+		      }
+		      
+		      visitor.visitAfterStatement(this, i);
+		    }
+
+		    visitor.visitAfterSequence(this);
+
+		    
+		   	checks = gen.visit(this);
+		
+	}
+
+  
+  /**
+   * Execute this sequence, invoking the given visitor as the execution unfolds.
+   * After invoking this method, the client can query the outcome of executing
+   * each statement via the method <code>getResult(i)</code>.
+   *
+   * <ul>
+   * <li>Before the sequence is executed, clears execution results and calls
+   * <code>visitor.initialize(this)</code>.
+   * <li>Executes each statement in the sequence. Before executing each
+   * statement calls the given visitor's <code>visitBefore</code> method. After
+   * executing each statement, calls the visitor's <code>visitAfter</code>
+   * method.
+   * <li>Execution stops if one of the following conditions holds:
+   * <ul>
+   * <li>All statements in the sequences have been executed.
+   * <li>A statement's execution results in an exception and
+   * <code>stop_on_exception==true</code>.
+   * <li>A <code>null</code> input value is implicitly passed to the statement
+   * (i.e., not via explicit declaration like x = null)
+   * <li>After executing the i-th statement and calling the visitor's
+   * <code>visitAfter</code> method, a <code>ContractViolation</code> check is
+   * present at index i.
+   * </ul>
+   * </ul>
+   *
+   * @param visitor
+   *          the {@code ExecutionVisitor}
+   * @param gen
+   *          the check generator
+   * @param ignoreException
+   *          the flag to indicate exceptions should be ignored
+ * @param canonizer 
+ * @throws CanonizationErrorException 
+   */
+  private void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, HeapCanonizerRuntimeEfficient canonizer, boolean secondPhase)  throws CanonizationErrorException {
+
+    visitor.initialize(this);
+
+    // reset execution result values
+    hasNullInput = false;
+    executionResults.theList.clear();
+    for (int i = 0; i < sequence.size(); i++) {
+      executionResults.theList.add(NotExecuted.create());
+    }
+
+    
+    lastStmtFormerExt = null;
+    lastStmtNextExt = null;
+    endsWithObserverReturningNewValue = false;
+    endsWithObserver = false;
+    for (int i = 0; i < this.sequence.size(); i++) {
+
+      // Find and collect the input values to i-th statement.
+      List<Variable> inputs = sequence.getInputs(i);
+      Object[] inputVariables;
+
+      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+
+      TypedOperation op = null;
+      if (canonizer != null && i == sequence.size() - 1) {
+    	  op = sequence.getStatement(i).getOperation();
+     	  if (FieldBasedGenLog.isLoggingOn()) {
+    		  if (op.notExecuted())
+    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " was never executed"); 
+    		  else if (op.isObserver())
+    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer for now"); 
+    		  else if (op.isFinalObserver())
+    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer"); 
+    		  else
+    			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is a modifier"); 
+     	  }
+
+		  if (sequence.size() > 1 && !op.isFinalObserver() && (op.notExecuted() || op.isObserver()))
+			  lastStmtFormerExt = createExtensionsForAllObjects(i, null, inputVariables, canonizer, true);
+      }
+      
+      visitor.visitBeforeStatement(this, i);
+      executeStatement(sequence, executionResults.theList, i, inputVariables);
+
+      // make sure statement executed
+      ExecutionOutcome statementResult = getResult(i);
+      if (statementResult instanceof NotExecuted) {
+        throw new Error("Unexecuted statement in sequence: " + this.toString());
+      }
+      // make sure no exception before final statement of sequence
+      if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
+        if (ignoreException) {
+          // this preserves previous behavior, which was simply to return if
+          // exception occurred
+          break;
+        } else {
+          String msg =
+              "Encountered exception before final statement of error-revealing test (statement "
+                  + i
+                  + "): ";
+          throw new Error(
+              msg + ((ExceptionalExecution) statementResult).getException().getMessage());
+        }
+      }
+      
+      if (canonizer != null && i == sequence.size() - 1) {
+    	  if (statementResult instanceof NormalExecution) {
+
+    		  if (op.isFinalObserver()) {
+    			  //if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+    			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, false);
+    			  //if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+
+    			  createLastStmtActiveVars();
+    		  } 
+    		  else {
+    			  //if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = true;
+    			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, true);
+    			  //if (AbstractGenerator.field_based_gen_differential_runtime_checks) canonizer.saveToDifferentialExtensions = false;
+
+    			  createLastStmtActiveVars();
+
+    			  // check if the current op is an observer or a modifier
+    			  if (!op.isModifier()) { 
+    				  if (sequence.size() == 1) {
+    					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+    						  if (lastStmtNextExt.get(j) != null) { 							  
+    							  if (FieldBasedGenLog.isLoggingOn())
+    								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+
+    							  op.setModifier();
+    							  break;
+    						  }
+    					  }
+    				  }
+    				  else { //sequence.size() > 1 
+    					  assert lastStmtFormerExt.size() == lastStmtNextExt.size();
+    					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+    						  assert !(lastStmtFormerExt.get(j) != null && lastStmtNextExt.get(j) == null);
+
+    						  if (lastStmtFormerExt.get(j) == null && lastStmtNextExt.get(j) == null)
+    							  continue;
+    						  else {
+    							  if (!lastStmtNextExt.get(j).equals(lastStmtFormerExt.get(j))) {
+    								  if (FieldBasedGenLog.isLoggingOn())
+    									  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+
+    								  op.setModifier();
+    								  // if (AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED || secondPhase)
+    								  break;
+    							  }
+    						  }
+    					  }
+    				  }
+    			  }
+
+    			  // If it's not a modifier, mark the current action as an observer or final observer
+    			  if (!op.isModifier()) {
+    				  // First check if the current observer produces a new primitive value
+    				  if (!secondPhase && !op.getOutputType().isVoid()) {
+    					  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+    					  if (obj != null && isObjectPrimtive(obj)) {
+    						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
+    							  endsWithObserverReturningNewValue = true;
+
+    							  if (FieldBasedGenLog.isLoggingOn())
+    								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " was added to primitive field bounds");				
+    						  }
+    						  else 
+    							  if (FieldBasedGenLog.isLoggingOn())
+    								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " already belongs to primitive field bounds");				
+    					  }
+    				  }
+
+    				  op.observerTimesExecuted++;
+    				  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
+    					  op.setFinalObserver(); 
+    					  if (FieldBasedGenLog.isLoggingOn())
+    						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
+    				  }
+    				  else {
+    					  op.setObserver();
+    					  if (FieldBasedGenLog.isLoggingOn())
+    						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
+    				  }
+
+    			  }
+
+    		  }
+
+    		  if (!op.isModifier()) {
+    			  endsWithObserver = true;
+    			  if (FieldBasedGenLog.isLoggingOn()) 
+    				  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
+    		  }
+    		  else 
+    			  if (FieldBasedGenLog.isLoggingOn()) 
+    				  FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
+    	  }
+    	  else {
+    		  // Execution failed, if the operation is not executed mark it as an observer for the moment
+    		  if (op.notExecuted())
+    			  op.setObserver();
+       	  }
+      }
+    	  
+      visitor.visitAfterStatement(this, i);
+    }
+
+    visitor.visitAfterSequence(this);
+
     
    	checks = gen.visit(this);
   
+  }
+  
+  public TypedOperation getLastStmtOperation() {
+	  return sequence.getStatement(sequence.size() - 1).getOperation();
+  } 
+
+  public void clearLastStmtExtensions() {
+	 lastStmtFormerExt = null;
+	 lastStmtNextExt = null;
+	 /*
+	 executionResults.theList.clear();
+	 for (int i = 0; i < sequence.size(); i++) {
+		 executionResults.theList.add(NotExecuted.create());
+	 }
+	 */
+  }
+  
+   public void clearExecutionResults() {
+	 executionResults.theList.clear();
+	 for (int i = 0; i < sequence.size(); i++) {
+		 executionResults.theList.add(NotExecuted.create());
+	 }
   }
   
   
@@ -440,6 +893,57 @@ public class ExecutableSequence {
     checks = gen.visit(this);
   }*/
   
+
+  
+   // Returns a list of objects for each of the variables of the sequence (including the return value), 
+   // that result from the execution of the whole sequence.
+   public List<Object> getObjectsAfterExecution() {
+	   
+	   List<Object> objectsAfterExecution = new ArrayList<>();
+
+	   int lastStmtIndex = this.sequence.size()-1;
+	   List<Variable> inputVars = sequence.getInputs(lastStmtIndex);
+	   Object[] outputObjs = getRuntimeInputs(executionResults.theList, inputVars);
+	   ExecutionOutcome statementResult = getResult(lastStmtIndex);
+	   Object runtimeResult = ((NormalExecution)statementResult).getRuntimeValue();
+
+	   Statement stmt = sequence.getStatement(lastStmtIndex);
+	   if (!stmt.getOutputType().isVoid()) {
+		   objectsAfterExecution.add(runtimeResult);
+	   }
+	   for (int j=0; j<outputObjs.length; j++) {
+		   objectsAfterExecution.add(outputObjs[j]);
+	   }
+
+	   return objectsAfterExecution;
+   }
+   
+   public List<Tuple<CanonizerClass, FieldExtensionsIndexes>> canonizeObjectsAfterExecution(HeapCanonizerRuntimeEfficient canonizer) {
+	   return canonizeObjectsAfterExecution(canonizer, true);
+   }
+   
+   public List<Tuple<CanonizerClass, FieldExtensionsIndexes>> canonizeObjectsAfterExecution(HeapCanonizerRuntimeEfficient canonizer, boolean includePrimitive) {
+
+	   List<Tuple<CanonizerClass, FieldExtensionsIndexes>> classesAndExtensions = new ArrayList<>();
+
+	   for (Object o: getObjectsAfterExecution()) {
+		   if (o == null || (!includePrimitive && isObjectPrimtive(o))) {
+			   classesAndExtensions.add(null);
+		   }
+		   else {
+			   FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
+			   if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+				   return null; 
+			   classesAndExtensions.add(new Tuple<>(canonizer.store.canonizeClass(o.getClass()), ext));
+		   }
+	   }
+
+	   return classesAndExtensions; 
+   }
+   
+   
+   
+  
   
   
   public ExtendedExtensionsResult enlargeExtensionsFast(HeapCanonizerRuntimeEfficient canonizer, ForwardGenerator generator) throws CanonizationErrorException {
@@ -459,16 +963,21 @@ public class ExecutableSequence {
 	else */
 
 	enlargesExtensions = enlargeExtensionsLimits(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
+
+	/*
+	if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED)
+		generator.modifierOps.add(sequence.getStatement(lastStmtIndex).getOperation());
+	*/
 	
 	// Update last method's weight
 	if (AbstractGenerator.field_based_gen_weighted_selection) {
-	    Statement stmt = sequence.getStatement(lastStmtIndex);		
+	    Statement stmt = sequence.getStatement(lastStmtIndex);	
 		if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED)
 			increaseOpearationWeight(stmt, generator);
 		else if (enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED);
 			decreaseOpearationWeight(stmt, generator);
 	}
-	
+
 	return enlargesExtensions;
   }
   
@@ -565,18 +1074,25 @@ public class ExecutableSequence {
   
   private boolean isObjectPrimtive(Object o) {
 	  Class<?> objectClass = o.getClass();
-	  return NonreceiverTerm.isNonreceiverType(objectClass) || objectClass.equals(Class.class) || objectClass.equals(Object.class);
+	  return NonreceiverTerm.isNonreceiverType(objectClass) || 
+			  objectClass.equals(Class.class) || 
+			  objectClass.equals(Object.class) ||
+			  objectClass.equals(BigInteger.class) || 
+			  objectClass.equals(BigDecimal.class);
   }
   
-  
-  private ExtendedExtensionsResult enlargeExtensionsLimits(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
-	  ExtendedExtensionsResult res = ExtendedExtensionsResult.NOT_EXTENDED;
+
+   private List<FieldExtensionsIndexes> createExtensionsForAllObjects(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer, boolean canonize) throws CanonizationErrorException {
 
 	  try {
 		  Statement stmt = sequence.getStatement(i);
+
 		  List<Object> parameters = new ArrayList<>();
-		  if (!stmt.getOutputType().isVoid())
+
+		  if (!stmt.getOutputType().isVoid()) {
 			  parameters.add(statementResult);
+		  }
+
 		  for (int j=0; j<inputVariables.length; j++) {
 			  parameters.add(inputVariables[j]);
 		  }
@@ -584,75 +1100,168 @@ public class ExecutableSequence {
 		  List<FieldExtensionsIndexes> extensions = new ArrayList<>();
 		  for (Object o: parameters) {
 			  if (o != null && !isObjectPrimtive(o)) {
-				  FieldExtensionsIndexes ext = new FieldExtensionsIndexes(canonizer.store, true);
-				  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
-					  return ExtendedExtensionsResult.LIMITS_EXCEEDED; 
+				  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
+				  if (canonize)
+					  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+						  return null; 
 
 				  extensions.add(ext);
 			  }
 			  else 
 				  extensions.add(null);
-
 		  }
 		  
-		  if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
-			  
-			  int varIndex = 0;
-			  for (FieldExtensionsIndexes ext: extensions) {
-				  if (ext != null && canonizer.store.extensions.testEnlarges(ext)) {
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
-								  + stmt.toString() + " (index " + i + ")");
-
-					  sequence.addActiveVar(i, varIndex);
-					  res = ExtendedExtensionsResult.EXTENDED;
-				  }
-				  varIndex++;
-			  }
-			  
-			  if (sequence.getActiveVars(i) != null) {
-				  for (Integer extIndex: sequence.getActiveVars(i)) 
-					 canonizer.store.extensions.addAllPairs(extensions.get(extIndex));
-			  }
-			  
-		  }
-		  else {
-		  
-			  int varIndex = 0;
-			  for (FieldExtensionsIndexes ext: extensions) {
-				  if (ext != null && canonizer.store.extensions.addAllPairs(ext)) {
-					  if (FieldBasedGenLog.isLoggingOn())
-						  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
-								  + stmt.toString() + " (index " + i + ")");
-
-					  res = ExtendedExtensionsResult.EXTENDED;
-				  }
-				  varIndex++;
-			  }
-
-		  }
-		  
-		  
-		  if (AbstractGenerator.field_based_gen_differential_runtime_checks) {
-			if (!canonizer.readableExtensions.equals(canonizer.store.extensions.toFieldExtensionsStrings())) {
-				if (FieldBasedGenLog.isLoggingOn()) {
-					FieldBasedGenLog.logLine("Differential extensions:");
-					FieldBasedGenLog.logLine(canonizer.readableExtensions.toString());
-					FieldBasedGenLog.logLine("Real extensions:");
-					FieldBasedGenLog.logLine(canonizer.store.extensions.toFieldExtensionsStrings().toString());
-				}
-				
-				System.out.println("ERROR: Differential test failed. Different versions of the extensions differ");
-				throw new RuntimeException("ERROR: Differential test failed. Different versions of the extensions differ");
-			}
-		  }	
-		  
+		 return extensions; 
 		  
 	  }	catch (Exception e) {
 		  e.printStackTrace();
 		  throw new CanonizationErrorException("ERROR: Exception during heap canonization");
 	  }
 	  
+   }
+   
+   public boolean lastStatementVarIsPrimitive(int varIndex) {
+	   return lastStmtNextExt.get(varIndex) == null;
+   }
+
+   private List<Boolean> lastStmtActiveVars;
+
+   public List<Boolean> getLastStmtActiveVars() { 
+	   return lastStmtActiveVars;
+   }
+   
+   public void createLastStmtActiveVars() {
+	   lastStmtActiveVars = new ArrayList<>();
+	   for (FieldExtensionsIndexes fe: lastStmtNextExt)
+		   lastStmtActiveVars.add(fe != null);
+   }
+   
+   
+   public void tryToEnlargeExtensions(HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+	   if (lastStmtNextExt == null) {
+		   enlargesExtensions = ExtendedExtensionsResult.LIMITS_EXCEEDED;
+		   return;
+	   }
+	   
+	   enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
+	   int index = sequence.size() -1;
+	   Statement stmt = sequence.getStatement(index);
+	   if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
+
+		   int varIndex = 0;
+		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
+			   if (ext != null && canonizer.getExtensions().testEnlarges(ext)) {
+				   if (FieldBasedGenLog.isLoggingOn())
+					   FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+							   + stmt.toString() + " (index " + index + ")");
+
+				   sequence.addActiveVar(index, varIndex);
+				   enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
+			   }
+			   
+			   varIndex++;
+		   }
+
+		   if (sequence.getActiveVars(index) != null)
+			   for (Integer i: sequence.getActiveVars(index))
+				   canonizer.getExtensions().addAllPairs(lastStmtNextExt.get(i));
+
+	   }
+	   else {
+
+		   int varIndex = 0;
+		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
+			   if (ext != null && canonizer.getExtensions().addAllPairs(ext)) {
+				   if (FieldBasedGenLog.isLoggingOn())
+					   FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+							   + stmt.toString() + " (index " + index + ")");
+
+				   enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
+			   }
+
+			   varIndex++;
+		   }
+
+	   }
+
+
+	   if (AbstractGenerator.field_based_gen_differential_runtime_checks) {
+		   if (!canonizer.readableExtensions.equals(canonizer.getExtensions().toFieldExtensionsStrings())) {
+			   if (FieldBasedGenLog.isLoggingOn()) {
+				   FieldBasedGenLog.logLine("Differential extensions:");
+				   FieldBasedGenLog.logLine(canonizer.readableExtensions.toString());
+				   FieldBasedGenLog.logLine("Real extensions:");
+				   FieldBasedGenLog.logLine(canonizer.getExtensions().toFieldExtensionsStrings().toString());
+			   }
+
+			   System.out.println("ERROR: Differential test failed. Different versions of the extensions differ");
+			   throw new RuntimeException("ERROR: Differential test failed. Different versions of the extensions differ");
+		   }
+	   }	
+
+   }
+   
+   
+   
+   
+  private ExtendedExtensionsResult enlargeExtensionsLimits(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+
+	  ExtendedExtensionsResult res = ExtendedExtensionsResult.NOT_EXTENDED;
+	  List<FieldExtensionsIndexes> extensions = createExtensionsForAllObjects(i, statementResult, inputVariables, canonizer, true);
+				  
+	  Statement stmt = sequence.getStatement(i);
+	  if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
+			  
+		  int varIndex = 0;
+		  for (FieldExtensionsIndexes ext: extensions) {
+			  if (ext != null && canonizer.getExtensions().testEnlarges(ext)) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+							  + stmt.toString() + " (index " + i + ")");
+
+				  sequence.addActiveVar(i, varIndex);
+				  res = ExtendedExtensionsResult.EXTENDED;
+			  }
+			  varIndex++;
+		  }
+		  
+		  if (sequence.getActiveVars(i) != null) {
+			  for (Integer extIndex: sequence.getActiveVars(i)) 
+				 canonizer.getExtensions().addAllPairs(extensions.get(extIndex));
+		  }
+		  
+	  }
+	  else {
+	  
+		  int varIndex = 0;
+		  for (FieldExtensionsIndexes ext: extensions) {
+			  if (ext != null && canonizer.getExtensions().addAllPairs(ext)) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+							  + stmt.toString() + " (index " + i + ")");
+
+				  res = ExtendedExtensionsResult.EXTENDED;
+			  }
+			  varIndex++;
+		  }
+
+	  }
+	  
+	  
+	  if (AbstractGenerator.field_based_gen_differential_runtime_checks) {
+		if (!canonizer.readableExtensions.equals(canonizer.getExtensions().toFieldExtensionsStrings())) {
+			if (FieldBasedGenLog.isLoggingOn()) {
+				FieldBasedGenLog.logLine("Differential extensions:");
+				FieldBasedGenLog.logLine(canonizer.readableExtensions.toString());
+				FieldBasedGenLog.logLine("Real extensions:");
+				FieldBasedGenLog.logLine(canonizer.getExtensions().toFieldExtensionsStrings().toString());
+			}
+			
+			System.out.println("ERROR: Differential test failed. Different versions of the extensions differ");
+			throw new RuntimeException("ERROR: Differential test failed. Different versions of the extensions differ");
+		}
+	  }	
+		  
 	  return res;
   }
   
@@ -1178,4 +1787,8 @@ public class ExecutableSequence {
   public boolean coversClass(Class<?> c) {
     return executionResults.getCoveredClasses().contains(c);
   }
+
+
+
+
 }

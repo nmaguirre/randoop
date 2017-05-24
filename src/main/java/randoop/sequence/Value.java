@@ -135,6 +135,10 @@ public class Value {
     if (s == null) {
       throw new IllegalArgumentException("s is null");
     }
+    
+	if (s.length() > GenInputsAbstract.string_maxlen)
+		return true;
+    
     return OBJECT_TOSTRING_PATTERN.matcher(s).find();
   }
 
@@ -160,9 +164,13 @@ public class Value {
    *  @see GenInputsAbstract
    */
   public static boolean stringLengthOK(String s) {
+  
     if (s == null) {
       throw new IllegalArgumentException("s is null");
     }
+
+	if (s.length() > GenInputsAbstract.string_maxlen)
+		return false;
 
     // Optimization: return cached value if available.
     Boolean b = stringLengthOKCached.get(s);

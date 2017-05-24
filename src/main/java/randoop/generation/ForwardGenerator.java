@@ -62,7 +62,7 @@ public class ForwardGenerator extends AbstractGenerator {
    * The set of ALL sequences ever generated, including sequences that were
    * executed and then discarded.
    */
-  private final Set<Sequence> allSequences;
+//  private final Set<Sequence> allSequences;
   private final Set<TypedOperation> observers;
 
   
@@ -85,11 +85,13 @@ public class ForwardGenerator extends AbstractGenerator {
   // For testing purposes only.
   private final List<Sequence> allsequencesAsList = new ArrayList<>();
 
+
+private int maxsize;
+
   // The set of all primitive values seen during generation and execution
   // of sequences. This set is used to tell if a new primitive value has
   // been generated, to add the value to the components.
-  private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
-  
+  //private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
 
 
   public ForwardGenerator(
@@ -140,19 +142,20 @@ public class ForwardGenerator extends AbstractGenerator {
     
     // PABLO: Initialized operation weights for random selection
     setInitialOperationWeights();
+    //initModifierOperationsHash();
     
     
     // FIXME: PABLO: Very ugly hack to initialize the canonizer. 
-    if (field_based_gen != FieldBasedGenType.DISABLED) {
+//    if (field_based_gen != FieldBasedGenType.DISABLED) {
     	if (GenInputsAbstract.field_based_gen_classlist == null)
     		initCanonizer();
-    	else {
+    	else 
     		initCanonizer(GenTests.field_based_gen_classes);
-    	}
-    }
+//    }
     
     initializeRuntimePrimitivesSeen();
     
+    /*
 	if (FieldBasedGenLog.isLoggingOn()) {
 		// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
 		FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
@@ -161,11 +164,14 @@ public class ForwardGenerator extends AbstractGenerator {
 		else 
 			FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
 	}
+	*/
 
+    if (field_based_gen != FieldBasedGenType.DISABLED)
+    	this.maxsize = GenInputsAbstract.maxsize - AbstractGenerator.field_based_gen_reserved_observer_lines;
+    else
+    	this.maxsize = GenInputsAbstract.maxsize;
+    
   }
-  
-  
-
   
   
   
@@ -179,8 +185,19 @@ public class ForwardGenerator extends AbstractGenerator {
   private void initializeRuntimePrimitivesSeen() {
     for (Sequence s : componentManager.getAllPrimitiveSequences()) {
       ExecutableSequence es = new ExecutableSequence(s);
-      es.execute(new DummyVisitor(), new DummyCheckGenerator());
-		
+
+      if (field_based_gen == FieldBasedGenType.DISABLED)
+    	 es.execute(new DummyVisitor(), new DummyCheckGenerator()); 
+      else {
+		  try {
+			es.executeFB(new DummyVisitor(), new DummyCheckGenerator(), null);
+		  } catch (CanonizationErrorException e2) {
+				// Should never happen 
+				e2.printStackTrace();
+		  }
+      }
+    	  
+      /*
       if (field_based_gen != FieldBasedGenType.DISABLED) {
 		  try {
 			es.enlargeExtensionsFast(canonizer, this);
@@ -189,6 +206,7 @@ public class ForwardGenerator extends AbstractGenerator {
 			e1.printStackTrace();
 		  }
       }
+      */
       
       NormalExecution e = (NormalExecution) es.getResult(0);
       Object runtimeValue = e.getRuntimeValue();
@@ -197,6 +215,112 @@ public class ForwardGenerator extends AbstractGenerator {
   }
   
   
+    @Override
+  public void executeExtendedSequenceNoReexecute(ExecutableSequence eSeq, ExecutableSequence extendedSeq, int startIndex,
+		  int endIndex) {
+
+    	long startTime = System.nanoTime();
+
+    	/*
+    if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
+      componentManager.clearGeneratedSequences();
+    }
+
+    if (eSeq == null) {
+      return null;
+    }
+
+    if (GenInputsAbstract.dontexecute) {
+      this.componentManager.addGeneratedSequence(eSeq.sequence);
+      return null;
+    }
+    	 */
+
+    	setCurrentSequence(eSeq.sequence);
+
+    	long endTime = System.nanoTime();
+
+    	long gentime = endTime - startTime;
+    	startTime = endTime; // reset start time.
+
+    	try {
+    		if (extendedSeq.hasNonExecutedStatements())
+    			eSeq.executeFBSecondPhase(executionVisitor, checkGenerator, canonizer);
+    		else
+    			eSeq.executeFBSecondPhaseNoReexecute(executionVisitor, checkGenerator, canonizer, extendedSeq, startIndex, endIndex);
+    	} catch (CanonizationErrorException e) {
+    		// TODO Auto-generated catch block
+    		e.printStackTrace();
+    	}
+
+    	if (FieldBasedGenLog.isLoggingOn()) {
+    		FieldBasedGenLog.logLine("> Executed current sequence: ");
+    		FieldBasedGenLog.logLine(eSeq.sequence.toCodeString());
+    	}
+
+    	endTime = System.nanoTime();
+    	eSeq.exectime = endTime - startTime;
+    	startTime = endTime; // reset start time.
+
+
+    	endTime = System.nanoTime();
+    	gentime += endTime - startTime;
+    	eSeq.gentime = gentime;
+
+	}
+  
+    @Override
+  public void executeExtendedSequence(ExecutableSequence eSeq) {
+
+    long startTime = System.nanoTime();
+
+    /*
+    if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
+      componentManager.clearGeneratedSequences();
+    }
+
+    if (eSeq == null) {
+      return null;
+    }
+
+    if (GenInputsAbstract.dontexecute) {
+      this.componentManager.addGeneratedSequence(eSeq.sequence);
+      return null;
+    }
+    */
+
+    setCurrentSequence(eSeq.sequence);
+
+    long endTime = System.nanoTime();
+    
+    long gentime = endTime - startTime;
+    startTime = endTime; // reset start time.
+    
+	try {
+		eSeq.executeFBSecondPhase(executionVisitor, checkGenerator, canonizer);
+	} catch (CanonizationErrorException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+
+	if (FieldBasedGenLog.isLoggingOn()) {
+		FieldBasedGenLog.logLine("> Executed current sequence: ");
+		FieldBasedGenLog.logLine(eSeq.sequence.toCodeString());
+	}
+	
+	endTime = System.nanoTime();
+	eSeq.exectime = endTime - startTime;
+	startTime = endTime; // reset start time.
+    
+   	
+    endTime = System.nanoTime();
+    gentime += endTime - startTime;
+    eSeq.gentime = gentime;
+    
+  }
+
+  
+ 
   @Override
   public ExecutableSequence step() {
 
@@ -207,6 +331,7 @@ public class ForwardGenerator extends AbstractGenerator {
     }
 
     ExecutableSequence eSeq = createNewUniqueSequence();
+
 
     if (eSeq == null) {
       return null;
@@ -220,128 +345,116 @@ public class ForwardGenerator extends AbstractGenerator {
     setCurrentSequence(eSeq.sequence);
 
     long endTime = System.nanoTime();
-    
     long gentime = endTime - startTime;
     startTime = endTime; // reset start time.
     
-	eSeq.execute(executionVisitor, checkGenerator);
+    // Original randoop behaviour
+    if (field_based_gen == FieldBasedGenType.DISABLED) {
+        eSeq.execute(executionVisitor, checkGenerator);
 
-	if (FieldBasedGenLog.isLoggingOn()) {
-		FieldBasedGenLog.logLine("> Executed current sequence: ");
-		FieldBasedGenLog.logLine(eSeq.sequence.toCodeString());
-	}
-	
-	endTime = System.nanoTime();
-	eSeq.exectime = endTime - startTime;
-	startTime = endTime; // reset start time.
-    
-	
-   	if (field_based_gen != FieldBasedGenType.DISABLED && eSeq.isNormalExecution()) {
-   		if (FieldBasedGenLog.isLoggingOn()) {
-   			FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
-   		}
-   		
-		// Field based filtering is only done on non error sequences
-		try {
+        endTime = System.nanoTime();
 
-	    	if (field_based_gen == FieldBasedGenType.FAST) 
-	    		eSeq.enlargeExtensionsFast(canonizer, this);
-	    	else
-	    		eSeq.enlargeExtensionsMin(canonizer, checkGenerator, this);
-	    		
-    		if (eSeq.enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED) {
-        	    notPassingFieldBasedFilter++;
-        		eSeq.sequence.clearAllActiveFlags();
+        eSeq.exectime = endTime - startTime;
+        startTime = endTime; // reset start time.
 
-        		if (field_based_gen_keep_non_contributing_tests_percentage != 1)
-        			coinFlipRes = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
+        processSequence(eSeq);
 
-        		if (field_based_gen_keep_non_contributing_tests_percentage == 1 || coinFlipRes)
-        			processSequence(eSeq);
+        if (eSeq.sequence.hasActiveFlags()) {
+          componentManager.addGeneratedSequence(eSeq.sequence);
+        }
+    }
+    else {
+    	// FB randoop behaviour
+    	try {
+    		eSeq.executeFB(executionVisitor, checkGenerator, canonizer);
+    		endTime = System.nanoTime();
+    		eSeq.exectime = endTime - startTime;
+    		startTime = endTime; // reset start time.
 
-           		if (FieldBasedGenLog.isLoggingOn()) 
-           			FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
-        	}
-    		else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
-        	    notPassingFieldBasedFilter++;
-    			seqsExceedingLimits++;
-        		eSeq.sequence.clearAllActiveFlags();
+    		if (eSeq.isNormalExecution()) {
 
-        		if (field_based_gen_keep_non_contributing_tests_percentage != 1)
-        			coinFlipRes = Randomness.weighedCoinFlip(field_based_gen_keep_non_contributing_tests_percentage);
+    			if (FieldBasedGenLog.isLoggingOn())
+    				FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
 
-           		if (FieldBasedGenLog.isLoggingOn()) 
-           			FieldBasedGenLog.logLine("> The current sequence exceeded the given object limits");
+    			
+   				// Field based filtering is only done on non error sequences
+    			if (field_based_gen == FieldBasedGenType.EXTENSIONS)
+    				eSeq.tryToEnlargeExtensions(canonizer);
+   				else 
+   					addObjectHashesToStore(eSeq);
+   				    				
+    			if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) {
+
+    				if (eSeq.getLastStmtOperation().isModifier())
+    					eSeq.getLastStmtOperation().timesExecutedInExtendingModifiers++;
+
+    				testsExtendingExt++;
+    				if (FieldBasedGenLog.isLoggingOn())
+    					FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
+
+    				processSequence(eSeq);
+
+    				if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) 
+   						componentManager.addFieldBasedActiveSequence(eSeq.sequence);
+    				else
+    					componentManager.addGeneratedSequence(eSeq.sequence);
+
+    				if (FieldBasedGenLog.isLoggingOn())
+    					FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
+
+    				if (FieldBasedGenLog.isLoggingOn() && field_based_gen == FieldBasedGenType.EXTENSIONS) {
+    					// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
+    					FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
+    					if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
+    						FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
+    					else 
+    						FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
+    				}
+    			}
+    			else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
+    				assert false : "ERROR in field based generation, limits exceeded not implemented";
+    				throw new RuntimeException("ERROR in field based generation, limits exceeded not implemented");
+    			}
+    			else {
+    				if (FieldBasedGenLog.isLoggingOn())
+    					FieldBasedGenLog.logLine("> The current sequence didn't contribute to field extensions");
+
+    				eSeq.sequence.clearAllActiveFlags();
+    				processSequence(eSeq);
+    				testsNotExtendingExt++;
+    			}
+
     		}
-        	else {
+    		else {
+    			// Execution finished with errors/failures 
+    			if (FieldBasedGenLog.isLoggingOn()) 
+    				FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions");
 
-           		if (FieldBasedGenLog.isLoggingOn())
-           			FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
+    			// Original randoop behavior when the current sequence produces an error
+    			processSequence(eSeq);
 
-           		if (field_based_gen == FieldBasedGenType.FAST) {
-    	    		processSequence(eSeq);
+    			if (eSeq.sequence.hasActiveFlags()) 
+    				componentManager.addGeneratedSequence(eSeq.sequence);
+    		}
 
-    	    		if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection)
-    	    			componentManager.addFieldBasedActiveSequence(eSeq.sequence);
-    	    		else
-    	    			componentManager.addGeneratedSequence(eSeq.sequence);
-   	    			
-    	    		if (FieldBasedGenLog.isLoggingOn())
-    	    			FieldBasedGenLog.logLine("> Current sequence stored to be used as input for other sequences");
-    	    	}
-    	    	else {
-    	    		// FIXME: This method should only consider indexes belonging to the minimized sequences. 
-    	            processSequence(eSeq);
+    	}	
+    	catch (CanonizationErrorException e) {
+    		canonizationErrorNum++;
+    		eSeq.sequence.clearAllActiveFlags();
+    		System.out.println(eSeq.toCodeString());
+    		System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
+    		if (FieldBasedGenLog.isLoggingOn()) {
+    			FieldBasedGenLog.logLine("> ERROR: Number of canonization errors: " + canonizationErrorNum + "Error sequence:");
+    			FieldBasedGenLog.logLine(eSeq.toCodeString());
+    		}
+    		eSeq.canonizationError = true;
+    	}
+    			
 
-    	            List<Sequence> minSeq = componentManager.addFieldBasedActiveSubsequences(eSeq.sequence);
-    		    	
-    		    	// The minimized sequences recently generated are subsumed by the whole test
-    	            for (Sequence s: minSeq) {
-    	            	// Unless the minimized sequence is exactly the size of the whole sequence,
-    	            	// meaning that minimization didn't have any effect
-    	            	if (s.size() < eSeq.sequence.size())
-    	            		subsumed_sequences.add(s);
-    	            }
-    	    		if (FieldBasedGenLog.isLoggingOn())
-    	    			FieldBasedGenLog.logLine("> Minimized sequences stored as subsumed by the current test");
-    	    	}
-           		
-           		if (FieldBasedGenLog.isLoggingOn()) {
-           			// Only log extensions with up to max_extensions_size_to_log elements to avoid a very large log file
-           			FieldBasedGenLog.logLine("> New field extensions, size " + canonizer.getExtensions().size() + ":");
-           			if (canonizer.getExtensions().size() <= max_extensions_size_to_log) 
-           				FieldBasedGenLog.logLine(canonizer.getExtensions().toString());
-           			else 
-           				FieldBasedGenLog.logLine("> Extensions exceed the log limit (" + max_extensions_size_to_log + ") and will not be shown");
-           		}
-    	    	
-            }
-    		
-		}
-		catch (CanonizationErrorException e) {
-        	canonizationErrorNum++;
-        	eSeq.sequence.clearAllActiveFlags();
-        	System.out.println(eSeq.toCodeString());
-        	System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
-        	if (FieldBasedGenLog.isLoggingOn()) {
-        		FieldBasedGenLog.logLine("> ERROR: Number of canonization errors: " + canonizationErrorNum + "Error sequence:");
-        		FieldBasedGenLog.logLine(eSeq.toCodeString());
-        	}
-        	eSeq.canonizationError = true;
-		}
-	}
-	else {
-	   	if (FieldBasedGenLog.isLoggingOn()) 
-	   		FieldBasedGenLog.logLine("> Execution of the current sequence finished with exceptions or failures. Don't use the sequence to enlarge field extensions.");
-		
-    	// Original randoop behavior when field_based_gen is disabled, or the current sequence produced an error
-	    processSequence(eSeq);
-	
-	    if (eSeq.sequence.hasActiveFlags()) {
-	      componentManager.addGeneratedSequence(eSeq.sequence);
-	    }
-	}
-   	
+
+
+    }
+
     endTime = System.nanoTime();
     gentime += endTime - startTime;
     eSeq.gentime = gentime;
@@ -700,7 +813,7 @@ public class ForwardGenerator extends AbstractGenerator {
   }
 
   
-  
+
   
   
  
@@ -773,7 +886,7 @@ public class ForwardGenerator extends AbstractGenerator {
     }
 
     // Discard if sequence is larger than size limit
-    if (newSequence.size() > GenInputsAbstract.maxsize) {
+    if (newSequence.size() > this.maxsize) {
       if (Log.isLoggingOn()) {
         Log.logLine(
             "Sequence discarded because size "
@@ -815,19 +928,19 @@ public class ForwardGenerator extends AbstractGenerator {
     
     
     if (FieldBasedGenLog.isLoggingOn()) 
-    	FieldBasedGenLog.logLine("\n\n>> New sequence constructed");
+    	FieldBasedGenLog.logLine("\n\n>> New sequence constructed:\n" + newSequence.toCodeString());
  
     // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
-    if (field_based_gen_keep_non_contributing_tests_percentage != 1 || keep_negative_tests_percentage != 1) {
-    	// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
-    	// test enlarges the field extensions
-    	if (FieldBasedGenLog.isLoggingOn())
-    		FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
-    	
-    	subsumed_candidates = new LinkedHashSet<>();
- 	    for (Sequence is : sequences.sequences) {
-	      subsumed_candidates.add(is);
-	    }
+    if (field_based_gen != FieldBasedGenType.DISABLED || (field_based_gen == FieldBasedGenType.DISABLED && drop_randoop_negative_tests)) {
+		// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
+		// test is saved later
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
+		
+		subsumed_candidates = new LinkedHashSet<>();
+		for (Sequence is : sequences.sequences) {
+		  subsumed_candidates.add(is);
+		}
     }
     else {
    		if (FieldBasedGenLog.isLoggingOn()) 
@@ -1199,6 +1312,19 @@ public class ForwardGenerator extends AbstractGenerator {
 
     return new InputsAndSuccessFlag(true, sequences, variables);
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   /**
    * Returns the set of sequences that are included in other sequences to

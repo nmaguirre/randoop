@@ -34,6 +34,15 @@ public class HeapCanonizerRuntimeEfficient {
 	private int maxArray;
 	private int maxStringLength;
 	private boolean dropTestsExceedingLimits;
+	// To canonize non primitive objects
+	public FieldExtensionsIndexes extensions;
+	// To canonize primitive values 
+	public FieldExtensionsIndexes primitiveExtensions;
+
+	public boolean saveToDifferentialExtensions = false;
+	
+	private boolean arrayWarningShown = false;
+	
 		
 	public HeapCanonizerRuntimeEfficient(boolean ignorePrimitive) {
 		this(ignorePrimitive, null, DEFAULT_MAX_OBJECTS, DEFAULT_MAX_CLASS_OBJECTS, DEFAULT_MAX_STRING, DEFAULT_MAX_ARRAY, false);
@@ -61,13 +70,18 @@ public class HeapCanonizerRuntimeEfficient {
 		
 		this.maxStringLength = maxStringLength;
 		this.maxArray = maxArray;
+		this.extensions = new FieldExtensionsIndexesMap(store);
+		this.primitiveExtensions = new FieldExtensionsIndexesMap(store);
 	}
 	
 	
 	public FieldExtensionsIndexes getExtensions() {
-		return store.extensions; 
+		return extensions; 
 	}
 
+	public FieldExtensionsIndexes getPrimitiveExtensions() {
+		return primitiveExtensions; 
+	}
 	
 	public void activateReadableExtensions() {
 		readableExtensions = new FieldExtensionsStrings();
@@ -113,7 +127,7 @@ public class HeapCanonizerRuntimeEfficient {
 		
 		boolean newRes = extensions.addPairToField(fld, src, tgt);
 
-		if (readableExtensions != null) {
+		if (readableExtensions != null && saveToDifferentialExtensions) {
 			boolean oldRes = addToReadableExtensions(src, tgt, fld); 
 			
 //			if (oldRes != newRes) { 
@@ -129,7 +143,7 @@ public class HeapCanonizerRuntimeEfficient {
 
 
 	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root) {
-		return traverseBreadthFirstAndEnlargeExtensions(root, store.extensions);
+		return traverseBreadthFirstAndEnlargeExtensions(root, extensions);
 	}
 	
 	
@@ -138,7 +152,6 @@ public class HeapCanonizerRuntimeEfficient {
 	// Returns true iff at least an element is added to the extensions.
 	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root, FieldExtensionsIndexes extensions) {
 		if (root == null) return ExtendedExtensionsResult.NOT_EXTENDED;
-		store.clear();
   	
 		ExtendedExtensionsResult extended = ExtendedExtensionsResult.NOT_EXTENDED;
 		/*
@@ -160,13 +173,21 @@ public class HeapCanonizerRuntimeEfficient {
 				int length = Array.getLength(cobj.obj);
 				if (length >= maxArray) {
 					length = maxArray;
-					String message = "> FIELD BASED GENERATION WARNING: Array length limit (" + maxArray + ") exceeded for class " + cobj.cc.name;
-					System.out.println(message);
-					if (FieldBasedGenLog.isLoggingOn()) 
+					if (!arrayWarningShown) {
+						String message = "> FIELD BASED GENERATION WARNING: Array length limit (" + maxArray + ") exceeded for class " + cobj.cc.name;
+						System.out.println(message);
+						arrayWarningShown = true;
+					}
+					if (FieldBasedGenLog.isLoggingOn()) {
+						String message = "> FIELD BASED GENERATION WARNING: Array length limit (" + maxArray + ") exceeded for class " + cobj.cc.name;
 						FieldBasedGenLog.logLine(message);
+					}	
 					
-					if (dropTestsExceedingLimits)
-						return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+					if (dropTestsExceedingLimits) {
+						store.clear();
+						throw new RuntimeException("ERROR IN CANONIZATION: Bounds limit not implemented");
+						// return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+					}
 				}
 				for (int i = 0; i < length; i++) {
 					
@@ -174,8 +195,11 @@ public class HeapCanonizerRuntimeEfficient {
 					CanonizerObject newcobj = store.addObject(target);
 					// Max number of stored objects for the class exceeded
 					if (newcobj == null) {
-						if (dropTestsExceedingLimits)
-							return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+						if (dropTestsExceedingLimits) {
+							store.clear();
+							throw new RuntimeException("ERROR IN CANONIZATION: Bounds limit not implemented");
+							// return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+						}
 						else
 							continue;
 					}
@@ -205,8 +229,11 @@ public class HeapCanonizerRuntimeEfficient {
 					CanonizerObject newcobj = store.addObject(target);
 					// Max number of stored objects for the class exceeded
 					if (newcobj == null) {
-						if (dropTestsExceedingLimits)
-							return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+						if (dropTestsExceedingLimits) {
+							store.clear();
+							throw new RuntimeException("ERROR IN CANONIZATION: Bounds limit not implemented");
+							//return ExtendedExtensionsResult.LIMITS_EXCEEDED;
+						}
 						else
 							continue;
 					}
@@ -229,6 +256,8 @@ public class HeapCanonizerRuntimeEfficient {
 			}
 		}	
   		*/
+
+		store.clear();
   		
 		return extended;
 	}

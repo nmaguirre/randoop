@@ -16,11 +16,6 @@ public class VectorsDifferentialTests {
 	    v.addElement(5);
 	    v.addElement(7);
 	
-		FieldExtensionsStrings fe = new FieldExtensionsStrings();
-	    HeapDump objectDump = new HeapDump(v, fe);
-	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vector.dot");
-	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorext.txt");
-	
 	    FieldExtensionsStrings fe1 = new FieldExtensionsStrings();
 	    HeapCanonizer canonizer1 = new HeapCanonizerListStore(fe1, false);
 	    canonizer1.canonizeAndEnlargeExtensions(v);
@@ -57,11 +52,6 @@ public class VectorsDifferentialTests {
         va[1] = v;
         va[2] = v2;
     
-		FieldExtensionsStrings fe = new FieldExtensionsStrings();
-	    HeapDump objectDump = new HeapDump(va, fe);
-	    objectDump.heapToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarr.dot");
-	    objectDump.extensionsToFile("src/test/java/randoop/util/fieldbasedcontrol/vectorarrext.txt");   
-	
 	    FieldExtensionsStrings fe1 = new FieldExtensionsStrings();
 	    HeapCanonizer canonizer1 = new HeapCanonizerListStore(fe1, false);
 	    canonizer1.canonizeAndEnlargeExtensions(va);

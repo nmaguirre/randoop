@@ -105,7 +105,7 @@ public final class Sequence implements WeightedElement {
    *
    * @return the variables used in the last statement of this sequence
    */
-  List<Variable> getVariablesOfLastStatement() {
+  public List<Variable> getVariablesOfLastStatement() {
     return this.lastStatementVariables;
   }
 
@@ -116,7 +116,7 @@ public final class Sequence implements WeightedElement {
    *
    * @return the types of the variables in the last statement of this sequence
    */
-  List<Type> getTypesForLastStatement() {
+  public List<Type> getTypesForLastStatement() {
     return this.lastStatementTypes;
   }
 
@@ -188,6 +188,10 @@ public final class Sequence implements WeightedElement {
   
   // PABLO: statement i -> list active variables in statement i   
   private Map<Integer, List<Integer>> activeVars = new HashMap<>();
+
+private List<Type> ithStatementTypes;
+
+private List<Variable> ithStatementVariables;
   
   
   public void addActiveVar(int stmtIndex, int varIndex) {
@@ -506,6 +510,49 @@ public final class Sequence implements WeightedElement {
     
     checkRep();
   }
+  
+  
+  
+
+  // Set lastStatementVariables and lastStatementTypes to their appropriate
+  // values. See documentation for these fields for more info.
+  public void computeIthStatementInfo(int ithStatementIndex) {
+    this.ithStatementTypes = new ArrayList<>();
+    this.ithStatementVariables = new ArrayList<>();
+
+    if (!this.statements.isEmpty()) {
+      Statement ithStatement = this.statements.get(ithStatementIndex);
+
+      // Process return value
+      if (!ithStatement.getOutputType().isVoid()) {
+        ithStatementTypes.add(ithStatement.getOutputType());
+        ithStatementVariables.add(new Variable(this, ithStatementIndex));
+      }
+
+      // Process input arguments.
+      if (ithStatement.inputs.size() != ithStatement.getInputTypes().size()) {
+        throw new RuntimeException(
+            ithStatement.inputs
+                + ", "
+                + ithStatement.getInputTypes()
+                + ", "
+                + ithStatement.toString());
+      }
+
+      List<Variable> v = this.getInputs(ithStatementIndex);
+      if (v.size() != ithStatement.getInputTypes().size()) {
+        throw new RuntimeException();
+      }
+
+      for (int i = 0; i < v.size(); i++) {
+        Variable actualArgument = v.get(i);
+        assert ithStatement.getInputTypes().get(i).isAssignableFrom(actualArgument.getType());
+        ithStatementTypes.add(actualArgument.getType());
+        ithStatementVariables.add(actualArgument);
+      }
+    }
+  }
+  
 
   // Set lastStatementVariables and lastStatementTypes to their appropriate
   // values. See documentation for these fields for more info.
@@ -700,6 +747,23 @@ public final class Sequence implements WeightedElement {
     if (possibleIndices.isEmpty()) return null;
     return Randomness.randomMember(possibleIndices);
   }
+  
+  public List<Variable> allVariablesForTypeLastStatement(Type type) {
+    if (type == null) throw new IllegalArgumentException("type cannot be null.");
+    List<Variable> possibleIndices = new ArrayList<>(this.lastStatementVariables.size());
+    for (Variable i : this.lastStatementVariables) {
+      Statement s = statements.get(i.index);
+      if (type.isAssignableFrom(s.getOutputType())) {
+        possibleIndices.add(i);
+      }
+    }
+    if (possibleIndices.isEmpty()) return null;
+    return possibleIndices;
+  }
+
+  
+  
+  
 
   void checkIndex(int i) {
     if (i < 0 || i > size() - 1) throw new IllegalArgumentException();
@@ -843,6 +907,33 @@ public final class Sequence implements WeightedElement {
     }
     return new Sequence(new ListOfLists<>(statements1), newHashCode, newNetSize);
   }
+  
+  
+   /**
+   * Create a new sequence that is the concatenation of the given sequences.
+   *
+   * @param sequences
+   *          the list of sequences to concatenate
+   * @return the concatenation of the sequences in the list
+   */
+  public static Sequence concatenateAndGetIndexes(List<Sequence> sequences, Sequence indexedSeq, int [] startingIndex) {
+    List<SimpleList<Statement>> statements1 = new ArrayList<>();
+    int newHashCode = 0;
+    int newNetSize = 0;
+    int lastIndex = 0;
+    for (Sequence c : sequences) {
+      newHashCode += c.savedHashCode;
+      newNetSize += c.savedNetSize;
+      if (c.equals(indexedSeq)) {
+    	  startingIndex[0] = lastIndex;
+      }
+      lastIndex += c.size();
+      statements1.add(c.statements);
+    }
+    return new Sequence(new ListOfLists<>(statements1), newHashCode, newNetSize);
+  }
+ 
+  
 
   /**
    * The inputs for the ith statement, as indices. An index equal to x means

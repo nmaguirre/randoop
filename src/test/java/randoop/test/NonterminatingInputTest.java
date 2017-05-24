@@ -39,7 +39,7 @@ public class NonterminatingInputTest {
     int oldTimeout = ReflectionExecutor.timeout;
     ReflectionExecutor.timeout = 500;
     ExecutableSequence es = new ExecutableSequence(s);
-    es.execute(new DummyVisitor(), new DummyCheckGenerator());
+    es.executeFB(new DummyVisitor(), new DummyCheckGenerator());
     ReflectionExecutor.timeout = oldTimeout;
     assertTrue(es.throwsException(TimeoutExceededException.class));
   }

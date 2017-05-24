@@ -58,6 +58,10 @@ public class SequenceCollection {
 
   // We make it a list to make it easier to pick out an element at random.
   private Map<Type, ArrayListSimpleList<Sequence>> sequenceMap = new LinkedHashMap<>();
+  
+  public Map<Type, ArrayListSimpleList<Sequence>> getSequenceMap() {
+	  return sequenceMap;
+  }
 
   private SubTypeSet typeSet = new SubTypeSet(false);
 
@@ -186,7 +190,7 @@ public class SequenceCollection {
 		  + argument.getType().getName();
 
 		  if (FieldBasedGenLog.isLoggingOn())
-			  FieldBasedGenLog.logLine("> Current subsequence active var: " + argument.toString() + " , index " + i);
+			  FieldBasedGenLog.logLine("> Current sequence active var: " + argument.toString() + " , index " + i);
 
 		  Type type = formalTypes.get(i);
 		  typeSet.add(type);
@@ -307,7 +311,17 @@ public class SequenceCollection {
     }
     return selector;
   }
-
+  
+  public Set<Type> getTypeMatches(Type type) {
+	  return typeSet.getMatches(type);
+  }
+  
+  
+  public Set<Type> getAllTypes() {
+    return typeSet.getElements();
+  }
+  
+  
   /**
    * Returns the set of all sequences in this collection.
    *

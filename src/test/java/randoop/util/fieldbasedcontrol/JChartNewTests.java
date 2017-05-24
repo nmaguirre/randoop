@@ -7,8 +7,14 @@ import org.junit.Test;
 
 
 public class JChartNewTests {
-
-	  
+	
+	@Test
+    public void test1113() throws Throwable {
+		System.out.println((int)' ');
+		System.out.println((int)'#');
+		
+	}
+	
 	     @Test
 	     public void test11137() throws Throwable {
 	   
@@ -221,12 +227,629 @@ public class JChartNewTests {
 	    HeapCanonizerRuntimeEfficient canonizer3 = new HeapCanonizerRuntimeEfficient(false, 10000, 1000, 1000, 1000, true);
 //	    canonizer3.activateReadableExtensions();
 	    canonizer3.traverseBreadthFirstAndEnlargeExtensions(dateAxis2);
-	    System.out.println(canonizer3.store.extensions.size());
+	    System.out.println(canonizer3.getExtensions().size());
 		canonizer3.traverseBreadthFirstAndEnlargeExtensions(timeZone1); 
-	    System.out.println(canonizer3.store.extensions.size());
+	    System.out.println(canonizer3.getExtensions().size());
     
 	}
+	
+	
+  @Test
+  public void test093() throws Throwable {
 
+
+    java.awt.Shape shape0 = org.jfree.chart.plot.XYPlot.DEFAULT_LEGEND_ITEM_CIRCLE;
+    java.awt.Shape shape4 = org.jfree.chart.util.ShapeUtilities.rotateShape(shape0, (double)8, 0.0f, (float)(-1));
+    org.jfree.chart.plot.CategoryPlot categoryPlot5 = new org.jfree.chart.plot.CategoryPlot();
+    org.jfree.data.category.CategoryDataset categoryDataset6 = categoryPlot5.getDataset();
+    categoryPlot5.setRangeZeroBaselineVisible(false);
+    org.jfree.chart.LegendItemCollection legendItemCollection9 = null;
+    categoryPlot5.setFixedLegendItems(legendItemCollection9);
+    org.jfree.chart.entity.PlotEntity plotEntity11 = new org.jfree.chart.entity.PlotEntity(shape0, (org.jfree.chart.plot.Plot)categoryPlot5);
+    java.awt.Paint paint12 = categoryPlot5.getDomainGridlinePaint();
+    org.jfree.chart.renderer.category.BarRenderer barRenderer14 = new org.jfree.chart.renderer.category.BarRenderer();
+    barRenderer14.setBaseSeriesVisibleInLegend(true);
+    barRenderer14.setMaximumBarWidth(100.0d);
+    org.jfree.chart.annotations.CategoryAnnotation categoryAnnotation19 = null;
+    boolean b20 = barRenderer14.removeAnnotation(categoryAnnotation19);
+    //boolean b21 = barRenderer14.getAutoPopulateSeriesOutlineStroke();
+    categoryPlot5.setRenderer(3, (org.jfree.chart.renderer.category.CategoryItemRenderer)barRenderer14, true);
+    barRenderer14.setMinimumBarLength(1.0d);
+    boolean b26 = barRenderer14.getShadowsVisible();
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertNotNull(shape0);
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertNotNull(shape4);
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertNull(categoryDataset6);
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertNotNull(paint12);
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertTrue(b20 == false);
+    
+    // Regression assertion (captures the current behavior of the code)
+    //org.junit.Assert.assertTrue(b21 == false);
+    
+    // Regression assertion (captures the current behavior of the code)
+    org.junit.Assert.assertTrue(b26 == false);
+
+  }
+  
+  
+  
+@Test
+public void test0931() throws Throwable {
+
+
+  java.awt.Shape shape0 = org.jfree.chart.plot.XYPlot.DEFAULT_LEGEND_ITEM_CIRCLE;
+  java.awt.Shape shape4 = org.jfree.chart.util.ShapeUtilities.rotateShape(shape0, (double)8, 0.0f, (float)(-1));
+  org.jfree.chart.plot.CategoryPlot categoryPlot5 = new org.jfree.chart.plot.CategoryPlot();
+  org.jfree.data.category.CategoryDataset categoryDataset6 = categoryPlot5.getDataset();
+  categoryPlot5.setRangeZeroBaselineVisible(false);
+  org.jfree.chart.LegendItemCollection legendItemCollection9 = null;
+  categoryPlot5.setFixedLegendItems(legendItemCollection9);
+  org.jfree.chart.entity.PlotEntity plotEntity11 = new org.jfree.chart.entity.PlotEntity(shape0, (org.jfree.chart.plot.Plot)categoryPlot5);
+  java.awt.Paint paint12 = categoryPlot5.getDomainGridlinePaint();
+  org.jfree.chart.renderer.category.BarRenderer barRenderer14 = new org.jfree.chart.renderer.category.BarRenderer();
+  barRenderer14.setBaseSeriesVisibleInLegend(true);
+  barRenderer14.setMaximumBarWidth(100.0d);
+  org.jfree.chart.annotations.CategoryAnnotation categoryAnnotation19 = null;
+  boolean b20 = barRenderer14.removeAnnotation(categoryAnnotation19);
+  boolean b21 = barRenderer14.getAutoPopulateSeriesOutlineStroke();
+  categoryPlot5.setRenderer(3, (org.jfree.chart.renderer.category.CategoryItemRenderer)barRenderer14, true);
+  barRenderer14.setMinimumBarLength(1.0d);
+  boolean b26 = barRenderer14.getShadowsVisible();
+  
+  // Regression assertion (captures the current behavior of the code)
+  org.junit.Assert.assertNotNull(shape0);
+  
+  // Regression assertion (captures the current behavior of the code)
+  org.junit.Assert.assertNotNull(shape4);
+  
+  // Regression assertion (captures the current behavior of the code)
+  org.junit.Assert.assertNull(categoryDataset6);
+  
+  // Regression assertion (captures the current behavior of the code)
+  org.junit.Assert.assertNotNull(paint12);
+  
+  // Regression assertion (captures the current behavior of the code)
+  org.junit.Assert.assertTrue(b20 == false);
+  
+  // Regression assertion (captures the current behavior of the code)
+  org.junit.Assert.assertTrue(b21 == false);
+  
+  // Regression assertion (captures the current behavior of the code)
+  org.junit.Assert.assertTrue(b26 == false);
+
+}
+
+@Test
+public void test001() throws Throwable {
+
+
+org.jfree.chart.renderer.category.BarRenderer3D barRenderer3D0 = new org.jfree.chart.renderer.category.BarRenderer3D();
+java.awt.Graphics2D graphics2D1 = null;
+java.awt.Shape shape2 = org.jfree.chart.plot.XYPlot.DEFAULT_LEGEND_ITEM_CIRCLE;
+java.awt.Shape shape6 = org.jfree.chart.util.ShapeUtilities.rotateShape(shape2, (double)8, 0.0f, (float)(-1));
+org.jfree.chart.plot.CategoryPlot categoryPlot7 = new org.jfree.chart.plot.CategoryPlot();
+org.jfree.data.category.CategoryDataset categoryDataset8 = categoryPlot7.getDataset();
+categoryPlot7.setRangeZeroBaselineVisible(false);
+org.jfree.chart.LegendItemCollection legendItemCollection11 = null;
+categoryPlot7.setFixedLegendItems(legendItemCollection11);
+org.jfree.chart.entity.PlotEntity plotEntity13 = new org.jfree.chart.entity.PlotEntity(shape2, (org.jfree.chart.plot.Plot)categoryPlot7);
+org.jfree.chart.util.Layer layer14 = null;
+java.util.Collection collection15 = categoryPlot7.getRangeMarkers(layer14);
+org.jfree.chart.axis.NumberAxis3D numberAxis3D16 = new org.jfree.chart.axis.NumberAxis3D();
+org.jfree.chart.util.RectangleInsets rectangleInsets17 = numberAxis3D16.getTickLabelInsets();
+boolean b18 = numberAxis3D16.isTickMarksVisible();
+org.jfree.chart.axis.TickUnitSource tickUnitSource19 = numberAxis3D16.getStandardTickUnits();
+org.jfree.chart.util.RectangleInsets rectangleInsets20 = org.jfree.chart.plot.RingPlot.DEFAULT_INSETS;
+org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator21 = null;
+org.jfree.chart.urls.XYURLGenerator xYURLGenerator22 = null;
+org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer23 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator21, xYURLGenerator22);
+org.jfree.chart.LegendItemCollection legendItemCollection24 = xYStepRenderer23.getLegendItems();
+boolean b28 = xYStepRenderer23.getItemCreateEntity((int)'#', 10, false);
+java.awt.Stroke stroke29 = org.jfree.chart.axis.PeriodAxis.DEFAULT_AXIS_LINE_STROKE;
+xYStepRenderer23.setBaseOutlineStroke(stroke29, false);
+org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator32 = null;
+org.jfree.chart.urls.XYURLGenerator xYURLGenerator33 = null;
+org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer34 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator32, xYURLGenerator33);
+org.jfree.chart.LegendItemCollection legendItemCollection35 = xYStepRenderer34.getLegendItems();
+java.awt.Graphics2D graphics2D36 = null;
+org.jfree.data.xy.XYDataset xYDataset37 = null;
+org.jfree.chart.axis.ValueAxis valueAxis38 = null;
+org.jfree.data.xy.XYDataset xYDataset39 = null;
+org.jfree.chart.axis.NumberAxis3D numberAxis3D40 = new org.jfree.chart.axis.NumberAxis3D();
+numberAxis3D40.setTickLabelsVisible(true);
+org.jfree.chart.renderer.PolarItemRenderer polarItemRenderer43 = null;
+org.jfree.chart.plot.PolarPlot polarPlot44 = new org.jfree.chart.plot.PolarPlot(xYDataset39, (org.jfree.chart.axis.ValueAxis)numberAxis3D40, polarItemRenderer43);
+org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator45 = null;
+org.jfree.chart.urls.XYURLGenerator xYURLGenerator46 = null;
+org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer47 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator45, xYURLGenerator46);
+xYStepRenderer47.setSeriesLinesVisible((int)'4', (java.lang.Boolean)false);
+org.jfree.chart.plot.XYPlot xYPlot51 = new org.jfree.chart.plot.XYPlot(xYDataset37, valueAxis38, (org.jfree.chart.axis.ValueAxis)numberAxis3D40, (org.jfree.chart.renderer.xy.XYItemRenderer)xYStepRenderer47);
+boolean b52 = xYPlot51.canSelectByPoint();
+xYPlot51.setRangeGridlinesVisible(true);
+java.awt.Color color55 = org.jfree.chart.ChartColor.red;
+xYPlot51.setDomainGridlinePaint((java.awt.Paint)color55);
+xYPlot51.setDomainCrosshairValue(0.0d, true);
+org.jfree.data.time.SpreadsheetDate spreadsheetDate62 = new org.jfree.data.time.SpreadsheetDate(6);
+org.jfree.data.time.SpreadsheetDate spreadsheetDate64 = new org.jfree.data.time.SpreadsheetDate(6);
+boolean b65 = spreadsheetDate62.isOn((org.jfree.data.time.SerialDate)spreadsheetDate64);
+org.jfree.data.time.Day day66 = new org.jfree.data.time.Day((org.jfree.data.time.SerialDate)spreadsheetDate64);
+org.jfree.data.time.SpreadsheetDate spreadsheetDate68 = new org.jfree.data.time.SpreadsheetDate(6);
+org.jfree.data.time.SpreadsheetDate spreadsheetDate70 = new org.jfree.data.time.SpreadsheetDate(6);
+boolean b71 = spreadsheetDate68.isOn((org.jfree.data.time.SerialDate)spreadsheetDate70);
+org.jfree.data.time.Day day72 = new org.jfree.data.time.Day((org.jfree.data.time.SerialDate)spreadsheetDate70);
+org.jfree.chart.axis.PeriodAxis periodAxis73 = new org.jfree.chart.axis.PeriodAxis("", (org.jfree.data.time.RegularTimePeriod)day66, (org.jfree.data.time.RegularTimePeriod)day72);
+periodAxis73.setMinorTickMarkInsideLength((float)5);
+org.jfree.chart.util.Size2D size2D78 = new org.jfree.chart.util.Size2D((double)'#', (double)2);
+org.jfree.chart.util.RectangleAnchor rectangleAnchor81 = org.jfree.chart.util.RectangleAnchor.RIGHT;
+java.awt.geom.Rectangle2D rectangle2D82 = org.jfree.chart.util.RectangleAnchor.createRectangle(size2D78, 90.0d, 3.0d, rectangleAnchor81);
+xYStepRenderer34.fillDomainGridBand(graphics2D36, xYPlot51, (org.jfree.chart.axis.ValueAxis)periodAxis73, rectangle2D82, (double)10L, 0.08d);
+xYStepRenderer23.setLegendLine((java.awt.Shape)rectangle2D82);
+java.awt.Paint paint89 = org.jfree.chart.plot.CombinedDomainXYPlot.DEFAULT_CROSSHAIR_PAINT;
+org.jfree.chart.plot.IntervalMarker intervalMarker90 = new org.jfree.chart.plot.IntervalMarker((double)(short)1, (double)' ', paint89);
+org.jfree.chart.util.LengthAdjustmentType lengthAdjustmentType91 = intervalMarker90.getLabelOffsetType();
+java.awt.Paint paint94 = org.jfree.chart.plot.CombinedDomainXYPlot.DEFAULT_CROSSHAIR_PAINT;
+org.jfree.chart.plot.IntervalMarker intervalMarker95 = new org.jfree.chart.plot.IntervalMarker((double)(short)1, (double)' ', paint94);
+org.jfree.chart.util.LengthAdjustmentType lengthAdjustmentType96 = intervalMarker95.getLabelOffsetType();
+java.awt.geom.Rectangle2D rectangle2D97 = rectangleInsets20.createAdjustedRectangle(rectangle2D82, lengthAdjustmentType91, lengthAdjustmentType96);
+java.awt.Paint paint99 = org.jfree.chart.renderer.category.BarRenderer.DEFAULT_PAINT;
+org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator100 = null;
+org.jfree.chart.urls.XYURLGenerator xYURLGenerator101 = null;
+org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer102 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator100, xYURLGenerator101);
+java.awt.Stroke stroke104 = org.jfree.chart.plot.CategoryPlot.DEFAULT_OUTLINE_STROKE;
+xYStepRenderer102.setSeriesOutlineStroke((int)' ', stroke104);
+java.awt.Stroke stroke106 = xYStepRenderer102.getBaseStroke();
+barRenderer3D0.drawRangeLine(graphics2D1, categoryPlot7, (org.jfree.chart.axis.ValueAxis)numberAxis3D16, rectangle2D97, 4.0d, paint99, stroke106);
+org.jfree.chart.renderer.category.GradientBarPainter gradientBarPainter111 = new org.jfree.chart.renderer.category.GradientBarPainter(0.0d, 100.0d, (double)10L);
+barRenderer3D0.setBarPainter((org.jfree.chart.renderer.category.BarPainter)gradientBarPainter111);
+boolean b113 = barRenderer3D0.getShadowsVisible();
+org.jfree.data.xy.XYDataset xYDataset114 = null;
+org.jfree.chart.axis.ValueAxis valueAxis115 = null;
+org.jfree.data.xy.XYDataset xYDataset116 = null;
+org.jfree.chart.axis.NumberAxis3D numberAxis3D117 = new org.jfree.chart.axis.NumberAxis3D();
+numberAxis3D117.setTickLabelsVisible(true);
+org.jfree.chart.renderer.PolarItemRenderer polarItemRenderer120 = null;
+org.jfree.chart.plot.PolarPlot polarPlot121 = new org.jfree.chart.plot.PolarPlot(xYDataset116, (org.jfree.chart.axis.ValueAxis)numberAxis3D117, polarItemRenderer120);
+org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator122 = null;
+org.jfree.chart.urls.XYURLGenerator xYURLGenerator123 = null;
+org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer124 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator122, xYURLGenerator123);
+xYStepRenderer124.setSeriesLinesVisible((int)'4', (java.lang.Boolean)false);
+org.jfree.chart.plot.XYPlot xYPlot128 = new org.jfree.chart.plot.XYPlot(xYDataset114, valueAxis115, (org.jfree.chart.axis.ValueAxis)numberAxis3D117, (org.jfree.chart.renderer.xy.XYItemRenderer)xYStepRenderer124);
+java.lang.Boolean b130 = xYStepRenderer124.getSeriesShapesFilled((int)(short)100);
+java.awt.Stroke stroke131 = org.jfree.chart.plot.RingPlot.DEFAULT_OUTLINE_STROKE;
+xYStepRenderer124.setBaseOutlineStroke(stroke131, false);
+boolean b134 = barRenderer3D0.equals((java.lang.Object)xYStepRenderer124);
+org.jfree.chart.labels.XYItemLabelGenerator xYItemLabelGenerator136 = null;
+xYStepRenderer124.setSeriesItemLabelGenerator(30, xYItemLabelGenerator136);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(shape2);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(shape6);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNull(categoryDataset8);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNull(collection15);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(rectangleInsets17);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertTrue(b18 == true);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(tickUnitSource19);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(rectangleInsets20);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(legendItemCollection24);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertTrue(b28 == true);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(stroke29);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(legendItemCollection35);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertTrue(b52 == false);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(color55);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertTrue(b65 == true);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertTrue(b71 == true);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(rectangleAnchor81);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(rectangle2D82);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(paint89);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(lengthAdjustmentType91);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(paint94);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(lengthAdjustmentType96);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(rectangle2D97);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(paint99);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(stroke104);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(stroke106);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertTrue(b113 == false);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNull(b130);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertNotNull(stroke131);
+
+// Regression assertion (captures the current behavior of the code)
+org.junit.Assert.assertTrue(b134 == false);
+
+}
+
+   @Test
+   public void test013() throws Throwable {
+ 
+     org.jfree.chart.renderer.category.BarRenderer3D barRenderer3D0 = new org.jfree.chart.renderer.category.BarRenderer3D();
+     java.awt.Graphics2D graphics2D1 = null;
+     java.awt.Shape shape2 = org.jfree.chart.plot.XYPlot.DEFAULT_LEGEND_ITEM_CIRCLE;
+     java.awt.Shape shape6 = org.jfree.chart.util.ShapeUtilities.rotateShape(shape2, (double)8, 0.0f, (float)(-1));
+     org.jfree.chart.plot.CategoryPlot categoryPlot7 = new org.jfree.chart.plot.CategoryPlot();
+     org.jfree.data.category.CategoryDataset categoryDataset8 = categoryPlot7.getDataset();
+     categoryPlot7.setRangeZeroBaselineVisible(false);
+     org.jfree.chart.LegendItemCollection legendItemCollection11 = null;
+     categoryPlot7.setFixedLegendItems(legendItemCollection11);
+     org.jfree.chart.entity.PlotEntity plotEntity13 = new org.jfree.chart.entity.PlotEntity(shape2, (org.jfree.chart.plot.Plot)categoryPlot7);
+     org.jfree.chart.util.Layer layer14 = null;
+     java.util.Collection collection15 = categoryPlot7.getRangeMarkers(layer14);
+     org.jfree.chart.axis.NumberAxis3D numberAxis3D16 = new org.jfree.chart.axis.NumberAxis3D();
+     org.jfree.chart.util.RectangleInsets rectangleInsets17 = numberAxis3D16.getTickLabelInsets();
+     boolean b18 = numberAxis3D16.isTickMarksVisible();
+     org.jfree.chart.axis.TickUnitSource tickUnitSource19 = numberAxis3D16.getStandardTickUnits();
+     org.jfree.chart.util.RectangleInsets rectangleInsets20 = org.jfree.chart.plot.RingPlot.DEFAULT_INSETS;
+     org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator21 = null;
+     org.jfree.chart.urls.XYURLGenerator xYURLGenerator22 = null;
+     org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer23 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator21, xYURLGenerator22);
+     org.jfree.chart.LegendItemCollection legendItemCollection24 = xYStepRenderer23.getLegendItems();
+     boolean b28 = xYStepRenderer23.getItemCreateEntity((int)'#', 10, false);
+     java.awt.Stroke stroke29 = org.jfree.chart.axis.PeriodAxis.DEFAULT_AXIS_LINE_STROKE;
+     xYStepRenderer23.setBaseOutlineStroke(stroke29, false);
+     org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator32 = null;
+     org.jfree.chart.urls.XYURLGenerator xYURLGenerator33 = null;
+     org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer34 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator32, xYURLGenerator33);
+     org.jfree.chart.LegendItemCollection legendItemCollection35 = xYStepRenderer34.getLegendItems();
+     java.awt.Graphics2D graphics2D36 = null;
+     org.jfree.data.xy.XYDataset xYDataset37 = null;
+     org.jfree.chart.axis.ValueAxis valueAxis38 = null;
+     org.jfree.data.xy.XYDataset xYDataset39 = null;
+     org.jfree.chart.axis.NumberAxis3D numberAxis3D40 = new org.jfree.chart.axis.NumberAxis3D();
+     numberAxis3D40.setTickLabelsVisible(true);
+     org.jfree.chart.renderer.PolarItemRenderer polarItemRenderer43 = null;
+     org.jfree.chart.plot.PolarPlot polarPlot44 = new org.jfree.chart.plot.PolarPlot(xYDataset39, (org.jfree.chart.axis.ValueAxis)numberAxis3D40, polarItemRenderer43);
+     org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator45 = null;
+     org.jfree.chart.urls.XYURLGenerator xYURLGenerator46 = null;
+     org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer47 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator45, xYURLGenerator46);
+     xYStepRenderer47.setSeriesLinesVisible((int)'4', (java.lang.Boolean)false);
+     org.jfree.chart.plot.XYPlot xYPlot51 = new org.jfree.chart.plot.XYPlot(xYDataset37, valueAxis38, (org.jfree.chart.axis.ValueAxis)numberAxis3D40, (org.jfree.chart.renderer.xy.XYItemRenderer)xYStepRenderer47);
+     boolean b52 = xYPlot51.canSelectByPoint();
+     xYPlot51.setRangeGridlinesVisible(true);
+     java.awt.Color color55 = org.jfree.chart.ChartColor.red;
+     xYPlot51.setDomainGridlinePaint((java.awt.Paint)color55);
+     xYPlot51.setDomainCrosshairValue(0.0d, true);
+     org.jfree.data.time.SpreadsheetDate spreadsheetDate62 = new org.jfree.data.time.SpreadsheetDate(6);
+     org.jfree.data.time.SpreadsheetDate spreadsheetDate64 = new org.jfree.data.time.SpreadsheetDate(6);
+     boolean b65 = spreadsheetDate62.isOn((org.jfree.data.time.SerialDate)spreadsheetDate64);
+     org.jfree.data.time.Day day66 = new org.jfree.data.time.Day((org.jfree.data.time.SerialDate)spreadsheetDate64);
+     org.jfree.data.time.SpreadsheetDate spreadsheetDate68 = new org.jfree.data.time.SpreadsheetDate(6);
+     org.jfree.data.time.SpreadsheetDate spreadsheetDate70 = new org.jfree.data.time.SpreadsheetDate(6);
+     boolean b71 = spreadsheetDate68.isOn((org.jfree.data.time.SerialDate)spreadsheetDate70);
+     org.jfree.data.time.Day day72 = new org.jfree.data.time.Day((org.jfree.data.time.SerialDate)spreadsheetDate70);
+     org.jfree.chart.axis.PeriodAxis periodAxis73 = new org.jfree.chart.axis.PeriodAxis("", (org.jfree.data.time.RegularTimePeriod)day66, (org.jfree.data.time.RegularTimePeriod)day72);
+     periodAxis73.setMinorTickMarkInsideLength((float)5);
+     org.jfree.chart.util.Size2D size2D78 = new org.jfree.chart.util.Size2D((double)'#', (double)2);
+     org.jfree.chart.util.RectangleAnchor rectangleAnchor81 = org.jfree.chart.util.RectangleAnchor.RIGHT;
+     java.awt.geom.Rectangle2D rectangle2D82 = org.jfree.chart.util.RectangleAnchor.createRectangle(size2D78, 90.0d, 3.0d, rectangleAnchor81);
+     xYStepRenderer34.fillDomainGridBand(graphics2D36, xYPlot51, (org.jfree.chart.axis.ValueAxis)periodAxis73, rectangle2D82, (double)10L, 0.08d);
+     xYStepRenderer23.setLegendLine((java.awt.Shape)rectangle2D82);
+     java.awt.Paint paint89 = org.jfree.chart.plot.CombinedDomainXYPlot.DEFAULT_CROSSHAIR_PAINT;
+     org.jfree.chart.plot.IntervalMarker intervalMarker90 = new org.jfree.chart.plot.IntervalMarker((double)(short)1, (double)' ', paint89);
+     org.jfree.chart.util.LengthAdjustmentType lengthAdjustmentType91 = intervalMarker90.getLabelOffsetType();
+     java.awt.Paint paint94 = org.jfree.chart.plot.CombinedDomainXYPlot.DEFAULT_CROSSHAIR_PAINT;
+     org.jfree.chart.plot.IntervalMarker intervalMarker95 = new org.jfree.chart.plot.IntervalMarker((double)(short)1, (double)' ', paint94);
+     org.jfree.chart.util.LengthAdjustmentType lengthAdjustmentType96 = intervalMarker95.getLabelOffsetType();
+     java.awt.geom.Rectangle2D rectangle2D97 = rectangleInsets20.createAdjustedRectangle(rectangle2D82, lengthAdjustmentType91, lengthAdjustmentType96);
+     java.awt.Paint paint99 = org.jfree.chart.renderer.category.BarRenderer.DEFAULT_PAINT;
+     org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator100 = null;
+     org.jfree.chart.urls.XYURLGenerator xYURLGenerator101 = null;
+     org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer102 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator100, xYURLGenerator101);
+     java.awt.Stroke stroke104 = org.jfree.chart.plot.CategoryPlot.DEFAULT_OUTLINE_STROKE;
+     xYStepRenderer102.setSeriesOutlineStroke((int)' ', stroke104);
+     java.awt.Stroke stroke106 = xYStepRenderer102.getBaseStroke();
+     barRenderer3D0.drawRangeLine(graphics2D1, categoryPlot7, (org.jfree.chart.axis.ValueAxis)numberAxis3D16, rectangle2D97, 4.0d, paint99, stroke106);
+     org.jfree.chart.renderer.category.GradientBarPainter gradientBarPainter111 = new org.jfree.chart.renderer.category.GradientBarPainter(0.0d, 100.0d, (double)10L);
+     barRenderer3D0.setBarPainter((org.jfree.chart.renderer.category.BarPainter)gradientBarPainter111);
+     boolean b113 = barRenderer3D0.getShadowsVisible();
+     org.jfree.data.xy.XYDataset xYDataset114 = null;
+     org.jfree.chart.axis.ValueAxis valueAxis115 = null;
+     org.jfree.data.xy.XYDataset xYDataset116 = null;
+     org.jfree.chart.axis.NumberAxis3D numberAxis3D117 = new org.jfree.chart.axis.NumberAxis3D();
+     numberAxis3D117.setTickLabelsVisible(true);
+     org.jfree.chart.renderer.PolarItemRenderer polarItemRenderer120 = null;
+     org.jfree.chart.plot.PolarPlot polarPlot121 = new org.jfree.chart.plot.PolarPlot(xYDataset116, (org.jfree.chart.axis.ValueAxis)numberAxis3D117, polarItemRenderer120);
+     org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator122 = null;
+     org.jfree.chart.urls.XYURLGenerator xYURLGenerator123 = null;
+     org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer124 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator122, xYURLGenerator123);
+     xYStepRenderer124.setSeriesLinesVisible((int)'4', (java.lang.Boolean)false);
+     org.jfree.chart.plot.XYPlot xYPlot128 = new org.jfree.chart.plot.XYPlot(xYDataset114, valueAxis115, (org.jfree.chart.axis.ValueAxis)numberAxis3D117, (org.jfree.chart.renderer.xy.XYItemRenderer)xYStepRenderer124);
+     java.lang.Boolean b130 = xYStepRenderer124.getSeriesShapesFilled((int)(short)100);
+     java.awt.Stroke stroke131 = org.jfree.chart.plot.RingPlot.DEFAULT_OUTLINE_STROKE;
+     xYStepRenderer124.setBaseOutlineStroke(stroke131, false);
+     boolean b134 = barRenderer3D0.equals((java.lang.Object)xYStepRenderer124);
+     org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator136 = null;
+     org.jfree.chart.urls.XYURLGenerator xYURLGenerator137 = null;
+     org.jfree.chart.renderer.xy.XYStepRenderer xYStepRenderer138 = new org.jfree.chart.renderer.xy.XYStepRenderer(xYToolTipGenerator136, xYURLGenerator137);
+     java.lang.Boolean b140 = xYStepRenderer138.getSeriesShapesVisible((int)' ');
+     boolean b142 = xYStepRenderer138.isSeriesVisibleInLegend(0);
+     java.awt.Font font144 = org.jfree.chart.axis.DateAxis.DEFAULT_AXIS_LABEL_FONT;
+     xYStepRenderer138.setSeriesItemLabelFont((int)(byte)1, font144);
+     org.jfree.chart.labels.XYToolTipGenerator xYToolTipGenerator147 = xYStepRenderer138.getSeriesToolTipGenerator((int)(byte)10);
+     org.jfree.chart.urls.StandardXYURLGenerator standardXYURLGenerator149 = new org.jfree.chart.urls.StandardXYURLGenerator("Polar Plot");
+     xYStepRenderer138.setBaseURLGenerator((org.jfree.chart.urls.XYURLGenerator)standardXYURLGenerator149);
+     xYStepRenderer124.setSeriesURLGenerator(255, (org.jfree.chart.urls.XYURLGenerator)standardXYURLGenerator149);
+     java.awt.Shape shape152 = org.jfree.chart.renderer.category.BarRenderer.DEFAULT_SHAPE;
+     java.lang.Number[][] number_array_array157 = new java.lang.Number[][] {  };
+     org.jfree.data.category.CategoryDataset categoryDataset158 = org.jfree.data.general.DatasetUtilities.createCategoryDataset("", "ItemLabelAnchor.INSIDE7", number_array_array157);
+     org.jfree.chart.plot.MultiplePiePlot multiplePiePlot159 = new org.jfree.chart.plot.MultiplePiePlot(categoryDataset158);
+     org.jfree.data.time.SpreadsheetDate spreadsheetDate162 = new org.jfree.data.time.SpreadsheetDate(6);
+     org.jfree.data.time.SpreadsheetDate spreadsheetDate164 = new org.jfree.data.time.SpreadsheetDate(6);
+     boolean b165 = spreadsheetDate162.isOn((org.jfree.data.time.SerialDate)spreadsheetDate164);
+     int i166 = spreadsheetDate164.getMonth();
+     org.jfree.chart.entity.CategoryItemEntity categoryItemEntity167 = new org.jfree.chart.entity.CategoryItemEntity(shape152, "RectangleInsets[t=2.0,l=4.0,b=2.0,r=4.0]", "ItemLabelAnchor.INSIDE7", categoryDataset158, (java.lang.Comparable)(-65536), (java.lang.Comparable)spreadsheetDate164);
+     java.awt.Shape shape168 = org.jfree.chart.util.ShapeUtilities.clone(shape152);
+     org.jfree.chart.entity.LegendItemEntity legendItemEntity169 = new org.jfree.chart.entity.LegendItemEntity(shape168);
+     java.lang.String str170 = legendItemEntity169.toString();
+     boolean b171 = standardXYURLGenerator149.equals((java.lang.Object)legendItemEntity169);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(shape2);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(shape6);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNull(categoryDataset8);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNull(collection15);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(rectangleInsets17);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b18 == true);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(tickUnitSource19);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(rectangleInsets20);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(legendItemCollection24);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b28 == true);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(stroke29);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(legendItemCollection35);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b52 == false);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(color55);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b65 == true);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b71 == true);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(rectangleAnchor81);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(rectangle2D82);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(paint89);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(lengthAdjustmentType91);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(paint94);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(lengthAdjustmentType96);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(rectangle2D97);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(paint99);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(stroke104);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(stroke106);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b113 == false);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNull(b130);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(stroke131);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b134 == false);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNull(b140);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b142 == true);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(font144);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNull(xYToolTipGenerator147);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(shape152);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(number_array_array157);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(categoryDataset158);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b165 == true);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(i166 == 1);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertNotNull(shape168);
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue("'" + str170 + "' != '" + "LegendItemEntity: seriesKey=null, dataset=null"+ "'", str170.equals("LegendItemEntity: seriesKey=null, dataset=null"));
+     
+     // Regression assertion (captures the current behavior of the code)
+     org.junit.Assert.assertTrue(b171 == false);
+ 
+   }
+	
+	
+	
+	   @Test
+	   public void test290() throws Throwable {
+	 
+	     org.jfree.chart.axis.SegmentedTimeline segmentedTimeline0 = org.jfree.chart.axis.SegmentedTimeline.newFifteenMinuteTimeline();
+	     org.jfree.chart.axis.SegmentedTimeline.Segment segment2 = segmentedTimeline0.getSegment((long)11);
+	     org.jfree.chart.axis.SegmentedTimeline segmentedTimeline3 = segmentedTimeline0.getBaseTimeline();
+	     org.jfree.chart.axis.SegmentedTimeline.Segment segment5 = segmentedTimeline0.getSegment((long)500);
+	     segmentedTimeline0.setAdjustForDaylightSaving(true);
+	     org.jfree.chart.axis.SegmentedTimeline segmentedTimeline8 = org.jfree.chart.axis.SegmentedTimeline.newFifteenMinuteTimeline();
+	     org.jfree.chart.axis.SegmentedTimeline.Segment segment10 = segmentedTimeline8.getSegment((long)11);
+	     org.jfree.chart.axis.SegmentedTimeline segmentedTimeline11 = segmentedTimeline8.getBaseTimeline();
+	     org.jfree.data.time.SpreadsheetDate spreadsheetDate13 = new org.jfree.data.time.SpreadsheetDate((int)(short)10);
+	     org.jfree.data.time.SpreadsheetDate spreadsheetDate15 = new org.jfree.data.time.SpreadsheetDate((int)(short)10);
+	     org.jfree.data.time.SpreadsheetDate spreadsheetDate17 = new org.jfree.data.time.SpreadsheetDate((int)(byte)100);
+	     boolean b19 = spreadsheetDate13.isInRange((org.jfree.data.time.SerialDate)spreadsheetDate15, (org.jfree.data.time.SerialDate)spreadsheetDate17, 8);
+	     java.util.Date date20 = spreadsheetDate15.toDate();
+	     java.util.Date date21 = spreadsheetDate15.toDate();
+	     long long22 = segmentedTimeline11.toTimelineValue(date21);
+	     segmentedTimeline0.setBaseTimeline(segmentedTimeline11);
+	     segmentedTimeline0.addException((long)11);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(segmentedTimeline0);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(segment2);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(segmentedTimeline3);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(segment5);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(segmentedTimeline8);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(segment10);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(segmentedTimeline11);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertTrue(b19 == false);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(date20);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertNotNull(date21);
+	     
+	     // Regression assertion (captures the current behavior of the code)
+	     org.junit.Assert.assertTrue(long22 == 518400360L);
+	 
+	   }
+	
+	  @Test
+	  public void test398() throws Throwable {
+
+	    org.jfree.chart.renderer.category.BarRenderer3D barRenderer3D2 = new org.jfree.chart.renderer.category.BarRenderer3D((double)(byte)100, 0.05d);
+	    org.jfree.chart.renderer.xy.XYStepAreaRenderer xYStepAreaRenderer3 = new org.jfree.chart.renderer.xy.XYStepAreaRenderer();
+	    org.jfree.chart.labels.ItemLabelPosition itemLabelPosition7 = xYStepAreaRenderer3.getPositiveItemLabelPosition((int)(byte)1, 5, true);
+	    barRenderer3D2.setPositiveItemLabelPositionFallback(itemLabelPosition7);
+//	    java.lang.Object obj9 = barRenderer3D2.clone();
+	    boolean b10 = barRenderer3D2.getShadowsVisible();
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertNotNull(itemLabelPosition7);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+//	    org.junit.Assert.assertNotNull(obj9);
+	    
+	    // Regression assertion (captures the current behavior of the code)
+	    org.junit.Assert.assertTrue(b10 == false);
+	  }
 
 	@Test
 	public void notNullPointer() throws Throwable {
