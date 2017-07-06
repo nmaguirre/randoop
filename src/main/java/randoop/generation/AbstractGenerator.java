@@ -162,7 +162,7 @@ public abstract class AbstractGenerator {
   public static int field_based_gen_observers_per_test = 50; 
   
   @Option("Max number of lines reserved for observers from the max number of lines given by the --maxsize parameter.")
-  public static int field_based_gen_reserved_observer_lines = 200; 
+  public static int field_based_gen_reserved_observer_lines = 0;//200; 
   
   @Option("Max times an observer must be used in tests to flag it final.")
   public static int field_based_gen_observer_executions_before_final = 20;
