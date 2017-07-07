@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 
+
 public class CanonicalClass {
 
 	private static int globalID = 0;
@@ -15,21 +16,24 @@ public class CanonicalClass {
 	private boolean isPrimitive;
 	private boolean isArray;
 	private CanonicalClass ancestor;
+	private Class<?> clazz;
 
-	public CanonicalClass(String name, CanonicalStore store) {
+	public CanonicalClass(String name) {
 		this.name = name;
 		ID = globalID++;
 		fields = new LinkedList<>();
-		Class<?> clazz = null;
 		try {
 			clazz = Class.forName(name);
 		} catch (ClassNotFoundException e) {
-			assert false: "ERROR: Loading class " + name + "failed.";
+			assert false: "ERROR: Loading class " + name + " failed.";
 		}
 		isPrimitive = isPrimitive(clazz);
-		isArray = isArray(clazz);
-		createCanonicalParentAndFields(name, clazz, store);
+		//isArray = isArray(clazz);
+
+		//visitAncestorsAndFields(store);
 	}
+	
+	
 
 	
 	/* TODO: We should use something like this method if loading of classes fail for any class.
@@ -44,9 +48,11 @@ public class CanonicalClass {
 	*/
 	
 
-	private void createCanonicalParentAndFields(String name, Class<?> clazz, CanonicalStore store) {
+	public void visitAncestorsAndFields(CanonicalStore store) {
+		if (isPrimitive) return;
+		
 		Class<?> ancestor = clazz.getSuperclass();
-		if (ancestor != null) {
+		if (!isPrimitive(ancestor)) {
 			CanonicalClass canonicalAnc = store.getCanonicalClass(ancestor.getName());
 			if (!canonicalAnc.isPrimitive()) {
 				this.ancestor = canonicalAnc;
@@ -55,7 +61,10 @@ public class CanonicalClass {
 		}
 		
 		for (Field fld: clazz.getDeclaredFields()) {
-			CanonicalClass fCanonicalType = store.getCanonicalClass(fld.getType().getName());
+			Class<?> fldType = fld.getType();
+			CanonicalClass fCanonicalType = null;
+			if (!isPrimitive(fldType))
+				fCanonicalType = store.getCanonicalClass(fldType.getName());
 			fields.add(new CanonicalField(fld, this, fCanonicalType));
 		}
 	}
@@ -102,7 +111,7 @@ public class CanonicalClass {
 		return name;
 	}
 
-	public int getIndex() {
+	public int getID() {
 		return ID;
 	}
 	
@@ -132,6 +141,14 @@ public class CanonicalClass {
 		return true;
 	}
 
+	public String toString() {
+		String res = getName();
+		res += ", ID=" + ID + ", ";
+		for (CanonicalField fld: fields) {
+			res += ", " + fld.toString();
+		}
+		return res;
+	}
 
 
 }

@@ -56,4 +56,35 @@ public class CanonicalObject {
 		return true;
 	}
 
+	public String candidateVectorCanonization(CanonicalHeap heap) {
+		String res = "";
+		try {
+			boolean first = true;
+			for (CanonicalField fld: clazz.getCanonicalFields()) {
+				if (first) 
+					first = false;
+				else 
+					res += " ";
+					
+				CanonicalObject target = fld.getTarget(this, heap);
+				if (target.getObject() == null) 
+					res += "-1";
+				else if (fld.isPrimitiveType())
+					res += target.getObject().hashCode();
+				else
+					res += target.getIndex();
+						
+			}
+
+		} catch (LimitsExceededException e) {
+			assert false: "ERROR: Adding a new object during canonization should never happen.";
+		}
+
+		return res;
+	}
+
+	public boolean isPrimitive() {
+		return getCanonicalClass().isPrimitive();
+	}
+
 }

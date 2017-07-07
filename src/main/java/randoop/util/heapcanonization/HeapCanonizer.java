@@ -23,14 +23,15 @@ public class HeapCanonizer {
 	private Collection<String> classNames;
 	private int maxObjects;
 	private boolean enqueueRepeated;
+	private boolean storeNullObjs;
 		
 	public HeapCanonizer(Collection<String> classNames, int maxObjects, boolean enqueueRepeated, boolean storeNullObjs) {
 		this.classNames = classNames;
 		this.maxObjects = maxObjects;
 		classNames.add("randoop.util.heapcanonization.DummyHeapRoot");
 		this.store = new CanonicalStore(classNames);
-		this.heap = new CanonicalHeap(maxObjects, storeNullObjs);
 		this.enqueueRepeated = enqueueRepeated;
+		this.storeNullObjs = storeNullObjs;
 	}
 	
 	// Canonize the heap in a breadth first manner, starting at root,
@@ -38,17 +39,25 @@ public class HeapCanonizer {
 	// Returns true iff at least an element is added to the extensions.
 	public CanonizationResult traverseBreadthFirst(Object root) {
 		try {
-
+			if (root == null) return CanonizationResult.OK;
+			
+			this.heap = new CanonicalHeap(maxObjects, storeNullObjs);
 			Set<CanonicalObject> visited; 
+			/*
 			if (enqueueRepeated)
 				visited = new DummySet<>();
 			else 
-				visited = new HashSet<>();
+			*/
 
+			visited = new HashSet<>();
+
+			/*
 			DummyHeapRoot dummyRoot = new DummyHeapRoot(root);
-			CanonicalObject canonicalRoot = heap.getCanonicalObject(dummyRoot, store.getCanonicalClass(dummyRoot.getClass()));
+CanonicalObject canonicalRoot = heap.getCanonicalObject(dummyRoot, store.getCanonicalClass(dummyRoot.getClass()));
+			*/
 			Queue<CanonicalObject> workQueue = new LinkedList<>();
 
+			CanonicalObject canonicalRoot = heap.getCanonicalObject(root, store.getCanonicalClass(root.getClass()));
 			workQueue.add(canonicalRoot);
 			visited.add(canonicalRoot);
 
@@ -64,15 +73,15 @@ public class HeapCanonizer {
 
 				for (CanonicalField cf: currObjType.getCanonicalFields()) {
 
-					if (!cf.isPrimitiveType()) {
-						CanonicalObject targetObj = cf.getTarget(currObj, heap);
+					if (cf.isPrimitiveType()) continue;
 
-						if (targetObj.isNull() && !visited.add(targetObj)) 
-							workQueue.add(targetObj);	
+					CanonicalObject targetObj = cf.getTarget(currObj, heap);
+
+					if (!targetObj.isNull() && !visited.add(targetObj)) 
+						workQueue.add(targetObj);	
 
 						// Treat cobj current field;
 						// printVectorComponent(cobj)
-					}
 				}
 
 				// Treat all cobj fields;
@@ -84,6 +93,14 @@ public class HeapCanonizer {
 			return CanonizationResult.LIMITS_EXCEEDED;
 		}
 
+	}
+
+	public CanonicalStore getStore() {
+		return store;
+	}
+
+	public CanonicalHeap getHeap() {
+		return heap;
 	}
 	
 	

@@ -42,6 +42,7 @@ import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
 import randoop.util.fieldbasedcontrol.Tuple;
+import randoop.util.heapcanonization.CanonizationResult;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -1106,6 +1107,15 @@ public class ExecutableSequence {
 						  return null; 
 
 				  extensions.add(ext);
+				  
+				  if (AbstractGenerator.candVectCanonizer.traverseBreadthFirst(o) == CanonizationResult.OK) {
+					  System.out.println(AbstractGenerator.candVectCanonizer.getStore().candidateVectorCanonization(
+							 AbstractGenerator.candVectCanonizer.getHeap()
+							 )
+					  );
+				  }
+				  
+				  
 			  }
 			  else 
 				  extensions.add(null);

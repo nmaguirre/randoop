@@ -372,6 +372,8 @@ public class GenTests extends GenInputsAbstract {
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
     
+    explorer.initCandVectCanonizer(classnames, AbstractGenerator.field_based_gen_max_objects);
+    
     /*
      * setup for check generation
      */

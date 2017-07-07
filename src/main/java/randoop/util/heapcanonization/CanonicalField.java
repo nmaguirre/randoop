@@ -34,23 +34,34 @@ public class CanonicalField {
 	}
 	
 	public boolean isPrimitiveType() {
-		return type.isPrimitive();
+		return (type == null) ? true : type.isPrimitive();
 	}
 	
 	public boolean isArrayType() {
-		return type.isArray();
+		return (type == null) ? false : type.isArray();
 	}
 
 	public CanonicalObject getTarget(CanonicalObject cobj, CanonicalHeap heap) throws LimitsExceededException {
-		Object obj = null;
+		Object obj = cobj.getObject();
+		if (obj == null)
+			return heap.getCanonicalObject(obj, type);
+
+		Object target = null;
 		try {
-			obj = field.get(cobj.getObject());
+			target = field.get(obj);
 		} catch (Exception e) {
+			System.out.println(field.getName()); 
+			System.out.println(obj);
 			assert false: "ERROR: Cannot find an existing field.";
 		}
-		return heap.getCanonicalObject(obj, type);
+		return heap.getCanonicalObject(target, type);
 	}
 
-
+	public String toString() {
+		String res = "{ " + getName();
+		res += ", ID=" + ID + "} ";
+		return res;
+	}
+	
 }
 

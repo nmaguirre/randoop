@@ -44,5 +44,14 @@ public class CanonicalHeap {
 		return res;
 	}
 	
+	public List<CanonicalObject> getObjectsForClass(CanonicalClass clazz) {
+		return objects.get(clazz); 
+	}
+	
+	public int getMaxObjects() {
+		return maxObjects;
+	}
+
+	
 	
 }
