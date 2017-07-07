@@ -7,6 +7,9 @@ import org.junit.Test;
 
 
 public class JChartNewTests {
+
+	
+	
 	
 	@Test
     public void test1113() throws Throwable {

@@ -2,8 +2,8 @@ package randoop.util.heapcanonization;
 
 public class CanonicalObject {
 
-	private Object object;
-	private CanonicalClass clazz;
+	private final Object object;
+	private final CanonicalClass clazz;
 	private int index;
 
 	public CanonicalObject(Object obj, CanonicalClass clazz, int index) {
@@ -58,28 +58,21 @@ public class CanonicalObject {
 
 	public String candidateVectorCanonization(CanonicalHeap heap) {
 		String res = "";
-		try {
-			boolean first = true;
-			for (CanonicalField fld: clazz.getCanonicalFields()) {
-				if (first) 
-					first = false;
-				else 
-					res += " ";
-					
-				CanonicalObject target = fld.getTarget(this, heap);
-				if (target.getObject() == null) 
-					res += "-1";
-				else if (fld.isPrimitiveType())
-					res += target.getObject().hashCode();
-				else
-					res += target.getIndex();
-						
-			}
+		boolean first = true;
+		for (CanonicalField fld: clazz.getCanonicalFields()) {
+			if (first) 
+				first = false;
+			else 
+				res += " ";
 
-		} catch (LimitsExceededException e) {
-			assert false: "ERROR: Adding a new object during canonization should never happen.";
+			CanonicalObject target = fld.getTarget(this, heap).getValue();
+			if (target.isNull()) 
+				res += "-1";
+			else if (target.isPrimitive())
+				res += target.getObject().hashCode();
+			else
+				res += target.getIndex();
 		}
-
 		return res;
 	}
 
@@ -87,4 +80,14 @@ public class CanonicalObject {
 		return getCanonicalClass().isPrimitive();
 	}
 
+	public String toString() {
+		if (isNull())
+			return "[null " + index + "]";
+		else if (isPrimitive())
+			return "[Prim " + getObject().toString() + "]";
+		else
+			return "[" + clazz.getName() + " " + index + "]";
+	}
+	
+	
 }

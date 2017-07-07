@@ -1,5 +1,6 @@
 package randoop.util.heapcanonization;
 
+import java.util.AbstractMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,41 +9,60 @@ import java.util.Map;
 
 public class CanonicalHeap {
 
-	private int maxObjects;
-	private boolean storeNullObjects;
-	private Map<CanonicalClass, List<CanonicalObject>> objects;
+	private final int maxObjects;
+	private final Map<CanonicalClass, List<CanonicalObject>> objects;
+	private final CanonicalStore store;
 
-	public CanonicalHeap(int maxObjects, boolean storeNullObjects) {
+	public CanonicalHeap(CanonicalStore store, int maxObjects) {
+		this.store = store;
 		this.maxObjects = maxObjects;
-		this.storeNullObjects = storeNullObjects;
 		objects = new LinkedHashMap<>();
 	}
 
-	public CanonicalObject getCanonicalObject(Object obj, CanonicalClass clazz) throws LimitsExceededException {
-		if (!storeNullObjects && obj == null) 
-			return new CanonicalObject(null, clazz, -1);
+	public Map.Entry<CanonizationResult, CanonicalObject> getCanonicalObject(Object obj) {
+		// Create a new CanonicalObject encapsulating null
+		if (obj == null)
+			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, new CanonicalObject(obj, null, -1));
 		
+		// Create a new CanonicalObject encapsulating the primitive value 
+		CanonicalClass clazz = store.getCanonicalClass(obj.getClass());
+		if (clazz.isPrimitive()) 
+			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, new CanonicalObject(obj, clazz, -1));
+
+		// If there is already an object encapsulating obj, return it
+		CanonicalObject res = findExistingCanonicalOject(obj, clazz);
+		if (res != null)
+			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, res);
+		
+		// If the object limit is exceeded for the current class, report the error
+		if (objects.get(clazz).size() >= maxObjects) 
+			return new AbstractMap.SimpleEntry<>(CanonizationResult.LIMITS_EXCEEDED, null);
+		
+		// Create a new canonical object
+		return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, newCanonicalObject(obj, clazz));
+	}
+	
+	private CanonicalObject findExistingCanonicalOject(Object obj, CanonicalClass clazz) {
 		List<CanonicalObject> clazzObjs = objects.get(clazz);
 		if (clazzObjs == null) {
 			clazzObjs = new LinkedList<>();
 			objects.put(clazz, clazzObjs);
 		}
 		
-		if (obj != null) {
-			for (CanonicalObject currObj: clazzObjs) {
-				if (currObj.getObject() == obj) 
-					return currObj;
-			}
-		}
+		for (CanonicalObject currObj: clazzObjs) 
+			if (currObj.getObject() == obj) 
+				return currObj;
 		
-		if (objects.size() >= maxObjects) 
-			throw new LimitsExceededException();
-		
-		CanonicalObject res = new CanonicalObject(obj, clazz, objects.size());
-		clazzObjs.add(res);
-
+		return null;
+	}
+	
+	private CanonicalObject newCanonicalObject(Object obj, CanonicalClass clazz) {
+		List<CanonicalObject> clazzObjs = objects.get(clazz);
+		CanonicalObject res = new CanonicalObject(obj, clazz, clazzObjs.size());
+		clazzObjs.add(res);	
 		return res;
 	}
+	
 	
 	public List<CanonicalObject> getObjectsForClass(CanonicalClass clazz) {
 		return objects.get(clazz); 
@@ -51,7 +71,9 @@ public class CanonicalHeap {
 	public int getMaxObjects() {
 		return maxObjects;
 	}
-
 	
+	public CanonicalStore getStore() {
+		return store;
+	}
 	
 }

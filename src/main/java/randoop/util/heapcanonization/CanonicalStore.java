@@ -7,17 +7,13 @@ import java.util.Map;
 
 public class CanonicalStore {
 
-	private Map<String, CanonicalClass> classes = new LinkedHashMap<>();
+	private final Map<String, CanonicalClass> classes = new LinkedHashMap<>();
 	
 	public CanonicalStore(Collection<String> classNames) {
-		for (String name: classNames) {
-			CanonicalClass cls = getCanonicalClass(name);
-		}
+		for (String name: classNames) 
+			getCanonicalClass(name);
 
-		for (String name: classes.keySet()) {
-			CanonicalClass cls = classes.get(name);
-			System.out.println("Loading class: " + cls.toString() + "\n");
-		}
+		System.out.print(toString());
 	}
 	
 	public CanonicalClass getCanonicalClass(String name) {
@@ -27,9 +23,8 @@ public class CanonicalStore {
 		
 		//System.out.print("New Class: " + name);
 		//res = new CanonicalClass(name, this);
-		res = new CanonicalClass(name);
+		res = new CanonicalClass(name, this);
 		classes.put(name, res);
-		res.visitAncestorsAndFields(this);
 
 		return res;
 	}
@@ -70,6 +65,14 @@ public class CanonicalStore {
 		}
 		
 		res += "";
+		return res;
+	}
+	
+	
+	public String toString() {
+		String res = "";
+		for (String name: classes.keySet()) 
+			res += "Loading class: " + classes.get(name).toString() + "\n";
 		return res;
 	}
 	

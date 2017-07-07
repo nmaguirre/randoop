@@ -1,6 +1,7 @@
 package randoop.util.heapcanonization;
 
 import java.lang.reflect.Field;
+import java.util.Map.Entry;
 
 public class CanonicalField {
 
@@ -13,6 +14,7 @@ public class CanonicalField {
 	public CanonicalField(Field field, CanonicalClass belongs, CanonicalClass type) {
 		ID = globalID++;
 		this.field = field;
+		field.setAccessible(true);
 		this.belongs = belongs;
 		this.type = type;
 	}
@@ -34,32 +36,31 @@ public class CanonicalField {
 	}
 	
 	public boolean isPrimitiveType() {
-		return (type == null) ? true : type.isPrimitive();
+//		return (type == null) ? true : type.isPrimitive();
+		return type.isPrimitive();
 	}
 	
 	public boolean isArrayType() {
-		return (type == null) ? false : type.isArray();
+//		return (type == null) ? false : type.isArray();
+		return type.isArray();
 	}
 
-	public CanonicalObject getTarget(CanonicalObject cobj, CanonicalHeap heap) throws LimitsExceededException {
+	public Entry<CanonizationResult, CanonicalObject> getTarget(CanonicalObject cobj, CanonicalHeap heap) {
 		Object obj = cobj.getObject();
-		if (obj == null)
-			return heap.getCanonicalObject(obj, type);
-
 		Object target = null;
 		try {
 			target = field.get(obj);
-		} catch (Exception e) {
-			System.out.println(field.getName()); 
-			System.out.println(obj);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			System.out.println("Error field: " + field.getName()); 
+			System.out.println("Error object: " + obj);
 			assert false: "ERROR: Cannot find an existing field.";
 		}
-		return heap.getCanonicalObject(target, type);
+		return heap.getCanonicalObject(target);
 	}
 
 	public String toString() {
 		String res = "{ " + getName();
-		res += ", ID=" + ID + "} ";
+		res += " ID=" + ID + "} ";
 		return res;
 	}
 	

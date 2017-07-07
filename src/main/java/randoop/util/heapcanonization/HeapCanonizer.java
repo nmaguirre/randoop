@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
@@ -22,43 +23,29 @@ public class HeapCanonizer {
 	private CanonicalHeap heap;
 	private Collection<String> classNames;
 	private int maxObjects;
-	private boolean enqueueRepeated;
-	private boolean storeNullObjs;
 		
-	public HeapCanonizer(Collection<String> classNames, int maxObjects, boolean enqueueRepeated, boolean storeNullObjs) {
+	public HeapCanonizer(Collection<String> classNames, int maxObjects) {
 		this.classNames = classNames;
 		this.maxObjects = maxObjects;
 		classNames.add("randoop.util.heapcanonization.DummyHeapRoot");
 		this.store = new CanonicalStore(classNames);
-		this.enqueueRepeated = enqueueRepeated;
-		this.storeNullObjs = storeNullObjs;
 	}
 	
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
 	public CanonizationResult traverseBreadthFirst(Object root) {
-		try {
-			if (root == null) return CanonizationResult.OK;
-			
-			this.heap = new CanonicalHeap(maxObjects, storeNullObjs);
-			Set<CanonicalObject> visited; 
-			/*
-			if (enqueueRepeated)
-				visited = new DummySet<>();
-			else 
-			*/
+			System.out.println("Starting BFS traversal");
+		
+			this.heap = new CanonicalHeap(store, maxObjects);
 
-			visited = new HashSet<>();
-
-			/*
 			DummyHeapRoot dummyRoot = new DummyHeapRoot(root);
-CanonicalObject canonicalRoot = heap.getCanonicalObject(dummyRoot, store.getCanonicalClass(dummyRoot.getClass()));
-			*/
-			Queue<CanonicalObject> workQueue = new LinkedList<>();
+			CanonicalObject canonicalRoot = heap.getCanonicalObject(dummyRoot).getValue();
 
-			CanonicalObject canonicalRoot = heap.getCanonicalObject(root, store.getCanonicalClass(root.getClass()));
+			Queue<CanonicalObject> workQueue = new LinkedList<>();
 			workQueue.add(canonicalRoot);
+
+			Set<CanonicalObject> visited = new HashSet<>();
 			visited.add(canonicalRoot);
 
 			CanonizationResult res = CanonizationResult.OK;
@@ -67,19 +54,27 @@ CanonicalObject canonicalRoot = heap.getCanonicalObject(dummyRoot, store.getCano
 
 				CanonicalObject currObj = workQueue.poll();
 				CanonicalClass currObjType = currObj.getCanonicalClass();
+				assert currObj != null && 
+						currObjType != null && 
+						!currObj.isNull() && 
+						!currObj.isPrimitive() : "Null/Primitive objects are never added to workQueue";
 
-				if (currObjType.isArray())
-					throw new RuntimeException("ERROR: Canonization of arrays not supported yet.");
+				assert !currObjType.isArray() : "Arrays are not supported yet.";
 
+				System.out.println("Current object: " + currObj.toString());
+				
 				for (CanonicalField cf: currObjType.getCanonicalFields()) {
 
-					if (cf.isPrimitiveType()) continue;
+					Entry<CanonizationResult, CanonicalObject> targetRes = cf.getTarget(currObj, heap);
+					if (targetRes.getKey() != CanonizationResult.OK)
+						return targetRes.getKey();
 
-					CanonicalObject targetObj = cf.getTarget(currObj, heap);
+					CanonicalObject targetObj = targetRes.getValue();
 
-					if (!targetObj.isNull() && !visited.add(targetObj)) 
+					System.out.println("	Field value for" + cf.toString() + ": " + targetObj.toString());
+
+					if (!targetObj.isNull() && !targetObj.isPrimitive() && visited.add(targetObj)) 
 						workQueue.add(targetObj);	
-
 						// Treat cobj current field;
 						// printVectorComponent(cobj)
 				}
@@ -87,12 +82,8 @@ CanonicalObject canonicalRoot = heap.getCanonicalObject(dummyRoot, store.getCano
 				// Treat all cobj fields;
 				// printVectorComponent(cobj)
 			}
+			System.out.println("Finishing BFS traversal");
 			return res;
-
-		} catch (LimitsExceededException e) {
-			return CanonizationResult.LIMITS_EXCEEDED;
-		}
-
 	}
 
 	public CanonicalStore getStore() {

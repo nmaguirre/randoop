@@ -60,7 +60,7 @@ public abstract class AbstractGenerator {
 	public static HeapCanonizer candVectCanonizer;
 	
 	public void initCandVectCanonizer(Collection<String> classNames, int maxObjects) {
-		candVectCanonizer = new HeapCanonizer(classNames, maxObjects, true, true);
+		candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
 	}
 	
   // The set of all primitive values seen during generation and execution
@@ -138,7 +138,7 @@ public abstract class AbstractGenerator {
   public static int field_based_gen_max_array = 5000;
 
   @Option("Only store up to this number of objects during canonization")
-  public static int field_based_gen_max_objects = 10;
+  public static int field_based_gen_max_objects = 20;
 
   @Option("Only store up to this number of objects for each individual class during canonization")
   public static int field_based_gen_max_class_objects = 5000;
