@@ -419,22 +419,22 @@ private int maxsize;
     
     // Original randoop behaviour
     if (field_based_gen == FieldBasedGenType.DISABLED) {
-        eSeq.execute(executionVisitor, checkGenerator);
+    	eSeq.execute(executionVisitor, checkGenerator);
 
-		if (CandidateVectorsWriter.isEnabled())
-			genCanonicalVectorFromLastReceiverObject(eSeq);
+    	endTime = System.nanoTime();
 
-        endTime = System.nanoTime();
+    	eSeq.exectime = endTime - startTime;
+    	startTime = endTime; // reset start time.
 
-        eSeq.exectime = endTime - startTime;
-        startTime = endTime; // reset start time.
+    	processSequence(eSeq);
 
-        processSequence(eSeq);
-        
 
-        if (eSeq.sequence.hasActiveFlags()) {
-          componentManager.addGeneratedSequence(eSeq.sequence);
-        }
+    	if (eSeq.sequence.hasActiveFlags()) {
+    		componentManager.addGeneratedSequence(eSeq.sequence);
+
+    		if (CandidateVectorsWriter.isEnabled())
+    			genCanonicalVectorFromLastReceiverObject(eSeq);
+    	}
     }
     else {
     	// FB randoop behaviour
