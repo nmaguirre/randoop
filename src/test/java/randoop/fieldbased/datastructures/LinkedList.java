@@ -51,9 +51,9 @@ public class LinkedList {
 	 * hold a value. The value of <code>next</code> is the first item in the
 	 * list. The value of of <code>previous</code> is the last item in the list.
 	 */
-	public/*@ nullable @*/transient LinkedListNode header;
+	private/*@ nullable @*/transient LinkedListNode header;
 	/** The size of the list */
-	public transient int size;
+	private transient int size;
 
 	/*@
 	  @ invariant this.header!=null && 

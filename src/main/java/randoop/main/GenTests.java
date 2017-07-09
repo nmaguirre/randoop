@@ -475,6 +475,9 @@ public class GenTests extends GenInputsAbstract {
 
       System.exit(1);
     }
+    
+    if (CanonizerLog.isLoggingOn())
+    	CanonizerLog.logLine(AbstractGenerator.candVectCanonizer.getStore().toPrettyString());
 
     /* post generation */
     if (GenInputsAbstract.dont_output_tests) {

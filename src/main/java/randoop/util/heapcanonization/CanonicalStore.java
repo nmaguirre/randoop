@@ -22,10 +22,7 @@ public class CanonicalStore {
 			getCanonicalClass(name);
 
 		if (CanonizerLog.isLoggingOn()) {
-			CanonizerLog.logLine("**********");
-			CanonizerLog.logLine("Canonical classes:");
-			CanonizerLog.logLine(toString("  ")); 
-			CanonizerLog.logLine("**********");
+			CanonizerLog.logLine(toPrettyString());
 		}
 	}
 	
@@ -67,6 +64,14 @@ public class CanonicalStore {
 		return res;
 	}
 
+	public String toPrettyString() {
+		String res = "**********\n";
+		res += "Canonical classes:\n";
+		res += toString("  ") + "\n";
+		res += "**********";
+		return res;
+	}
+	
 	public boolean isGenerationClass(CanonicalClass clazz) {
 		return genClasses.contains(clazz.getName());
 	}	

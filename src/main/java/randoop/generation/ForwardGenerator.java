@@ -339,11 +339,26 @@ private int maxsize;
 			CanonizerLog.logLine("Canonizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
 			CanonizerLog.logLine("**********");
 		}	
-    	
-		int index = 0;
+
+		List<Integer> activeVars = eSeq.sequence.getActiveVars(eSeq.sequence.size() -1);
+		if (activeVars != null)
+			assert AbstractGenerator.field_based_gen == FieldBasedGenType.EXTENSIONS: 
+					"Active vars are only computed when running field based generation.";
+		
+		int index = -1;
 		HeapCanonizer newCanonizer = AbstractGenerator.candVectCanonizer;
 		CanonicalStore store = newCanonizer.getStore();
 		for (Object o: eSeq.getLastStmtRuntimeObjects()) {
+			index++;
+
+			if (activeVars != null && !activeVars.contains(index)) {
+
+				continue;
+			}
+
+			if (CanonizerLog.isLoggingOn())
+				CanonizerLog.logLine("INFO: Active variable index: " + index);
+			
 			Entry<CanonizationResult, CanonicalHeap> res;
 			CanonicalClass rootClass = store.getCanonicalClass(o);
 			// FIXME: Should check the compile time type of o instead of its runtime type to 

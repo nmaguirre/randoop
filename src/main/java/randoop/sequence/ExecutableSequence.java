@@ -598,10 +598,10 @@ public class ExecutableSequence {
 	   List<Variable> inputs = sequence.getInputs(i);
 	   List<Object> res = new LinkedList<>();
 
-	  Statement stmt = sequence.getStatement(i);
-	  if (!stmt.getOutputType().isVoid()) 
-		  res.add(((NormalExecution)getResult(i)).getRuntimeValue());
-	   
+	   Statement stmt = sequence.getStatement(i);
+	   if (!stmt.getOutputType().isVoid()) 
+		   res.add(((NormalExecution)getResult(i)).getRuntimeValue());
+
 	   res.addAll(Arrays.asList(getRuntimeInputs(executionResults.theList, inputs))); 
 	   return res;
    }

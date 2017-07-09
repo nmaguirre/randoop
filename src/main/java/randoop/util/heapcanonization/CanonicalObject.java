@@ -63,11 +63,11 @@ public class CanonicalObject {
 
 	public String toString() {
 		if (isNull())
-			return "[null " + index + "]";
+			return "[type=null,index=" + index + "]";
 		else if (isPrimitive())
-			return "[Prim " + getObject().toString() + "]";
+			return "[type=" + clazz.getName() + ",value=" + getObject().toString() + ",hash=" + getObject().hashCode() + "]";
 		else
-			return "[" + clazz.getName() + " " + index + "]";
+			return "[type=" + clazz.getName() + ",index=" + index + "]";
 	}
 	
 	
