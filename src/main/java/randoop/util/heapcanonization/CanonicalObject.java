@@ -56,26 +56,7 @@ public class CanonicalObject {
 		return true;
 	}
 
-	public String candidateVectorCanonization(CanonicalHeap heap) {
-		String res = "";
-		boolean first = true;
-		for (CanonicalField fld: clazz.getCanonicalFields()) {
-			if (first) 
-				first = false;
-			else 
-				res += " ";
-
-			CanonicalObject target = fld.getTarget(this, heap).getValue();
-			if (target.isNull()) 
-				res += "-1";
-			else if (target.isPrimitive())
-				res += target.getObject().hashCode();
-			else
-				res += target.getIndex();
-		}
-		return res;
-	}
-
+	
 	public boolean isPrimitive() {
 		return getCanonicalClass().isPrimitive();
 	}

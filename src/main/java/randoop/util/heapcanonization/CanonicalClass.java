@@ -3,6 +3,8 @@ package randoop.util.heapcanonization;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,7 +31,8 @@ public class CanonicalClass {
 		try {
 			cls = Class.forName(name);
 		} catch (ClassNotFoundException e) {
-			System.out.println("\nCreating new canonical primitive class: " + name + "\n");
+			if (CanonizerLog.isLoggingOn())
+				CanonizerLog.logLine("Class for name " + name + " not found, assuming the type is primitive.");
 		}
 		clazz = cls;
 		isPrimitive = isPrimitive(clazz);
@@ -67,7 +70,9 @@ public class CanonicalClass {
 		if (ancestor != null)
 			fields.addAll(ancestor.getCanonicalFields());
 		
-		for (Field fld: clazz.getDeclaredFields()) {
+		List<Field> sortedFields = Arrays.asList(clazz.getDeclaredFields());
+		Collections.sort(sortedFields, new FieldComparatorByName());
+		for (Field fld: sortedFields) {
 			Class<?> fldType = fld.getType();
 			CanonicalClass fCanonicalType = null;
 			if (fldType.getName().equals(name))

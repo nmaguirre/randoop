@@ -617,6 +617,13 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Disable contract checking during field based generation (very expensive when tests get large)")
   public static boolean field_based_gen_disable_contracts = true;
   
+  @Option("<filename> Name of a file to which save the generated candidate vectors")
+  public static FileWriter cand_vect_file = null;
+
+  @Option("<filename> Name of a file to which to log lots of information about heap canonization")
+  public static FileWriter canonizer_log = null;
+  
+  
 
   ///////////////////////////////////////////////////////////////////
   // Options used when testing Randoop.

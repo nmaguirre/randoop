@@ -24,7 +24,7 @@ public class CanonicalHeap {
 		if (obj == null)
 			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, new CanonicalObject(obj, null, -1));
 		
-		// Create a new CanonicalObject encapsulating the primitive value 
+		// Create or get a new CanonicalObject encapsulating the primitive value 
 		CanonicalClass clazz = store.getCanonicalClass(obj.getClass());
 		if (clazz.isPrimitive()) 
 			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, new CanonicalObject(obj, clazz, -1));
@@ -62,7 +62,6 @@ public class CanonicalHeap {
 		clazzObjs.add(res);	
 		return res;
 	}
-	
 	
 	public List<CanonicalObject> getObjectsForClass(CanonicalClass clazz) {
 		return objects.get(clazz); 

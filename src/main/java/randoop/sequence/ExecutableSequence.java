@@ -8,11 +8,13 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
@@ -42,7 +44,14 @@ import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
 import randoop.util.fieldbasedcontrol.Tuple;
+import randoop.util.heapcanonization.CanonicalClass;
+import randoop.util.heapcanonization.CanonicalHeap;
+import randoop.util.heapcanonization.CanonicalStore;
 import randoop.util.heapcanonization.CanonizationResult;
+import randoop.util.heapcanonization.CanonizerLog;
+import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorPrinter;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -1099,6 +1108,48 @@ public class ExecutableSequence {
 		  }
 
 		  List<FieldExtensionsIndexes> extensions = new ArrayList<>();
+		  // Use the new canonizer to generate a candidate vector for receiver object 
+		  // of the last method of the sequence
+		  if (inputVariables.length > 0) {
+			  Object o = inputVariables[0];
+
+			  HeapCanonizer newCanonizer = AbstractGenerator.candVectCanonizer;
+			  CanonicalStore store = newCanonizer.getStore();
+			  CanonicalClass rootClass = store.getCanonicalClass(o);
+			  Entry<CanonizationResult, CanonicalHeap> res;
+			  // FIXME: Should check the compile time type of o instead of its runtime type to 
+			  // avoid generating null objects of other types? 
+			  if (o == null || (o != null && store.isGenerationClass(rootClass))) {
+				  // Root is not an object we are interested in generating a candidate vector for.
+				  // Notice that we are always interested in generating a candidate object for null, 
+				  // even if we don't know its type.
+				  res = AbstractGenerator.candVectCanonizer.traverseBreadthFirstAndCanonize(o);
+				  if (res.getKey() == CanonizationResult.OK) {
+					  String canonicalVector = CandidateVectorPrinter.printAsCandidateVector(res.getValue());
+					  if (CandidateVectorsWriter.isEnabled())
+						  CandidateVectorsWriter.logLine(canonicalVector);
+				  }
+				  else {
+					  assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
+					  if (res.getKey() == CanonizationResult.LIMITS_EXCEEDED) {
+						  if (CanonizerLog.isLoggingOn()) {
+							  CanonizerLog.logLine("----------");
+							  CanonizerLog.logLine("Not canonizing an object that is larger than permitted "
+									  + "by cand_vectors_max_objs=" + AbstractGenerator.cand_vectors_max_objs);
+							  CanonizerLog.logLine("----------");
+						  }
+					  }
+				  }
+			  }
+			  else {
+				  if (CanonizerLog.isLoggingOn()) {
+					  CanonizerLog.logLine("----------");
+					  CanonizerLog.logLine("Not canonizing object of class: " + rootClass.getName());
+					  CanonizerLog.logLine("----------");
+				  }
+			  }
+		  }
+			  
 		  for (Object o: parameters) {
 			  if (o != null && !isObjectPrimtive(o)) {
 				  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
@@ -1108,14 +1159,7 @@ public class ExecutableSequence {
 
 				  extensions.add(ext);
 				  
-				  if (AbstractGenerator.candVectCanonizer.traverseBreadthFirst(o) == CanonizationResult.OK) {
-					  System.out.println(AbstractGenerator.candVectCanonizer.getStore().candidateVectorCanonization(
-							 AbstractGenerator.candVectCanonizer.getHeap()
-							 )
-					  );
-				  }
-				  
-				  
+
 			  }
 			  else 
 				  extensions.add(null);

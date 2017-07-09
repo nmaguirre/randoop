@@ -1,19 +1,32 @@
 package randoop.util.heapcanonization;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 
 public class CanonicalStore {
 
 	private final Map<String, CanonicalClass> classes = new LinkedHashMap<>();
+	private final Set<String> genClasses;
 	
 	public CanonicalStore(Collection<String> classNames) {
-		for (String name: classNames) 
+		genClasses = new HashSet<>(classNames);
+		List<String> sortedNames = new LinkedList<>(classNames);
+		Collections.sort(sortedNames);
+		for (String name: sortedNames) 
 			getCanonicalClass(name);
 
-		System.out.print(toString());
+		if (CanonizerLog.isLoggingOn()) {
+			CanonizerLog.logLine("**********");
+			CanonizerLog.logLine("Canonical classes:");
+			CanonizerLog.logLine(toString("  ")); 
+			CanonizerLog.logLine("**********");
+		}
 	}
 	
 	public CanonicalClass getCanonicalClass(String name) {
@@ -34,46 +47,28 @@ public class CanonicalStore {
 		return getCanonicalClass(clazz.getName());
 	}
 	
-	
-	public String candidateVectorCanonization(CanonicalHeap heap) {
-		String res = "";
-		
-		boolean first = true;
-		for (String className: classes.keySet()) {
-			int i = 0;
-			
-			CanonicalClass canonicalClass = classes.get(className);
-			if (canonicalClass.isPrimitive()) continue;
-
-			for (CanonicalObject obj: heap.getObjectsForClass(canonicalClass)) {
-				if (first) 
-					first = false;
-				else 
-					res += " ";
-				res += obj.candidateVectorCanonization(heap);
-			}
-				
-
-			for ( ; i < heap.getMaxObjects(); i++) {
-				if (first) 
-					first = false;
-				else 
-					res += " ";
-				res += new CanonicalObject(null, canonicalClass, i).candidateVectorCanonization(heap);
-			}
-			
-		}
-		
-		res += "";
-		return res;
+	public CanonicalClass getCanonicalClass(Object o) {
+		return getCanonicalClass(o.getClass());
 	}
 	
+	public Set<String> getAllCanonicalClassNames() {
+		return classes.keySet();
+	}
 	
 	public String toString() {
-		String res = "";
-		for (String name: classes.keySet()) 
-			res += "Loading class: " + classes.get(name).toString() + "\n";
-		return res;
+		return toString("");
 	}
 	
+	public String toString(String pad) {
+		String res = "";
+		for (String name: classes.keySet()) 
+			res += pad + classes.get(name).toString() + "\n";
+		return res;
+	}
+
+	public boolean isGenerationClass(CanonicalClass clazz) {
+		return genClasses.contains(clazz.getName());
+	}	
+
+
 }

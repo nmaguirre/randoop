@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.filefilter.CanWriteFileFilter;
+
 import plume.Option;
 import plume.Options;
 import plume.Options.ArgException;
@@ -59,6 +61,12 @@ import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
+import randoop.util.heapcanonization.CanonicalHeap;
+import randoop.util.heapcanonization.CanonicalStore;
+import randoop.util.heapcanonization.CanonizerLog;
+import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorPrinter;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
@@ -372,7 +380,12 @@ public class GenTests extends GenInputsAbstract {
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
     
-    explorer.initCandVectCanonizer(classnames, AbstractGenerator.field_based_gen_max_objects);
+    explorer.initCandVectCanonizer(classnames, AbstractGenerator.cand_vectors_max_objs);
+    HeapCanonizer newCanonizer = AbstractGenerator.candVectCanonizer;
+    CanonicalStore store = newCanonizer.getStore();
+    CanonicalHeap heap = new CanonicalHeap(store, AbstractGenerator.cand_vectors_max_objs);
+    if (CandidateVectorsWriter.isEnabled())
+    	CandidateVectorsWriter.logLine(CandidateVectorPrinter.printCandidateVectorsStructure(heap));
     
     /*
      * setup for check generation
