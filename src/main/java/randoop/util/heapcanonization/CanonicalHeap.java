@@ -20,7 +20,7 @@ public class CanonicalHeap {
 		for (String className: store.getAllCanonicalClassnames()) {
 			CanonicalClass canonicalClass = store.getCanonicalClass(className);
 			if (!canonicalClass.isPrimitive())
-				objects.put(canonicalClass, new LinkedList<>());
+				objects.put(canonicalClass, new LinkedList<CanonicalObject>());
 		}
 	}
 

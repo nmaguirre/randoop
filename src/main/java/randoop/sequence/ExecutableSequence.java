@@ -602,7 +602,10 @@ public class ExecutableSequence {
 	   if (!stmt.getOutputType().isVoid()) 
 		   res.add(((NormalExecution)getResult(i)).getRuntimeValue());
 
-	   res.addAll(Arrays.asList(getRuntimeInputs(executionResults.theList, inputs))); 
+	   for (Object o: getRuntimeInputs(executionResults.theList, inputs)) {
+		   res.add(o);
+	   }
+	   
 	   return res;
    }
    
@@ -1012,7 +1015,7 @@ public class ExecutableSequence {
 	    Statement stmt = sequence.getStatement(lastStmtIndex);	
 		if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED)
 			increaseOpearationWeight(stmt, generator);
-		else if (enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED);
+		else if (enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED)
 			decreaseOpearationWeight(stmt, generator);
 	}
 
