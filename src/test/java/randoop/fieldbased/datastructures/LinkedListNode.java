@@ -1,4 +1,4 @@
-package randoop.util.fieldexhaustive.structures;
+package randoop.fieldbased.datastructures;
 
 /**
  * A node within the linked list.

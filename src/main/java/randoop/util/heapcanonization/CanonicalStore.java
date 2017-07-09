@@ -43,15 +43,16 @@ public class CanonicalStore {
 	}
 	
 	public CanonicalClass getCanonicalClass(Class<?> clazz) {
-		//System.out.print("From Class: " + clazz.getName());
 		return getCanonicalClass(clazz.getName());
 	}
 	
 	public CanonicalClass getCanonicalClass(Object o) {
-		return getCanonicalClass(o.getClass());
+		if (o == null)
+			return null;
+		return getCanonicalClass(o.getClass().getName());
 	}
 	
-	public Set<String> getAllCanonicalClassNames() {
+	public Set<String> getAllCanonicalClassnames() {
 		return classes.keySet();
 	}
 	

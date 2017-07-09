@@ -52,7 +52,6 @@ public class HeapCanonizer {
 		Set<CanonicalObject> visited = new HashSet<>();
 		visited.add(canonicalRoot);
 
-		CanonizationResult res = CanonizationResult.OK;
 		while (!workQueue.isEmpty()) {
 
 			CanonicalObject currObj = workQueue.poll();
@@ -73,10 +72,7 @@ public class HeapCanonizer {
 						if (targetRes.getKey() != CanonizationResult.OK) {
 							if (CanonizerLog.isLoggingOn()) 
 								CanonizerLog.logLine("Canonization error: " + targetRes.getKey().toString());
-
-							res = targetRes.getKey();
-							resHeap = null;
-							break;
+							return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(targetRes.getKey(), null);
 						}
 
 						CanonicalObject targetObj = targetRes.getValue();
@@ -98,7 +94,7 @@ public class HeapCanonizer {
 			CanonizerLog.logLine("Finishing BFS traversal");
 			CanonizerLog.logLine("----------");
 		}
-		return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(res, resHeap);
+		return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(CanonizationResult.OK, resHeap);
 	}
 
 	public CanonicalStore getStore() {

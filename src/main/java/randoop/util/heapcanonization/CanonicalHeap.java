@@ -17,6 +17,11 @@ public class CanonicalHeap {
 		this.store = store;
 		this.maxObjects = maxObjects;
 		objects = new LinkedHashMap<>();
+		for (String className: store.getAllCanonicalClassnames()) {
+			CanonicalClass canonicalClass = store.getCanonicalClass(className);
+			if (!canonicalClass.isPrimitive())
+				objects.put(canonicalClass, new LinkedList<>());
+		}
 	}
 
 	public Map.Entry<CanonizationResult, CanonicalObject> getCanonicalObject(Object obj) {
@@ -44,10 +49,12 @@ public class CanonicalHeap {
 	
 	private CanonicalObject findExistingCanonicalOject(Object obj, CanonicalClass clazz) {
 		List<CanonicalObject> clazzObjs = objects.get(clazz);
+		/*
 		if (clazzObjs == null) {
 			clazzObjs = new LinkedList<>();
 			objects.put(clazz, clazzObjs);
 		}
+		*/
 		
 		for (CanonicalObject currObj: clazzObjs) 
 			if (currObj.getObject() == obj) 

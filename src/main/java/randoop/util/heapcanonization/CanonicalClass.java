@@ -32,7 +32,7 @@ public class CanonicalClass {
 			cls = Class.forName(name);
 		} catch (ClassNotFoundException e) {
 			if (CanonizerLog.isLoggingOn())
-				CanonizerLog.logLine("Class for name " + name + " not found, assuming the type is primitive.");
+				CanonizerLog.logLine("WARNING: Class for name " + name + " not found, assuming it is a primitive type.");
 		}
 		clazz = cls;
 		isPrimitive = isPrimitive(clazz);
@@ -159,9 +159,9 @@ public class CanonicalClass {
 	}
 
 	public String toString() {
-		String res = "[" + getName() + " ID=" + ID + " ";
+		String res = "name=" + getName() + ",ID=" + ID + ",fields=[";
 		for (CanonicalField fld: fields) {
-			res += " " + fld.toString();
+			res += fld.toString();
 		}
 		return res + "]";
 	}

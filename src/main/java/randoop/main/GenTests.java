@@ -380,10 +380,10 @@ public class GenTests extends GenInputsAbstract {
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
     
-    explorer.initCandVectCanonizer(classnames, AbstractGenerator.cand_vectors_max_objs);
+    explorer.initCandVectCanonizer(classnames, AbstractGenerator.cand_vect_max_objs);
     HeapCanonizer newCanonizer = AbstractGenerator.candVectCanonizer;
     CanonicalStore store = newCanonizer.getStore();
-    CanonicalHeap heap = new CanonicalHeap(store, AbstractGenerator.cand_vectors_max_objs);
+    CanonicalHeap heap = new CanonicalHeap(store, AbstractGenerator.cand_vect_max_objs);
     if (CandidateVectorsWriter.isEnabled())
     	CandidateVectorsWriter.logLine(CandidateVectorPrinter.printCandidateVectorsStructure(heap));
     

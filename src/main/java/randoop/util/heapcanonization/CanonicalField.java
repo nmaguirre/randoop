@@ -54,13 +54,14 @@ public class CanonicalField {
 			System.out.println("Error field: " + field.getName()); 
 			System.out.println("Error object: " + obj);
 			assert false: "ERROR: Cannot find an existing field.";
+			System.exit(0);
 		}
 		return heap.getCanonicalObject(target);
 	}
 
 	public String toString() {
-		String res = "{ " + getName();
-		res += " ID=" + ID + "} ";
+		String res = "{" + getName();
+		res += ",ID=" + ID + "}";
 		return res;
 	}
 	

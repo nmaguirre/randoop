@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
 
@@ -41,6 +42,14 @@ import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
+import randoop.util.heapcanonization.CanonicalClass;
+import randoop.util.heapcanonization.CanonicalHeap;
+import randoop.util.heapcanonization.CanonicalStore;
+import randoop.util.heapcanonization.CanonizationResult;
+import randoop.util.heapcanonization.CanonizerLog;
+import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorPrinter;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 
 
 /**
@@ -319,6 +328,52 @@ private int maxsize;
     
   }
 
+    
+    
+    
+	// Use the new canonizer to generate a candidate vector for receiver object 
+    // of the last method of the sequence
+    private void genCanonicalVectorFromLastReceiverObject(ExecutableSequence eSeq) {
+		if (CanonizerLog.isLoggingOn()) {
+			CanonizerLog.logLine("**********");
+			CanonizerLog.logLine("Canonizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
+			CanonizerLog.logLine("**********");
+		}	
+    	
+		int index = 0;
+		HeapCanonizer newCanonizer = AbstractGenerator.candVectCanonizer;
+		CanonicalStore store = newCanonizer.getStore();
+		for (Object o: eSeq.getLastStmtRuntimeObjects()) {
+			Entry<CanonizationResult, CanonicalHeap> res;
+			CanonicalClass rootClass = store.getCanonicalClass(o);
+			// FIXME: Should check the compile time type of o instead of its runtime type to 
+			// avoid generating null objects of other types? 
+			if (o == null || (o != null && store.isGenerationClass(rootClass))) {
+				// Root is not an object we are interested in generating a candidate vector for.
+				// Notice that we are always interested in generating a candidate object for null, 
+				// even if we don't know its type.
+				res = AbstractGenerator.candVectCanonizer.traverseBreadthFirstAndCanonize(o);
+				if (res.getKey() == CanonizationResult.OK) {
+					String canonicalVector = CandidateVectorPrinter.printAsCandidateVector(res.getValue());
+					// FIXME: Assuming candidate vector writer is enabled, otherwise we don't reach this code.
+					// if (CandidateVectorsWriter.isEnabled())
+					CandidateVectorsWriter.logLine(canonicalVector);
+				}
+				else {
+					assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
+					if (res.getKey() == CanonizationResult.LIMITS_EXCEEDED) {
+						if (CanonizerLog.isLoggingOn()) {
+							CanonizerLog.logLine("----------");
+							CanonizerLog.logLine("Not canonizing an object that is larger than permitted "
+									+ "by cand_vectors_max_objs=" + AbstractGenerator.cand_vect_max_objs);
+							CanonizerLog.logLine("----------");
+						}
+					}
+				}
+			}
+		}
+    }
+    
   
  
   @Override
@@ -331,7 +386,6 @@ private int maxsize;
     }
 
     ExecutableSequence eSeq = createNewUniqueSequence();
-
 
     if (eSeq == null) {
       return null;
@@ -352,12 +406,16 @@ private int maxsize;
     if (field_based_gen == FieldBasedGenType.DISABLED) {
         eSeq.execute(executionVisitor, checkGenerator);
 
+		if (CandidateVectorsWriter.isEnabled())
+			genCanonicalVectorFromLastReceiverObject(eSeq);
+
         endTime = System.nanoTime();
 
         eSeq.exectime = endTime - startTime;
         startTime = endTime; // reset start time.
 
         processSequence(eSeq);
+        
 
         if (eSeq.sequence.hasActiveFlags()) {
           componentManager.addGeneratedSequence(eSeq.sequence);
@@ -375,7 +433,6 @@ private int maxsize;
 
     			if (FieldBasedGenLog.isLoggingOn())
     				FieldBasedGenLog.logLine("> Current sequence executed normally. Try to enlarge field extensions");
-
     			
    				// Field based filtering is only done on non error sequences
     			if (field_based_gen == FieldBasedGenType.EXTENSIONS)
@@ -384,6 +441,9 @@ private int maxsize;
    					addObjectHashesToStore(eSeq);
    				    				
     			if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) {
+    				
+    				if (CandidateVectorsWriter.isEnabled())
+    					genCanonicalVectorFromLastReceiverObject(eSeq);
 
     				if (eSeq.getLastStmtOperation().isModifier())
     					eSeq.getLastStmtOperation().timesExecutedInExtendingModifiers++;

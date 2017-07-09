@@ -141,7 +141,7 @@ public abstract class AbstractGenerator {
   public static int field_based_gen_max_objects = 5000;
   
   @Option("Only store up to this number of objects during field vector canonization")
-  public static int cand_vectors_max_objs = 5;
+  public static int cand_vect_max_objs = 5;
 
   @Option("Only store up to this number of objects for each individual class during canonization")
   public static int field_based_gen_max_class_objects = 5000;

@@ -12,12 +12,14 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import randoop.ExceptionalExecution;
 import randoop.ExecutionOutcome;
 import randoop.ExecutionVisitor;
@@ -578,6 +580,32 @@ public class ExecutableSequence {
 		
 	}
 
+   
+   public Object getLastStmtReceiverObject() {
+	   int i = sequence.size()-1;
+	   List<Variable> inputs = sequence.getInputs(i);
+	   if (inputs.size() == 0)
+		   // No receiver object in the last statement
+		   return null;
+
+	   Object[] inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+	   return inputVariables[0];
+   }
+   
+   
+   public List<Object> getLastStmtRuntimeObjects() {
+	   int i = sequence.size()-1;
+	   List<Variable> inputs = sequence.getInputs(i);
+	   List<Object> res = new LinkedList<>();
+
+	  Statement stmt = sequence.getStatement(i);
+	  if (!stmt.getOutputType().isVoid()) 
+		  res.add(((NormalExecution)getResult(i)).getRuntimeValue());
+	   
+	   res.addAll(Arrays.asList(getRuntimeInputs(executionResults.theList, inputs))); 
+	   return res;
+   }
+   
   
   /**
    * Execute this sequence, invoking the given visitor as the execution unfolds.
@@ -1108,47 +1136,6 @@ public class ExecutableSequence {
 		  }
 
 		  List<FieldExtensionsIndexes> extensions = new ArrayList<>();
-		  // Use the new canonizer to generate a candidate vector for receiver object 
-		  // of the last method of the sequence
-		  if (inputVariables.length > 0) {
-			  Object o = inputVariables[0];
-
-			  HeapCanonizer newCanonizer = AbstractGenerator.candVectCanonizer;
-			  CanonicalStore store = newCanonizer.getStore();
-			  CanonicalClass rootClass = store.getCanonicalClass(o);
-			  Entry<CanonizationResult, CanonicalHeap> res;
-			  // FIXME: Should check the compile time type of o instead of its runtime type to 
-			  // avoid generating null objects of other types? 
-			  if (o == null || (o != null && store.isGenerationClass(rootClass))) {
-				  // Root is not an object we are interested in generating a candidate vector for.
-				  // Notice that we are always interested in generating a candidate object for null, 
-				  // even if we don't know its type.
-				  res = AbstractGenerator.candVectCanonizer.traverseBreadthFirstAndCanonize(o);
-				  if (res.getKey() == CanonizationResult.OK) {
-					  String canonicalVector = CandidateVectorPrinter.printAsCandidateVector(res.getValue());
-					  if (CandidateVectorsWriter.isEnabled())
-						  CandidateVectorsWriter.logLine(canonicalVector);
-				  }
-				  else {
-					  assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
-					  if (res.getKey() == CanonizationResult.LIMITS_EXCEEDED) {
-						  if (CanonizerLog.isLoggingOn()) {
-							  CanonizerLog.logLine("----------");
-							  CanonizerLog.logLine("Not canonizing an object that is larger than permitted "
-									  + "by cand_vectors_max_objs=" + AbstractGenerator.cand_vectors_max_objs);
-							  CanonizerLog.logLine("----------");
-						  }
-					  }
-				  }
-			  }
-			  else {
-				  if (CanonizerLog.isLoggingOn()) {
-					  CanonizerLog.logLine("----------");
-					  CanonizerLog.logLine("Not canonizing object of class: " + rootClass.getName());
-					  CanonizerLog.logLine("----------");
-				  }
-			  }
-		  }
 			  
 		  for (Object o: parameters) {
 			  if (o != null && !isObjectPrimtive(o)) {
