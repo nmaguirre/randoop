@@ -32,6 +32,7 @@ import randoop.util.fieldbasedcontrol.MurmurHash3.LongPair;
 import randoop.util.fieldbasedcontrol.RandomPerm;
 import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorsFieldExtensions;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
@@ -58,9 +59,11 @@ import java.util.Set;
 public abstract class AbstractGenerator {
 	
 	public static HeapCanonizer candVectCanonizer;
+	public static CandidateVectorsFieldExtensions candVectExtensions;
 	
 	public void initCandVectCanonizer(Collection<String> classNames, int maxObjects) {
 		candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		candVectExtensions = new CandidateVectorsFieldExtensions();
 	}
 	
   // The set of all primitive values seen during generation and execution

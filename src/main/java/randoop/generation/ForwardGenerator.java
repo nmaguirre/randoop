@@ -48,7 +48,8 @@ import randoop.util.heapcanonization.CanonicalStore;
 import randoop.util.heapcanonization.CanonizationResult;
 import randoop.util.heapcanonization.CanonizerLog;
 import randoop.util.heapcanonization.HeapCanonizer;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorPrinter;
+import randoop.util.heapcanonization.candidatevectors.CandidateVector;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 
 
@@ -333,7 +334,7 @@ private int maxsize;
     
 	// Use the new canonizer to generate a candidate vector for receiver object 
     // of the last method of the sequence
-    private void genCanonicalVectorFromLastReceiverObject(ExecutableSequence eSeq) {
+    private void makeCanonicalVectorsForLastStatement(ExecutableSequence eSeq) {
 		if (CanonizerLog.isLoggingOn()) {
 			CanonizerLog.logLine("**********");
 			CanonizerLog.logLine("Canonizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
@@ -351,11 +352,8 @@ private int maxsize;
 		for (Object o: eSeq.getLastStmtRuntimeObjects()) {
 			index++;
 
-			if (activeVars != null && !activeVars.contains(index)) {
-
+			if (activeVars != null && !activeVars.contains(index)) 
 				continue;
-			}
-
 			if (CanonizerLog.isLoggingOn())
 				CanonizerLog.logLine("INFO: Active variable index: " + index);
 			
@@ -369,10 +367,12 @@ private int maxsize;
 				// even if we don't know its type.
 				res = AbstractGenerator.candVectCanonizer.traverseBreadthFirstAndCanonize(o);
 				if (res.getKey() == CanonizationResult.OK) {
-					String canonicalVector = CandidateVectorPrinter.printAsCandidateVector(res.getValue());
+					CandidateVector candidateVector = CandidateVectorGenerator.makeCandidateVector(res.getValue());
+							//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
+					candVectExtensions.addToExtensions(candidateVector);
 					// FIXME: Assuming candidate vector writer is enabled, otherwise we don't reach this code.
 					// if (CandidateVectorsWriter.isEnabled())
-					CandidateVectorsWriter.logLine(canonicalVector);
+					CandidateVectorsWriter.logLine(candidateVector.toString());
 				}
 				else {
 					assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
@@ -428,12 +428,11 @@ private int maxsize;
 
     	processSequence(eSeq);
 
-
     	if (eSeq.sequence.hasActiveFlags()) {
     		componentManager.addGeneratedSequence(eSeq.sequence);
 
     		if (CandidateVectorsWriter.isEnabled())
-    			genCanonicalVectorFromLastReceiverObject(eSeq);
+    			makeCanonicalVectorsForLastStatement(eSeq);
     	}
     }
     else {
@@ -458,7 +457,7 @@ private int maxsize;
     			if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) {
     				
     				if (CandidateVectorsWriter.isEnabled())
-    					genCanonicalVectorFromLastReceiverObject(eSeq);
+    					makeCanonicalVectorsForLastStatement(eSeq);
 
     				if (eSeq.getLastStmtOperation().isModifier())
     					eSeq.getLastStmtOperation().timesExecutedInExtendingModifiers++;

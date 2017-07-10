@@ -65,7 +65,7 @@ import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonicalStore;
 import randoop.util.heapcanonization.CanonizerLog;
 import randoop.util.heapcanonization.HeapCanonizer;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorPrinter;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -385,7 +385,7 @@ public class GenTests extends GenInputsAbstract {
     CanonicalStore store = newCanonizer.getStore();
     CanonicalHeap heap = new CanonicalHeap(store, AbstractGenerator.cand_vect_max_objs);
     if (CandidateVectorsWriter.isEnabled())
-    	CandidateVectorsWriter.logLine(CandidateVectorPrinter.printCandidateVectorsStructure(heap));
+    	CandidateVectorsWriter.logLine(CandidateVectorGenerator.printCandidateVectorsStructure(heap));
     
     /*
      * setup for check generation
@@ -476,8 +476,20 @@ public class GenTests extends GenInputsAbstract {
       System.exit(1);
     }
     
-    if (CanonizerLog.isLoggingOn())
-    	CanonizerLog.logLine(AbstractGenerator.candVectCanonizer.getStore().toPrettyString());
+    if (CanonizerLog.isLoggingOn()) {
+    	CanonizerLog.logLine("**********");
+    	CanonizerLog.logLine("Canonical classes:");
+    	CanonizerLog.logLine(AbstractGenerator.candVectCanonizer.getStore().toString());
+    	CanonizerLog.logLine("**********");
+
+    	CanonizerLog.logLine("**********");
+    	CanonizerLog.logLine("Candidate Vectors Field Extensions:");
+    	CanonizerLog.logLine(AbstractGenerator.candVectExtensions.toString());
+    	CanonizerLog.logLine("**********");
+    }
+    
+    if (CandidateVectorsWriter.isEnabled()) 
+    	CandidateVectorsWriter.logLine(AbstractGenerator.candVectExtensions.toString());
 
     /* post generation */
     if (GenInputsAbstract.dont_output_tests) {
