@@ -1,26 +1,39 @@
 package randoop.util.heapcanonization;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Map.Entry;
 
 public class CanonicalField {
 
 	private static int globalID = 0;
-	private int ID;
-	private Field field;
-	private CanonicalClass belongs;
-	private CanonicalClass type;
+	private final int ID;
+	private final Field field;
+	private final CanonicalClass belongsTo;
+	private final CanonicalClass type;
+	private final String name;
 
-	public CanonicalField(Field field, CanonicalClass belongs, CanonicalClass type) {
+	// Creates fields for non primitive types 
+	public CanonicalField(Field field, CanonicalClass belongsTo, CanonicalClass type) {
 		ID = globalID++;
 		this.field = field;
 		field.setAccessible(true);
-		this.belongs = belongs;
+		this.name = field.getName();
+		this.belongsTo = belongsTo;
+		this.type = type;
+	}
+	
+	// Creates (dummy) array fields 
+	public CanonicalField(Integer name, CanonicalClass belongs, CanonicalClass type) {
+		ID = name;
+		this.name = Integer.toString(name);
+		this.field = null;
+		this.belongsTo = belongs;
 		this.type = type;
 	}
 
 	public String getName() {
-		return field.getName();
+		return name;
 	}
 	
 	public int getIndex() { 
@@ -32,37 +45,38 @@ public class CanonicalField {
 	}
 
 	public CanonicalClass getBelongs() {
-		return belongs;
+		return belongsTo;
 	}
 	
 	public boolean isPrimitiveType() {
-//		return (type == null) ? true : type.isPrimitive();
 		return type.isPrimitive();
 	}
 	
 	public boolean isArrayType() {
-//		return (type == null) ? false : type.isArray();
 		return type.isArray();
 	}
 
-	public Entry<CanonizationResult, CanonicalObject> getTarget(CanonicalObject cobj, CanonicalHeap heap) {
-		Object obj = cobj.getObject();
-		Object target = null;
-		try {
-			target = field.get(obj);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			System.out.println("Error field: " + field.getName()); 
-			System.out.println("Error object: " + obj);
-			assert false: "ERROR: Cannot find an existing field.";
-			System.exit(0);
+	public Object getValue(CanonicalObject canObj) {
+		if (belongsTo.isArray()) {
+			return Array.get(canObj.getObject(), ID);
+		} 
+		else {
+			Object target = null;
+			try {
+				target = field.get(canObj.getObject());
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				System.out.println("Cannot find field: " + field.getName());
+				System.out.println("Error object: " + canObj.getObject());
+				assert false: "Cannot find an existing field";
+				System.exit(1);
+			}
+			return target;
 		}
-		return heap.getCanonicalObject(target);
+		//heap.getCanonicalObject(target);
 	}
 
 	public String toString() {
-		String res = "{" + getName();
-		res += ",ID=" + ID + "}";
-		return res;
+		return "{" + getName() + ",ID=" + ID + ",type=" + type.getName()  + "}";
 	}
 	
 }

@@ -1,15 +1,25 @@
 package randoop.util.heapcanonization;
 
+import java.lang.reflect.Array;
+import java.util.AbstractMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+
+
 public class CanonicalObject {
 
 	private final Object object;
 	private final CanonicalClass clazz;
 	private int index;
-
-	public CanonicalObject(Object obj, CanonicalClass clazz, int index) {
+	private CanonicalHeap heap;
+	
+	public CanonicalObject(Object obj, CanonicalClass clazz, int index, CanonicalHeap heap) {
 		this.object = obj;
 		this.clazz = clazz;
 		this.index = index;
+		this.heap = heap;
 	}
 
 	public Object getObject() {
@@ -18,6 +28,21 @@ public class CanonicalObject {
 
 	public CanonicalClass getCanonicalClass() {
 		return clazz;
+	}
+	
+	public Map.Entry<CanonizationResult, List<CanonicalField>> getCanonicalFields() {
+		assert !clazz.isPrimitive(): "Should never try to get the fields of primitive types";
+		if (clazz.isArray()) {
+			int arrLength = Array.getLength(object);
+			if (arrLength > heap.getMaxObjects())
+				return new AbstractMap.SimpleEntry<>(CanonizationResult.ARRAY_LIMITS_EXCEEDED, null); 
+
+			List<CanonicalField> arrFields = new LinkedList<>();
+			for (int i = 0; i < arrLength; i++) 
+				arrFields.add(new CanonicalField(i, clazz, clazz.getArrayElementsType()));
+			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, arrFields);
+		}
+		return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, clazz.getCanonicalFields());
 	}
 
 	public int getIndex() {
@@ -59,6 +84,10 @@ public class CanonicalObject {
 	
 	public boolean isPrimitive() {
 		return getCanonicalClass().isPrimitive();
+	}
+	
+	public boolean isArray() {
+		return getCanonicalClass().isArray();
 	}
 
 	public String toString() {

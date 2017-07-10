@@ -5,5 +5,6 @@ public enum CanonizationResult {
 	EXTENSIONS_NOT_EXTENDED, 
 	OK,
 	LIMITS_EXCEEDED, 
+	ARRAY_LIMITS_EXCEEDED, 
 	NOT_GENCLASS;
 }

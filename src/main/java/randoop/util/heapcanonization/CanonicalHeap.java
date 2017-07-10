@@ -27,12 +27,12 @@ public class CanonicalHeap {
 	public Map.Entry<CanonizationResult, CanonicalObject> getCanonicalObject(Object obj) {
 		// Create a new CanonicalObject encapsulating null
 		if (obj == null)
-			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, new CanonicalObject(obj, null, -1));
+			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, new CanonicalObject(obj, null, -1, this));
 		
 		// Create or get a new CanonicalObject encapsulating the primitive value 
 		CanonicalClass clazz = store.getCanonicalClass(obj.getClass());
 		if (clazz.isPrimitive()) 
-			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, new CanonicalObject(obj, clazz, -1));
+			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, new CanonicalObject(obj, clazz, -1, this));
 
 		// If there is already an object encapsulating obj, return it
 		CanonicalObject res = findExistingCanonicalOject(obj, clazz);
@@ -40,7 +40,7 @@ public class CanonicalHeap {
 			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, res);
 		
 		// If the object limit is exceeded for the current class, report the error
-		if (objects.get(clazz).size() >= maxObjects) 
+		if (objects.get(clazz).size() > maxObjects) 
 			return new AbstractMap.SimpleEntry<>(CanonizationResult.LIMITS_EXCEEDED, null);
 		
 		// Create a new canonical object
@@ -65,7 +65,7 @@ public class CanonicalHeap {
 	
 	private CanonicalObject newCanonicalObject(Object obj, CanonicalClass clazz) {
 		List<CanonicalObject> clazzObjs = objects.get(clazz);
-		CanonicalObject res = new CanonicalObject(obj, clazz, clazzObjs.size());
+		CanonicalObject res = new CanonicalObject(obj, clazz, clazzObjs.size(), this);
 		clazzObjs.add(res);	
 		return res;
 	}

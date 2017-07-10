@@ -19,6 +19,7 @@ public class CanonicalClass {
 	private final boolean isArray;
 	private final CanonicalClass ancestor;
 	private final Class<?> clazz;
+	private final CanonicalClass arrObjectsType;
 	private final CanonicalStore store;
 
 	public CanonicalClass(String name, CanonicalStore store) {
@@ -36,15 +37,20 @@ public class CanonicalClass {
 		}
 		clazz = cls;
 		isPrimitive = isPrimitive(clazz);
-		//isArray = isArray(clazz);
-		isArray = false;
-
+		isArray = isArray(clazz);
+		
+		CanonicalClass anc = null;
+		CanonicalClass arrObjsType = null;
 		if (!isPrimitive) {
-			ancestor = createAncestors();
-			addFields();
+			if (isArray) 
+				arrObjsType = store.getCanonicalClass(clazz.getComponentType().getName());
+			else {
+				anc = createAncestors();
+				addFields();
+			}
 		}
-		else 
-			ancestor = null;
+		ancestor = anc;
+		arrObjectsType = arrObjsType;
 	}
 	
 	/* TODO: We should use something like this method if loading of classes fail for any class.
@@ -112,8 +118,7 @@ public class CanonicalClass {
 	}
   	
   	private boolean isArray(Class<?> clazz) {
-  		// assert false: "ERROR: Creating an array class. Array classes are not supported yet.";
-  		return clazz.isArray();
+  		return (clazz == null) ? false : clazz.isArray();
   	}	
   	
   	public boolean isArray() {
@@ -161,9 +166,14 @@ public class CanonicalClass {
 	public String toString() {
 		String res = "name=" + getName() + ",ID=" + ID + ",fields=[";
 		for (CanonicalField fld: fields) {
-			res += fld.toString();
+			res += "\n\t" + fld.toString();
 		}
 		return res + "]";
+	}
+
+	public CanonicalClass getArrayElementsType() {
+		assert isArray: "Asking for the type of objects of an array for a non array class";
+		return arrObjectsType;
 	}
 
 

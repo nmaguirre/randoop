@@ -367,7 +367,7 @@ private int maxsize;
 				// even if we don't know its type.
 				res = AbstractGenerator.candVectCanonizer.traverseBreadthFirstAndCanonize(o);
 				if (res.getKey() == CanonizationResult.OK) {
-					CandidateVector candidateVector = CandidateVectorGenerator.makeCandidateVector(res.getValue());
+					CandidateVector candidateVector = CandidateVectorGenerator.makeCandidateVectorFrom(res.getValue());
 							//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
 					candVectExtensions.addToExtensions(candidateVector);
 					// FIXME: Assuming candidate vector writer is enabled, otherwise we don't reach this code.
