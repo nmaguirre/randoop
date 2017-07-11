@@ -367,7 +367,7 @@ private int maxsize;
 				// even if we don't know its type.
 				res = AbstractGenerator.candVectCanonizer.traverseBreadthFirstAndCanonize(o);
 				if (res.getKey() == CanonizationResult.OK) {
-					CandidateVector candidateVector = CandidateVectorGenerator.makeCandidateVectorFrom(res.getValue());
+					CandidateVector candidateVector = candVectGenerator.makeCandidateVectorFrom(res.getValue());
 							//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
 					candVectExtensions.addToExtensions(candidateVector);
 					// FIXME: Assuming candidate vector writer is enabled, otherwise we don't reach this code.
@@ -375,12 +375,13 @@ private int maxsize;
 					CandidateVectorsWriter.logLine(candidateVector.toString());
 				}
 				else {
-					assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
-					if (res.getKey() == CanonizationResult.LIMITS_EXCEEDED) {
+					// assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
+					if (res.getKey() != CanonizationResult.OK) {
 						if (CanonizerLog.isLoggingOn()) {
 							CanonizerLog.logLine("----------");
 							CanonizerLog.logLine("Not canonizing an object that is larger than permitted "
 									+ "by cand_vectors_max_objs=" + AbstractGenerator.cand_vect_max_objs);
+							CanonizerLog.logLine("Error message: " + res.getKey());
 							CanonizerLog.logLine("----------");
 						}
 					}

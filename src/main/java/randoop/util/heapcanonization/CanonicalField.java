@@ -9,26 +9,26 @@ public class CanonicalField {
 	private static int globalID = 0;
 	private final int ID;
 	private final Field field;
-	private final CanonicalClass belongsTo;
+	private final CanonicalClass clazz;
 	private final CanonicalClass type;
 	private final String name;
 
 	// Creates fields for non primitive types 
-	public CanonicalField(Field field, CanonicalClass belongsTo, CanonicalClass type) {
+	public CanonicalField(Field field, CanonicalClass clazz, CanonicalClass type) {
 		ID = globalID++;
 		this.field = field;
 		field.setAccessible(true);
 		this.name = field.getName();
-		this.belongsTo = belongsTo;
+		this.clazz = clazz;
 		this.type = type;
 	}
 	
 	// Creates (dummy) array fields 
-	public CanonicalField(Integer name, CanonicalClass belongs, CanonicalClass type) {
+	public CanonicalField(Integer name, CanonicalClass clazz, CanonicalClass type) {
 		ID = name;
 		this.name = Integer.toString(name);
 		this.field = null;
-		this.belongsTo = belongs;
+		this.clazz = clazz;
 		this.type = type;
 	}
 
@@ -40,12 +40,12 @@ public class CanonicalField {
 		return ID;
 	}
 
-	public CanonicalClass getType() {
+	public CanonicalClass getCanonicalType() {
 		return type;
 	}
 
-	public CanonicalClass getBelongs() {
-		return belongsTo;
+	public CanonicalClass getCanonicalClass() {
+		return clazz;
 	}
 	
 	public boolean isPrimitiveType() {
@@ -57,7 +57,7 @@ public class CanonicalField {
 	}
 
 	public Object getValue(CanonicalObject canObj) {
-		if (belongsTo.isArray()) {
+		if (clazz.isArray()) {
 			return Array.get(canObj.getObject(), ID);
 		} 
 		else {
@@ -76,7 +76,7 @@ public class CanonicalField {
 	}
 
 	public String toString() {
-		return "{" + getName() + ",ID=" + ID + ",type=" + type.getName()  + "}";
+		return "{" + getName() + ",ID=" + ID + ",class="+ clazz.getName() + ",type=" + type.getName() + "}";
 	}
 	
 }

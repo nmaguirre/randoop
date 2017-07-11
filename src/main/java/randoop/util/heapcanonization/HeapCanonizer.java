@@ -19,14 +19,13 @@ import java.util.Set;
 
 public class HeapCanonizer {
 	
-	private CanonicalStore store;
-	private Collection<String> classNames;
-	private int maxObjects;
+	private final CanonicalStore store;
+	private final Collection<String> classNames;
+	private final int maxObjects;
 		
 	public HeapCanonizer(Collection<String> classNames, int maxObjects) {
 		this.classNames = classNames;
 		this.maxObjects = maxObjects;
-		classNames.add("randoop.util.heapcanonization.DummyHeapRoot");
 		this.store = new CanonicalStore(classNames);
 	}
 	

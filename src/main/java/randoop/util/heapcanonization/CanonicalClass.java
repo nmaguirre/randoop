@@ -1,6 +1,7 @@
 package randoop.util.heapcanonization;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -21,6 +22,8 @@ public class CanonicalClass {
 	private final Class<?> clazz;
 	private final CanonicalClass arrObjectsType;
 	private final CanonicalStore store;
+	private final boolean isAbstract;
+	private final boolean isInterface;
 
 	public CanonicalClass(String name, CanonicalStore store) {
 		this.store = store;
@@ -33,24 +36,24 @@ public class CanonicalClass {
 			cls = Class.forName(name);
 		} catch (ClassNotFoundException e) {
 			if (CanonizerLog.isLoggingOn())
-				CanonizerLog.logLine("WARNING: Class for name " + name + " not found, assuming it is a primitive type.");
+				CanonizerLog.logLine("WARNING: Class for name " + name + " not found, assuming it's a primitive type.");
 		}
 		clazz = cls;
 		isPrimitive = isPrimitive(clazz);
 		isArray = isArray(clazz);
+		arrObjectsType = (!isArray) ? null : store.getCanonicalClass(clazz.getComponentType().getName());
 		
-		CanonicalClass anc = null;
-		CanonicalClass arrObjsType = null;
-		if (!isPrimitive) {
-			if (isArray) 
-				arrObjsType = store.getCanonicalClass(clazz.getComponentType().getName());
-			else {
-				anc = createAncestors();
-				addFields();
-			}
+		if (!isPrimitive && !isArray) {
+			ancestor = canonizeAncestors();
+			canonizeFields();
+			isAbstract = Modifier.isAbstract(clazz.getModifiers());
+			isInterface = Modifier.isInterface(clazz.getModifiers());
 		}
-		ancestor = anc;
-		arrObjectsType = arrObjsType;
+		else {
+			ancestor = null;
+			isAbstract = false;
+			isInterface = false;
+		}
 	}
 	
 	/* TODO: We should use something like this method if loading of classes fail for any class.
@@ -64,7 +67,7 @@ public class CanonicalClass {
 	}
 	*/
 
-	private CanonicalClass createAncestors() {
+	private CanonicalClass canonizeAncestors() {
 		CanonicalClass ancestor = store.getCanonicalClass(clazz.getSuperclass());
 		if (!ancestor.isPrimitive()) {
 			return ancestor;
@@ -72,7 +75,7 @@ public class CanonicalClass {
 		return null;
 	}
 		
-	private void addFields() {
+	private void canonizeFields() {
 		if (ancestor != null)
 			fields.addAll(ancestor.getCanonicalFields());
 		
@@ -115,6 +118,14 @@ public class CanonicalClass {
 	
 	public boolean isPrimitive() {
 		return isPrimitive;
+	}
+	
+	public boolean isAbstract() {
+		return isAbstract;
+	}
+	
+	public boolean isInterface() {
+		return isInterface;
 	}
   	
   	private boolean isArray(Class<?> clazz) {

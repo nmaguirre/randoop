@@ -32,6 +32,7 @@ import randoop.util.fieldbasedcontrol.MurmurHash3.LongPair;
 import randoop.util.fieldbasedcontrol.RandomPerm;
 import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsFieldExtensions;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -59,11 +60,15 @@ import java.util.Set;
 public abstract class AbstractGenerator {
 	
 	public static HeapCanonizer candVectCanonizer;
+	public static CandidateVectorGenerator candVectGenerator;
 	public static CandidateVectorsFieldExtensions candVectExtensions;
 	
-	public void initCandVectCanonizer(Collection<String> classNames, int maxObjects) {
+	public void initCandVectCanonizerAndGenerator(Collection<String> classNames, int maxObjects) {
 		candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
 		candVectExtensions = new CandidateVectorsFieldExtensions();
+		// Initialize the candidate vector generator with the canonical classes that were mined from the code,
+		// before the generation starts.
+		candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
 	}
 	
   // The set of all primitive values seen during generation and execution
@@ -146,6 +151,9 @@ public abstract class AbstractGenerator {
   @Option("Only store up to this number of objects during field vector canonization")
   public static int cand_vect_max_objs = 5;
 
+  @Option("Representation of the null value in candidate vectors")
+  public static int cand_vect_null_rep = Integer.MIN_VALUE;
+  
   @Option("Only store up to this number of objects for each individual class during canonization")
   public static int field_based_gen_max_class_objects = 5000;
 
@@ -393,6 +401,7 @@ public abstract class AbstractGenerator {
    * behavior.
    */
   public static Sequence currSeq = null;
+
 
 
   /**

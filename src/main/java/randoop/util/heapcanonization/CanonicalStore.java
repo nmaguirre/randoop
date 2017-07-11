@@ -12,11 +12,13 @@ import java.util.Set;
 public class CanonicalStore {
 
 	private final Map<String, CanonicalClass> classes = new LinkedHashMap<>();
-	private final Set<String> genClasses;
+	private final Set<String> genClasses = new HashSet<>();
 	
 	public CanonicalStore(Collection<String> classNames) {
-		genClasses = new HashSet<>(classNames);
+		genClasses.addAll(classNames);
+		
 		List<String> sortedNames = new LinkedList<>(classNames);
+		sortedNames.add("randoop.util.heapcanonization.DummyHeapRoot");
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
 			getCanonicalClass(name);
@@ -26,6 +28,8 @@ public class CanonicalStore {
 		}
 	}
 	
+	private CanonicalStore() { };
+
 	public CanonicalClass getCanonicalClass(String name) {
 		CanonicalClass res = classes.get(name);
 		if (res != null)
@@ -57,17 +61,17 @@ public class CanonicalStore {
 		return toString("");
 	}
 	
-	public String toString(String pad) {
+	public String toString(String padding) {
 		String res = "";
 		for (String name: classes.keySet()) 
-			res += pad + classes.get(name).toString() + "\n";
+			res += padding + classes.get(name).toString() + "\n";
 		return res;
 	}
 
 	public String toPrettyString() {
 		String res = "**********\n";
 		res += "Canonical classes:\n";
-		res += toString("  ") + "\n";
+		res += toString("") + "\n";
 		res += "**********";
 		return res;
 	}
@@ -76,5 +80,11 @@ public class CanonicalStore {
 		return genClasses.contains(clazz.getName());
 	}	
 
-
+	public CanonicalStore clone() {
+		CanonicalStore res = new CanonicalStore();
+		res.classes.putAll(classes);
+		res.genClasses.addAll(genClasses);
+		return res;
+	}	
+	
 }
