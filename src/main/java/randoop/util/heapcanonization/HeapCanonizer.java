@@ -59,40 +59,40 @@ public class HeapCanonizer {
 					!currObj.isNull() && 
 					!currObj.isPrimitive() : "Null/Primitive objects are never added to workQueue";
 
-					//assert !currObjType.isArray() : "Arrays are not supported yet.";
+			//assert !currObjType.isArray() : "Arrays are not supported yet.";
 
+			if (CanonizerLog.isLoggingOn()) 
+				CanonizerLog.logLine("Current object: " + currObj.toString());
+
+			Entry<CanonizationResult, List<CanonicalField>> getFieldsRes = currObj.getCanonicalFields(); 
+			if (getFieldsRes.getKey() != CanonizationResult.OK) {
+				if (CanonizerLog.isLoggingOn()) 
+					CanonizerLog.logLine("Canonization error: " + getFieldsRes.getKey().toString());
+				return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(getFieldsRes.getKey(), null);
+			}
+
+			for (CanonicalField currField: getFieldsRes.getValue()) {
+
+				Object fieldValue = currField.getValue(currObj);
+				Entry<CanonizationResult, CanonicalObject> valueCanonizationRes = resHeap.getCanonicalObject(fieldValue);
+				if (valueCanonizationRes.getKey() != CanonizationResult.OK) {
 					if (CanonizerLog.isLoggingOn()) 
-						CanonizerLog.logLine("Current object: " + currObj.toString());
+						CanonizerLog.logLine("Canonization error: " + valueCanonizationRes.getKey().toString());
+					return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(valueCanonizationRes.getKey(), null);
+				}
 
-					Entry<CanonizationResult, List<CanonicalField>> getFieldsRes = currObj.getCanonicalFields(); 
-					if (getFieldsRes.getKey() != CanonizationResult.OK) {
-						if (CanonizerLog.isLoggingOn()) 
-							CanonizerLog.logLine("Canonization error: " + getFieldsRes.getKey().toString());
-						return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(getFieldsRes.getKey(), null);
-					}
-					
-					for (CanonicalField currfield: getFieldsRes.getValue()) {
+				CanonicalObject canonicalValue = valueCanonizationRes.getValue();
+				if (CanonizerLog.isLoggingOn()) 
+					CanonizerLog.logLine("	field value: " + /*currfield.toString()*/ currField.getName() + "->"  + canonicalValue.toString());
 
-						Object fieldValue = currfield.getValue(currObj);
-						Entry<CanonizationResult, CanonicalObject> valueCanonizationRes = resHeap.getCanonicalObject(fieldValue);
-						if (valueCanonizationRes.getKey() != CanonizationResult.OK) {
-							if (CanonizerLog.isLoggingOn()) 
-								CanonizerLog.logLine("Canonization error: " + valueCanonizationRes.getKey().toString());
-							return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(valueCanonizationRes.getKey(), null);
-						}
+				if (!canonicalValue.isNull() && !canonicalValue.isPrimitive() && visited.add(canonicalValue)) 
+					workQueue.add(canonicalValue);	
+				// Treat cobj current field;
+				// printVectorComponent(cobj)
+			}
 
-						CanonicalObject canonicalValue = valueCanonizationRes.getValue();
-						if (CanonizerLog.isLoggingOn()) 
-							CanonizerLog.logLine("	field value: " + currfield.toString() + "->"  + canonicalValue.toString());
-
-						if (!canonicalValue.isNull() && !canonicalValue.isPrimitive() && visited.add(canonicalValue)) 
-							workQueue.add(canonicalValue);	
-						// Treat cobj current field;
-						// printVectorComponent(cobj)
-					}
-
-					// Treat all cobj fields;
-					// printVectorComponent(cobj)
+			// Treat all cobj fields;
+			// printVectorComponent(cobj)
 		}
 
 		if (CanonizerLog.isLoggingOn()) {

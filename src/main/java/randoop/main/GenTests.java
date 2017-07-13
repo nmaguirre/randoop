@@ -65,7 +65,9 @@ import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonicalStore;
 import randoop.util.heapcanonization.CanonizerLog;
 import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
+import randoop.util.heapcanonization.candidatevectors.CandidateVectorsFieldExtensions;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -381,11 +383,7 @@ public class GenTests extends GenInputsAbstract {
 
     
     explorer.initCandVectCanonizerAndGenerator(classnames, AbstractGenerator.cand_vect_max_objs);
-    HeapCanonizer newCanonizer = AbstractGenerator.candVectCanonizer;
-    CanonicalStore store = newCanonizer.getStore();
-    CanonicalHeap heap = new CanonicalHeap(store, AbstractGenerator.cand_vect_max_objs);
-    if (CandidateVectorsWriter.isEnabled())
-    	CandidateVectorsWriter.logLine(AbstractGenerator.candVectGenerator.printCandidateVectorsStructure(heap));
+
     
     /*
      * setup for check generation

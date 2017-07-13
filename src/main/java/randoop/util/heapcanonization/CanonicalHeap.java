@@ -40,7 +40,7 @@ public class CanonicalHeap {
 			return new AbstractMap.SimpleEntry<>(CanonizationResult.OK, res);
 		
 		// If the object limit is exceeded for the current class, report the error
-		if (objects.get(clazz).size() > maxObjects) 
+		if (objects.get(clazz).size() >= maxObjects) 
 			return new AbstractMap.SimpleEntry<>(CanonizationResult.LIMITS_EXCEEDED, null);
 		
 		// Create a new canonical object
