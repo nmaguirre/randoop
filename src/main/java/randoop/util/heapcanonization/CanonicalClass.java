@@ -47,9 +47,9 @@ public class CanonicalClass {
 		
 		if (!isPrimitive && !isArray) {
 			ancestor = canonizeAncestors();
-			canonizeFields();
-			isAbstract = Modifier.isAbstract(clazz.getModifiers());
 			isInterface = Modifier.isInterface(clazz.getModifiers());
+			isAbstract = Modifier.isAbstract(clazz.getModifiers());
+			canonizeFields();
 		}
 		else {
 			ancestor = null;
@@ -85,6 +85,10 @@ public class CanonicalClass {
 		Collections.sort(sortedFields, new FieldComparatorByName());
 		for (Field fld: sortedFields) {
 			Class<?> fldType = fld.getType();
+			// If this is an inner class, ignore the this$0 field pointing to its enclosing class.
+			if (fld.getName().equals("this$0") && clazz.getEnclosingClass() != null)
+				continue;
+			
 			CanonicalClass fCanonicalType = null;
 			if (fldType.getName().equals(name))
 				fCanonicalType = this;

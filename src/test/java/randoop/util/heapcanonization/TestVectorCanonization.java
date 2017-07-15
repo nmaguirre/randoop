@@ -6,6 +6,7 @@ import org.junit.Test;
 import randoop.test.datastructures.binheap.BinomialHeap;
 import randoop.test.datastructures.bstree.BSTree;
 import randoop.test.datastructures.singlylist.SinglyLinkedList;
+import randoop.test.datastructures.singlylistinner.SinglyLinkedListInner;
 import randoop.test.datastructures.treeset.TreeSet;
 import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonizationResult;
@@ -20,10 +21,52 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * Canonizer Tests
+ * A few tests for the vector canonization algorithm.
  */
 public class TestVectorCanonization {
    
+	@Test
+	public void testSinglyLinkedListWithInnerNode() {
+		
+		String headerOracle = "randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o1.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o1.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o2.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o2.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o3.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o3.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o4.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o4.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o5.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o5.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o1.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o1.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o2.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o2.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o3.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o3.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o4.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o4.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o5.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o5.size,randoop.util.heapcanonization.DummyHeapRoot->o0.theroot";
+		String vectorOracle = "2,0,3,2,4,3,0,4,0,0,1,3,0,0,0,0,0,0,0,0,1";
+		
+		int maxObjects = 5;
+		Set<String> classNames = new HashSet<String>();
+		classNames.add(SinglyLinkedListInner.class.getName());
+		
+		// O lo que es lo mismo que la linea anterior:
+		// classNames.add("java.util.LinkedList");
+
+		/** Inicializar clases que hacen la canonizacion **/
+		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
+		// por clase en los vectores candidatos
+		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+	
+		/* Descomentar esto para imprimir el header de los vectores candidatos */
+		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
+		Assert.assertTrue(header.toString().equals(headerOracle));
+		
+		/** Crear el objeto a canonizar. Esto es lo unico que cambia, el resto del codigo es siempre igual **/
+		//List<Integer> obj = new LinkedList<>();
+		//obj.add(2);
+		SinglyLinkedListInner obj = new SinglyLinkedListInner();
+		obj.add(2);
+		obj.add(3);
+		obj.add(4);
+		
+		/** Canonizar el objeto creado **/
+		Entry<CanonizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Assert.assertTrue(canonRes.getKey() == CanonizationResult.OK);
+		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+		Assert.assertTrue(candVect.toString().equals(vectorOracle));
+
+	}	
+	
+	
 	@Test
 	public void testSinglyLinkedList() {
 		
@@ -275,7 +318,7 @@ public class TestVectorCanonization {
 	@Test
 	public void testTreeSet() {
 		
-		String headerOracle = "randoop.test.datasctructures.treeset.TreeSetEntry->o1._index,randoop.test.datasctructures.treeset.TreeSetEntry->o1.color,randoop.test.datasctructures.treeset.TreeSetEntry->o1.key,randoop.test.datasctructures.treeset.TreeSetEntry->o1.left,randoop.test.datasctructures.treeset.TreeSetEntry->o1.parent,randoop.test.datasctructures.treeset.TreeSetEntry->o1.right,randoop.test.datasctructures.treeset.TreeSetEntry->o2._index,randoop.test.datasctructures.treeset.TreeSetEntry->o2.color,randoop.test.datasctructures.treeset.TreeSetEntry->o2.key,randoop.test.datasctructures.treeset.TreeSetEntry->o2.left,randoop.test.datasctructures.treeset.TreeSetEntry->o2.parent,randoop.test.datasctructures.treeset.TreeSetEntry->o2.right,randoop.test.datasctructures.treeset.TreeSetEntry->o3._index,randoop.test.datasctructures.treeset.TreeSetEntry->o3.color,randoop.test.datasctructures.treeset.TreeSetEntry->o3.key,randoop.test.datasctructures.treeset.TreeSetEntry->o3.left,randoop.test.datasctructures.treeset.TreeSetEntry->o3.parent,randoop.test.datasctructures.treeset.TreeSetEntry->o3.right,randoop.test.datasctructures.treeset.TreeSetEntry->o4._index,randoop.test.datasctructures.treeset.TreeSetEntry->o4.color,randoop.test.datasctructures.treeset.TreeSetEntry->o4.key,randoop.test.datasctructures.treeset.TreeSetEntry->o4.left,randoop.test.datasctructures.treeset.TreeSetEntry->o4.parent,randoop.test.datasctructures.treeset.TreeSetEntry->o4.right,randoop.test.datasctructures.treeset.TreeSetEntry->o5._index,randoop.test.datasctructures.treeset.TreeSetEntry->o5.color,randoop.test.datasctructures.treeset.TreeSetEntry->o5.key,randoop.test.datasctructures.treeset.TreeSetEntry->o5.left,randoop.test.datasctructures.treeset.TreeSetEntry->o5.parent,randoop.test.datasctructures.treeset.TreeSetEntry->o5.right,randoop.test.datasctructures.treeset.TreeSet->o1.BLACK,randoop.test.datasctructures.treeset.TreeSet->o1.RED,randoop.test.datasctructures.treeset.TreeSet->o1.root,randoop.test.datasctructures.treeset.TreeSet->o1.size,randoop.test.datasctructures.treeset.TreeSet->o2.BLACK,randoop.test.datasctructures.treeset.TreeSet->o2.RED,randoop.test.datasctructures.treeset.TreeSet->o2.root,randoop.test.datasctructures.treeset.TreeSet->o2.size,randoop.test.datasctructures.treeset.TreeSet->o3.BLACK,randoop.test.datasctructures.treeset.TreeSet->o3.RED,randoop.test.datasctructures.treeset.TreeSet->o3.root,randoop.test.datasctructures.treeset.TreeSet->o3.size,randoop.test.datasctructures.treeset.TreeSet->o4.BLACK,randoop.test.datasctructures.treeset.TreeSet->o4.RED,randoop.test.datasctructures.treeset.TreeSet->o4.root,randoop.test.datasctructures.treeset.TreeSet->o4.size,randoop.test.datasctructures.treeset.TreeSet->o5.BLACK,randoop.test.datasctructures.treeset.TreeSet->o5.RED,randoop.test.datasctructures.treeset.TreeSet->o5.root,randoop.test.datasctructures.treeset.TreeSet->o5.size,randoop.util.heapcanonization.DummyHeapRoot->o0.theroot";
+		String headerOracle = "randoop.test.datastructures.treeset.TreeSetEntry->o1._index,randoop.test.datastructures.treeset.TreeSetEntry->o1.color,randoop.test.datastructures.treeset.TreeSetEntry->o1.key,randoop.test.datastructures.treeset.TreeSetEntry->o1.left,randoop.test.datastructures.treeset.TreeSetEntry->o1.parent,randoop.test.datastructures.treeset.TreeSetEntry->o1.right,randoop.test.datastructures.treeset.TreeSetEntry->o2._index,randoop.test.datastructures.treeset.TreeSetEntry->o2.color,randoop.test.datastructures.treeset.TreeSetEntry->o2.key,randoop.test.datastructures.treeset.TreeSetEntry->o2.left,randoop.test.datastructures.treeset.TreeSetEntry->o2.parent,randoop.test.datastructures.treeset.TreeSetEntry->o2.right,randoop.test.datastructures.treeset.TreeSetEntry->o3._index,randoop.test.datastructures.treeset.TreeSetEntry->o3.color,randoop.test.datastructures.treeset.TreeSetEntry->o3.key,randoop.test.datastructures.treeset.TreeSetEntry->o3.left,randoop.test.datastructures.treeset.TreeSetEntry->o3.parent,randoop.test.datastructures.treeset.TreeSetEntry->o3.right,randoop.test.datastructures.treeset.TreeSetEntry->o4._index,randoop.test.datastructures.treeset.TreeSetEntry->o4.color,randoop.test.datastructures.treeset.TreeSetEntry->o4.key,randoop.test.datastructures.treeset.TreeSetEntry->o4.left,randoop.test.datastructures.treeset.TreeSetEntry->o4.parent,randoop.test.datastructures.treeset.TreeSetEntry->o4.right,randoop.test.datastructures.treeset.TreeSetEntry->o5._index,randoop.test.datastructures.treeset.TreeSetEntry->o5.color,randoop.test.datastructures.treeset.TreeSetEntry->o5.key,randoop.test.datastructures.treeset.TreeSetEntry->o5.left,randoop.test.datastructures.treeset.TreeSetEntry->o5.parent,randoop.test.datastructures.treeset.TreeSetEntry->o5.right,randoop.test.datastructures.treeset.TreeSet->o1.BLACK,randoop.test.datastructures.treeset.TreeSet->o1.RED,randoop.test.datastructures.treeset.TreeSet->o1.root,randoop.test.datastructures.treeset.TreeSet->o1.size,randoop.test.datastructures.treeset.TreeSet->o2.BLACK,randoop.test.datastructures.treeset.TreeSet->o2.RED,randoop.test.datastructures.treeset.TreeSet->o2.root,randoop.test.datastructures.treeset.TreeSet->o2.size,randoop.test.datastructures.treeset.TreeSet->o3.BLACK,randoop.test.datastructures.treeset.TreeSet->o3.RED,randoop.test.datastructures.treeset.TreeSet->o3.root,randoop.test.datastructures.treeset.TreeSet->o3.size,randoop.test.datastructures.treeset.TreeSet->o4.BLACK,randoop.test.datastructures.treeset.TreeSet->o4.RED,randoop.test.datastructures.treeset.TreeSet->o4.root,randoop.test.datastructures.treeset.TreeSet->o4.size,randoop.test.datastructures.treeset.TreeSet->o5.BLACK,randoop.test.datastructures.treeset.TreeSet->o5.RED,randoop.test.datastructures.treeset.TreeSet->o5.root,randoop.test.datastructures.treeset.TreeSet->o5.size,randoop.util.heapcanonization.DummyHeapRoot->o0.theroot";
 		String vectorOracle = "0,1,3,2,0,3,0,1,1,4,1,5,0,1,4,0,1,0,0,0,0,0,2,0,0,0,2,0,2,0,1,0,1,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1";
 		
 		int maxObjects = 5;
@@ -316,7 +359,7 @@ public class TestVectorCanonization {
 	@Test
 	public void testBinHeap() {
 		
-		String headerOracle = "randoop.test.datasturctures.binheap.BinomialHeapNode->o1._index,randoop.test.datasturctures.binheap.BinomialHeapNode->o1.child,randoop.test.datasturctures.binheap.BinomialHeapNode->o1.degree,randoop.test.datasturctures.binheap.BinomialHeapNode->o1.key,randoop.test.datasturctures.binheap.BinomialHeapNode->o1.parent,randoop.test.datasturctures.binheap.BinomialHeapNode->o1.sibling,randoop.test.datasturctures.binheap.BinomialHeapNode->o2._index,randoop.test.datasturctures.binheap.BinomialHeapNode->o2.child,randoop.test.datasturctures.binheap.BinomialHeapNode->o2.degree,randoop.test.datasturctures.binheap.BinomialHeapNode->o2.key,randoop.test.datasturctures.binheap.BinomialHeapNode->o2.parent,randoop.test.datasturctures.binheap.BinomialHeapNode->o2.sibling,randoop.test.datasturctures.binheap.BinomialHeapNode->o3._index,randoop.test.datasturctures.binheap.BinomialHeapNode->o3.child,randoop.test.datasturctures.binheap.BinomialHeapNode->o3.degree,randoop.test.datasturctures.binheap.BinomialHeapNode->o3.key,randoop.test.datasturctures.binheap.BinomialHeapNode->o3.parent,randoop.test.datasturctures.binheap.BinomialHeapNode->o3.sibling,randoop.test.datasturctures.binheap.BinomialHeapNode->o4._index,randoop.test.datasturctures.binheap.BinomialHeapNode->o4.child,randoop.test.datasturctures.binheap.BinomialHeapNode->o4.degree,randoop.test.datasturctures.binheap.BinomialHeapNode->o4.key,randoop.test.datasturctures.binheap.BinomialHeapNode->o4.parent,randoop.test.datasturctures.binheap.BinomialHeapNode->o4.sibling,randoop.test.datasturctures.binheap.BinomialHeapNode->o5._index,randoop.test.datasturctures.binheap.BinomialHeapNode->o5.child,randoop.test.datasturctures.binheap.BinomialHeapNode->o5.degree,randoop.test.datasturctures.binheap.BinomialHeapNode->o5.key,randoop.test.datasturctures.binheap.BinomialHeapNode->o5.parent,randoop.test.datasturctures.binheap.BinomialHeapNode->o5.sibling,randoop.test.datasturctures.binheap.BinomialHeap->o1.Nodes,randoop.test.datasturctures.binheap.BinomialHeap->o1.size,randoop.test.datasturctures.binheap.BinomialHeap->o2.Nodes,randoop.test.datasturctures.binheap.BinomialHeap->o2.size,randoop.test.datasturctures.binheap.BinomialHeap->o3.Nodes,randoop.test.datasturctures.binheap.BinomialHeap->o3.size,randoop.test.datasturctures.binheap.BinomialHeap->o4.Nodes,randoop.test.datasturctures.binheap.BinomialHeap->o4.size,randoop.test.datasturctures.binheap.BinomialHeap->o5.Nodes,randoop.test.datasturctures.binheap.BinomialHeap->o5.size,randoop.util.heapcanonization.DummyHeapRoot->o0.theroot";
+		String headerOracle = "randoop.test.datastructures.binheap.BinomialHeapNode->o1._index,randoop.test.datastructures.binheap.BinomialHeapNode->o1.child,randoop.test.datastructures.binheap.BinomialHeapNode->o1.degree,randoop.test.datastructures.binheap.BinomialHeapNode->o1.key,randoop.test.datastructures.binheap.BinomialHeapNode->o1.parent,randoop.test.datastructures.binheap.BinomialHeapNode->o1.sibling,randoop.test.datastructures.binheap.BinomialHeapNode->o2._index,randoop.test.datastructures.binheap.BinomialHeapNode->o2.child,randoop.test.datastructures.binheap.BinomialHeapNode->o2.degree,randoop.test.datastructures.binheap.BinomialHeapNode->o2.key,randoop.test.datastructures.binheap.BinomialHeapNode->o2.parent,randoop.test.datastructures.binheap.BinomialHeapNode->o2.sibling,randoop.test.datastructures.binheap.BinomialHeapNode->o3._index,randoop.test.datastructures.binheap.BinomialHeapNode->o3.child,randoop.test.datastructures.binheap.BinomialHeapNode->o3.degree,randoop.test.datastructures.binheap.BinomialHeapNode->o3.key,randoop.test.datastructures.binheap.BinomialHeapNode->o3.parent,randoop.test.datastructures.binheap.BinomialHeapNode->o3.sibling,randoop.test.datastructures.binheap.BinomialHeapNode->o4._index,randoop.test.datastructures.binheap.BinomialHeapNode->o4.child,randoop.test.datastructures.binheap.BinomialHeapNode->o4.degree,randoop.test.datastructures.binheap.BinomialHeapNode->o4.key,randoop.test.datastructures.binheap.BinomialHeapNode->o4.parent,randoop.test.datastructures.binheap.BinomialHeapNode->o4.sibling,randoop.test.datastructures.binheap.BinomialHeapNode->o5._index,randoop.test.datastructures.binheap.BinomialHeapNode->o5.child,randoop.test.datastructures.binheap.BinomialHeapNode->o5.degree,randoop.test.datastructures.binheap.BinomialHeapNode->o5.key,randoop.test.datastructures.binheap.BinomialHeapNode->o5.parent,randoop.test.datastructures.binheap.BinomialHeapNode->o5.sibling,randoop.test.datastructures.binheap.BinomialHeap->o1.Nodes,randoop.test.datastructures.binheap.BinomialHeap->o1.size,randoop.test.datastructures.binheap.BinomialHeap->o2.Nodes,randoop.test.datastructures.binheap.BinomialHeap->o2.size,randoop.test.datastructures.binheap.BinomialHeap->o3.Nodes,randoop.test.datastructures.binheap.BinomialHeap->o3.size,randoop.test.datastructures.binheap.BinomialHeap->o4.Nodes,randoop.test.datastructures.binheap.BinomialHeap->o4.size,randoop.test.datastructures.binheap.BinomialHeap->o5.Nodes,randoop.test.datastructures.binheap.BinomialHeap->o5.size,randoop.util.heapcanonization.DummyHeapRoot->o0.theroot";
 		String vectorOracle = "0,0,0,3,0,2,0,3,2,0,0,0,0,4,1,1,2,5,0,0,0,2,3,0,0,0,0,9,2,0,1,5,0,0,0,0,0,0,0,0,1";
 		
 		int maxObjects = 5;
