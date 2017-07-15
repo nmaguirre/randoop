@@ -24,8 +24,8 @@ public class CanonicalClass {
 	private final CanonicalStore store;
 	private final boolean isAbstract;
 	private final boolean isInterface;
-	// TODO: Implement
-	private int fieldDistance;
+	// TODO: For now it is implemented 
+	// private int fieldDistance;
 
 	public CanonicalClass(String name, CanonicalStore store) {
 		this.store = store;
