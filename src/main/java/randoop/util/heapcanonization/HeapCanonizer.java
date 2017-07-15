@@ -22,17 +22,23 @@ public class HeapCanonizer {
 	private final CanonicalStore store;
 	private final Collection<String> classNames;
 	private final int maxObjects;
+	private final int maxFieldDistance;
 		
 	public HeapCanonizer(Collection<String> classNames, int maxObjects) {
+		this(classNames, maxObjects, Integer.MAX_VALUE);
+	}
+	
+	public HeapCanonizer(Collection<String> classNames, int maxObjects, int maxFieldDistance) {
 		this.classNames = classNames;
 		this.maxObjects = maxObjects;
 		this.store = new CanonicalStore(classNames);
+		this.maxFieldDistance = maxFieldDistance;
 	}
-	
+
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public Map.Entry<CanonizationResult, CanonicalHeap> traverseBreadthFirstAndCanonize(Object root) {
+	public Entry<CanonizationResult, CanonicalHeap> traverseBreadthFirstAndCanonize(Object root) {
 
 		if (CanonizerLog.isLoggingOn()) {
 			CanonizerLog.logLine("----------");
@@ -44,22 +50,22 @@ public class HeapCanonizer {
 		DummyHeapRoot dummyRoot = new DummyHeapRoot(root);
 		CanonicalObject canonicalRoot = resHeap.getCanonicalObject(dummyRoot).getValue();
 
-		Queue<CanonicalObject> workQueue = new LinkedList<>();
-		workQueue.add(canonicalRoot);
+		Queue<Entry<CanonicalObject, Integer>> workQueue = new LinkedList<>();
+		workQueue.add(new AbstractMap.SimpleEntry<>(canonicalRoot, -1));
 
 		Set<CanonicalObject> visited = new HashSet<>();
 		visited.add(canonicalRoot);
 
 		while (!workQueue.isEmpty()) {
 
-			CanonicalObject currObj = workQueue.poll();
+			Entry<CanonicalObject, Integer> currElem = workQueue.poll();
+			int currFieldDistance = currElem.getValue();
+			CanonicalObject currObj = currElem.getKey(); 
 			CanonicalClass currObjType = currObj.getCanonicalClass();
 			assert currObj != null && 
 					currObjType != null && 
 					!currObj.isNull() && 
 					!currObj.isPrimitive() : "Null/Primitive objects are never added to workQueue";
-
-			//assert !currObjType.isArray() : "Arrays are not supported yet.";
 
 			if (CanonizerLog.isLoggingOn()) 
 				CanonizerLog.logLine("Current object: " + currObj.toString());
@@ -85,8 +91,18 @@ public class HeapCanonizer {
 				if (CanonizerLog.isLoggingOn()) 
 					CanonizerLog.logLine("	field value: " + /*currfield.toString()*/ currField.getName() + "->"  + canonicalValue.toString());
 
-				if (!canonicalValue.isNull() && !canonicalValue.isPrimitive() && visited.add(canonicalValue)) 
-					workQueue.add(canonicalValue);	
+				if (!canonicalValue.isNull() && 
+						!canonicalValue.isPrimitive() 
+						&& visited.add(canonicalValue)) {
+					workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance));	
+					if (currFieldDistance < maxFieldDistance-1) {
+						if (canonicalValue.isArray())
+							// Arrays elements don't count as fields
+							workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance));	
+						else	
+							workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance+1));	
+					}
+				}
 				// Treat cobj current field;
 				// printVectorComponent(cobj)
 			}
