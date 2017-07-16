@@ -7,6 +7,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import randoop.util.heapcanonization.fieldextensions.FieldExtensionsCollector;
+import randoop.util.heapcanonization.fieldextensions.FieldExtensionsDummyCollector;
+
 import java.util.Queue;
 import java.util.Set;
 
@@ -34,11 +38,16 @@ public class HeapCanonizer {
 		this.store = new CanonicalStore(classNames);
 		this.maxFieldDistance = maxFieldDistance;
 	}
+	
+	
+	public Entry<CanonizationResult, CanonicalHeap> traverseBreadthFirstAndCanonize(Object root) {	
+		return traverseBreadthFirstAndCanonize(root, new FieldExtensionsDummyCollector());
+	}
 
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public Entry<CanonizationResult, CanonicalHeap> traverseBreadthFirstAndCanonize(Object root) {
+	public Entry<CanonizationResult, CanonicalHeap> traverseBreadthFirstAndCanonize(Object root, FieldExtensionsCollector collector) {
 
 		if (CanonizerLog.isLoggingOn()) {
 			CanonizerLog.logLine("----------");
@@ -104,6 +113,7 @@ public class HeapCanonizer {
 					}
 				}
 				// Treat cobj current field;
+				collector.collect(currField, currObj, canonicalValue);
 				// printVectorComponent(cobj)
 			}
 
@@ -120,6 +130,10 @@ public class HeapCanonizer {
 
 	public CanonicalStore getStore() {
 		return store;
+	}
+	
+	public Set<String> getAllCanonicalClassNames() {
+		return store.getAllCanonicalClassnames();
 	}
 
 	

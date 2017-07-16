@@ -18,7 +18,7 @@ public class CanonicalStore {
 		genClasses.addAll(classNames);
 		
 		List<String> sortedNames = new LinkedList<>(classNames);
-		sortedNames.add("randoop.util.heapcanonization.DummyHeapRoot");
+		sortedNames.add(DummyHeapRoot.class.getName());
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
 			getCanonicalClass(name);
