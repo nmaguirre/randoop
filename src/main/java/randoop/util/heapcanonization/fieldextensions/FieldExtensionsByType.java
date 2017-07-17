@@ -6,22 +6,20 @@ import java.util.Map;
 public class FieldExtensionsByType implements FieldExtensions {
 	
 	private FieldExtensionsStrings referenceExtensions = new FieldExtensionsStrings();
-	private Map<String, FieldExtensionsPrimitiveBitwise> primitiveExtensions = new HashMap<>();
+	private Map<String, FieldExtensionsPrimitiveBinary> primitiveExtensions = new HashMap<>();
 	
-	public FieldExtensionsByType() {
-		for (PrimitiveType t: PrimitiveType.values()) 
-			primitiveExtensions.put(t.toString(), new FieldExtensionsPrimitiveBitwise());
-	}
-
 	public void addPairToReferenceField(String fieldStr, String objStr, String valueStr) {
 		referenceExtensions.addPairToField(fieldStr, objStr, valueStr);
 	}
 
-	public void addPairToPrimitiveField(String typeStr, String fieldStr, String objStr, BitwisePrimitiveValue bitwisePrimitiveValue) {
-		FieldExtensionsPrimitiveBitwise currPrimExt = primitiveExtensions.get(typeStr); 
+	public void addPairToPrimitiveField(String typeStr, String fieldStr, String objStr, BinaryPrimitiveValue bitwisePrimitiveValue) {
+		FieldExtensionsPrimitiveBinary currPrimExt = primitiveExtensions.get(typeStr); 
+		if (currPrimExt == null) {
+			currPrimExt = new FieldExtensionsPrimitiveBinary();
+			primitiveExtensions.put(typeStr, currPrimExt);
+		}
 		currPrimExt.addPairToField(fieldStr, objStr, bitwisePrimitiveValue);
 	}
-	
 	
 	public String toString() {
 		String result = "---------- FIELD EXTENSIONS ----------\n";
@@ -39,4 +37,39 @@ public class FieldExtensionsByType implements FieldExtensions {
 		result += "----------";
 		return result;
 	}
+
+	@Override
+	public boolean addAll(FieldExtensions other) {
+		FieldExtensionsByType otherExt = (FieldExtensionsByType) other;
+		boolean res = false;
+		res |= referenceExtensions.addAll(otherExt.referenceExtensions);
+		for (String type: otherExt.primitiveExtensions.keySet()) {
+			FieldExtensionsPrimitiveBinary currPrimExt = primitiveExtensions.get(type); 
+			if (currPrimExt == null) {
+				currPrimExt = new FieldExtensionsPrimitiveBinary();
+				primitiveExtensions.put(type, currPrimExt);
+			}
+			res |= primitiveExtensions.get(type).addAll(otherExt.primitiveExtensions.get(type));
+		}
+		
+		return res;
+	}
+
+	@Override
+	public boolean containsAll(FieldExtensions other) {
+		FieldExtensionsByType otherExt = (FieldExtensionsByType) other;
+		if (!primitiveExtensions.keySet().containsAll(otherExt.primitiveExtensions.keySet()))
+			return false;
+
+		if (!referenceExtensions.containsAll(otherExt.referenceExtensions))
+			return false;
+		
+		for (String type: primitiveExtensions.keySet()) 
+			if (!primitiveExtensions.get(type).containsAll(otherExt.primitiveExtensions.get(type)))
+				return false;
+		
+		return false;
+	}
+
+
 }

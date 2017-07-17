@@ -38,7 +38,7 @@ public class FieldExtensionsByTypeCollector implements FieldExtensionsCollector 
 			// Canonical value is primitive
 			PrimitiveType objType = PrimitiveType.fromObject(canonicalValue.getObject());
 			extensions.addPairToPrimitiveField(objType.toString(), fieldStr, objStr, 
-					new BitwisePrimitiveValue(canonicalValue.getObject()));
+					new BinaryPrimitiveValue(canonicalValue.getObject()));
 		}
 	}
 

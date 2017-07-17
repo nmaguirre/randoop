@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class BitwisePrimitiveValue {
+public class BinaryPrimitiveValue {
 
 	private Map<Integer, Set<Character>> bitwiseValue = new HashMap<>();
 	
@@ -16,7 +16,9 @@ public class BitwisePrimitiveValue {
 		return String.format("%0"+(n-str.length())+"d%s", 0, str); 
 	}
 	
-	public BitwisePrimitiveValue(Object o) {
+	public BinaryPrimitiveValue() { }
+	
+	public BinaryPrimitiveValue(Object o) {
 		int n;
 		switch (PrimitiveType.fromObject(o)) {
 		case INTEGER:
@@ -76,7 +78,7 @@ public class BitwisePrimitiveValue {
 		}
 	}
 	
-	public boolean union(BitwisePrimitiveValue other) {
+	public boolean union(BinaryPrimitiveValue other) {
 		boolean extended = false;
 		int i;
 		for (i = 0; i < bitwiseValue.size(); i++) {
@@ -114,7 +116,7 @@ public class BitwisePrimitiveValue {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		BitwisePrimitiveValue other = (BitwisePrimitiveValue) obj;
+		BinaryPrimitiveValue other = (BinaryPrimitiveValue) obj;
 		if (bitwiseValue == null) {
 			if (other.bitwiseValue != null)
 				return false;
@@ -123,7 +125,7 @@ public class BitwisePrimitiveValue {
 		return true;
 	}
 
-	public boolean contains(BitwisePrimitiveValue other) {
+	public boolean contains(BinaryPrimitiveValue other) {
 		if (this.bitwiseValue.size() != other.bitwiseValue.size())
 			return false;
 		

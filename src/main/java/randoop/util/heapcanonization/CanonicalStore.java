@@ -35,8 +35,6 @@ public class CanonicalStore {
 		if (res != null)
 			return res;
 		
-		//System.out.print("New Class: " + name);
-		//res = new CanonicalClass(name, this);
 		res = new CanonicalClass(name, this);
 		classes.put(name, res);
 

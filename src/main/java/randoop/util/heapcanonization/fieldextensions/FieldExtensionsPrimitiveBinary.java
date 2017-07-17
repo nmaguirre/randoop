@@ -7,16 +7,17 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FieldExtensionsStrings implements FieldExtensions {
-	
+public class FieldExtensionsPrimitiveBinary {
+
+	// TOOD: Is it easy to compute size with these extensions?
 	//private int size = 0;
 
-	private Map<String, FieldExtensionStrings> extensions = new HashMap<String, FieldExtensionStrings>();
+	private Map<String, FieldExtensionPrimitiveBinary> extensions = new HashMap<>();
 
-	public boolean addPairToField(String field, String src, String tgt) {
-		FieldExtensionStrings fe = extensions.get(field);
+	public boolean addPairToField(String field, String src, BinaryPrimitiveValue tgt) {
+		FieldExtensionPrimitiveBinary fe = extensions.get(field);
 		if (fe == null) {
-			fe = new FieldExtensionStrings(field);
+			fe = new FieldExtensionPrimitiveBinary(field);
 			extensions.put(field, fe);
 		}
 		return fe.addPair(src, tgt);
@@ -29,8 +30,8 @@ public class FieldExtensionsStrings implements FieldExtensions {
 		*/
 	}
 	
-	public boolean pairBelongsToField(String field, String src, String tgt) {
-		FieldExtensionStrings fe = extensions.get(field);
+	public boolean pairBelongsToField(String field, String src, BinaryPrimitiveValue tgt) {
+		FieldExtensionPrimitiveBinary fe = extensions.get(field);
 		if (fe == null) 
 			return false;
 
@@ -56,41 +57,39 @@ public class FieldExtensionsStrings implements FieldExtensions {
 	}
 	*/
 
-
 	public boolean isEmpty() {
 		return extensions.isEmpty();
 	}
+	
+	
 
-	@Override
-	public boolean addAll(FieldExtensions other) {
-		FieldExtensionsStrings otherExt = (FieldExtensionsStrings) other;
+	public boolean addAll(FieldExtensionsPrimitiveBinary other) {
 		boolean res = false;
 		
-		for (String field: otherExt.extensions.keySet()) {
-			FieldExtensionStrings currExt = extensions.get(field);
+		for (String field: other.extensions.keySet()) {
+			FieldExtensionPrimitiveBinary currExt = extensions.get(field);
 			if (currExt == null) {
-				currExt = new FieldExtensionStrings(field);
+				currExt = new FieldExtensionPrimitiveBinary(field);
 				extensions.put(field, currExt);
 			}
-			res |= currExt.addAll(otherExt.extensions.get(field));
+			res |= currExt.addAll(other.extensions.get(field));
 		}
 
 		return res;
 	}
 
-	@Override
-	public boolean containsAll(FieldExtensions other) {
-		FieldExtensionsStrings otherExt = (FieldExtensionsStrings) other;
+
+	public boolean containsAll(FieldExtensionsPrimitiveBinary other) {
 		/*
 		if (otherExt.size > size) 
 			return false;
 			*/
 		
-		if (!extensions.keySet().containsAll(otherExt.extensions.keySet()))
+		if (!extensions.keySet().containsAll(other.extensions.keySet()))
 			return false;
 		
 		for (String field: extensions.keySet()) 
-			if (!extensions.get(field).containsAll(otherExt.extensions.get(field)))
+			if (!extensions.get(field).containsAll(other.extensions.get(field)))
 				return false;
 		
 		return true;
