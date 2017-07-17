@@ -3,11 +3,11 @@ package randoop.util.heapcanonization.fieldextensions;
 import randoop.util.heapcanonization.CanonicalField;
 import randoop.util.heapcanonization.CanonicalObject;
 
-public class FieldExtensionsStringsCollector implements FieldExtensionsCollector {
+public class FieldExtensionsByTypeCollector implements FieldExtensionsCollector {
 	
 	private static final String NULL_REPRESENTATION = "null";
 
-	FieldExtensionsStrings extensions = new FieldExtensionsStrings();
+	FieldExtensionsByType extensions = new FieldExtensionsByType();
 	
 	// pre: object cannot be null or primitive.
 	private String objectRepresentation(CanonicalObject object) {
@@ -20,18 +20,26 @@ public class FieldExtensionsStringsCollector implements FieldExtensionsCollector
 		String fieldStr = currObj.getCanonicalClass().getName() + "." + currField.getName();
 		String objStr = objectRepresentation(currObj); 
 		
+		/*
 		if (!collectPrimitives() && (canonicalValue.isNull() || canonicalValue.isPrimitive()))
 			return;
+		*/
 
-		String valueStr = "";
-		if (canonicalValue.isNull()) 
-			valueStr = NULL_REPRESENTATION;
-		else if (canonicalValue.isPrimitive())
-			valueStr = canonicalValue.getObject().toString();
-		else
-			valueStr = objectRepresentation(canonicalValue);
-		
-		extensions.addPairToField(fieldStr, objStr, valueStr);
+		if (canonicalValue.isNull() || !canonicalValue.isPrimitive()) {
+			String valueStr = "";
+			if (canonicalValue.isNull()) 
+				valueStr = NULL_REPRESENTATION;
+			else
+				valueStr = objectRepresentation(canonicalValue);
+			
+			extensions.addPairToReferenceField(fieldStr, objStr, valueStr);
+		}
+		else { 
+			// Canonical value is primitive
+			PrimitiveType objType = PrimitiveType.fromObject(canonicalValue.getObject());
+			extensions.addPairToPrimitiveField(objType.toString(), fieldStr, objStr, 
+					new BitwisePrimitiveValue(canonicalValue.getObject()));
+		}
 	}
 
 	boolean collectPrimitives() {

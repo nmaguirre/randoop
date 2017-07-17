@@ -6,27 +6,27 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 
-public class FieldExtension {
+public class FieldExtensionPrimitiveBitwise {
 	
 	private String fieldname;
-	private Map<String, Set<String>> extension = new HashMap<String, Set<String>>();
+	private Map<String, BitwisePrimitiveValue> extension = new HashMap<>();
 
-	public FieldExtension(String name) {
+	public FieldExtensionPrimitiveBitwise(String name) {
 		fieldname = name;
 	}
 	
-	public boolean addPair(String p1, String p2) {
-		Set<String> s = extension.get(p1);
+	public boolean addPair(String p1, BitwisePrimitiveValue p2) {
+		BitwisePrimitiveValue s = extension.get(p1);
 		if (s == null) {
-			s = new LinkedHashSet<String>();
-			extension.put(p1, s);
+			extension.put(p1, p2);
+			return true;
 		}
 		
-		return s.add(p2);
+		return s.union(p2);
 	}
 	
-	public boolean containsPair(String p1, String p2) {
-		Set<String> s = extension.get(p1);
+	public boolean containsPair(String p1, BitwisePrimitiveValue p2) {
+		BitwisePrimitiveValue s = extension.get(p1);
 		if (s == null)
 			return false;
 		
@@ -50,7 +50,7 @@ public class FieldExtension {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		FieldExtension other = (FieldExtension) obj;
+		FieldExtensionPrimitiveBitwise other = (FieldExtensionPrimitiveBitwise) obj;
 		if (fieldname == null) {
 			if (other.fieldname != null)
 				return false;
@@ -67,5 +67,6 @@ public class FieldExtension {
 	public String toString() {
 		return fieldname + ":" + extension.toString();
 	}
+
 	
 }

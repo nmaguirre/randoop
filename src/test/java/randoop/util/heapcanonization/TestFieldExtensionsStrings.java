@@ -13,6 +13,8 @@ import randoop.util.heapcanonization.CanonizationResult;
 import randoop.util.heapcanonization.HeapCanonizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
+import randoop.util.heapcanonization.fieldextensions.FieldExtensionsByTypeCollector;
+import randoop.util.heapcanonization.fieldextensions.FieldExtensionsCollector;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsStringsCollector;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsStringsNonPrimitiveCollector;
 
@@ -28,7 +30,7 @@ import java.util.Set;
 public class TestFieldExtensionsStrings {
    
 	@Test
-	public void testSinglyLinkedListWithInnerNode() {
+	public void testSinglyLinedListWithInnerNode() {
 		String headerOracle = "randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o1.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o1.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o2.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o2.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o3.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o3.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o4.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o4.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o5.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o5.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o1.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o1.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o2.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o2.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o3.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o3.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o4.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o4.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o5.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o5.size,randoop.util.heapcanonization.DummyHeapRoot->o0.theroot";
 		String vectorOracle = "2,0,3,2,4,3,0,4,0,0,1,3,0,0,0,0,0,0,0,0,1";	
 		
@@ -50,15 +52,21 @@ public class TestFieldExtensionsStrings {
 		obj.add(4);
 		
 		/** Canonizar el objeto creado **/
-		FieldExtensionsStringsCollector collector = new FieldExtensionsStringsCollector();
+		FieldExtensionsCollector collector = new FieldExtensionsStringsCollector();
 		Entry<CanonizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj, collector);
 		Assert.assertTrue(canonRes.getKey() == CanonizationResult.OK);
 		System.out.println(collector.getExtensions().toString());
 
-		FieldExtensionsStringsCollector collector2 = new FieldExtensionsStringsNonPrimitiveCollector();
+		FieldExtensionsCollector collector2 = new FieldExtensionsStringsNonPrimitiveCollector();
 		Entry<CanonizationResult, CanonicalHeap> canonRes2 = candVectCanonizer.traverseBreadthFirstAndCanonize(obj, collector2);
 		Assert.assertTrue(canonRes2.getKey() == CanonizationResult.OK);
 		System.out.println(collector2.getExtensions().toString());
+		
+		FieldExtensionsCollector collector3 = new FieldExtensionsByTypeCollector();
+		Entry<CanonizationResult, CanonicalHeap> canonRes3 = candVectCanonizer.traverseBreadthFirstAndCanonize(obj, collector3);
+		Assert.assertTrue(canonRes3.getKey() == CanonizationResult.OK);
+		System.out.println(collector3.getExtensions().toString());
+		
 	}	
 	
 	
