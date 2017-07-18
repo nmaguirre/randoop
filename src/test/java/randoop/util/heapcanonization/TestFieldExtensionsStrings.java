@@ -13,6 +13,7 @@ import randoop.util.heapcanonization.CanonizationResult;
 import randoop.util.heapcanonization.HeapCanonizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
+import randoop.util.heapcanonization.fieldextensions.FieldExtensions;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsByTypeCollector;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsCollector;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsStringsCollector;
@@ -68,6 +69,7 @@ public class TestFieldExtensionsStrings {
 		System.out.println(collector3.getExtensions().toString());
 		
 	}	
+	
 	
 	
 	@Test

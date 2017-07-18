@@ -65,10 +65,11 @@ public class FieldExtensionsByType implements FieldExtensions {
 			return false;
 		
 		for (String type: primitiveExtensions.keySet()) 
-			if (!primitiveExtensions.get(type).containsAll(otherExt.primitiveExtensions.get(type)))
+			if (otherExt.primitiveExtensions.get(type) != null &&
+				!primitiveExtensions.get(type).containsAll(otherExt.primitiveExtensions.get(type)))
 				return false;
 		
-		return false;
+		return true;
 	}
 
 

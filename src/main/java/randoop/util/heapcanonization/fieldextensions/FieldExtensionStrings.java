@@ -56,7 +56,8 @@ public class FieldExtensionStrings {
 			return false;
 		
 		for (String field: extension.keySet()) 
-			if (!extension.get(field).containsAll(other.extension.get(field)))
+			if (other.extension.get(field) != null &&
+				!extension.get(field).containsAll(other.extension.get(field)))
 				return false;
 		
 		return true;

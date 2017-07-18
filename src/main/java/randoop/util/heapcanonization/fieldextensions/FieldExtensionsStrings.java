@@ -90,7 +90,8 @@ public class FieldExtensionsStrings implements FieldExtensions {
 			return false;
 		
 		for (String field: extensions.keySet()) 
-			if (!extensions.get(field).containsAll(otherExt.extensions.get(field)))
+			if (otherExt.extensions.get(field) != null &&
+					!extensions.get(field).containsAll(otherExt.extensions.get(field)))
 				return false;
 		
 		return true;
