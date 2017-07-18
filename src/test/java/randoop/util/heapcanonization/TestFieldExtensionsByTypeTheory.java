@@ -139,7 +139,7 @@ public class TestFieldExtensionsByTypeTheory {
 		// por clase en los vectores candidatos
 		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
 		
-		FieldExtensionsCollector collector = new FieldExtensionsByTypeCollector();
+		FieldExtensionsCollector collector = new FieldExtensionsByTypeCollector(maxObjects);
 		Entry<CanonizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(o1, collector);
 		Assert.assertTrue(canonRes.getKey() == CanonizationResult.OK);
 		FieldExtensionsByType ext1 = (FieldExtensionsByType) collector.getExtensions();
@@ -148,7 +148,7 @@ public class TestFieldExtensionsByTypeTheory {
 		System.out.println(ext1.toString());
 		*/
 		
-		FieldExtensionsCollector collector2 = new FieldExtensionsByTypeCollector();
+		FieldExtensionsCollector collector2 = new FieldExtensionsByTypeCollector(maxObjects);
 		canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(o2, collector2);
 		Assert.assertTrue(canonRes.getKey() == CanonizationResult.OK);
 		FieldExtensionsByType ext2 = (FieldExtensionsByType) collector2.getExtensions();

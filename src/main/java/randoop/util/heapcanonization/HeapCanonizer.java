@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsCollector;
@@ -113,7 +112,12 @@ public class HeapCanonizer {
 					}
 				}
 				// Treat cobj current field;
-				collector.collect(currField, currObj, canonicalValue);
+				CanonizationResult addToFieldExtRes = collector.collect(currField, currObj, canonicalValue);
+				if (addToFieldExtRes != CanonizationResult.OK) {
+					if (CanonizerLog.isLoggingOn()) 
+						CanonizerLog.logLine("Canonization error: " + addToFieldExtRes.toString());
+					return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(addToFieldExtRes, null);
+				}
 				// printVectorComponent(cobj)
 			}
 

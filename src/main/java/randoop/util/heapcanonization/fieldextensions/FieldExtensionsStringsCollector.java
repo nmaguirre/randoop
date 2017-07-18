@@ -2,6 +2,7 @@ package randoop.util.heapcanonization.fieldextensions;
 
 import randoop.util.heapcanonization.CanonicalField;
 import randoop.util.heapcanonization.CanonicalObject;
+import randoop.util.heapcanonization.CanonizationResult;
 
 public class FieldExtensionsStringsCollector implements FieldExtensionsCollector {
 	
@@ -16,12 +17,12 @@ public class FieldExtensionsStringsCollector implements FieldExtensionsCollector
 
 	@Override
 	// pre: currObj cannot be null or primitive.
-	public void collect(CanonicalField currField, CanonicalObject currObj, CanonicalObject canonicalValue) {
+	public CanonizationResult collect(CanonicalField currField, CanonicalObject currObj, CanonicalObject canonicalValue) {
 		String fieldStr = currObj.getCanonicalClass().getName() + "." + currField.getName();
 		String objStr = objectRepresentation(currObj); 
 		
 		if (!collectPrimitives() && (canonicalValue.isNull() || canonicalValue.isPrimitive()))
-			return;
+			return CanonizationResult.OK;
 
 		String valueStr = "";
 		if (canonicalValue.isNull()) 
@@ -32,6 +33,8 @@ public class FieldExtensionsStringsCollector implements FieldExtensionsCollector
 			valueStr = objectRepresentation(canonicalValue);
 		
 		extensions.addPairToField(fieldStr, objStr, valueStr);
+		
+		return CanonizationResult.OK;
 	}
 
 	boolean collectPrimitives() {

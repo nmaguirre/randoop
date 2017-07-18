@@ -13,7 +13,6 @@ import randoop.util.heapcanonization.CanonizationResult;
 import randoop.util.heapcanonization.HeapCanonizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
-import randoop.util.heapcanonization.fieldextensions.FieldExtensions;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsByTypeCollector;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsCollector;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsStringsCollector;
@@ -63,7 +62,7 @@ public class TestFieldExtensionsStrings {
 		Assert.assertTrue(canonRes2.getKey() == CanonizationResult.OK);
 		System.out.println(collector2.getExtensions().toString());
 		
-		FieldExtensionsCollector collector3 = new FieldExtensionsByTypeCollector();
+		FieldExtensionsCollector collector3 = new FieldExtensionsByTypeCollector(maxObjects);
 		Entry<CanonizationResult, CanonicalHeap> canonRes3 = candVectCanonizer.traverseBreadthFirstAndCanonize(obj, collector3);
 		Assert.assertTrue(canonRes3.getKey() == CanonizationResult.OK);
 		System.out.println(collector3.getExtensions().toString());
