@@ -36,15 +36,15 @@ import randoop.util.Randomness;
 import randoop.util.SimpleList;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
-import randoop.util.heapcanonization.ExtendedExtensionsResult;
-import randoop.util.heapcanonization.CanonicalClass;
-import randoop.util.heapcanonization.CanonicalHeap;
-import randoop.util.heapcanonization.CanonicalStore;
-import randoop.util.heapcanonization.CanonizationResult;
-import randoop.util.heapcanonization.CanonizerLog;
-import randoop.util.heapcanonization.HeapCanonicalizer;
-import randoop.util.heapcanonization.candidatevectors.CandidateVector;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
+import randoop.util.heapcanonicalization.CanonicalClass;
+import randoop.util.heapcanonicalization.CanonicalHeap;
+import randoop.util.heapcanonicalization.CanonicalStore;
+import randoop.util.heapcanonicalization.CanonicalizationResult;
+import randoop.util.heapcanonicalization.CanonizerLog;
+import randoop.util.heapcanonicalization.ExtendedExtensionsResult;
+import randoop.util.heapcanonicalization.HeapCanonicalizer;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
 
 
 /**
@@ -323,8 +323,7 @@ private int maxsize;
     
   }
 
-    
-    
+
     
 	// Use the new canonizer to generate a candidate vector for receiver object 
     // of the last method of the sequence
@@ -349,7 +348,7 @@ private int maxsize;
 			if (CanonizerLog.isLoggingOn())
 				CanonizerLog.logLine("INFO: Active variable index: " + index);
 			
-			Entry<CanonizationResult, CanonicalHeap> res;
+			Entry<CanonicalizationResult, CanonicalHeap> res;
 			CanonicalClass rootClass = store.getCanonicalClass(o);
 			// FIXME: Should check the compile time type of o instead of its runtime type to 
 			// avoid generating null objects of other types? 
@@ -358,7 +357,7 @@ private int maxsize;
 				// Notice that we are always interested in generating a candidate object for null, 
 				// even if we don't know its type.
 				res = AbstractGenerator.candVectCanonicalizer.traverseBreadthFirstAndCanonize(o);
-				if (res.getKey() == CanonizationResult.OK) {
+				if (res.getKey() == CanonicalizationResult.OK) {
 					CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(res.getValue());
 							//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
 					candVectExtensions.addToExtensions(candidateVector);
@@ -368,7 +367,7 @@ private int maxsize;
 				}
 				else {
 					// assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
-					if (res.getKey() != CanonizationResult.OK) {
+					if (res.getKey() != CanonicalizationResult.OK) {
 						if (CanonizerLog.isLoggingOn()) {
 							CanonizerLog.logLine("----------");
 							CanonizerLog.logLine("Not canonizing an object that is larger than permitted "

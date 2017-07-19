@@ -45,15 +45,15 @@ import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.Tuple;
-import randoop.util.heapcanonization.CanonicalClass;
-import randoop.util.heapcanonization.CanonicalHeap;
-import randoop.util.heapcanonization.CanonicalStore;
-import randoop.util.heapcanonization.CanonizationResult;
-import randoop.util.heapcanonization.CanonizerLog;
-import randoop.util.heapcanonization.ExtendedExtensionsResult;
-import randoop.util.heapcanonization.HeapCanonicalizer;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
+import randoop.util.heapcanonicalization.CanonicalClass;
+import randoop.util.heapcanonicalization.CanonicalHeap;
+import randoop.util.heapcanonicalization.CanonicalStore;
+import randoop.util.heapcanonicalization.CanonicalizationResult;
+import randoop.util.heapcanonicalization.CanonizerLog;
+import randoop.util.heapcanonicalization.ExtendedExtensionsResult;
+import randoop.util.heapcanonicalization.HeapCanonicalizer;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for

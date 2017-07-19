@@ -26,18 +26,18 @@ import randoop.util.fieldbasedcontrol.CanonizerClass;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
-import randoop.util.heapcanonization.ExtendedExtensionsResult;
 import randoop.util.fieldbasedcontrol.MurmurHash3;
 import randoop.util.fieldbasedcontrol.MurmurHash3.LongPair;
+import randoop.util.heapcanonicalization.CanonicalHeap;
+import randoop.util.heapcanonicalization.CanonicalStore;
+import randoop.util.heapcanonicalization.ExtendedExtensionsResult;
+import randoop.util.heapcanonicalization.HeapCanonicalizer;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsFieldExtensions;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
 import randoop.util.fieldbasedcontrol.RandomPerm;
 import randoop.util.fieldbasedcontrol.Tuple;
-import randoop.util.heapcanonization.CanonicalHeap;
-import randoop.util.heapcanonization.CanonicalStore;
-import randoop.util.heapcanonization.HeapCanonicalizer;
-import randoop.util.heapcanonization.candidatevectors.CandidateVector;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorsFieldExtensions;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
@@ -185,7 +185,7 @@ public abstract class AbstractGenerator {
   public static int field_based_gen_negatives_ratio = 500;
 
   @Option("Generation stops when this many tests are discarded.")
-  public static int field_based_gen_max_discarded_tests = 100000;
+  public static int max_discarded_tests = 100000;
 
   @Option("Second phase TO.")
   public static int field_based_gen_second_phase_timeout_millis = 300000;
@@ -550,7 +550,7 @@ private int genFirstAdditionalObsErrorSeqs;
   protected boolean stop() {
     return (listenerMgr != null && listenerMgr.stopGeneration())
         || (timer.getTimeElapsedMillis() >= maxTimeMillis)
-        || (discardedTests > field_based_gen_max_discarded_tests)
+        || (discardedTests > max_discarded_tests)
         //|| (testsExtendingExt >= maxOutputSequences)
         || (numOutputSequences() >= maxOutputSequences)
         || (numGeneratedSequences() >= maxGeneratedSequences)
