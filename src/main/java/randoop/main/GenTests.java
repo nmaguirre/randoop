@@ -64,7 +64,7 @@ import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonicalStore;
 import randoop.util.heapcanonization.CanonizerLog;
-import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.HeapCanonicalizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsFieldExtensions;
@@ -381,9 +381,7 @@ public class GenTests extends GenInputsAbstract {
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
-    
-    explorer.initCandVectCanonizerAndGenerator(classnames, AbstractGenerator.cand_vect_max_objs);
-
+    explorer.initNewCanonicalizer(classnames, AbstractGenerator.cand_vect_max_objs);
     
     /*
      * setup for check generation
@@ -477,7 +475,7 @@ public class GenTests extends GenInputsAbstract {
     if (CanonizerLog.isLoggingOn()) {
     	CanonizerLog.logLine("**********");
     	CanonizerLog.logLine("Canonical classes:");
-    	CanonizerLog.logLine(AbstractGenerator.candVectCanonizer.getStore().toString());
+    	CanonizerLog.logLine(AbstractGenerator.store.toString());
     	CanonizerLog.logLine("**********");
 
     	CanonizerLog.logLine("**********");

@@ -20,21 +20,19 @@ import java.util.Set;
  * Date: July 2017.
  */
 
-public class HeapCanonizer {
+public class HeapCanonicalizer {
 	
 	private final CanonicalStore store;
-	private final Collection<String> classNames;
 	private final int maxObjects;
 	private final int maxFieldDistance;
 		
-	public HeapCanonizer(Collection<String> classNames, int maxObjects) {
-		this(classNames, maxObjects, Integer.MAX_VALUE);
+	public HeapCanonicalizer(CanonicalStore store, int maxObjects) {
+		this(store, maxObjects, Integer.MAX_VALUE);
 	}
 	
-	public HeapCanonizer(Collection<String> classNames, int maxObjects, int maxFieldDistance) {
-		this.classNames = classNames;
+	public HeapCanonicalizer(CanonicalStore store, int maxObjects, int maxFieldDistance) {
 		this.maxObjects = maxObjects;
-		this.store = new CanonicalStore(classNames);
+		this.store = store; 
 		this.maxFieldDistance = maxFieldDistance;
 	}
 	
@@ -132,13 +130,6 @@ public class HeapCanonizer {
 		return new AbstractMap.SimpleEntry<CanonizationResult, CanonicalHeap>(CanonizationResult.OK, resHeap);
 	}
 
-	public CanonicalStore getStore() {
-		return store;
-	}
-	
-	public Set<String> getAllCanonicalClassNames() {
-		return store.getAllCanonicalClassnames();
-	}
 
 	
 	

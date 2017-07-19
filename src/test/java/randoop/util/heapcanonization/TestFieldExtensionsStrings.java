@@ -10,7 +10,7 @@ import randoop.test.datastructures.singlylistinner.SinglyLinkedListInner;
 import randoop.test.datastructures.treeset.TreeSet;
 import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonizationResult;
-import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.HeapCanonicalizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsByTypeCollector;
@@ -41,7 +41,8 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 	
 		/** Crear el objeto a canonizar. Esto es lo unico que cambia, el resto del codigo es siempre igual **/
 		//List<Integer> obj = new LinkedList<>();
@@ -87,12 +88,13 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
-		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		Assert.assertTrue(header.toString().equals(headerOracle));
 		
@@ -128,12 +130,13 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
-		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		Assert.assertTrue(header.toString().equals(headerOracle));		
 		
@@ -169,12 +172,13 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
-		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		Assert.assertTrue(header.toString().equals(headerOracle));		
 		
@@ -210,12 +214,13 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
-		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		Assert.assertTrue(header.toString().equals(headerOracle));		
 		
@@ -251,12 +256,13 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
-		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		Assert.assertTrue(header.toString().equals(headerOracle));		
 		
@@ -292,12 +298,13 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
-		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		Assert.assertTrue(header.toString().equals(headerOracle));
 		
@@ -332,12 +339,13 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
-		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		Assert.assertTrue(header.toString().equals(headerOracle));
 		
@@ -373,12 +381,13 @@ public class TestFieldExtensionsStrings {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
-		CanonicalHeap emptyHeap = new CanonicalHeap(candVectCanonizer.getStore(), maxObjects);
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		Assert.assertTrue(header.toString().equals(headerOracle));
 		

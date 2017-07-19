@@ -42,7 +42,7 @@ import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonicalStore;
 import randoop.util.heapcanonization.CanonizationResult;
 import randoop.util.heapcanonization.CanonizerLog;
-import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.HeapCanonicalizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 
@@ -341,8 +341,6 @@ private int maxsize;
 					"Active vars are only computed when running field based generation.";
 		
 		int index = -1;
-		HeapCanonizer newCanonizer = AbstractGenerator.candVectCanonizer;
-		CanonicalStore store = newCanonizer.getStore();
 		for (Object o: eSeq.getLastStmtRuntimeObjects()) {
 			index++;
 
@@ -359,7 +357,7 @@ private int maxsize;
 				// Root is not an object we are interested in generating a candidate vector for.
 				// Notice that we are always interested in generating a candidate object for null, 
 				// even if we don't know its type.
-				res = AbstractGenerator.candVectCanonizer.traverseBreadthFirstAndCanonize(o);
+				res = AbstractGenerator.candVectCanonicalizer.traverseBreadthFirstAndCanonize(o);
 				if (res.getKey() == CanonizationResult.OK) {
 					CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(res.getValue());
 							//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
@@ -428,6 +426,7 @@ private int maxsize;
     else {
     	// FB randoop behaviour
     	// TODO: Change to the new canonizer
+    	// eSeq.executeFB(executionVisitor, checkGenerator, canonizer);
     	eSeq.executeFB(executionVisitor, checkGenerator, canonizer);
     	endTime = System.nanoTime();
     	eSeq.exectime = endTime - startTime;

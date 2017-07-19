@@ -15,7 +15,7 @@ import randoop.test.datastructures.singlylistinner.SinglyLinkedListInner;
 import randoop.test.datastructures.treeset.TreeSet;
 import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonizationResult;
-import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.HeapCanonicalizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.fieldextensions.FieldExtensionsByType;
@@ -137,7 +137,8 @@ public class TestFieldExtensionsByTypeTheory {
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
-		HeapCanonizer candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		
 		FieldExtensionsCollector collector = new FieldExtensionsByTypeCollector(maxObjects);
 		Entry<CanonizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(o1, collector);

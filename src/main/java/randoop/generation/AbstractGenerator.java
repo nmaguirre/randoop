@@ -33,7 +33,7 @@ import randoop.util.fieldbasedcontrol.RandomPerm;
 import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonicalStore;
-import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.HeapCanonicalizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsFieldExtensions;
@@ -63,17 +63,20 @@ import java.util.Set;
  */
 public abstract class AbstractGenerator {
 	
-	public static HeapCanonizer candVectCanonizer;
+	public static CanonicalStore store;
+	public static HeapCanonicalizer candVectCanonicalizer;
 	public static CandidateVectorGenerator candVectGenerator;
 	public static CandidateVectorsFieldExtensions candVectExtensions;
 	
-	public void initCandVectCanonizerAndGenerator(Collection<String> classNames, int maxObjects) {
-		candVectCanonizer = new HeapCanonizer(classNames, maxObjects);
+	public void initNewCanonicalizer(Collection<String> classNames, int maxObjects) {
+		
+	    store = new CanonicalStore(classNames);
+		
+		candVectCanonicalizer = new HeapCanonicalizer(store, maxObjects);
 		// Initialize the candidate vector generator with the canonical classes that were mined from the code,
 		// before the generation starts.
-		candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
+		candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 
-	    CanonicalStore store = candVectCanonizer.getStore();
 	    CanonicalHeap heap = new CanonicalHeap(store, AbstractGenerator.cand_vect_max_objs);
 	    CandidateVector<String> header = AbstractGenerator.candVectGenerator.makeCandidateVectorsHeader(heap);
 		AbstractGenerator.candVectExtensions = new CandidateVectorsFieldExtensions(header);

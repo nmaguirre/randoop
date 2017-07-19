@@ -51,7 +51,7 @@ import randoop.util.heapcanonization.CanonicalStore;
 import randoop.util.heapcanonization.CanonizationResult;
 import randoop.util.heapcanonization.CanonizerLog;
 import randoop.util.heapcanonization.ExtendedExtensionsResult;
-import randoop.util.heapcanonization.HeapCanonizer;
+import randoop.util.heapcanonization.HeapCanonicalizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 
