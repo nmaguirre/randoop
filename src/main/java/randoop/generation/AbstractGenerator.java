@@ -90,8 +90,6 @@ public abstract class AbstractGenerator {
   protected Set<Sequence> allSequences;
 
  
-  public int seqsExceedingLimits = 0;
-	
   public enum FieldBasedGenType {
 	    /** Field based generation is disabled */
 	    DISABLED,
@@ -130,12 +128,6 @@ public abstract class AbstractGenerator {
   @Option("Ignore primitive values in the construction of field extensions")
   public static boolean field_based_gen_ignore_primitive = false;
   
-
-
-  @Option("Activate regression tests to try to find bugs in the different implementations of the field extensions. "
-  		+ "When active it slowdowns the analysis a lot. Only for debug purposes")
-  public static boolean field_based_gen_differential_runtime_checks = false;
-
   @Option("Only consider strings with up to this number of elements for augmenting the extensions")
   public static int field_based_gen_max_string_length = 5000;
 
@@ -362,6 +354,7 @@ public abstract class AbstractGenerator {
   private int positiveTestsDropped;
   private int negativeTestsSaved;
   private int negativeTestsDropped;
+  private int testsExceedingLimits;
 
   /**
    * Container for execution visitors used during execution of sequences.
@@ -824,22 +817,12 @@ private int genFirstAdditionalObsErrorSeqs;
     	  }
 
     	  FieldBasedGenLog.logLine("> First phase stats:");
-    	  // TODO: Improve statistics!!!!
-    	  /*
-    	  FieldBasedGenLog.logLine("Tests augmenting extensions: " + testsExtendingExt);
-    	  FieldBasedGenLog.logLine("Tests not augmenting extensions: " + testsNotExtendingExt);
-    	  FieldBasedGenLog.logLine("Modifier tests generated: " + modifierTestsGen);
-    	  FieldBasedGenLog.logLine("Modifier tests discarded: " + modifierTestsDropped);
-    	  FieldBasedGenLog.logLine("Modifier tests remaining: " + (modifierTestsGen - modifierTestsDropped));
-    	  FieldBasedGenLog.logLine("Negative tests generated: " + negativeTestsGen);
+     	  FieldBasedGenLog.logLine("Positive tests saved: " + positiveTestsSaved);
+    	  FieldBasedGenLog.logLine("Positive tests extending extensions: " + positiveExtendingTests);
+    	  FieldBasedGenLog.logLine("Postiive tests discarded: " + positiveTestsDropped);
+    	  FieldBasedGenLog.logLine("Negative tests: " + negativeTestsSaved);
     	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
-    	  FieldBasedGenLog.logLine("Negative tests remaining: " + (negativeTestsGen - negativeTestsDropped));
-    	  FieldBasedGenLog.logLine("Observer tests generated: " + observerTestsGen);
-    	  FieldBasedGenLog.logLine("Observer tests discarded: " + observerTestsDropped);
-    	  FieldBasedGenLog.logLine("Observer tests remaining: " + (observerTestsGen - observerTestsDropped));
-    	  FieldBasedGenLog.logLine("Total tests generated: " + ((modifierTestsGen - modifierTestsDropped) + (observerTestsGen - observerTestsDropped) + (negativeTestsGen - negativeTestsDropped)));
-    	  FieldBasedGenLog.logLine("Tests excceding limits: " + seqsExceedingLimits);
-    	  */
+    	  FieldBasedGenLog.logLine("Tests excceding limits: " + testsExceedingLimits);
     	  FieldBasedGenLog.logLine("> Second phase stats:");
 		  FieldBasedGenLog.logLine("Operations incorrectly deemed observers in the first phase: " + operationBadTag); 
 		  FieldBasedGenLog.logLine("Positive sequences observed in the second phase (modifiers): " + genFirstAdditionalPositiveSeqs); 
@@ -877,26 +860,14 @@ private int genFirstAdditionalObsErrorSeqs;
     	  FieldBasedGenLog.logLine("Second phase execution time: " + secondPhaseTimeHumanReadable);
       }
 
-      System.out.println();
+   	  System.out.println();
    	  System.out.println("> First phase stats:");
-   	  
-   	  /*
-   	  System.out.println("Tests augmenting extensions: " + testsExtendingExt);
-	  System.out.println("Tests not augmenting extensions: " + testsNotExtendingExt);
-	  System.out.println("Modifier tests generated: " + modifierTestsGen);
-	  System.out.println("Modifier tests discarded: " + modifierTestsDropped);
-	  System.out.println("Modifier tests remaining: " + (modifierTestsGen - modifierTestsDropped));
-	  System.out.println("Negative tests generated: " + negativeTestsGen);
-	  System.out.println("Negative tests discarded: " + negativeTestsDropped);
-	  System.out.println("Negative tests remaining: " + (negativeTestsGen - negativeTestsDropped));
-	  System.out.println("Observer tests generated: " + observerTestsGen);
-	  System.out.println("Observer tests discarded: " + observerTestsDropped);
-	  System.out.println("Observer tests remaining: " + (observerTestsGen - observerTestsDropped));
-   	  System.out.println("Total tests generated: " + ((modifierTestsGen - modifierTestsDropped) + (observerTestsGen - observerTestsDropped) + (negativeTestsGen - negativeTestsDropped)));
-   	  */
-   	  
-   	  
-   	  System.out.println("Tests excceding limits: " + seqsExceedingLimits);
+   	  System.out.println("Positive tests saved: " + positiveTestsSaved);
+   	  System.out.println("Positive tests extending extensions: " + positiveExtendingTests);
+   	  System.out.println("Postiive tests discarded: " + positiveTestsDropped);
+   	  System.out.println("Negative tests: " + negativeTestsSaved);
+   	  System.out.println("Negative tests discarded: " + negativeTestsDropped);
+   	  System.out.println("Tests excceding limits: " + testsExceedingLimits);
    	  System.out.println("> Second phase stats:");
       System.out.println("Operations incorrectly deemed observers in the first phase: " + operationBadTag); 
 	  System.out.println("Positive sequences observed in the second phase (modifiers): " + genFirstAdditionalPositiveSeqs); 
@@ -944,20 +915,25 @@ private int genFirstAdditionalObsErrorSeqs;
 		  save = true;
 	  }
 	  else {
-		  
-		  if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) {
-			  
-			 positiveExtendingTests++;
+		  if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED ||
+				  eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED_PRIMITIVE) {
+			  save = true;
+			  positiveExtendingTests++;
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> Current sequence enlarges extensions.");
 		  }
 		  else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
-			 // Ver si tiro o no los tests que exceden los límites 
-			  
+			 // We discard the tests exceeding limits (for now at least)
+			  assert false: "Should never happen as randoop's generation mechanism does not produce too large strings";
+				  
+			  testsExceedingLimits++;
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> Current sequence exceeds generation limits.");
 		  }
 		  else {
-			  if (saveNonExtendingModifierSequence(eSeq))
+			  if (eSeq.getLastStmtOperation().isModifier() && saveNonExtendingModifierSequence(eSeq))
 				  save = true;
 		  }
-
 	  }
 
 	  if (save) {
@@ -975,6 +951,7 @@ private int genFirstAdditionalObsErrorSeqs;
 			  FieldBasedGenLog.logLine("> Current positive sequence discarded");
 	  }
   }
+  
   
   private void treatNegativeSequence(ExecutableSequence eSeq) {
 	  boolean save = false;
@@ -1003,10 +980,7 @@ private int genFirstAdditionalObsErrorSeqs;
   }
 	  
 
-
-
-
-public LongPair hashExtensions(FieldExtensionsIndexes ext) {
+  private LongPair hashExtensions(FieldExtensionsIndexes ext) {
 	  LongPair hash = new LongPair();
 	  byte [] bytesExt = ext.toIndexesString().getBytes();
 	  

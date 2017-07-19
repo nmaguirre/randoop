@@ -64,8 +64,10 @@ public class HeapCanonizerRuntimeEfficient {
 		if (fieldBasedGenClassnames != null)
 			store.setFieldBasedGenByClasses(fieldBasedGenClassnames);
 		
+		/*
 		if (AbstractGenerator.field_based_gen_differential_runtime_checks)
 			activateReadableExtensions();
+			*/
 		
 		this.maxStringLength = maxStringLength;
 		this.maxArray = maxArray;

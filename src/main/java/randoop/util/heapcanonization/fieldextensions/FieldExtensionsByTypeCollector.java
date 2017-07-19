@@ -9,6 +9,10 @@ public class FieldExtensionsByTypeCollector implements FieldExtensionsCollector 
 	private static final String NULL_REPRESENTATION = "null";
 	private int maxStrLen;
 	
+	public FieldExtensionsByTypeCollector() {
+		this(Integer.MAX_VALUE);
+	}
+
 	public FieldExtensionsByTypeCollector(int maxStrLen) {
 		this.maxStrLen = maxStrLen;
 	}
