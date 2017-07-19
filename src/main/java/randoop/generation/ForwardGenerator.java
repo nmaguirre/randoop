@@ -1,6 +1,5 @@
 package randoop.generation;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -8,14 +7,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.checkerframework.checker.initialization.qual.NotOnlyInitialized;
-
 import randoop.BugInRandoopException;
 import randoop.DummyVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
-import randoop.generation.AbstractGenerator.FieldBasedGenType;
 import randoop.main.GenInputsAbstract;
 import randoop.main.GenTests;
 import randoop.operation.NonreceiverTerm;
@@ -38,10 +34,9 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
-import randoop.util.WeightedElement;
 import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
-import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
+import randoop.util.heapcanonization.ExtendedExtensionsResult;
 import randoop.util.heapcanonization.CanonicalClass;
 import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonicalStore;
@@ -49,7 +44,6 @@ import randoop.util.heapcanonization.CanonizationResult;
 import randoop.util.heapcanonization.CanonizerLog;
 import randoop.util.heapcanonization.HeapCanonizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVector;
-import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
 
 
@@ -438,7 +432,6 @@ private int maxsize;
     }
     else {
     	// FB randoop behaviour
-    	try {
     		eSeq.executeFB(executionVisitor, checkGenerator, canonizer);
     		endTime = System.nanoTime();
     		eSeq.exectime = endTime - startTime;
@@ -463,7 +456,6 @@ private int maxsize;
     				if (eSeq.getLastStmtOperation().isModifier())
     					eSeq.getLastStmtOperation().timesExecutedInExtendingModifiers++;
 
-    				testsExtendingExt++;
     				if (FieldBasedGenLog.isLoggingOn())
     					FieldBasedGenLog.logLine("> The current sequence contributed to field extensions");
 
@@ -496,7 +488,6 @@ private int maxsize;
 
     				eSeq.sequence.clearAllActiveFlags();
     				processSequence(eSeq);
-    				testsNotExtendingExt++;
     			}
 
     		}
@@ -511,22 +502,6 @@ private int maxsize;
     			if (eSeq.sequence.hasActiveFlags()) 
     				componentManager.addGeneratedSequence(eSeq.sequence);
     		}
-
-    	}	
-    	catch (CanonizationErrorException e) {
-    		canonizationErrorNum++;
-    		eSeq.sequence.clearAllActiveFlags();
-    		System.out.println(eSeq.toCodeString());
-    		System.out.println("ERROR: Number of canonization errors: " + canonizationErrorNum);
-    		if (FieldBasedGenLog.isLoggingOn()) {
-    			FieldBasedGenLog.logLine("> ERROR: Number of canonization errors: " + canonizationErrorNum + "Error sequence:");
-    			FieldBasedGenLog.logLine(eSeq.toCodeString());
-    		}
-    		eSeq.canonizationError = true;
-    	}
-    			
-
-
 
     }
 
@@ -1000,32 +975,16 @@ private int maxsize;
 
     // Keep track of any input sequences that are used in this sequence.
     // Tests that contain only these sequences are probably redundant.
-    
-    
-    if (FieldBasedGenLog.isLoggingOn()) 
-    	FieldBasedGenLog.logLine("\n\n>> New sequence constructed:\n" + newSequence.toCodeString());
- 
-    // PABLO: Subsumption changes when the flag field_based_gen_drop_non_contributing_tests is enabled
-    if (field_based_gen != FieldBasedGenType.DISABLED || (field_based_gen == FieldBasedGenType.DISABLED && drop_randoop_negative_tests)) {
-		// Temporarily store possibly subsumed sequences. They will be subsumed only if the current 
-		// test is saved later
-		if (FieldBasedGenLog.isLoggingOn())
-			FieldBasedGenLog.logLine("> Temporarily store candidates for subsumed sequences");
-		
-		subsumed_candidates = new LinkedHashSet<>();
-		for (Sequence is : sequences.sequences) {
-		  subsumed_candidates.add(is);
-		}
-    }
-    else {
-   		if (FieldBasedGenLog.isLoggingOn()) 
-   			FieldBasedGenLog.logLine("> New subsumed sequences stored");
-    	    	
-    	// PABLO: Original randoop behaviour
-	    for (Sequence is : sequences.sequences) {
-	      subsumed_sequences.add(is);
-	    }
-    }
+    /*
+	 // PABLO: Original randoop behaviour
+	for (Sequence is : sequences.sequences) {
+	  subsumed_sequences.add(is);
+	}
+	*/
+	subsumed_candidates = new LinkedHashSet<>();
+	for (Sequence is : sequences.sequences) {
+	  subsumed_candidates.add(is);
+	}
 
     return new ExecutableSequence(newSequence);
   }

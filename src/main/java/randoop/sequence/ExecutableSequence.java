@@ -44,13 +44,13 @@ import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
-import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient.ExtendedExtensionsResult;
 import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.heapcanonization.CanonicalClass;
 import randoop.util.heapcanonization.CanonicalHeap;
 import randoop.util.heapcanonization.CanonicalStore;
 import randoop.util.heapcanonization.CanonizationResult;
 import randoop.util.heapcanonization.CanonizerLog;
+import randoop.util.heapcanonization.ExtendedExtensionsResult;
 import randoop.util.heapcanonization.HeapCanonizer;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonization.candidatevectors.CandidateVectorsWriter;
@@ -825,15 +825,9 @@ public class ExecutableSequence {
 	  return sequence.getStatement(sequence.size() - 1).getOperation();
   } 
 
-  public void clearLastStmtExtensions() {
+  public void clearExtensions() {
 	 lastStmtFormerExt = null;
 	 lastStmtNextExt = null;
-	 /*
-	 executionResults.theList.clear();
-	 for (int i = 0; i < sequence.size(); i++) {
-		 executionResults.theList.add(NotExecuted.create());
-	 }
-	 */
   }
   
    public void clearExecutionResults() {

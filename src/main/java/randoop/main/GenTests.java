@@ -212,7 +212,7 @@ public class GenTests extends GenInputsAbstract {
 		System.out.println("> Field Based Generation Option: --field-based-gen-observers-per-test=" + AbstractGenerator.field_based_gen_observers_per_test);
 		System.out.println("> Field Based Generation Option: --field-based-gen-negative-observers-per-test=" + AbstractGenerator.field_based_gen_negative_observers_per_test);
 		System.out.println("> Field Based Generation Option: --field-based-gen-observer-executions-before-final=" + AbstractGenerator.field_based_gen_observer_executions_before_final);
-		System.out.println("> Field Based Generation Option: --field-based-max-non-extending-tests-for-modifier-ratio=" + AbstractGenerator.field_based_gen_max_non_extending_modifier_tests_ratio);
+		System.out.println("> Field Based Generation Option: --field-based-max-non-extending-tests-for-modifier-ratio=" + AbstractGenerator.field_based_gen_non_extending_modifiers_ratio);
 		System.out.println("> Field Based Generation Option: --count-objects=" + AbstractGenerator.count_objects);
 //		System.out.println("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 		System.out.println("> Field Based Generation Option: --field-based-gen-drop-tests-exceeding-object-limits=" + AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits);
@@ -242,7 +242,7 @@ public class GenTests extends GenInputsAbstract {
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-observers-per-test=" + AbstractGenerator.field_based_gen_observers_per_test);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-negative-observers-per-test=" + AbstractGenerator.field_based_gen_negative_observers_per_test);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-observer-executions-before-final=" + AbstractGenerator.field_based_gen_observer_executions_before_final);
-		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-max-non-extending-tests-for-modifier-ratio=" + AbstractGenerator.field_based_gen_max_non_extending_modifier_tests_ratio);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-max-non-extending-tests-for-modifier-ratio=" + AbstractGenerator.field_based_gen_non_extending_modifiers_ratio);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --count-objects=" + AbstractGenerator.count_objects);
 //		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-drop-tests-exceeding-object-limits=" + AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits);

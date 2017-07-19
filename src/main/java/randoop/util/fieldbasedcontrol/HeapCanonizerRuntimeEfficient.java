@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import randoop.generation.AbstractGenerator;
+import randoop.util.heapcanonization.ExtendedExtensionsResult;
 
 
 /* 
@@ -18,8 +19,6 @@ import randoop.generation.AbstractGenerator;
  */
 
 public class HeapCanonizerRuntimeEfficient {
-	
-	public enum ExtendedExtensionsResult { EXTENDED, NOT_EXTENDED, LIMITS_EXCEEDED };
 	
 	public FieldExtensionsStrings readableExtensions = null;
 	
