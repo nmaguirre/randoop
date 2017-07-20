@@ -192,6 +192,13 @@ public class CanonicalClass {
 		assert isArray: "Asking for the type of objects of an array for a non array class";
 		return arrObjectsType;
 	}
-
+	
+	public boolean hasFieldReferencingItself() {
+		for (CanonicalField f: fields)
+			if (f.getCanonicalType().equals(this))
+				return true;
+		
+		return false;
+	}
 
 }

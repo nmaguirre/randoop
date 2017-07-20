@@ -185,7 +185,7 @@ public abstract class AbstractGenerator {
   @Option("Max times a modifier can be executed in a test not extending the extensions.")
   public static int field_based_gen_non_extending_modifiers_ratio = 1000;
   
-  @Option("Save test only if the last operation was used at least (#test gen./fbg_not_extending_ops_ratio)+1 times in tests"
+  @Option("Save test only if the last operation was used at most (#test gen./fbg_not_extending_ops_ratio)+1 times in tests"
   		+ "not extending the extensions.")
   public static int fbg_save_not_extending_ratio = 500;
 

@@ -1,5 +1,6 @@
 package randoop.util.heapcanonicalization.candidatevectors;
 
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,12 +20,26 @@ public class CandidateVectorGenerator {
 	
 	private static int NULL_INT_REPRESENTATION = AbstractGenerator.cand_vect_null_rep; //Integer.MIN_VALUE;
 	private final Set<String> classesFromCode = new LinkedHashSet<>();
-
+	private final Set<String> singletonClasses = new HashSet<>();
+	
+	public CandidateVectorGenerator(Set<String> classesFromCode, String rootClass, CanonicalStore store) {
+		this(classesFromCode);
+		CanonicalClass cls = store.getCanonicalClass(rootClass);
+		/*
+		 *  FIXME: Hack to avoid saving space for many instances of the root class in candidate vectors.
+		 *  It may be useful for the generation of data structure's instances.
+		 */
+		if (!cls.hasFieldReferencingItself())
+			singletonClasses.add(rootClass);
+	}
+	
+	
 	// Should be passed only those classes that were obtained from the code of the classes
 	// we will canonize, before test generation starts. In this way, classes added to 
 	// the store later during generation are ignored.
 	public CandidateVectorGenerator(Set<String> classesFromCode) {
 		this.classesFromCode.addAll(classesFromCode);
+		singletonClasses.add(DummyHeapRoot.class.getName());
 	}
 	
 	public CandidateVector<String> makeCandidateVectorsHeader(CanonicalHeap heap) {
@@ -36,8 +51,8 @@ public class CandidateVectorGenerator {
 			if (ignoreCanonicalClassInCandidateVectors(canonicalClass))
 				continue;
 
-			if (canonicalClass.getName().equals(DummyHeapRoot.class.getName()))
-				addCandidateVectorFields(heap, canonicalClass, 0, header);
+			if (singletonClasses.contains(canonicalClass.getName())) 
+				addCandidateVectorFields(heap, canonicalClass, 1, header);
 			else if (canonicalClass.isArray()) {
 				// for (int i = 0; i < heap.getMaxObjects(); i++) 
 				// Start enumerating objects from 1 to handle null=0 well
@@ -83,14 +98,14 @@ public class CandidateVectorGenerator {
 			CanonicalClass canonicalClass = store.getCanonicalClass(className);
 			if (ignoreCanonicalClassInCandidateVectors(canonicalClass))
 				continue;
-			int i = 0;
+			int i = 1;
 			for (CanonicalObject obj: heap.getObjectsForClass(canonicalClass)) {
 				addToCandidateVector(obj, heap, res);
 				i++;
 			}
 			
-			if (!canonicalClass.getName().equals(DummyHeapRoot.class.getName()))
-				for ( ; i < heap.getMaxObjects(); i++) 
+			if (!singletonClasses.contains(canonicalClass.getName()))
+				for ( ; i <= heap.getMaxObjects(); i++) 
 					addNullObjectToCandidateVector(canonicalClass, heap, res);
 		}	
 
