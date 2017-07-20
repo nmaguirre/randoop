@@ -1002,7 +1002,9 @@ public class ExecutableSequence {
 	    	  enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
 	      }
 	    	  
-	    	  // TODO: update operation types according to extensions for observer detection
+	      // TODO: update operation types according to extensions for observer detection.
+	      // We need to figure out what to do with operations that never extend extensions.
+	      
 	    	  
 	    	  /*
 			   if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED && getLastStmtOperation().isModifier())

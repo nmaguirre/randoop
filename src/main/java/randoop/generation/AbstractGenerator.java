@@ -184,6 +184,10 @@ public abstract class AbstractGenerator {
 
   @Option("Max times a modifier can be executed in a test not extending the extensions.")
   public static int field_based_gen_non_extending_modifiers_ratio = 1000;
+  
+  @Option("Save test only if the last operation was used at least (#test gen./fbg_not_extending_ops_ratio)+1 times in tests"
+  		+ "not extending the extensions.")
+  public static int fbg_save_not_extending_ratio = 500;
 
   @Option("Max times an observer can be executed in a test not extending the extensions.")
   public static int field_based_gen_max_non_extending_observer_tests_ratio = 500;
@@ -616,6 +620,13 @@ private int genFirstAdditionalObsErrorSeqs;
 		return false;
   }
   
+  private boolean saveRarelyExtendingOperation(ExecutableSequence eSeq) {
+	int ratio = (numRegressionSequences() / fbg_save_not_extending_ratio) + 1;
+	return eSeq.getLastStmtOperation().timesExecutedInExtendingTests < ratio;
+  }
+  
+  
+  
   /*
   private boolean saveObserverAddingNewPrimitiveValue(ExecutableSequence eSeq) {
 	assert eSeq.getLastStmtOperation().isObserver();
@@ -918,30 +929,40 @@ private int genFirstAdditionalObsErrorSeqs;
         			
   
   private void treatPositiveSequence(ExecutableSequence eSeq) {
-	  
 	  boolean save = false;
-	  if (field_based_gen == FieldBasedGenType.DISABLED) {
+	  if (field_based_gen == FieldBasedGenType.DISABLED) 
 		  save = true;
-	  }
 	  else {
 		  if (eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED ||
 				  eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED_PRIMITIVE) {
 			  save = true;
 			  positiveExtendingTests++;
-			  if (FieldBasedGenLog.isLoggingOn()) 
-				  FieldBasedGenLog.logLine("> Current sequence enlarges extensions.");
+			  if (FieldBasedGenLog.isLoggingOn()) {
+				  if (eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED)
+					  FieldBasedGenLog.logLine("> Extensions enlarged for reference type objects.");
+				  else
+					  FieldBasedGenLog.logLine("> Extensions enlarged for primitive values.");
+			  }
 		  }
 		  else if (eSeq.enlargesExtensions == ExtendExtensionsResult.LIMITS_EXCEEDED) {
-			 // We discard the tests exceeding limits (for now at least)
+			  // We discard the tests exceeding limits (for now at least)
 			  assert false: "Should never happen as randoop's generation mechanism does not produce too large strings";
-				  
+		  /*
 			  testsExceedingLimits++;
 			  if (FieldBasedGenLog.isLoggingOn()) 
 				  FieldBasedGenLog.logLine("> Current sequence exceeds generation limits.");
+		   */
 		  }
 		  else {
-			  if (eSeq.getLastStmtOperation().isModifier() && saveNonExtendingModifierSequence(eSeq))
+			  // TODO: Need observer detection for the following line to work
+			  //if (eSeq.getLastStmtOperation().isModifier() && saveNonExtendingModifierSequence(eSeq)) {
+ 			  if (FieldBasedGenLog.isLoggingOn()) 
+ 				  FieldBasedGenLog.logLine("> Extensions not enlarged.");
+			  if (saveRarelyExtendingOperation(eSeq)) {
 				  save = true;
+				  if (FieldBasedGenLog.isLoggingOn()) 
+					  FieldBasedGenLog.logLine("> The last operation rarely enlarges extensions.");
+			  }
 		  }
 	  }
 
@@ -949,15 +970,16 @@ private int genFirstAdditionalObsErrorSeqs;
 		  outRegressionSeqs.add(eSeq);
 		  saveSubsumedCandidates();
 		  positiveTestsSaved++;
+		  eSeq.getLastStmtOperation().timesExecutedInExtendingTests++;
 		  if (field_based_gen_extend_with_observers)
 			  positiveRegressionSeqs.add(eSeq);
 		  if (FieldBasedGenLog.isLoggingOn()) 
-			  FieldBasedGenLog.logLine("> Current positive sequence saved");
+			  FieldBasedGenLog.logLine("> Current positive sequence saved.");
 	  }
 	  else {
 		  positiveTestsDropped++;
 		  if (FieldBasedGenLog.isLoggingOn()) 
-			  FieldBasedGenLog.logLine("> Current positive sequence discarded");
+			  FieldBasedGenLog.logLine("> Current positive sequence discarded.");
 	  }
   }
   
@@ -973,18 +995,17 @@ private int genFirstAdditionalObsErrorSeqs;
 			  save = true;
 	  }
 	  
-	  
 	  if (save) {
 		  outRegressionSeqs.add(eSeq);
 		  saveSubsumedCandidates();
 		  negativeTestsSaved++;
 		  if (FieldBasedGenLog.isLoggingOn()) 
-			  FieldBasedGenLog.logLine("> Current negative sequence saved");
+			  FieldBasedGenLog.logLine("> Current negative sequence saved.");
 	  }
 	  else {
 		  negativeTestsDropped++;
 		  if (FieldBasedGenLog.isLoggingOn())
-			  FieldBasedGenLog.logLine("> Current negative sequence discarded");
+			  FieldBasedGenLog.logLine("> Current negative sequence discarded.");
 	  }
   }
 	  

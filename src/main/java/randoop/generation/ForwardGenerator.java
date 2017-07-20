@@ -445,8 +445,11 @@ private int maxsize;
     	*/
     	
     	if (eSeq.sequence.hasActiveFlags() && eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED) {
-			// TODO: Only handle non primitive types in this method
+
+			// FIXED?: Only handle non primitive types in this method
 			componentManager.addFieldBasedActiveSequence(eSeq.sequence);
+    		if (FieldBasedGenLog.isLoggingOn()) 
+    			FieldBasedGenLog.logLine("> Current sequence saved as a generator for new tests.");
     		/*
 			if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) 
 				// TODO: Only handle non primitive types in this method
