@@ -216,7 +216,7 @@ public class GenTests extends GenInputsAbstract {
 		System.out.println("> Field Based Generation Option: --count-objects=" + AbstractGenerator.count_objects);
 //		System.out.println("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 		System.out.println("> Field Based Generation Option: --field-based-gen-drop-tests-exceeding-object-limits=" + AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits);
-		System.out.println("> Field Based Generation Option: --field-based-gen-precise-enlarging-objects-detection=" + AbstractGenerator.field_based_gen_precise_enlarging_objects_detection);
+		System.out.println("> Field Based Generation Option: --field-based-gen-precise-enlarging-objects-detection=" + AbstractGenerator.fbg_precise_extension_detection);
 //		System.out.println("> Field Based Generation Option: --field-based-gen-keep-negative-tests-percentage=" + AbstractGenerator.keep_negative_tests_percentage);
 		System.out.println("> Field Based Generation Option: --field-based-gen-disable-collections-generation-heuristic=" + AbstractGenerator.disable_collections_generation_heuristic);
 		System.out.println("> Field Based Generation Option: --field-based-gen-weighted-selection=" + AbstractGenerator.field_based_gen_weighted_selection);
@@ -246,7 +246,7 @@ public class GenTests extends GenInputsAbstract {
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --count-objects=" + AbstractGenerator.count_objects);
 //		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-non-contributing-tests-percentage=" + AbstractGenerator.field_based_gen_keep_non_contributing_tests_percentage);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-drop-tests-exceeding-object-limits=" + AbstractGenerator.field_based_gen_drop_tests_exceeding_object_limits);
-		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-precise-enlarging-objects-detection=" + AbstractGenerator.field_based_gen_precise_enlarging_objects_detection);
+		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-precise-enlarging-objects-detection=" + AbstractGenerator.fbg_precise_extension_detection);
 //		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-keep-negative-tests-percentage=" + AbstractGenerator.keep_negative_tests_percentage);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-disable-collections-generation-heuristic=" + AbstractGenerator.disable_collections_generation_heuristic);
 		FieldBasedGenLog.logLine("> Field Based Generation Option: --field-based-gen-weighted-selection=" + AbstractGenerator.field_based_gen_weighted_selection);
@@ -381,7 +381,7 @@ public class GenTests extends GenInputsAbstract {
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
-    explorer.initNewCanonicalizer(classnames, AbstractGenerator.cand_vect_max_objs);
+    explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_field_distance);
     
     /*
      * setup for check generation

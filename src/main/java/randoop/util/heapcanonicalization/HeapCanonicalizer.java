@@ -52,13 +52,11 @@ public class HeapCanonicalizer {
 		}
 
 		CanonicalHeap resHeap = new CanonicalHeap(store, maxObjects);
-
 		DummyHeapRoot dummyRoot = new DummyHeapRoot(root);
 		CanonicalObject canonicalRoot = resHeap.getCanonicalObject(dummyRoot).getValue();
 
 		Queue<Entry<CanonicalObject, Integer>> workQueue = new LinkedList<>();
 		workQueue.add(new AbstractMap.SimpleEntry<>(canonicalRoot, -1));
-
 		Set<CanonicalObject> visited = new HashSet<>();
 		visited.add(canonicalRoot);
 
@@ -128,6 +126,10 @@ public class HeapCanonicalizer {
 			CanonizerLog.logLine("----------");
 		}
 		return new AbstractMap.SimpleEntry<CanonicalizationResult, CanonicalHeap>(CanonicalizationResult.OK, resHeap);
+	}
+
+	public CanonicalStore getStore() {
+		return store;
 	}
 
 

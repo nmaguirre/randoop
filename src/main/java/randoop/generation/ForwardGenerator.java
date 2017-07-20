@@ -41,7 +41,7 @@ import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.CanonizerLog;
-import randoop.util.heapcanonicalization.ExtendedExtensionsResult;
+import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
@@ -356,7 +356,7 @@ private int maxsize;
 				// Root is not an object we are interested in generating a candidate vector for.
 				// Notice that we are always interested in generating a candidate object for null, 
 				// even if we don't know its type.
-				res = AbstractGenerator.candVectCanonicalizer.traverseBreadthFirstAndCanonize(o);
+				res = AbstractGenerator.newCanonicalizer.traverseBreadthFirstAndCanonize(o);
 				if (res.getKey() == CanonicalizationResult.OK) {
 					CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(res.getValue());
 							//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
@@ -370,8 +370,8 @@ private int maxsize;
 					if (res.getKey() != CanonicalizationResult.OK) {
 						if (CanonizerLog.isLoggingOn()) {
 							CanonizerLog.logLine("----------");
-							CanonizerLog.logLine("Not canonizing an object that is larger than permitted "
-									+ "by cand_vectors_max_objs=" + AbstractGenerator.cand_vect_max_objs);
+							CanonizerLog.logLine("Not canonizing an object with more than " + 
+									AbstractGenerator.fbg_max_objects + " objects of the same type");
 							CanonizerLog.logLine("Error message: " + res.getKey());
 							CanonizerLog.logLine("----------");
 						}
@@ -425,30 +425,35 @@ private int maxsize;
     else {
     	// FB randoop behaviour
     	// TODO: Change to the new canonizer
-    	// eSeq.executeFB(executionVisitor, checkGenerator, canonizer);
-    	eSeq.executeFB(executionVisitor, checkGenerator, canonizer);
+    	eSeq.executeFB(executionVisitor, checkGenerator, newCanonicalizer, globalExtensions);
     	endTime = System.nanoTime();
     	eSeq.exectime = endTime - startTime;
     	startTime = endTime; // reset start time.
 
     	processSequence(eSeq);
     	
+    	/* 
+    	 * Not needed anymore.
+    	 * TODO: Support hashes again?
     	if (eSeq.isNormalExecution()) {
     		// Field based filtering is only done on non error sequences
     		if (field_based_gen == FieldBasedGenType.EXTENSIONS)
-    			eSeq.tryToEnlargeExtensions(canonizer);
+    			eSeq.enlargeExtensions(newCanonicalizer);
     		else 
     			addObjectHashesToStore(eSeq);	
     	}
+    	*/
     	
-    	if (eSeq.sequence.hasActiveFlags() && eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED) {
-    		
+    	if (eSeq.sequence.hasActiveFlags() && eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED) {
+			// TODO: Only handle non primitive types in this method
+			componentManager.addFieldBasedActiveSequence(eSeq.sequence);
+    		/*
 			if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) 
 				// TODO: Only handle non primitive types in this method
 				componentManager.addFieldBasedActiveSequence(eSeq.sequence);
 			else
 				componentManager.addGeneratedSequence(eSeq.sequence);
-    		
+				*/
     		if (CandidateVectorsWriter.isEnabled())
     			makeCanonicalVectorsForLastStatement(eSeq);
     	}

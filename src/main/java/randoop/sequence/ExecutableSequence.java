@@ -50,10 +50,14 @@ import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.CanonizerLog;
-import randoop.util.heapcanonicalization.ExtendedExtensionsResult;
+import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
+import randoop.util.heapcanonicalization.fieldextensions.BugInFieldExtensionsCanonicalization;
+import randoop.util.heapcanonicalization.fieldextensions.FieldExtensions;
+import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByType;
+import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByTypeCollector;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -124,7 +128,7 @@ public class ExecutableSequence {
   // public boolean normalExecution;
 //  private boolean DIFFERENTIAL = false;
 //  private boolean DEBUG = false;
-  public ExtendedExtensionsResult enlargesExtensions = null;
+  public ExtendExtensionsResult enlargesExtensions = ExtendExtensionsResult.NOT_EXTENDED;
   public boolean canonizationError = false;
   public boolean endsWithObserverReturningNewValue;
   public boolean endsWithObserver;
@@ -132,7 +136,8 @@ public class ExecutableSequence {
   private List<FieldExtensionsIndexes> lastStmtFormerExt;
   private List<FieldExtensionsIndexes> lastStmtNextExt;
 
-  /** The underlying sequence. */
+
+ /** The underlying sequence. */
   public Sequence sequence;
 
   /** The checks for this sequence */
@@ -527,7 +532,7 @@ public class ExecutableSequence {
 						  if (!secondPhase && !op.getOutputType().isVoid()) {
 							  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
 							  if (obj != null && isObjectPrimtive(obj)) {
-								  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
+								  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendExtensionsResult.EXTENDED) {
 									  endsWithObserverReturningNewValue = true;
 
 									  //System.out.println("Prim ext size:" + canonizer.getPrimitiveExtensions().size());
@@ -763,7 +768,7 @@ public class ExecutableSequence {
     				  if (!secondPhase && !op.getOutputType().isVoid()) {
     					  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
     					  if (obj != null && isObjectPrimtive(obj)) {
-    						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
+    						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendExtensionsResult.EXTENDED) {
     							  endsWithObserverReturningNewValue = true;
 
     							  if (FieldBasedGenLog.isLoggingOn())
@@ -816,6 +821,294 @@ public class ExecutableSequence {
    	checks = gen.visit(this);
   
   }
+  
+
+   public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonicalizer canonicalizer, FieldExtensions globalExt) {
+	   executeFB(visitor, gen, true, canonicalizer, globalExt);
+   }
+  
+   private void logOperationType(TypedOperation op) {
+  	  if (FieldBasedGenLog.isLoggingOn()) {
+ 		  if (op.notExecuted())
+ 			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " was never executed"); 
+ 		  else if (op.isObserver())
+ 			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer for the moment"); 
+ 		  else if (op.isFinalObserver())
+ 			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is an observer (final)"); 
+ 		  else
+ 			  FieldBasedGenLog.logLine("> Operation " + op.toString() + " is a modifier"); 
+  	  }
+   }
+   
+   private List<Object> getObjectsForStatement(int i, Object statementResult, Object[] inputVariables) {
+	   Statement stmt = sequence.getStatement(i);
+	   List<Object> objects = new ArrayList<>();
+	   if (!stmt.getOutputType().isVoid()) 
+		   objects.add(statementResult);
+	   for (int j = 0; j < inputVariables.length; j++)
+		   objects.add(inputVariables[j]);
+	   return objects;
+   }
+   
+   private List<FieldExtensions> createExtensionsForAllObjects(List<Object> objects, HeapCanonicalizer canonicalizer) { 
+	   List<FieldExtensions> extensions = new ArrayList<>();
+	   for (Object o: objects) {
+		   if (o != null) {
+			   FieldExtensionsByTypeCollector collector = new FieldExtensionsByTypeCollector();
+			   Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonize(o, collector);
+			   if (res.getKey() != CanonicalizationResult.OK)
+				   throw new BugInFieldExtensionsCanonicalization("Structure exceeding limits. We don't support these yet.");
+			   extensions.add(collector.getExtensions());
+		   }
+		   else
+			   extensions.add(null);
+	   }
+	   return extensions; 
+   }
+   
+   
+   private boolean isPrimitive(Object o) {
+	   Class<?> cls = o.getClass();
+	   return NonreceiverTerm.isNonreceiverType(cls);
+	   /* TODO We may treat these as primitives
+				  cls.equals(BigInteger.class) || 
+				  cls.equals(BigDecimal.class);
+				  */
+   }
+   
+   private ExtendExtensionsResult lift(ExtendExtensionsResult oldres, ExtendExtensionsResult newres) {
+	   assert oldres != ExtendExtensionsResult.LIMITS_EXCEEDED && newres != ExtendExtensionsResult.LIMITS_EXCEEDED:
+		   "Canonicalization of structures exceeding limits not supported";
+
+	   switch (oldres) {
+	   case EXTENDED:
+		   return oldres;
+	   case EXTENDED_PRIMITIVE:
+		   if (newres == ExtendExtensionsResult.EXTENDED)
+			   return newres;
+		   else
+			   return oldres;
+	   case NOT_EXTENDED:
+		   return newres;
+	   default: 
+		   return null;
+	   }
+   }
+
+   private ExtendExtensionsResult enlargeExtensions(List<Object> objects, List<FieldExtensions> newExtensions, 
+		   FieldExtensions globalExt) { 
+	   assert newExtensions != null: "Trying to enlarge global extensions with null list of extensions";
+	   assert objects.size() == newExtensions.size(): "There should be exactly one extension for each object";
+	   
+	   ExtendExtensionsResult res = ExtendExtensionsResult.NOT_EXTENDED;
+	   int index = sequence.size()-1;
+	   Statement stmt = sequence.getStatement(index);
+
+	   List<FieldExtensions> enlargingExt = new LinkedList<>();
+	   for (int i = 0; i < objects.size(); i++) {
+		   FieldExtensions ext = newExtensions.get(i);
+		   Object obj = objects.get(i);
+		   
+		   if (obj == null) continue;
+		   
+		   boolean enlargesExt = false;
+		   if (AbstractGenerator.fbg_precise_extension_detection) {
+			   if (!globalExt.containsAll(ext)) {
+				   enlargingExt.add(ext);
+				   enlargesExt = true;
+			   }
+		   }
+		   else 
+			   if (globalExt.addAll(ext))
+				   enlargesExt = true;
+
+		   if (enlargesExt) {
+			   if (!isPrimitive(obj)) {
+				   res = ExtendExtensionsResult.EXTENDED;
+				   sequence.addActiveVar(index, i); 
+			   }
+			   else 
+				   res = lift(res, ExtendExtensionsResult.EXTENDED_PRIMITIVE);
+		   }
+	   }
+
+	   for (FieldExtensions ext: enlargingExt)
+		   globalExt.addAll(ext);
+
+	   return res;
+   }
+
+   private void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, 
+		   HeapCanonicalizer canonicalizer, FieldExtensions globalExt) {
+
+	    visitor.initialize(this);
+
+	    // reset execution result values
+	    hasNullInput = false;
+	    executionResults.theList.clear();
+	    for (int i = 0; i < sequence.size(); i++) {
+	      executionResults.theList.add(NotExecuted.create());
+	    }
+	    List<FieldExtensions> lastStmtExtBeforeExecution = null;
+	    List<FieldExtensions> lastStmtExtAfterExecution = null;
+
+	    for (int i = 0; i < this.sequence.size(); i++) {
+	      // Find and collect the input values to i-th statement.
+	      List<Variable> inputs = sequence.getInputs(i);
+	      Object[] inputVariables;
+	      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+	      TypedOperation op = null;
+
+	      // TODO: Don't do observer detection yet.
+	      /*
+	      if (i == sequence.size()-1) {
+	    	  op = sequence.getStatement(i).getOperation();
+	    	  logOperationType(op);
+			  if (sequence.size() > 1 && (op.notExecuted() || op.isObserver())) {
+				  List<Object> objs = getObjectsForStatement(i, null, inputVariables);
+				  lastStmtExtBeforeExecution = createExtensionsForAllObjects(objs, canonicalizer);
+			  }
+	      }
+	      */
+	      
+	      visitor.visitBeforeStatement(this, i);
+	      executeStatement(sequence, executionResults.theList, i, inputVariables);
+	      // make sure statement executed
+	      ExecutionOutcome statementResult = getResult(i);
+	      if (statementResult instanceof NotExecuted) {
+	        throw new Error("Unexecuted statement in sequence: " + this.toString());
+	      }
+	      // make sure no exception before final statement of sequence
+	      if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
+	        if (ignoreException) {
+	          // this preserves previous behavior, which was simply to return if
+	          // exception occurred
+	          break;
+	        } else {
+	          String msg =
+	              "Encountered exception before final statement of error-revealing test (statement "
+	                  + i
+	                  + "): ";
+	          throw new Error(
+	              msg + ((ExceptionalExecution) statementResult).getException().getMessage());
+	        }
+	      }
+	      
+	      if (i == sequence.size()-1) {
+	    	  assert statementResult instanceof NormalExecution: "Sequence didn't fail but its execution is not \"normal\"";
+	    	  Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
+	    	  List<Object> objs = getObjectsForStatement(i, retVal, inputVariables);
+	    	  lastStmtExtAfterExecution = createExtensionsForAllObjects(objs, canonicalizer);
+	    	  enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
+	      }
+	    	  
+	    	  // TODO: update operation types according to extensions for observer detection
+	    	  
+	    	  /*
+			   if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED && getLastStmtOperation().isModifier())
+				   getLastStmtOperation().timesExecutedInExtendingModifiers++;
+ 
+	    	  
+
+	    		  if (op.isFinalObserver()) {
+	    			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, false);
+	    			  createLastStmtActiveVars();
+	    		  } 
+	    		  else {
+	    			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, true);
+	    			  createLastStmtActiveVars();
+
+	    			  // check if the current op is an observer or a modifier
+	    			  if (!op.isModifier()) { 
+	    				  if (sequence.size() == 1) {
+	    					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+	    						  if (lastStmtNextExt.get(j) != null) { 							  
+	    							  if (FieldBasedGenLog.isLoggingOn())
+	    								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+
+	    							  op.setModifier();
+	    							  break;
+	    						  }
+	    					  }
+	    				  }
+	    				  else { //sequence.size() > 1 
+	    					  assert lastStmtFormerExt.size() == lastStmtNextExt.size();
+	    					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
+	    						  assert !(lastStmtFormerExt.get(j) != null && lastStmtNextExt.get(j) == null);
+
+	    						  if (lastStmtFormerExt.get(j) == null && lastStmtNextExt.get(j) == null)
+	    							  continue;
+	    						  else {
+	    							  if (!lastStmtNextExt.get(j).equals(lastStmtFormerExt.get(j))) {
+	    								  if (FieldBasedGenLog.isLoggingOn())
+	    									  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
+
+	    								  op.setModifier();
+	    								  // if (AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED || secondPhase)
+	    								  break;
+	    							  }
+	    						  }
+	    					  }
+	    				  }
+	    			  }
+
+	    			  // If it's not a modifier, mark the current action as an observer or final observer
+	    			  if (!op.isModifier()) {
+	    				  // First check if the current observer produces a new primitive value
+	    				  if (!secondPhase && !op.getOutputType().isVoid()) {
+	    					  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
+	    					  if (obj != null && isObjectPrimtive(obj)) {
+	    						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
+	    							  endsWithObserverReturningNewValue = true;
+
+	    							  if (FieldBasedGenLog.isLoggingOn())
+	    								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " was added to primitive field bounds");				
+	    						  }
+	    						  else 
+	    							  if (FieldBasedGenLog.isLoggingOn())
+	    								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " already belongs to primitive field bounds");				
+	    					  }
+	    				  }
+
+	    				  op.observerTimesExecuted++;
+	    				  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
+	    					  op.setFinalObserver(); 
+	    					  if (FieldBasedGenLog.isLoggingOn())
+	    						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
+	    				  }
+	    				  else {
+	    					  op.setObserver();
+	    					  if (FieldBasedGenLog.isLoggingOn())
+	    						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
+	    				  }
+
+	    			  }
+
+	    		  }
+
+	    		  if (!op.isModifier()) {
+	    			  endsWithObserver = true;
+	    			  if (FieldBasedGenLog.isLoggingOn()) 
+	    				  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
+	    		  }
+	    		  else 
+	    			  if (FieldBasedGenLog.isLoggingOn()) 
+	    				  FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
+	    	  }
+	    	  else {
+	    		  // Execution failed, if the operation is not executed mark it as an observer for the moment
+	    		  if (op.notExecuted())
+	    			  op.setObserver();
+	       	  }
+	      }
+	      */
+	    	  
+	      visitor.visitAfterStatement(this, i);
+	    }
+	    visitor.visitAfterSequence(this);
+	   	checks = gen.visit(this);
+	  }
+  
   
   public TypedOperation getLastStmtOperation() {
 	  return sequence.getStatement(sequence.size() - 1).getOperation();
@@ -963,7 +1256,7 @@ public class ExecutableSequence {
 		   }
 		   else {
 			   FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
-			   if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+			   if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendExtensionsResult.LIMITS_EXCEEDED)
 				   return null; 
 			   classesAndExtensions.add(new Tuple<>(canonizer.store.canonizeClass(o.getClass()), ext));
 		   }
@@ -973,96 +1266,10 @@ public class ExecutableSequence {
    }
    
    
-   
-  
-  
-  
-   /*
-  public ExtendedExtensionsResult enlargeExtensionsFast(HeapCanonizerRuntimeEfficient canonizer, ForwardGenerator generator) throws CanonizationErrorException {
-	// PABLO: Fast field based generation: For efficiency, only consider the last statement 
-	// for attempting to enlarge field extensions
-	int lastStmtIndex = this.sequence.size()-1;
-	List<Variable> inputs = sequence.getInputs(lastStmtIndex);
-	Object[] inputVariables = getRuntimeInputs(executionResults.theList, inputs);
-
-    // make sure statement executed
-	ExecutionOutcome statementResult = getResult(lastStmtIndex);
-	
-	enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
-	
-	enlargesExtensions = enlargeExtensionsLimits(lastStmtIndex, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer);
-
-	// Update last method's weight
-	if (AbstractGenerator.field_based_gen_weighted_selection) {
-	    Statement stmt = sequence.getStatement(lastStmtIndex);	
-		if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED)
-			increaseOpearationWeight(stmt, generator);
-		else if (enlargesExtensions == ExtendedExtensionsResult.NOT_EXTENDED)
-			decreaseOpearationWeight(stmt, generator);
-	}
-
-	return enlargesExtensions;
-  }
-  */
-  
-  
-  /*
-  private ExtendedExtensionsResult enlargeExtensions(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
-	  ExtendedExtensionsResult enlargesExt = ExtendedExtensionsResult.NOT_EXTENDED;
-	  
-	  try {
-		  Statement stmt = sequence.getStatement(i);
-		  int varIndex = 0;
-		  if (!stmt.getOutputType().isVoid()) {
-			  Object obj = statementResult;
-			  
-			  if (obj != null && !isObjectPrimtive(obj)) {
-			  	  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj) == ExtendedExtensionsResult.EXTENDED) {
-		           	  if (FieldBasedGenLog.isLoggingOn()) {
-	        	    		FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
-	        	    				+ stmt.toString() + " (index " + i + ")");
-		           	  }
-
-			  		  //sequence.addActiveVar(i, varIndex);
-		           	  enlargesExt = ExtendedExtensionsResult.EXTENDED;
-			  	  }
-			  }
-			  varIndex++;
-		  }
-	
-		  // Cover the field values belonging to all the current method's parameters
-		  if (inputVariables != null && inputVariables.length > 0) {
-				for (int j=0; j<inputVariables.length; j++) {
-					if (inputVariables[j] != null && !isObjectPrimtive(inputVariables[j])) {
-	        	    	if (canonizer.traverseBreadthFirstAndEnlargeExtensions(inputVariables[j]) == ExtendedExtensionsResult.EXTENDED) {
-	        	    		if (FieldBasedGenLog.isLoggingOn()) {
-	        	    			FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
-	        	    					+ stmt.toString() + " (index " + i + ")");
-	        	    		}
-
-	        	    		//sequence.addActiveVar(i, varIndex);		        	    		
-	        	    		enlargesExt = ExtendedExtensionsResult.EXTENDED;
-	        	    	}
-					}
-					varIndex++;
-				}
-		  }
-		  
-	  }	catch (Exception e) {
-		  e.printStackTrace();
-		  throw new CanonizationErrorException("ERROR: Exception during heap canonization");
-	  }
-	  
-	  return enlargesExt;
-  }
-  */
-  
-  
   
   private boolean isObjectPrimtive(Object o) {
 	  Class<?> objectClass = o.getClass();
 	  return NonreceiverTerm.isNonreceiverType(objectClass) || 
-			  objectClass.equals(Class.class) || 
 			  objectClass.equals(Object.class) ||
 			  objectClass.equals(BigInteger.class) || 
 			  objectClass.equals(BigDecimal.class);
@@ -1090,7 +1297,7 @@ public class ExecutableSequence {
 			  if (o != null && !isObjectPrimtive(o)) {
 				  FieldExtensionsIndexes ext = new FieldExtensionsIndexesMap(canonizer.store);
 				  if (canonize)
-					  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendedExtensionsResult.LIMITS_EXCEEDED)
+					  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(o, ext) == ExtendExtensionsResult.LIMITS_EXCEEDED)
 						  return null; 
 
 				  extensions.add(ext);
@@ -1129,6 +1336,60 @@ public class ExecutableSequence {
    
    public void tryToEnlargeExtensions(HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 	   if (lastStmtNextExt == null) {
+		   enlargesExtensions = ExtendExtensionsResult.LIMITS_EXCEEDED;
+		   return;
+	   }
+	   
+	   enlargesExtensions = ExtendExtensionsResult.NOT_EXTENDED;
+	   int index = sequence.size()-1;
+	   Statement stmt = sequence.getStatement(index);
+	   if (AbstractGenerator.fbg_precise_extension_detection) {
+
+		   int varIndex = 0;
+		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
+			   if (ext != null && canonizer.getExtensions().testEnlarges(ext)) {
+				   if (FieldBasedGenLog.isLoggingOn())
+					   FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+							   + stmt.toString() + " (index " + index + ")");
+
+				   sequence.addActiveVar(index, varIndex);
+				   enlargesExtensions = ExtendExtensionsResult.EXTENDED;
+			   }
+			   
+			   varIndex++;
+		   }
+
+		   if (sequence.getActiveVars(index) != null)
+			   for (Integer i: sequence.getActiveVars(index))
+				   canonizer.getExtensions().addAllPairs(lastStmtNextExt.get(i));
+
+	   }
+	   else {
+
+		   int varIndex = 0;
+		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
+			   if (ext != null && canonizer.getExtensions().addAllPairs(ext)) {
+				   if (FieldBasedGenLog.isLoggingOn())
+					   FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
+							   + stmt.toString() + " (index " + index + ")");
+
+				   enlargesExtensions = ExtendExtensionsResult.EXTENDED;
+			   }
+
+			   varIndex++;
+		   }
+
+	   }
+	   
+	   if (enlargesExtensions == ExtendExtensionsResult.EXTENDED && getLastStmtOperation().isModifier())
+		   getLastStmtOperation().timesExecutedInExtendingModifiers++;
+
+   }
+   
+   
+   public void enlargeExtensions(HeapCanonicalizer candVectCanonicalizer) {
+	   /*
+	   if (lastStmtNextExt == null) {
 		   enlargesExtensions = ExtendedExtensionsResult.LIMITS_EXCEEDED;
 		   return;
 	   }
@@ -1136,7 +1397,7 @@ public class ExecutableSequence {
 	   enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
 	   int index = sequence.size() -1;
 	   Statement stmt = sequence.getStatement(index);
-	   if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
+	   if (AbstractGenerator.fbg_precise_extension_detection) {
 
 		   int varIndex = 0;
 		   for (FieldExtensionsIndexes ext: lastStmtNextExt) {
@@ -1176,19 +1437,18 @@ public class ExecutableSequence {
 	   
 	   if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED && getLastStmtOperation().isModifier())
 		   getLastStmtOperation().timesExecutedInExtendingModifiers++;
-
+		*/
    }
    
    
    
-   
-  private ExtendedExtensionsResult enlargeExtensionsLimits(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
+  private ExtendExtensionsResult enlargeExtensionsLimits(int i, Object statementResult, Object[] inputVariables, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 
-	  ExtendedExtensionsResult res = ExtendedExtensionsResult.NOT_EXTENDED;
+	  ExtendExtensionsResult res = ExtendExtensionsResult.NOT_EXTENDED;
 	  List<FieldExtensionsIndexes> extensions = createExtensionsForAllObjects(i, statementResult, inputVariables, canonizer, true);
 				  
 	  Statement stmt = sequence.getStatement(i);
-	  if (AbstractGenerator.field_based_gen_precise_enlarging_objects_detection) {
+	  if (AbstractGenerator.fbg_precise_extension_detection) {
 			  
 		  int varIndex = 0;
 		  for (FieldExtensionsIndexes ext: extensions) {
@@ -1198,7 +1458,7 @@ public class ExecutableSequence {
 							  + stmt.toString() + " (index " + i + ")");
 
 				  sequence.addActiveVar(i, varIndex);
-				  res = ExtendedExtensionsResult.EXTENDED;
+				  res = ExtendExtensionsResult.EXTENDED;
 			  }
 			  varIndex++;
 		  }
@@ -1218,7 +1478,7 @@ public class ExecutableSequence {
 					  FieldBasedGenLog.logLine("> Enlarged extensions at variable " + varIndex + " of " 
 							  + stmt.toString() + " (index " + i + ")");
 
-				  res = ExtendedExtensionsResult.EXTENDED;
+				  res = ExtendExtensionsResult.EXTENDED;
 			  }
 			  varIndex++;
 		  }
@@ -1359,8 +1619,8 @@ public class ExecutableSequence {
 
   
   
-  public ExtendedExtensionsResult enlargeExtensionsMin(HeapCanonizerRuntimeEfficient canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
-	enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
+  public ExtendExtensionsResult enlargeExtensionsMin(HeapCanonizerRuntimeEfficient canonizer, TestCheckGenerator checkgen, ForwardGenerator generator) throws CanonizationErrorException {
+	enlargesExtensions = ExtendExtensionsResult.NOT_EXTENDED;
 /*
 	//	seqnum++;
 	

@@ -30,12 +30,14 @@ import randoop.util.fieldbasedcontrol.MurmurHash3;
 import randoop.util.fieldbasedcontrol.MurmurHash3.LongPair;
 import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
-import randoop.util.heapcanonicalization.ExtendedExtensionsResult;
+import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsFieldExtensions;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
+import randoop.util.heapcanonicalization.fieldextensions.FieldExtensions;
+import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByType;
 import randoop.util.fieldbasedcontrol.RandomPerm;
 import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.predicate.AlwaysFalse;
@@ -64,24 +66,26 @@ import java.util.Set;
 public abstract class AbstractGenerator {
 	
 	public static CanonicalStore store;
-	public static HeapCanonicalizer candVectCanonicalizer;
+	public static HeapCanonicalizer newCanonicalizer;
+	public static FieldExtensions globalExtensions;
 	public static CandidateVectorGenerator candVectGenerator;
 	public static CandidateVectorsFieldExtensions candVectExtensions;
 	
-	public void initNewCanonicalizer(Collection<String> classNames, int maxObjects) {
+	public void initNewCanonicalizer(Collection<String> classNames, int maxObjects, int fieldDistance) {
 		
 	    store = new CanonicalStore(classNames);
 		
-		candVectCanonicalizer = new HeapCanonicalizer(store, maxObjects);
+		newCanonicalizer = new HeapCanonicalizer(store, maxObjects, fieldDistance);
+		globalExtensions = new FieldExtensionsByType();
 		// Initialize the candidate vector generator with the canonical classes that were mined from the code,
 		// before the generation starts.
-		candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
-
-	    CanonicalHeap heap = new CanonicalHeap(store, AbstractGenerator.cand_vect_max_objs);
-	    CandidateVector<String> header = AbstractGenerator.candVectGenerator.makeCandidateVectorsHeader(heap);
-		AbstractGenerator.candVectExtensions = new CandidateVectorsFieldExtensions(header);
-	    if (CandidateVectorsWriter.isEnabled())
-	    	CandidateVectorsWriter.logLine(header.toString());
+		if (CandidateVectorsWriter.isEnabled()) {
+			candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+			CanonicalHeap heap = new CanonicalHeap(store, maxObjects);
+			CandidateVector<String> header = AbstractGenerator.candVectGenerator.makeCandidateVectorsHeader(heap);
+			AbstractGenerator.candVectExtensions = new CandidateVectorsFieldExtensions(header);
+			CandidateVectorsWriter.logLine(header.toString());
+		}
 	}
 	
   // The set of all primitive values seen during generation and execution
@@ -140,8 +144,11 @@ public abstract class AbstractGenerator {
   @Option("Only store up to this number of objects during canonization")
   public static int field_based_gen_max_objects = 5000;
   
-  @Option("Only store up to this number of objects during field vector canonization")
-  public static int cand_vect_max_objs = 5;
+  @Option("Do not canonicalize structures having more than this number of objects of a single reference type.")
+  public static int fbg_max_objects = Integer.MAX_VALUE;
+
+  @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
+  public static int fbg_field_distance = Integer.MAX_VALUE;
 
   @Option("Representation of the null value in candidate vectors")
   public static int cand_vect_null_rep = 0;//Integer.MIN_VALUE;
@@ -158,7 +165,7 @@ public abstract class AbstractGenerator {
 
   @Option("Allows field based generation to detect precisely which objects enlarge the extensions."
   		+ " This may negatively affect runtime performance.")
-  public static boolean field_based_gen_precise_enlarging_objects_detection = true;
+  public static boolean fbg_precise_extension_detection = true;
 
   @Option("Save tests ending with observers.")
   public static boolean field_based_gen_save_observers = true;
@@ -726,7 +733,6 @@ private int genFirstAdditionalObsErrorSeqs;
 			  if (FieldBasedGenLog.isLoggingOn())
 				  FieldBasedGenLog.logLine("**** ERROR: Current sequence has invalid behaviour");
    		  }
-   		  
   	  }
 	  else {
 		  if (FieldBasedGenLog.isLoggingOn()) 
@@ -918,14 +924,14 @@ private int genFirstAdditionalObsErrorSeqs;
 		  save = true;
 	  }
 	  else {
-		  if (eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED ||
-				  eSeq.enlargesExtensions == ExtendedExtensionsResult.EXTENDED_PRIMITIVE) {
+		  if (eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED ||
+				  eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED_PRIMITIVE) {
 			  save = true;
 			  positiveExtendingTests++;
 			  if (FieldBasedGenLog.isLoggingOn()) 
 				  FieldBasedGenLog.logLine("> Current sequence enlarges extensions.");
 		  }
-		  else if (eSeq.enlargesExtensions == ExtendedExtensionsResult.LIMITS_EXCEEDED) {
+		  else if (eSeq.enlargesExtensions == ExtendExtensionsResult.LIMITS_EXCEEDED) {
 			 // We discard the tests exceeding limits (for now at least)
 			  assert false: "Should never happen as randoop's generation mechanism does not produce too large strings";
 				  
@@ -1061,7 +1067,7 @@ private int genFirstAdditionalObsErrorSeqs;
   public boolean addObjectHashesToStore(ExecutableSequence eSeq) {
 
 	  List<Tuple<CanonizerClass, FieldExtensionsIndexes>> lastStmtExt = eSeq.canonizeObjectsAfterExecution(canonizer, false);
-	  eSeq.enlargesExtensions = ExtendedExtensionsResult.NOT_EXTENDED;
+	  eSeq.enlargesExtensions = ExtendExtensionsResult.NOT_EXTENDED;
 	  boolean result = false;
 	  
 	  int lastStmtInd = eSeq.sequence.size() -1;
@@ -1101,7 +1107,7 @@ private int genFirstAdditionalObsErrorSeqs;
 					   + stmt.toString() + " (index " + lastStmtInd + ")");
 			  
 			  eSeq.sequence.addActiveVar(lastStmtInd, varIndex);
-			  eSeq.enlargesExtensions = ExtendedExtensionsResult.EXTENDED;
+			  eSeq.enlargesExtensions = ExtendExtensionsResult.EXTENDED;
 			  result = true;
 		  }
 		  else {

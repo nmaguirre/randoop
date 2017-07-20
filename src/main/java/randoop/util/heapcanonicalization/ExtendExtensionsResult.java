@@ -1,6 +1,6 @@
 package randoop.util.heapcanonicalization;
 
-public enum ExtendedExtensionsResult {
+public enum ExtendExtensionsResult {
 	EXTENDED, 
 	EXTENDED_PRIMITIVE,
 	NOT_EXTENDED, 

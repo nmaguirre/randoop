@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 import randoop.generation.AbstractGenerator;
-import randoop.util.heapcanonicalization.ExtendedExtensionsResult;
+import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 
 
 /* 
@@ -143,7 +143,7 @@ public class HeapCanonizerRuntimeEfficient {
 
 
 
-	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root) {
+	public ExtendExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root) {
 		return traverseBreadthFirstAndEnlargeExtensions(root, extensions);
 	}
 	
@@ -151,10 +151,10 @@ public class HeapCanonizerRuntimeEfficient {
 	// Canonize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public ExtendedExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root, FieldExtensionsIndexes extensions) {
-		if (root == null) return ExtendedExtensionsResult.NOT_EXTENDED;
+	public ExtendExtensionsResult traverseBreadthFirstAndEnlargeExtensions(Object root, FieldExtensionsIndexes extensions) {
+		if (root == null) return ExtendExtensionsResult.NOT_EXTENDED;
   	
-		ExtendedExtensionsResult extended = ExtendedExtensionsResult.NOT_EXTENDED;
+		ExtendExtensionsResult extended = ExtendExtensionsResult.NOT_EXTENDED;
 		/*
 		CanonizerObject croot = store.addObject(root);
 		if (croot.ignored() || croot.primitive() || croot.isNull()) 
@@ -210,7 +210,7 @@ public class HeapCanonizerRuntimeEfficient {
 
 					CanonizerField arrDummyFld = store.canonizeArrayField(cobj.cc, i);
 					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, arrDummyFld, extensions))
-						extended = ExtendedExtensionsResult.EXTENDED; 
+						extended = ExtendExtensionsResult.EXTENDED; 
 				}
 			}
 			else {
@@ -243,7 +243,7 @@ public class HeapCanonizerRuntimeEfficient {
 						toVisit.add(newcobj);
 
 					if (!newcobj.ignored() && addToExtensions(cobj, newcobj, cf, extensions))
-						extended = ExtendedExtensionsResult.EXTENDED;
+						extended = ExtendExtensionsResult.EXTENDED;
 				}
 			}
 		}
