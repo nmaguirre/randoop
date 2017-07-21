@@ -1,7 +1,6 @@
 package randoop.util.heapcanonicalization;
 
 import java.util.AbstractMap;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,18 +23,17 @@ public class HeapCanonicalizer {
 	
 	private final CanonicalStore store;
 	private final int maxObjects;
-	private final int maxFieldDistance;
+	private final int maxBFSDepth;
 		
 	public HeapCanonicalizer(CanonicalStore store, int maxObjects) {
 		this(store, maxObjects, Integer.MAX_VALUE);
 	}
 	
-	public HeapCanonicalizer(CanonicalStore store, int maxObjects, int maxFieldDistance) {
+	public HeapCanonicalizer(CanonicalStore store, int maxObjects, int maxBFSDepth) {
 		this.maxObjects = maxObjects;
 		this.store = store; 
-		this.maxFieldDistance = maxFieldDistance;
+		this.maxBFSDepth = maxBFSDepth;
 	}
-	
 	
 	public Entry<CanonicalizationResult, CanonicalHeap> traverseBreadthFirstAndCanonize(Object root) {	
 		return traverseBreadthFirstAndCanonize(root, new FieldExtensionsDummyCollector());
@@ -63,7 +61,7 @@ public class HeapCanonicalizer {
 		while (!workQueue.isEmpty()) {
 
 			Entry<CanonicalObject, Integer> currElem = workQueue.poll();
-			int currFieldDistance = currElem.getValue();
+			int currDepth = currElem.getValue();
 			CanonicalObject currObj = currElem.getKey(); 
 			CanonicalClass currObjType = currObj.getCanonicalClass();
 			assert currObj != null && 
@@ -98,13 +96,13 @@ public class HeapCanonicalizer {
 				if (!canonicalValue.isNull() && 
 						!canonicalValue.isPrimitive() 
 						&& visited.add(canonicalValue)) {
-					workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance));	
-					if (currFieldDistance < maxFieldDistance-1) {
+					//workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance));	
+					if (currDepth < maxBFSDepth-1) {
 						if (canonicalValue.isArray())
 							// Arrays elements don't count as fields
-							workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance));	
+							workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currDepth));	
 						else	
-							workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance+1));	
+							workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currDepth+1));	
 					}
 				}
 				// Treat cobj current field;

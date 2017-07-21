@@ -2,9 +2,8 @@ package randoop.util.heapcanonicalization.fieldextensions;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +13,13 @@ public class BinaryPrimitiveValue {
 	
 	
 	private String padLeftWithZeros(String str, int n) {
+		/*
+		System.out.println("Cadena:");
+		System.out.println(str);
+		System.out.println(n);
+		*/
+		if (str.length() > n)
+			return str.substring(0, n-1);
 		if (str.length() == n)
 			return str;
 		return String.format("%0"+(n-str.length())+"d%s", 0, str); 
@@ -76,7 +82,7 @@ public class BinaryPrimitiveValue {
 		int currSize = bitwiseValue.size();
 		for (int i = 0; i < str.length(); i++) {
 			int currInd = currSize + i;
-			Set<Character> newSet = new HashSet<>();
+			Set<Character> newSet = new LinkedHashSet<>();
 			newSet.add(str.charAt(i));
 			bitwiseValue.put(currInd, newSet);
 		}
@@ -92,7 +98,7 @@ public class BinaryPrimitiveValue {
 		}
 
 		while (i < other.bitwiseValue.size()) {
-			bitwiseValue.put(i, new HashSet<>(other.bitwiseValue.get(i)));
+			bitwiseValue.put(i, new LinkedHashSet<>(other.bitwiseValue.get(i)));
 			extended = true;
 			i++;
 		}

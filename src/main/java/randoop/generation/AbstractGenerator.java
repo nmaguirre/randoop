@@ -147,8 +147,12 @@ public abstract class AbstractGenerator {
   @Option("Do not canonicalize structures having more than this number of objects of a single reference type.")
   public static int fbg_max_objects = Integer.MAX_VALUE;
 
+  /*
   @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
   public static int fbg_field_distance = Integer.MAX_VALUE;
+  */
+  @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
+  public static int fbg_bfs_depth = Integer.MAX_VALUE;
 
   @Option("Representation of the null value in candidate vectors")
   public static int cand_vect_null_rep = 0;//Integer.MIN_VALUE;
