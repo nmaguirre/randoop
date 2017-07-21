@@ -40,8 +40,10 @@ public class FieldExtensionsPrimitiveBinary {
 	
 	public String toString() {
 		String result = "";
-		for (String fname: extensions.keySet()) 
-			result += extensions.get(fname).toString() + '\n';
+		for (String fname: extensions.keySet()) { 
+			if (!extensions.get(fname).isEmpty())
+				result += extensions.get(fname).toString() + '\n';
+		}
 		return result;
 	}
 	

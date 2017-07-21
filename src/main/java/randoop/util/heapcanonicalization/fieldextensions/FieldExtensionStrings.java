@@ -1,8 +1,7 @@
 package randoop.util.heapcanonicalization.fieldextensions;
 
 import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -10,7 +9,7 @@ import java.util.Set;
 public class FieldExtensionStrings {
 	
 	private String fieldname;
-	private Map<String, Set<String>> extension = new HashMap<String, Set<String>>();
+	private Map<String, Set<String>> extension = new LinkedHashMap<String, Set<String>>();
 	// private int size;
 
 	public FieldExtensionStrings(String name) {
@@ -73,7 +72,7 @@ public class FieldExtensionStrings {
 		for (String field: other.extension.keySet()) {
 			Set<String> currSet = extension.get(field);
 			if (currSet == null) {
-				currSet = new HashSet<>();
+				currSet = new LinkedHashSet<>();
 				extension.put(field, currSet);
 			}
 			res |= currSet.addAll(other.extension.get(field));

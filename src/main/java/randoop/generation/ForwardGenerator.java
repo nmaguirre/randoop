@@ -411,7 +411,9 @@ private int maxsize;
     
     if (FieldBasedGenLog.isLoggingOn())
     	FieldBasedGenLog.logLine("\n\n----- Current sequence ----- \n" + eSeq.toCodeString());
-    
+    if (CanonizerLog.isLoggingOn())
+    	CanonizerLog.logLine("\n\n----- Current sequence ----- \n" + eSeq.toCodeString());
+   
     // Original randoop behaviour
     if (field_based_gen == FieldBasedGenType.DISABLED) {
     	eSeq.execute(executionVisitor, checkGenerator);

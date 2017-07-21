@@ -478,10 +478,12 @@ public class GenTests extends GenInputsAbstract {
     	CanonizerLog.logLine(AbstractGenerator.store.toString());
     	CanonizerLog.logLine("**********");
 
-    	CanonizerLog.logLine("**********");
-    	CanonizerLog.logLine("Candidate Vectors Field Extensions:");
-    	CanonizerLog.logLine(AbstractGenerator.candVectExtensions.toString());
-    	CanonizerLog.logLine("**********");
+    	if (CandidateVectorsWriter.isEnabled()) {
+			CanonizerLog.logLine("**********");
+			CanonizerLog.logLine("Candidate Vectors Field Extensions:");
+			CanonizerLog.logLine(AbstractGenerator.candVectExtensions.toString());
+			CanonizerLog.logLine("**********");
+    	}
     }
     
     if (CandidateVectorsWriter.isEnabled()) 

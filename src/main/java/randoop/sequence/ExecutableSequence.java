@@ -925,15 +925,49 @@ public class ExecutableSequence {
 		   if (enlargesExt) {
 			   if (!isPrimitive(obj)) {
 				   res = ExtendExtensionsResult.EXTENDED;
-				   sequence.addActiveVar(index, i); 
+				   sequence.addActiveVar(index, i);
+				    if (CanonizerLog.isLoggingOn()) {
+				    	CanonizerLog.logLine("----------");
+				    	CanonizerLog.logLine("Object enlarges reference extensions. Object extensions:");
+				    	CanonizerLog.logLine(ext.toString());
+				    	CanonizerLog.logLine("----------");
+				    }
 			   }
-			   else 
+			   else {
 				   res = lift(res, ExtendExtensionsResult.EXTENDED_PRIMITIVE);
+				   if (CanonizerLog.isLoggingOn()) {
+					   CanonizerLog.logLine("----------");
+					   CanonizerLog.logLine("Value enlarges primitive extensions. Value extensions:");
+					   CanonizerLog.logLine(ext.toString());
+					   CanonizerLog.logLine("----------");
+				   }
+			   }
 		   }
+		   else {
+			   if (CanonizerLog.isLoggingOn()) {
+				   CanonizerLog.logLine("----------");
+				   CanonizerLog.logLine("Extensions not enlarged.");
+				   CanonizerLog.logLine("----------");
+			   }
+		   }
+	   }
+
+	   if (CanonizerLog.isLoggingOn() && res != ExtendExtensionsResult.NOT_EXTENDED) {
+		   CanonizerLog.logLine("----------");
+		   CanonizerLog.logLine("Former global extensions:");
+		   CanonizerLog.logLine(globalExt.toString());
+		   CanonizerLog.logLine("----------");
 	   }
 
 	   for (FieldExtensions ext: enlargingExt)
 		   globalExt.addAll(ext);
+	   
+	   if (CanonizerLog.isLoggingOn() && res != ExtendExtensionsResult.NOT_EXTENDED) {
+		   CanonizerLog.logLine("----------");
+		   CanonizerLog.logLine("New global extensions:");
+		   CanonizerLog.logLine(globalExt.toString());
+		   CanonizerLog.logLine("----------");
+	   }
 
 	   return res;
    }

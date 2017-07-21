@@ -1,16 +1,14 @@
 package randoop.util.heapcanonicalization.fieldextensions;
 
 import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+
 
 
 public class FieldExtensionPrimitiveBinary {
 	
 	private String fieldname;
-	private Map<String, BinaryPrimitiveValue> extension = new HashMap<>();
+	private Map<String, BinaryPrimitiveValue> extension = new LinkedHashMap<>();
 
 	public FieldExtensionPrimitiveBinary(String name) {
 		fieldname = name;
@@ -67,6 +65,15 @@ public class FieldExtensionPrimitiveBinary {
 
 	public String toString() {
 		return fieldname + ":" + extension.toString();
+/*				;
+		List<String> keys = new LinkedList<>(extension.keySet());
+		Collections.sort(keys);
+		for (String s: keys) {
+			
+		}
+		
+			
+		return res;*/
 	}
 
 
@@ -106,5 +113,8 @@ public class FieldExtensionPrimitiveBinary {
 		return res;
 	}
 	
+	public boolean isEmpty() {
+		return extension.isEmpty();
+	}
 	
 }

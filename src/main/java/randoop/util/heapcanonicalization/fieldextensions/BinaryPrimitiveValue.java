@@ -4,12 +4,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class BinaryPrimitiveValue {
 
-	private Map<Integer, Set<Character>> bitwiseValue = new HashMap<>();
+	private Map<Integer, Set<Character>> bitwiseValue = new LinkedHashMap<>();
 	
 	
 	private String padLeftWithZeros(String str, int n) {
@@ -27,7 +28,8 @@ public class BinaryPrimitiveValue {
 			addFromBitwiseString(padLeftWithZeros(Integer.toBinaryString((int) o), 32));
 			break;
 		case SHORT:
-			addFromBitwiseString(padLeftWithZeros(Integer.toBinaryString((int) o), 16));
+			n = (short) o;
+			addFromBitwiseString(padLeftWithZeros(Integer.toBinaryString(n), 16));
 			break;
 		case CHAR:	
 			n = (char) o;

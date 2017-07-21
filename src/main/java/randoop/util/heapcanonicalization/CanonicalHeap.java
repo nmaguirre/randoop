@@ -35,7 +35,7 @@ public class CanonicalHeap {
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, new CanonicalObject(obj, clazz, -1, this));
 
 		// If there is already an object encapsulating obj, return it
-		CanonicalObject res = findExistingCanonicalOject(obj, clazz);
+		CanonicalObject res = findExistingCanonicalObject(obj, clazz);
 		if (res != null)
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, res);
 		
@@ -47,9 +47,16 @@ public class CanonicalHeap {
 		return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, newCanonicalObject(obj, clazz));
 	}
 	
-	private CanonicalObject findExistingCanonicalOject(Object obj, CanonicalClass clazz) {
-		// FIXME: Problem with list iterators, we cannot retrieve the objects for the class.
+	private CanonicalObject findExistingCanonicalObject(Object obj, CanonicalClass clazz) {
 		List<CanonicalObject> clazzObjs = objects.get(clazz);
+
+		// Some classes are found out at runtime, for example, when they are not the type 
+		// of any field but they are the return type of a method.
+		if (clazzObjs == null) {
+			objects.put(clazz, new LinkedList<CanonicalObject>());
+			return null;
+		}
+		
 		/*
 		if (clazzObjs == null) {
 			clazzObjs = new LinkedList<>();

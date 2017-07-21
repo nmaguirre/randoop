@@ -70,6 +70,12 @@ public class CanonicalClass {
 	*/
 
 	private CanonicalClass canonizeAncestors() {
+		/* 
+		 * Ugly hack to deal with weird randoop test:
+		 * Object o = new Object();
+		 */
+		if (clazz.equals(Object.class)) return null;
+
 		CanonicalClass ancestor = store.getCanonicalClass(clazz.getSuperclass());
 		if (!ancestor.isPrimitive()) {
 			return ancestor;
@@ -78,6 +84,12 @@ public class CanonicalClass {
 	}
 		
 	private void canonizeFields() {
+		/* 
+		 * Ugly hack to deal with weird randoop test:
+		 * Object o = new Object();
+		 */
+		if (clazz.equals(Object.class)) return;
+
 		if (ancestor != null)
 			fields.addAll(ancestor.getCanonicalFields());
 		
@@ -117,7 +129,7 @@ public class CanonicalClass {
   				|| clazz == Double.class
   				|| clazz == Boolean.class
   				// || clazz == Date.class
-  				|| clazz == Object.class
+  				//|| clazz == Object.class
 		  		|| clazz.isEnum()
 				);
   	}	

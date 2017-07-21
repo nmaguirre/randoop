@@ -4,14 +4,14 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FieldExtensionsStrings implements FieldExtensions {
 	
 	//private int size = 0;
 
-	private Map<String, FieldExtensionStrings> extensions = new HashMap<String, FieldExtensionStrings>();
+	private Map<String, FieldExtensionStrings> extensions = new LinkedHashMap<String, FieldExtensionStrings>();
 
 	public boolean addPairToField(String field, String src, String tgt) {
 		FieldExtensionStrings fe = extensions.get(field);

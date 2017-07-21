@@ -22,7 +22,7 @@ public class FieldExtensionsByType implements FieldExtensions {
 	}
 	
 	public String toString() {
-		String result = "---------- FIELD EXTENSIONS ----------\n";
+		String result = "";
 		if (!referenceExtensions.isEmpty()) {
 			result += "REFERENCE type: \n";
 			result += referenceExtensions.toString() + "\n";
@@ -34,7 +34,6 @@ public class FieldExtensionsByType implements FieldExtensions {
 				result += primitiveExtensions.get(fname).toString() + "\n";
 			}
 		}
-		result += "----------";
 		return result;
 	}
 
