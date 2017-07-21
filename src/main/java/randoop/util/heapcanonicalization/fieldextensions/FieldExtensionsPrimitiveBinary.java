@@ -88,7 +88,7 @@ public class FieldExtensionsPrimitiveBinary {
 		if (!extensions.keySet().containsAll(other.extensions.keySet()))
 			return false;
 		
-		for (String field: extensions.keySet()) 
+		for (String field: other.extensions.keySet()) 
 			if (!extensions.get(field).containsAll(other.extensions.get(field)))
 				return false;
 		

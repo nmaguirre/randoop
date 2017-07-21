@@ -957,10 +957,9 @@ public class ExecutableSequence {
 	      List<Variable> inputs = sequence.getInputs(i);
 	      Object[] inputVariables;
 	      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
-	      TypedOperation op = null;
-
-	      // TODO: Don't do observer detection yet.
 	      /*
+	      TypedOperation op = null;
+	      // TODO: Don't do observer detection yet.
 	      if (i == sequence.size()-1) {
 	    	  op = sequence.getStatement(i).getOperation();
 	    	  logOperationType(op);
@@ -994,8 +993,7 @@ public class ExecutableSequence {
 	        }
 	      }
 	      
-	      if (i == sequence.size()-1) {
-	    	  assert statementResult instanceof NormalExecution: "Sequence didn't fail but its execution is not \"normal\"";
+	      if (i == sequence.size()-1 && statementResult instanceof NormalExecution) {
 	    	  Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
 	    	  List<Object> objs = getObjectsForStatement(i, retVal, inputVariables);
 	    	  lastStmtExtAfterExecution = createExtensionsForAllObjects(objs, canonicalizer);

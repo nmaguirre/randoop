@@ -34,8 +34,8 @@ public final class FieldBasedGenLog {
     }
 
     try {
-      GenInputsAbstract.field_based_gen_log.write(s);
-      GenInputsAbstract.field_based_gen_log.flush();
+      GenInputsAbstract.fbg_log.write(s);
+      GenInputsAbstract.fbg_log.flush();
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -48,9 +48,9 @@ public final class FieldBasedGenLog {
     }
 
     try {
-      GenInputsAbstract.field_based_gen_log.write(s);
-      GenInputsAbstract.field_based_gen_log.write(Globals.lineSep);
-      GenInputsAbstract.field_based_gen_log.flush();
+      GenInputsAbstract.fbg_log.write(s);
+      GenInputsAbstract.fbg_log.write(Globals.lineSep);
+      GenInputsAbstract.fbg_log.flush();
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -63,9 +63,9 @@ public final class FieldBasedGenLog {
     }
 
     try {
-      GenInputsAbstract.field_based_gen_log.write(Globals.lineSep + Globals.lineSep);
-      GenInputsAbstract.field_based_gen_log.write(s.toString());
-      GenInputsAbstract.field_based_gen_log.flush();
+      GenInputsAbstract.fbg_log.write(Globals.lineSep + Globals.lineSep);
+      GenInputsAbstract.fbg_log.write(s.toString());
+      GenInputsAbstract.fbg_log.flush();
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -79,11 +79,11 @@ public final class FieldBasedGenLog {
     }
 
     try {
-      GenInputsAbstract.field_based_gen_log.write("Statements : " + Globals.lineSep);
+      GenInputsAbstract.fbg_log.write("Statements : " + Globals.lineSep);
       for (TypedOperation t : model) {
-        GenInputsAbstract.field_based_gen_log.write(t.toString());
-        GenInputsAbstract.field_based_gen_log.write(Globals.lineSep);
-        GenInputsAbstract.field_based_gen_log.flush();
+        GenInputsAbstract.fbg_log.write(t.toString());
+        GenInputsAbstract.fbg_log.write(Globals.lineSep);
+        GenInputsAbstract.fbg_log.flush();
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -92,6 +92,6 @@ public final class FieldBasedGenLog {
   }
 
   public static boolean isLoggingOn() {
-    return GenInputsAbstract.field_based_gen_log != null;
+    return GenInputsAbstract.fbg_log != null;
   }
 }

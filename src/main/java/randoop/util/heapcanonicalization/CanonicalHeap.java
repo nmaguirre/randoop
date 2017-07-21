@@ -48,6 +48,7 @@ public class CanonicalHeap {
 	}
 	
 	private CanonicalObject findExistingCanonicalOject(Object obj, CanonicalClass clazz) {
+		// FIXME: Problem with list iterators, we cannot retrieve the objects for the class.
 		List<CanonicalObject> clazzObjs = objects.get(clazz);
 		/*
 		if (clazzObjs == null) {

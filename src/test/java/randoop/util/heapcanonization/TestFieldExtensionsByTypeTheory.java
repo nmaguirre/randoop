@@ -2,30 +2,21 @@ package randoop.util.heapcanonization;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.junit.experimental.theories.Theory;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.DataPoint;
 import org.junit.runner.RunWith;
 
-import randoop.test.datastructures.binheap.BinomialHeap;
 import randoop.test.datastructures.bstree.BSTree;
-import randoop.test.datastructures.singlylist.SinglyLinkedList;
 import randoop.test.datastructures.singlylistinner.SinglyLinkedListInner;
-import randoop.test.datastructures.treeset.TreeSet;
 import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
-import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
-import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByType;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByTypeCollector;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsCollector;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsCollector;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsNonPrimitiveCollector;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map.Entry;

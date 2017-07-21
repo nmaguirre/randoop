@@ -192,8 +192,9 @@ public abstract class AbstractGenerator {
   @Option("Max times an observer can be executed in a test not extending the extensions.")
   public static int field_based_gen_max_non_extending_observer_tests_ratio = 500;
   
-  @Option("Max times a modifier can be executed in a negative test.")
-  public static int field_based_gen_negatives_ratio = 500;
+  @Option("Save negative test only if the last operation was used at most (#test gen./fbg_save_negatives_ratio)+1 times in tests"
+	  		+ "not extending the extensions.")
+  public static int fbg_save_negatives_ratio = 500;
 
   @Option("Generation stops when this many tests are discarded.")
   public static int max_discarded_tests = 100000;
@@ -646,7 +647,7 @@ private int genFirstAdditionalObsErrorSeqs;
   
    private boolean saveNegativeSequence(ExecutableSequence eSeq) {
 	
-	int limit = (numRegressionSequences() / field_based_gen_negatives_ratio) + 1;
+	int limit = (numRegressionSequences() / fbg_save_negatives_ratio) + 1;
 	
 	if (eSeq.getLastStmtOperation().timesExecutedInNegativeTests < limit) {
 		eSeq.getLastStmtOperation().timesExecutedInNegativeTests++;
@@ -716,9 +717,6 @@ private int genFirstAdditionalObsErrorSeqs;
         continue;
       }
       
-	  if (FieldBasedGenLog.isLoggingOn())
-		  FieldBasedGenLog.logLine("> Current sequence: \n" + eSeq.toCodeString());
-
       num_sequences_generated++;
       
       if (eSeq.hasFailure()) {
@@ -1035,7 +1033,7 @@ private int genFirstAdditionalObsErrorSeqs;
 			  continue;
 		  }
 		  if (FieldBasedGenLog.isLoggingOn())
-			  FieldBasedGenLog.logLine("> Current sequence: \n" + eSeq.toCodeString());
+			  FieldBasedGenLog.logLine(">> Current sequence:\n" + eSeq.toCodeString());
 
 		  List<Tuple<CanonizerClass, FieldExtensionsIndexes>> lastStmtExt = eSeq.canonizeObjectsAfterExecution(canonizer);
 		  

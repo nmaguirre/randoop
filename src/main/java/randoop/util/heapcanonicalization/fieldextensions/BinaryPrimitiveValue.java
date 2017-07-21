@@ -13,6 +13,8 @@ public class BinaryPrimitiveValue {
 	
 	
 	private String padLeftWithZeros(String str, int n) {
+		if (str.length() == n)
+			return str;
 		return String.format("%0"+(n-str.length())+"d%s", 0, str); 
 	}
 	

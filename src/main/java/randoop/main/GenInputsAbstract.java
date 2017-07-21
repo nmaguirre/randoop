@@ -612,7 +612,7 @@ public abstract class GenInputsAbstract extends CommandHandler {
   
   @OptionGroup(value = "Additional field based generation options")
   @Option("<filename> Name of a file to which to log lots of information about field based generation")
-  public static FileWriter field_based_gen_log = null;
+  public static FileWriter fbg_log = null;
   
   @Option("Disable contract checking during field based generation (very expensive when tests get large)")
   public static boolean field_based_gen_disable_contracts = true;
