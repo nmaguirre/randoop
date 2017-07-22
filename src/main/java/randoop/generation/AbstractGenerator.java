@@ -71,11 +71,10 @@ public abstract class AbstractGenerator {
 	public static CandidateVectorGenerator candVectGenerator;
 	public static CandidateVectorsFieldExtensions candVectExtensions;
 	
-	public void initNewCanonicalizer(Collection<String> classNames, int maxObjects, int fieldDistance) {
+	public void initNewCanonicalizer(Collection<String> classNames, int maxObjects, int bfsDepth, int fieldDistance) {
 		
-	    store = new CanonicalStore(classNames);
-		
-		newCanonicalizer = new HeapCanonicalizer(store, maxObjects, fieldDistance);
+	    store = new CanonicalStore(classNames, fieldDistance);
+		newCanonicalizer = new HeapCanonicalizer(store, maxObjects, bfsDepth);
 		globalExtensions = new FieldExtensionsByType();
 		// Initialize the candidate vector generator with the canonical classes that were mined from the code,
 		// before the generation starts.
@@ -147,10 +146,9 @@ public abstract class AbstractGenerator {
   @Option("Do not canonicalize structures having more than this number of objects of a single reference type.")
   public static int fbg_max_objects = Integer.MAX_VALUE;
 
-  /*
   @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
   public static int fbg_field_distance = Integer.MAX_VALUE;
-  */
+
   @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
   public static int fbg_bfs_depth = Integer.MAX_VALUE;
 

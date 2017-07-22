@@ -25,9 +25,10 @@ public class CanonicalClass {
 	private final boolean isAbstract;
 	private final boolean isInterface;
 	// TODO: For now it is implemented 
-	// private int fieldDistance;
+	private int fieldDistance;
 
-	public CanonicalClass(String name, CanonicalStore store) {
+	public CanonicalClass(String name, CanonicalStore store, int fieldDistance, int maxFieldDistance) {
+		this.fieldDistance = fieldDistance;
 		this.store = store;
 		this.name = name;
 		ID = globalID++;
@@ -43,13 +44,14 @@ public class CanonicalClass {
 		clazz = cls;
 		isPrimitive = isPrimitive(clazz);
 		isArray = isArray(clazz);
-		arrObjectsType = (!isArray) ? null : store.getCanonicalClass(clazz.getComponentType().getName());
+		arrObjectsType = (!isArray) ? null : store.getCanonicalClass(clazz.getComponentType(), fieldDistance);
 		
 		if (!isPrimitive && !isArray) {
 			ancestor = canonizeAncestors();
 			isInterface = Modifier.isInterface(clazz.getModifiers());
 			isAbstract = Modifier.isAbstract(clazz.getModifiers());
-			canonizeFields();
+			if (this.fieldDistance < maxFieldDistance)
+				canonizeFields();
 		}
 		else {
 			ancestor = null;
@@ -57,6 +59,7 @@ public class CanonicalClass {
 			isInterface = false;
 		}
 	}
+	
 	
 	/* TODO: We should use something like this method if loading of classes fail for any class.
 	public static String getCanonicalClassName(Class<?> clazz) {
@@ -76,7 +79,7 @@ public class CanonicalClass {
 		 */
 		if (clazz.equals(Object.class)) return null;
 
-		CanonicalClass ancestor = store.getCanonicalClass(clazz.getSuperclass());
+		CanonicalClass ancestor = store.getCanonicalClass(clazz.getSuperclass(), fieldDistance);
 		if (!ancestor.isPrimitive()) {
 			return ancestor;
 		}
@@ -104,8 +107,8 @@ public class CanonicalClass {
 			CanonicalClass fCanonicalType = null;
 			if (fldType.getName().equals(name))
 				fCanonicalType = this;
-			else
-				fCanonicalType = store.getCanonicalClass(fldType.getName());
+			else 
+				fCanonicalType = store.getCanonicalClass(fldType.getName(), fieldDistance+1);
 			fields.add(new CanonicalField(fld, this, fCanonicalType));
 		}
 	}
@@ -211,6 +214,19 @@ public class CanonicalClass {
 				return true;
 		
 		return false;
+	}
+
+	public void updateFieldDistance(int fieldDistance) {
+		if (this.fieldDistance <= fieldDistance)
+			return;
+		
+		this.fieldDistance = fieldDistance;
+		if (isArray)
+			arrObjectsType.updateFieldDistance(fieldDistance);
+		if (!isPrimitive && !isArray) {
+			ancestor.updateFieldDistance(fieldDistance);
+			canonizeFields();
+		}
 	}
 
 }

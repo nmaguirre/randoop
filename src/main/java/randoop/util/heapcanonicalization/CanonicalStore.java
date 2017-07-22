@@ -13,10 +13,16 @@ public class CanonicalStore {
 
 	private final Map<String, CanonicalClass> classes = new LinkedHashMap<>();
 	private final Set<String> genClasses = new HashSet<>();
+	private final int maxFieldDistance;
 	
 	public CanonicalStore(Collection<String> classNames) {
+		this(classNames, Integer.MAX_VALUE);
+	}
+
+	public CanonicalStore(Collection<String> classNames, int maxFieldDistance) {
+		this.maxFieldDistance = maxFieldDistance;
+
 		genClasses.addAll(classNames);
-		
 		List<String> sortedNames = new LinkedList<>(classNames);
 		sortedNames.add(DummyHeapRoot.class.getName());
 		Collections.sort(sortedNames);
@@ -28,21 +34,29 @@ public class CanonicalStore {
 		}
 	}
 	
-	private CanonicalStore() { };
-
 	public CanonicalClass getCanonicalClass(String name) {
+		return getCanonicalClass(name, 0);
+	}
+	
+	protected CanonicalClass getCanonicalClass(String name, int fieldDistance) {
 		CanonicalClass res = classes.get(name);
-		if (res != null)
+		if (res != null) {
+			if (fieldDistance < maxFieldDistance)
+				res.updateFieldDistance(fieldDistance);
 			return res;
-		
-		res = new CanonicalClass(name, this);
-		classes.put(name, res);
+		}
 
+		res = new CanonicalClass(name, this, fieldDistance, maxFieldDistance);
+		classes.put(name, res);
 		return res;
 	}
 	
 	public CanonicalClass getCanonicalClass(Class<?> clazz) {
 		return getCanonicalClass(clazz.getName());
+	}
+	
+	protected CanonicalClass getCanonicalClass(Class<?> clazz, int fieldDistance) {
+		return getCanonicalClass(clazz.getName(), fieldDistance);
 	}
 	
 	public CanonicalClass getCanonicalClass(Object o) {
@@ -78,11 +92,13 @@ public class CanonicalStore {
 		return genClasses.contains(clazz.getName());
 	}	
 
+	/*
 	public CanonicalStore clone() {
 		CanonicalStore res = new CanonicalStore();
 		res.classes.putAll(classes);
 		res.genClasses.addAll(genClasses);
 		return res;
 	}	
+	*/
 	
 }

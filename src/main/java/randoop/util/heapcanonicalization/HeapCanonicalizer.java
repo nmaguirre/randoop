@@ -99,7 +99,7 @@ public class HeapCanonicalizer {
 					//workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance));	
 					if (currDepth < maxBFSDepth-1) {
 						if (canonicalValue.isArray())
-							// Arrays elements don't count as fields
+							// Arrays elements don't count for BFS depth 
 							workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currDepth));	
 						else	
 							workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currDepth+1));	
