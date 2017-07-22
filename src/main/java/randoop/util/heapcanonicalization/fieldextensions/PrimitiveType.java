@@ -1,5 +1,8 @@
 package randoop.util.heapcanonicalization.fieldextensions;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 public enum PrimitiveType {
 	INTEGER,
 	SHORT,
@@ -10,7 +13,9 @@ public enum PrimitiveType {
 	FLOAT,
 	DOUBLE,
 	STRING,
-	ENUM;
+	ENUM, 
+	BIGINTEGER, 
+	BIGDECIMAL;
 	
 	public static PrimitiveType fromObject(Object o) {
 		if (o.getClass() == int.class || o.getClass() == Integer.class)
@@ -33,6 +38,10 @@ public enum PrimitiveType {
 			return STRING;
 		else if (o.getClass().isEnum()) 
 			return ENUM;
+		else if (o.getClass() == BigInteger.class)
+			return BIGINTEGER;
+		else if (o.getClass() == BigDecimal.class)
+			return BIGDECIMAL;
 		else 
 			throw new BugInFieldExtensionsCanonicalization("Bitwise canonization of " + o.getClass() + " not supported");
 	}

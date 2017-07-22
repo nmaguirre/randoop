@@ -147,7 +147,7 @@ public abstract class AbstractGenerator {
   public static int fbg_max_objects = Integer.MAX_VALUE;
 
   @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
-  public static int fbg_field_distance = 1;//2; //Integer.MAX_VALUE;
+  public static int fbg_field_distance = 2; //Integer.MAX_VALUE;
 
   @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
   public static int fbg_bfs_depth = Integer.MAX_VALUE;
@@ -367,6 +367,7 @@ public abstract class AbstractGenerator {
   }
   
   private int positiveTestsSaved;
+  public int savedTests;
   public int positiveReferenceExtendingTests;
   private int positivePrimitiveExtendingTests;
   private int positiveTestsDropped;
@@ -938,15 +939,15 @@ private int genFirstAdditionalObsErrorSeqs;
 		  if (eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED ||
 				  eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED_PRIMITIVE) {
 			  save = true;
-			  if (FieldBasedGenLog.isLoggingOn()) {
-				  if (eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED) {
-					  positiveReferenceExtendingTests++;
+			  if (eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED) {
+				  positiveReferenceExtendingTests++;
+				  if (FieldBasedGenLog.isLoggingOn()) 
 					  FieldBasedGenLog.logLine("> Extensions enlarged for reference type objects.");
-				  }
-				  else {
-					  positivePrimitiveExtendingTests++;
+			  }
+			  else {
+				  positivePrimitiveExtendingTests++;
+				  if (FieldBasedGenLog.isLoggingOn()) 
 					  FieldBasedGenLog.logLine("> Extensions enlarged for primitive values.");
-				  }
 			  }
 		  }
 		  else if (eSeq.enlargesExtensions == ExtendExtensionsResult.LIMITS_EXCEEDED) {
@@ -975,6 +976,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  outRegressionSeqs.add(eSeq);
 		  saveSubsumedCandidates();
 		  positiveTestsSaved++;
+		  savedTests++;
 		  eSeq.getLastStmtOperation().timesExecutedInExtendingTests++;
 		  if (field_based_gen_extend_with_observers)
 			  positiveRegressionSeqs.add(eSeq);
@@ -1012,6 +1014,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  outRegressionSeqs.add(eSeq);
 		  saveSubsumedCandidates();
 		  negativeTestsSaved++;
+		  savedTests++;
 		  if (FieldBasedGenLog.isLoggingOn()) 
 			  FieldBasedGenLog.logLine("> Current negative sequence saved.");
 	  }

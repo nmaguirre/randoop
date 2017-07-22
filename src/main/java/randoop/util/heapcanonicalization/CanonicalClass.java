@@ -16,15 +16,15 @@ public class CanonicalClass {
 	private final String name;
 	private final int ID;
 	private final List<CanonicalField> fields;
+	private final boolean isObject;
 	private final boolean isPrimitive;
 	private final boolean isArray;
+	private final boolean isAbstract;
+	private final boolean isInterface;
 	private final CanonicalClass ancestor;
 	private final Class<?> clazz;
 	private final CanonicalClass arrObjectsType;
 	private final CanonicalStore store;
-	private final boolean isAbstract;
-	private final boolean isInterface;
-	// TODO: For now it is implemented 
 	private int fieldDistance;
 
 	public CanonicalClass(String name, CanonicalStore store, int fieldDistance, int maxFieldDistance) {
@@ -41,54 +41,42 @@ public class CanonicalClass {
 				CanonizerLog.logLine("CANONICALIZER INFO: Class for name " + name + " not found, assuming it's a primitive type.");
 		}
 		clazz = cls;
+		isObject = isObject(clazz);
 		isPrimitive = isPrimitive(clazz);
 		isArray = isArray(clazz);
 		arrObjectsType = (!isArray) ? null : store.getOrUpdateCanonicalClass(clazz.getComponentType().getName(), fieldDistance);
+		isInterface = isInterface(clazz);
+		isAbstract = isAbstract(clazz);
 		
-		if (isPrimitive)
+		if (isObject || isPrimitive)
 			this.fieldDistance = 0;
 		else
 			this.fieldDistance = fieldDistance;
-		
 		if (CanonizerLog.isLoggingOn())
 			CanonizerLog.logLine("CANONICALIZER INFO: Class " + name + " created. Field distance=" + this.fieldDistance);
 		
-		if (!isPrimitive && !isArray) {
-			ancestor = canonicalizeAncestors();
-			isInterface = Modifier.isInterface(clazz.getModifiers());
-			isAbstract = Modifier.isAbstract(clazz.getModifiers());
-			if (this.fieldDistance < maxFieldDistance)
-				canonicalizeFields();
-		}
-		else {
-			ancestor = null;
-			isAbstract = false;
-			isInterface = false;
-		}
-
+		ancestor = canonicalizeAncestors();
+		if (this.fieldDistance < maxFieldDistance)
+			canonicalizeFields();
 	}
 	
-	
-	/* TODO: We should use something like this method if loading of classes fail for any class.
-	public static String getCanonicalClassName(Class<?> clazz) {
-		String name = clazz.getName();
-		// FIXME: To handle anonymous classes correctly, not sure if this is still needed
-		if (name == null) {
-			name = clazz.getCanonicalName();
-		}
-		return name;
+	private boolean isInterface(Class<?> clazz) {
+		return (clazz == null || isObject || isPrimitive || isArray) ? false : Modifier.isInterface(clazz.getModifiers());
 	}
-	*/
+	
+	private boolean isAbstract(Class<?> clazz) {
+		return (clazz == null || isObject || isPrimitive || isArray) ? false : Modifier.isAbstract(clazz.getModifiers());
+	}
 
 	private CanonicalClass canonicalizeAncestors() {
 		/* 
 		 * Ugly hack to deal with weird randoop test:
 		 * Object o = new Object();
 		 */
-		if (clazz.equals(Object.class)) return null;
+		if (isObject || isPrimitive || isArray || isInterface) return null;
 
 		CanonicalClass ancestor = store.getOrUpdateCanonicalClass(clazz.getSuperclass().getName(), fieldDistance);
-		if (!ancestor.isPrimitive()) {
+		if (!ancestor.isPrimitive() && !ancestor.clazz.equals(Object.class)) {
 			return ancestor;
 		}
 		return null;
@@ -99,7 +87,7 @@ public class CanonicalClass {
 		 * Ugly hack to deal with weird randoop test:
 		 * Object o = new Object();
 		 */
-		if (clazz.equals(Object.class)) return;
+		if (isObject || isPrimitive || isArray || isInterface) return;
 
 		if (ancestor != null)
 			fields.addAll(ancestor.getCanonicalFields());
@@ -145,8 +133,16 @@ public class CanonicalClass {
 				);
   	}	
 	
+	private boolean isObject(Class<?> clazz) {
+  		return (clazz == null) ? false : clazz == Object.class;
+  	}	
+	
 	public boolean isPrimitive() {
 		return isPrimitive;
+	}
+	
+	public boolean isObject() {
+		return isObject;
 	}
 	
 	public boolean isAbstract() {
@@ -204,7 +200,7 @@ public class CanonicalClass {
 	}
 
 	public String toString() {
-		String res = "name=" + getName() + ",fielddist=" + fieldDistance + ",ID=" + ID + ",fields=[";
+		String res = "name=" + getName() + ",distance=" + fieldDistance + ",ID=" + ID + ",fields=[";
 		for (CanonicalField fld: fields) {
 			res += "\n\t" + fld.toString();
 		}

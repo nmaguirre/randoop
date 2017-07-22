@@ -61,8 +61,10 @@ public class ProgressDisplay extends Thread {
   public String message() {
     return "Progress update: test inputs generated="
         + generator.num_sequences_generated
-        + ", extending extensions="
+        + ", extending="
         + generator.positiveReferenceExtendingTests
+        + ", saved="
+        + generator.savedTests
         + ", failing inputs="
         + generator.num_failing_sequences
         + "      ("

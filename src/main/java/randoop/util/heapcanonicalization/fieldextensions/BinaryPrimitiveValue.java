@@ -71,6 +71,14 @@ public class BinaryPrimitiveValue {
 		case ENUM:
 			addFromBitwiseString(Integer.toBinaryString(((Enum<?>)o).ordinal()));
 			break;
+		case BIGINTEGER:
+			long l = ((BigInteger)o).longValue();
+			addFromBitwiseString(padLeftWithZeros(Long.toBinaryString(l), 64));
+			break;
+		case BIGDECIMAL:
+			double d = ((BigDecimal)o).doubleValue();
+			addFromBitwiseString(padLeftWithZeros(Long.toBinaryString(Double.doubleToRawLongBits(d)), 64));
+			break;
 		}
 		/* TODO: Implement support for these types
 	  				|| clazz == BigInteger.class
