@@ -147,7 +147,7 @@ public abstract class AbstractGenerator {
   public static int fbg_max_objects = Integer.MAX_VALUE;
 
   @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
-  public static int fbg_field_distance = Integer.MAX_VALUE;
+  public static int fbg_field_distance = 1;//2; //Integer.MAX_VALUE;
 
   @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
   public static int fbg_bfs_depth = Integer.MAX_VALUE;

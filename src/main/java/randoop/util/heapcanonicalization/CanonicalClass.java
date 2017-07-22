@@ -28,7 +28,6 @@ public class CanonicalClass {
 	private int fieldDistance;
 
 	public CanonicalClass(String name, CanonicalStore store, int fieldDistance, int maxFieldDistance) {
-		this.fieldDistance = fieldDistance;
 		this.store = store;
 		this.name = name;
 		ID = globalID++;
@@ -39,25 +38,34 @@ public class CanonicalClass {
 			cls = Class.forName(name);
 		} catch (ClassNotFoundException e) {
 			if (CanonizerLog.isLoggingOn())
-				CanonizerLog.logLine("WARNING: Class for name " + name + " not found, assuming it's a primitive type.");
+				CanonizerLog.logLine("CANONICALIZER INFO: Class for name " + name + " not found, assuming it's a primitive type.");
 		}
 		clazz = cls;
 		isPrimitive = isPrimitive(clazz);
 		isArray = isArray(clazz);
-		arrObjectsType = (!isArray) ? null : store.getCanonicalClass(clazz.getComponentType(), fieldDistance);
+		arrObjectsType = (!isArray) ? null : store.getOrUpdateCanonicalClass(clazz.getComponentType().getName(), fieldDistance);
+		
+		if (isPrimitive)
+			this.fieldDistance = 0;
+		else
+			this.fieldDistance = fieldDistance;
+		
+		if (CanonizerLog.isLoggingOn())
+			CanonizerLog.logLine("CANONICALIZER INFO: Class " + name + " created. Field distance=" + this.fieldDistance);
 		
 		if (!isPrimitive && !isArray) {
-			ancestor = canonizeAncestors();
+			ancestor = canonicalizeAncestors();
 			isInterface = Modifier.isInterface(clazz.getModifiers());
 			isAbstract = Modifier.isAbstract(clazz.getModifiers());
 			if (this.fieldDistance < maxFieldDistance)
-				canonizeFields();
+				canonicalizeFields();
 		}
 		else {
 			ancestor = null;
 			isAbstract = false;
 			isInterface = false;
 		}
+
 	}
 	
 	
@@ -72,21 +80,21 @@ public class CanonicalClass {
 	}
 	*/
 
-	private CanonicalClass canonizeAncestors() {
+	private CanonicalClass canonicalizeAncestors() {
 		/* 
 		 * Ugly hack to deal with weird randoop test:
 		 * Object o = new Object();
 		 */
 		if (clazz.equals(Object.class)) return null;
 
-		CanonicalClass ancestor = store.getCanonicalClass(clazz.getSuperclass(), fieldDistance);
+		CanonicalClass ancestor = store.getOrUpdateCanonicalClass(clazz.getSuperclass().getName(), fieldDistance);
 		if (!ancestor.isPrimitive()) {
 			return ancestor;
 		}
 		return null;
 	}
 		
-	private void canonizeFields() {
+	private void canonicalizeFields() {
 		/* 
 		 * Ugly hack to deal with weird randoop test:
 		 * Object o = new Object();
@@ -108,7 +116,7 @@ public class CanonicalClass {
 			if (fldType.getName().equals(name))
 				fCanonicalType = this;
 			else 
-				fCanonicalType = store.getCanonicalClass(fldType.getName(), fieldDistance+1);
+				fCanonicalType = store.getOrUpdateCanonicalClass(fldType.getName(), fieldDistance+1);
 			fields.add(new CanonicalField(fld, this, fCanonicalType));
 		}
 	}
@@ -196,7 +204,7 @@ public class CanonicalClass {
 	}
 
 	public String toString() {
-		String res = "name=" + getName() + ",ID=" + ID + ",fields=[";
+		String res = "name=" + getName() + ",fielddist=" + fieldDistance + ",ID=" + ID + ",fields=[";
 		for (CanonicalField fld: fields) {
 			res += "\n\t" + fld.toString();
 		}
@@ -217,15 +225,18 @@ public class CanonicalClass {
 	}
 
 	public void updateFieldDistance(int fieldDistance) {
-		if (this.fieldDistance <= fieldDistance)
+		if (isPrimitive || this.fieldDistance <= fieldDistance)
 			return;
 		
 		this.fieldDistance = fieldDistance;
+		if (CanonizerLog.isLoggingOn())
+			CanonizerLog.logLine("CANONICALIZER INFO: Updated class " + name + ". Field distance=" + fieldDistance);
+
 		if (isArray)
 			arrObjectsType.updateFieldDistance(fieldDistance);
-		if (!isPrimitive && !isArray) {
+		else {
 			ancestor.updateFieldDistance(fieldDistance);
-			canonizeFields();
+			canonicalizeFields();
 		}
 	}
 

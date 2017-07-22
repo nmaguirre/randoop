@@ -27,18 +27,26 @@ public class CanonicalStore {
 		sortedNames.add(DummyHeapRoot.class.getName());
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
-			getCanonicalClass(name);
+			getOrUpdateCanonicalClass(name, 0);
 
 		if (CanonizerLog.isLoggingOn()) {
 			CanonizerLog.logLine(toPrettyString());
 		}
 	}
 	
+	
 	public CanonicalClass getCanonicalClass(String name) {
-		return getCanonicalClass(name, 0);
+		CanonicalClass res = classes.get(name);
+		if (res != null) {
+			return res;
+		}
+
+		res = new CanonicalClass(name, this, 0, maxFieldDistance);
+		classes.put(name, res);
+		return res;
 	}
 	
-	protected CanonicalClass getCanonicalClass(String name, int fieldDistance) {
+	protected CanonicalClass getOrUpdateCanonicalClass(String name, int fieldDistance) {
 		CanonicalClass res = classes.get(name);
 		if (res != null) {
 			if (fieldDistance < maxFieldDistance)
@@ -53,10 +61,6 @@ public class CanonicalStore {
 	
 	public CanonicalClass getCanonicalClass(Class<?> clazz) {
 		return getCanonicalClass(clazz.getName());
-	}
-	
-	protected CanonicalClass getCanonicalClass(Class<?> clazz, int fieldDistance) {
-		return getCanonicalClass(clazz.getName(), fieldDistance);
 	}
 	
 	public CanonicalClass getCanonicalClass(Object o) {
