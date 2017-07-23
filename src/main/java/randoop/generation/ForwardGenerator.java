@@ -170,10 +170,13 @@ private int maxsize;
 	}
 	*/
 
+    this.maxsize = GenInputsAbstract.maxsize;
+    /*
     if (field_based_gen != FieldBasedGenType.DISABLED)
     	this.maxsize = GenInputsAbstract.maxsize - AbstractGenerator.field_based_gen_reserved_observer_lines;
     else
     	this.maxsize = GenInputsAbstract.maxsize;
+    	*/
     
   }
   

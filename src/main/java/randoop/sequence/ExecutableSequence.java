@@ -854,7 +854,7 @@ public class ExecutableSequence {
 	   List<FieldExtensions> extensions = new ArrayList<>();
 	   for (Object o: objects) {
 		   if (o != null) {
-			   FieldExtensionsByTypeCollector collector = new FieldExtensionsByTypeCollector();
+			   FieldExtensionsByTypeCollector collector = new FieldExtensionsByTypeCollector(GenInputsAbstract.string_maxlen);
 			   Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonize(o, collector);
 			   if (res.getKey() != CanonicalizationResult.OK)
 				   throw new BugInFieldExtensionsCanonicalization("Structure exceeding limits. We don't support these yet.");

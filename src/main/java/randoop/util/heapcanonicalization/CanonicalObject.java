@@ -4,16 +4,15 @@ import java.lang.reflect.Array;
 import java.util.AbstractMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
+import java.util.Map.Entry;
 
 
 public class CanonicalObject {
 
 	private final Object object;
 	private final CanonicalClass clazz;
-	private int index;
-	private CanonicalHeap heap;
+	private final int index;
+	private final CanonicalHeap heap;
 	
 	public CanonicalObject(Object obj, CanonicalClass clazz, int index, CanonicalHeap heap) {
 		this.object = obj;
@@ -30,7 +29,7 @@ public class CanonicalObject {
 		return clazz;
 	}
 	
-	public Map.Entry<CanonicalizationResult, List<CanonicalField>> getCanonicalFields() {
+	public Entry<CanonicalizationResult, List<CanonicalField>> getCanonicalFields() {
 		assert !clazz.isPrimitive(): "Should never try to get the fields of primitive types";
 		if (clazz.isArray()) {
 			int arrLength = Array.getLength(object);
@@ -38,6 +37,12 @@ public class CanonicalObject {
 				return new AbstractMap.SimpleEntry<>(CanonicalizationResult.ARRAY_LIMITS_EXCEEDED, null); 
 
 			List<CanonicalField> arrFields = new LinkedList<>();
+			if (arrLength > heap.getMaxArrayObjects()) {
+				if (CanonizerLog.isLoggingOn())
+					CanonizerLog.logLine("CANONICALIZER INFO: only considering the first " + heap.getMaxArrayObjects() + 
+							" elements of an array of size " + arrLength);
+				arrLength = heap.getMaxArrayObjects();
+			}
 			for (int i = 0; i < arrLength; i++) 
 				arrFields.add(new CanonicalField(i, clazz, clazz.getArrayElementsType()));
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, arrFields);

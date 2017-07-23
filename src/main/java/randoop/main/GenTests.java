@@ -381,7 +381,11 @@ public class GenTests extends GenInputsAbstract {
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
-    explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_bfs_depth, AbstractGenerator.fbg_field_distance);
+    if (CandidateVectorsWriter.isEnabled())
+    	explorer.initNewCanonicalizerForVectorization(classnames, AbstractGenerator.fbg_max_objects);
+    else
+    	explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_max_array_objs, 
+    			AbstractGenerator.fbg_bfs_depth, AbstractGenerator.fbg_field_distance);
     
     /*
      * setup for check generation
@@ -462,6 +466,20 @@ public class GenTests extends GenInputsAbstract {
       System.out.printf("Explorer = %s\n", explorer);
     }
 
+    if (FieldBasedGenLog.isLoggingOn()) {
+    	FieldBasedGenLog.logLine("\n\n**********");
+    	FieldBasedGenLog.logLine("Canonical classes:");
+    	FieldBasedGenLog.logLine(AbstractGenerator.store.toString());
+    	FieldBasedGenLog.logLine("**********");
+    }
+    
+    if (CanonizerLog.isLoggingOn()) {
+    	CanonizerLog.logLine("\n\n**********");
+    	CanonizerLog.logLine("Canonical classes:");
+    	CanonizerLog.logLine(AbstractGenerator.store.toString());
+    	CanonizerLog.logLine("**********");
+    }
+
     /* Generate tests */
     try {
       explorer.explore();
@@ -472,14 +490,21 @@ public class GenTests extends GenInputsAbstract {
       System.exit(1);
     }
     
+    if (FieldBasedGenLog.isLoggingOn()) {
+    	FieldBasedGenLog.logLine("\n\n**********");
+    	FieldBasedGenLog.logLine("Canonical classes:");
+    	FieldBasedGenLog.logLine(AbstractGenerator.store.toString());
+    	FieldBasedGenLog.logLine("**********");
+    }
+    
     if (CanonizerLog.isLoggingOn()) {
-    	CanonizerLog.logLine("**********");
+    	CanonizerLog.logLine("\n\n**********");
     	CanonizerLog.logLine("Canonical classes:");
     	CanonizerLog.logLine(AbstractGenerator.store.toString());
     	CanonizerLog.logLine("**********");
 
     	if (CandidateVectorsWriter.isEnabled()) {
-			CanonizerLog.logLine("**********");
+			CanonizerLog.logLine("\n\n**********");
 			CanonizerLog.logLine("Candidate Vectors Field Extensions:");
 			CanonizerLog.logLine(AbstractGenerator.candVectExtensions.toString());
 			CanonizerLog.logLine("**********");

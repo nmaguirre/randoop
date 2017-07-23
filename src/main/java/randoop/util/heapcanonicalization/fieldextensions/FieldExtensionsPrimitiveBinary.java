@@ -4,7 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FieldExtensionsPrimitiveBinary {
@@ -12,7 +12,7 @@ public class FieldExtensionsPrimitiveBinary {
 	// TOOD: Is it easy to compute size with these extensions?
 	//private int size = 0;
 
-	private Map<String, FieldExtensionPrimitiveBinary> extensions = new HashMap<>();
+	private Map<String, FieldExtensionPrimitiveBinary> extensions = new LinkedHashMap<>();
 
 	public boolean addPairToField(String field, String src, BinaryPrimitiveValue tgt) {
 		FieldExtensionPrimitiveBinary fe = extensions.get(field);

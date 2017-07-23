@@ -21,17 +21,12 @@ public class CanonicalStore {
 
 	public CanonicalStore(Collection<String> classNames, int maxFieldDistance) {
 		this.maxFieldDistance = maxFieldDistance;
-
 		genClasses.addAll(classNames);
 		List<String> sortedNames = new LinkedList<>(classNames);
 		sortedNames.add(DummyHeapRoot.class.getName());
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
 			getOrUpdateCanonicalClass(name, 0);
-
-		if (CanonizerLog.isLoggingOn()) {
-			CanonizerLog.logLine(toPrettyString());
-		}
 	}
 	
 	
@@ -84,14 +79,6 @@ public class CanonicalStore {
 		return res;
 	}
 
-	public String toPrettyString() {
-		String res = "**********\n";
-		res += "Canonical classes:\n";
-		res += toString("") + "\n";
-		res += "**********";
-		return res;
-	}
-	
 	public boolean isGenerationClass(CanonicalClass clazz) {
 		return genClasses.contains(clazz.getName());
 	}	

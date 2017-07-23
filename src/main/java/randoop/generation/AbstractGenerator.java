@@ -21,7 +21,6 @@ import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
 import randoop.util.SimpleList;
 import randoop.util.Timer;
-import randoop.util.fieldbasedcontrol.CanonizationErrorException;
 import randoop.util.fieldbasedcontrol.CanonizerClass;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
@@ -71,21 +70,26 @@ public abstract class AbstractGenerator {
 	public static CandidateVectorGenerator candVectGenerator;
 	public static CandidateVectorsFieldExtensions candVectExtensions;
 	
-	public void initNewCanonicalizer(Collection<String> classNames, int maxObjects, int bfsDepth, int fieldDistance) {
-		
+	public void initNewCanonicalizer(Collection<String> classNames, int maxObjects, int maxArrayObjs, int bfsDepth, int fieldDistance) {
 	    store = new CanonicalStore(classNames, fieldDistance);
-		newCanonicalizer = new HeapCanonicalizer(store, maxObjects, bfsDepth);
+		newCanonicalizer = new HeapCanonicalizer(store, maxObjects, maxArrayObjs, bfsDepth);
 		globalExtensions = new FieldExtensionsByType();
+
+	}
+	
+	
+	public void initNewCanonicalizerForVectorization(Collection<String> classNames, int maxObjects) {
+		store = new CanonicalStore(classNames);
+		newCanonicalizer = new HeapCanonicalizer(store, maxObjects);
 		// Initialize the candidate vector generator with the canonical classes that were mined from the code,
 		// before the generation starts.
-		if (CandidateVectorsWriter.isEnabled()) {
-			candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
-			CanonicalHeap heap = new CanonicalHeap(store, maxObjects);
-			CandidateVector<String> header = AbstractGenerator.candVectGenerator.makeCandidateVectorsHeader(heap);
-			AbstractGenerator.candVectExtensions = new CandidateVectorsFieldExtensions(header);
-			CandidateVectorsWriter.logLine(header.toString());
-		}
+		candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CanonicalHeap heap = new CanonicalHeap(store, maxObjects);
+		CandidateVector<String> header = AbstractGenerator.candVectGenerator.makeCandidateVectorsHeader(heap);
+		AbstractGenerator.candVectExtensions = new CandidateVectorsFieldExtensions(header);
+		CandidateVectorsWriter.logLine(header.toString());
 	}
+	
 	
   // The set of all primitive values seen during generation and execution
   // of sequences. This set is used to tell if a new primitive value has
@@ -145,6 +149,9 @@ public abstract class AbstractGenerator {
   
   @Option("Do not canonicalize structures having more than this number of objects of a single reference type.")
   public static int fbg_max_objects = Integer.MAX_VALUE;
+  
+  @Option("Only canonicalize up to this number of elements in arrays.")
+  public static int fbg_max_array_objs = 5000;
 
   @Option("Only canonicalize objects reachable by this number of field traversals from the structure's root.")
   public static int fbg_field_distance = 2; //Integer.MAX_VALUE;
@@ -178,8 +185,10 @@ public abstract class AbstractGenerator {
   @Option("Max number of observers to be added to each test.")
   public static int field_based_gen_observers_per_test = 50; 
   
+  /*
   @Option("Max number of lines reserved for observers from the max number of lines given by the --maxsize parameter.")
   public static int field_based_gen_reserved_observer_lines = 0;//200; 
+  */
   
   @Option("Max times an observer must be used in tests to flag it final.")
   public static int field_based_gen_observer_executions_before_final = 20;

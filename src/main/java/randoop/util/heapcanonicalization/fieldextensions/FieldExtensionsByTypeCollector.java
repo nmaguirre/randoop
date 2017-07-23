@@ -3,11 +3,13 @@ package randoop.util.heapcanonicalization.fieldextensions;
 import randoop.util.heapcanonicalization.CanonicalField;
 import randoop.util.heapcanonicalization.CanonicalObject;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
+import randoop.util.heapcanonicalization.CanonizerLog;
 
 public class FieldExtensionsByTypeCollector implements FieldExtensionsCollector {
 	
 	private static final String NULL_REPRESENTATION = "null";
-	private int maxStrLen;
+	private final int maxStrLen;
+	private FieldExtensionsByType extensions = new FieldExtensionsByType();
 	
 	public FieldExtensionsByTypeCollector() {
 		this(Integer.MAX_VALUE);
@@ -16,8 +18,6 @@ public class FieldExtensionsByTypeCollector implements FieldExtensionsCollector 
 	public FieldExtensionsByTypeCollector(int maxStrLen) {
 		this.maxStrLen = maxStrLen;
 	}
-
-	FieldExtensionsByType extensions = new FieldExtensionsByType();
 	
 	// pre: object cannot be null or primitive.
 	private String objectRepresentation(CanonicalObject object) {
@@ -46,12 +46,21 @@ public class FieldExtensionsByTypeCollector implements FieldExtensionsCollector 
 		}
 		else { 
 			// Canonical value is primitive
-			PrimitiveType objType = PrimitiveType.fromObject(canonicalValue.getObject());
-			if (objType == PrimitiveType.STRING && ((String)canonicalValue.getObject()).length() > maxStrLen)
-				return CanonicalizationResult.STRING_LIMITS_EXCEEDED;
+			Object val = canonicalValue.getObject();
+			PrimitiveType objType = PrimitiveType.fromObject(val);
+			if (objType == PrimitiveType.STRING) {
+				String str = (String) val;
+				if (str.length() > maxStrLen) {
+					// For now, do not throw an error and trim the string up to the given limit.
+					//return CanonicalizationResult.STRING_LIMITS_EXCEEDED;
+					if (CanonizerLog.isLoggingOn())
+						CanonizerLog.log("CANONICALIZER INFO: Trimmed string from size " + str.length() + " to " + maxStrLen);
+					val = str.substring(0, maxStrLen);
+				}
+			}
 			
 			extensions.addPairToPrimitiveField(objType.toString(), fieldStr, objStr, 
-					new BinaryPrimitiveValue(canonicalValue.getObject()));
+					new BinaryPrimitiveValue(val));
 		}
 		
 		return CanonicalizationResult.OK;

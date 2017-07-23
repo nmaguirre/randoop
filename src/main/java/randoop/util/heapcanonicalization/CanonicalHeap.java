@@ -10,12 +10,18 @@ import java.util.Map;
 public class CanonicalHeap {
 
 	private final int maxObjects;
+	private final int maxArrayObjs;
 	private final Map<CanonicalClass, List<CanonicalObject>> objects;
 	private final CanonicalStore store;
 
 	public CanonicalHeap(CanonicalStore store, int maxObjects) {
+		this(store, maxObjects, Integer.MAX_VALUE);
+	}
+	
+	public CanonicalHeap(CanonicalStore store, int maxObjects, int maxArrayObjs) {
 		this.store = store;
 		this.maxObjects = maxObjects;
+		this.maxArrayObjs = maxArrayObjs;
 		objects = new LinkedHashMap<>();
 		for (String className: store.getAllCanonicalClassnames()) {
 			CanonicalClass canonicalClass = store.getCanonicalClass(className);
@@ -88,6 +94,10 @@ public class CanonicalHeap {
 	
 	public CanonicalStore getStore() {
 		return store;
+	}
+
+	public int getMaxArrayObjects() {
+		return maxArrayObjs;
 	}
 	
 }

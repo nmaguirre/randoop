@@ -23,14 +23,20 @@ public class HeapCanonicalizer {
 	
 	private final CanonicalStore store;
 	private final int maxObjects;
+	private final int maxArrayObjs;
 	private final int maxBFSDepth;
 		
 	public HeapCanonicalizer(CanonicalStore store, int maxObjects) {
-		this(store, maxObjects, Integer.MAX_VALUE);
+		this(store, maxObjects, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 	
-	public HeapCanonicalizer(CanonicalStore store, int maxObjects, int maxBFSDepth) {
+	public HeapCanonicalizer(CanonicalStore store, int maxObjects, int maxArrayObjs) {
+		this(store, maxObjects, maxArrayObjs, Integer.MAX_VALUE);
+	}
+
+	public HeapCanonicalizer(CanonicalStore store, int maxObjects, int maxArrayObjs, int maxBFSDepth) {
 		this.maxObjects = maxObjects;
+		this.maxArrayObjs = maxArrayObjs;
 		this.store = store; 
 		this.maxBFSDepth = maxBFSDepth;
 	}
@@ -49,7 +55,7 @@ public class HeapCanonicalizer {
 			CanonizerLog.logLine("Starting BFS traversal");
 		}
 
-		CanonicalHeap resHeap = new CanonicalHeap(store, maxObjects);
+		CanonicalHeap resHeap = new CanonicalHeap(store, maxObjects, maxArrayObjs);
 		DummyHeapRoot dummyRoot = new DummyHeapRoot(root);
 		CanonicalObject canonicalRoot = resHeap.getCanonicalObject(dummyRoot).getValue();
 
