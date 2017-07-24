@@ -221,7 +221,7 @@ public class CanonicalClass {
 	}
 
 	public void updateFieldDistance(int fieldDistance) {
-		if (isPrimitive || this.fieldDistance <= fieldDistance)
+		if (isObject || isPrimitive || this.fieldDistance <= fieldDistance)
 			return;
 		
 		this.fieldDistance = fieldDistance;
@@ -231,7 +231,8 @@ public class CanonicalClass {
 		if (isArray)
 			arrObjectsType.updateFieldDistance(fieldDistance);
 		else {
-			ancestor.updateFieldDistance(fieldDistance);
+			if (ancestor != null)
+				ancestor.updateFieldDistance(fieldDistance);
 			canonicalizeFields();
 		}
 	}
