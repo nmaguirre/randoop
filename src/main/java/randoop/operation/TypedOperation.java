@@ -511,9 +511,9 @@ public abstract class TypedOperation implements Operation {
   
   public int timesExecutedInObserversAddingPrimValue = 0;
 
-  public int timesExecutedInNegativeTests = 0;
+  public int timesExecutedInSavedNegativeTests = 0;
 
-  public int timesExecutedInExtendingTests = 0;
+  public int timesExecutedInSavePositiveTests = 0;
   
   
 //  public int timesExecutedInNotExtendingModifiers = 0;

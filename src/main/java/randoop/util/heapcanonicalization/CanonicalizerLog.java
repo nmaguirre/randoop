@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-public final class CanonizerLog {
+public final class CanonicalizerLog {
 
-  private CanonizerLog() {
+  private CanonicalizerLog() {
     throw new IllegalStateException("no instance");
   }
 

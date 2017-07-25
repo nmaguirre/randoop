@@ -144,10 +144,10 @@ public class BinaryPrimitiveValue {
 	}
 
 	public boolean contains(BinaryPrimitiveValue other) {
-		if (this.bitwiseValue.size() != other.bitwiseValue.size())
+		if (this.bitwiseValue.size() < other.bitwiseValue.size())
 			return false;
 		
-		for (int i = 0; i < bitwiseValue.size(); i++) 
+		for (int i = 0; i < other.bitwiseValue.size(); i++) 
 			if (!bitwiseValue.get(i).containsAll(other.bitwiseValue.get(i)))
 				return false;
 	

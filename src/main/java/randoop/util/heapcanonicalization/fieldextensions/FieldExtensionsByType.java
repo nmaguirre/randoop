@@ -62,12 +62,42 @@ public class FieldExtensionsByType implements FieldExtensions {
 
 		if (!referenceExtensions.containsAll(otherExt.referenceExtensions))
 			return false;
-		
-		for (String type: primitiveExtensions.keySet()) 
-			if (otherExt.primitiveExtensions.get(type) != null &&
-				!primitiveExtensions.get(type).containsAll(otherExt.primitiveExtensions.get(type)))
+	
+		for (String type: otherExt.primitiveExtensions.keySet()) 
+			if (!primitiveExtensions.get(type).containsAll(otherExt.primitiveExtensions.get(type)))
 				return false;
 		
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((referenceExtensions == null) ? 0 : referenceExtensions.hashCode());
+		result = prime * result + ((primitiveExtensions == null) ? 0 : primitiveExtensions.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FieldExtensionsByType other = (FieldExtensionsByType) obj;
+		if (referenceExtensions == null) {
+			if (other.referenceExtensions != null)
+				return false;
+		} else if (!referenceExtensions.equals(other.referenceExtensions))
+			return false;
+		if (primitiveExtensions == null) {
+			if (other.primitiveExtensions != null)
+				return false;
+		} else if (!primitiveExtensions.equals(other.primitiveExtensions))
+			return false;
 		return true;
 	}
 

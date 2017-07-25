@@ -198,14 +198,14 @@ public abstract class AbstractGenerator {
   
   @Option("Save test only if the last operation was used at most (#test gen./fbg_not_extending_ops_ratio)+1 times in tests"
   		+ "not extending the extensions.")
-  public static int fbg_save_not_extending_ratio = 500;
+  public static int fbg_save_not_extending_ratio = 1000;//500;
 
   @Option("Max times an observer can be executed in a test not extending the extensions.")
   public static int field_based_gen_max_non_extending_observer_tests_ratio = 500;
   
   @Option("Save negative test only if the last operation was used at most (#test gen./fbg_save_negatives_ratio)+1 times in tests"
 	  		+ "not extending the extensions.")
-  public static int fbg_save_negatives_ratio = 500;
+  public static int fbg_save_negatives_ratio = 1000; //500;
 
   @Option("Generation stops when this many tests are discarded.")
   public static int max_discarded_tests = 100000;
@@ -636,7 +636,7 @@ private int genFirstAdditionalObsErrorSeqs;
   
   private boolean saveRarelyExtendingOperation(ExecutableSequence eSeq) {
 	int ratio = (numRegressionSequences() / fbg_save_not_extending_ratio) + 1;
-	return eSeq.getLastStmtOperation().timesExecutedInExtendingTests < ratio;
+	return eSeq.getLastStmtOperation().timesExecutedInSavePositiveTests < ratio;
   }
   
   
@@ -660,12 +660,7 @@ private int genFirstAdditionalObsErrorSeqs;
   
    private boolean saveNegativeSequence(ExecutableSequence eSeq) {
 	int limit = (numRegressionSequences() / fbg_save_negatives_ratio) + 1;
-	if (eSeq.getLastStmtOperation().timesExecutedInNegativeTests < limit) {
-		eSeq.getLastStmtOperation().timesExecutedInNegativeTests++;
-		return true;
-	}
-	else
-		return false;
+	return eSeq.getLastStmtOperation().timesExecutedInSavedNegativeTests < limit;
   }
 
 
@@ -986,7 +981,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  saveSubsumedCandidates();
 		  positiveTestsSaved++;
 		  savedTests++;
-		  eSeq.getLastStmtOperation().timesExecutedInExtendingTests++;
+		  eSeq.getLastStmtOperation().timesExecutedInSavePositiveTests++;
 		  if (field_based_gen_extend_with_observers)
 			  positiveRegressionSeqs.add(eSeq);
 		  if (FieldBasedGenLog.isLoggingOn()) 
@@ -1024,6 +1019,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  saveSubsumedCandidates();
 		  negativeTestsSaved++;
 		  savedTests++;
+		  eSeq.getLastStmtOperation().timesExecutedInSavedNegativeTests++;
 		  if (FieldBasedGenLog.isLoggingOn()) 
 			  FieldBasedGenLog.logLine("> Current negative sequence saved.");
 	  }

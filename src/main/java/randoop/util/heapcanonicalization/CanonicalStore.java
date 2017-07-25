@@ -26,10 +26,11 @@ public class CanonicalStore {
 		sortedNames.add(DummyHeapRoot.class.getName());
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
-			getOrUpdateCanonicalClass(name, 0);
+			getUpdateOrCreateCanonicalClass(name, 0);
 	}
 	
 	
+	/*
 	public CanonicalClass getCanonicalClass(String name) {
 		CanonicalClass res = classes.get(name);
 		if (res != null) {
@@ -40,8 +41,39 @@ public class CanonicalStore {
 		classes.put(name, res);
 		return res;
 	}
+	*/
 	
-	protected CanonicalClass getOrUpdateCanonicalClass(String name, int fieldDistance) {
+	public CanonicalClass getCanonicalClass(String name) {
+		CanonicalClass cls = classes.get(name);
+		assert cls != null : "This method should be called for existing canonical classes only";
+		return cls;
+	}
+	
+	public CanonicalClass getCanonicalClass(Class<?> clazz) {
+		return getCanonicalClass(clazz.getName());
+	}
+	
+	public CanonicalClass getUpdateOrCreateCanonicalClass(String name, int fieldDistance) {
+		assert fieldDistance <= maxFieldDistance: "Field distance should never be greater than: " + maxFieldDistance;
+		CanonicalClass res = classes.get(name);
+		if (res != null) {
+			if (fieldDistance < maxFieldDistance)
+				res.updateFieldDistance(fieldDistance, maxFieldDistance);
+			return res;
+		}
+
+		res = new CanonicalClass(name, this, fieldDistance, maxFieldDistance);
+		classes.put(name, res);
+		return res;
+	}
+	
+	public CanonicalClass getUpdateOrCreateCanonicalClass(Class<?> clazz, int fieldDistance) {
+		return getUpdateOrCreateCanonicalClass(clazz.getName(), fieldDistance);
+	}
+
+
+/*	
+	protected CanonicalClass getCanonicalClass(String name, int fieldDistance) {
 		CanonicalClass res = classes.get(name);
 		if (res != null) {
 			if (fieldDistance < maxFieldDistance)
@@ -54,15 +86,17 @@ public class CanonicalStore {
 		return res;
 	}
 	
-	public CanonicalClass getCanonicalClass(Class<?> clazz) {
-		return getCanonicalClass(clazz.getName());
+	public CanonicalClass getCanonicalClass(Class<?> clazz, int fieldDistance) {
+		return getCanonicalClass(clazz.getName(), fieldDistance);
 	}
 	
+	/*
 	public CanonicalClass getCanonicalClass(Object o) {
 		if (o == null)
 			return null;
 		return getCanonicalClass(o.getClass().getName());
 	}
+	*/
 	
 	public Set<String> getAllCanonicalClassnames() {
 		return classes.keySet();

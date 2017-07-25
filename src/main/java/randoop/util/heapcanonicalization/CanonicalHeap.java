@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
+
 
 public class CanonicalHeap {
 
@@ -23,54 +25,56 @@ public class CanonicalHeap {
 		this.maxObjects = maxObjects;
 		this.maxArrayObjs = maxArrayObjs;
 		objects = new LinkedHashMap<>();
-		for (String className: store.getAllCanonicalClassnames()) {
-			CanonicalClass canonicalClass = store.getCanonicalClass(className);
-			if (!canonicalClass.isPrimitive())
-				objects.put(canonicalClass, new LinkedList<CanonicalObject>());
+		/*
+		if (CandidateVectorsWriter.isEnabled()) {
+			// Candidate vectors need heaps with the shape of the classes provided
+			// FIXME: Maybe not?
+			for (String className: store.getAllCanonicalClassnames()) {
+				CanonicalClass canonicalClass = store.getCanonicalClass(className);
+				if (!canonicalClass.isPrimitive())
+					objects.put(canonicalClass, new LinkedList<CanonicalObject>());
+			}
 		}
+		*/
 	}
-
+	
+	
 	public Map.Entry<CanonicalizationResult, CanonicalObject> getCanonicalObject(Object obj) {
+		if (obj == null)
+			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, new CanonicalObject(obj, null, -1, this));
+		CanonicalClass cls = store.getCanonicalClass(obj.getClass());
+		assert cls != null : "This method should be called for existing canonical classes only";
+		return getExistingOrCreateCanonicalObject(obj,cls);
+	}
+	
+
+	public Map.Entry<CanonicalizationResult, CanonicalObject> getExistingOrCreateCanonicalObject(Object obj, CanonicalClass clazz) {
 		// Create a new CanonicalObject encapsulating null
 		if (obj == null)
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, new CanonicalObject(obj, null, -1, this));
-		
-		// Create or get a new CanonicalObject encapsulating the primitive value 
-		CanonicalClass clazz = store.getCanonicalClass(obj.getClass());
+		// Get, update or create a new CanonicalObject encapsulating the primitive value 
 		if (clazz.isPrimitive()) 
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, new CanonicalObject(obj, clazz, -1, this));
-
 		// If there is already an object encapsulating obj, return it
 		CanonicalObject res = findExistingCanonicalObject(obj, clazz);
 		if (res != null)
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, res);
-		
 		// If the object limit is exceeded for the current class, report the error
 		if (objects.get(clazz).size() >= maxObjects) 
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.LIMITS_EXCEEDED, null);
-		
 		// Create a new canonical object
 		return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, newCanonicalObject(obj, clazz));
 	}
 	
 	private CanonicalObject findExistingCanonicalObject(Object obj, CanonicalClass clazz) {
 		List<CanonicalObject> clazzObjs = objects.get(clazz);
-
-		// Some classes are found out at runtime, for example, when they are not the type 
-		// of any field but they are the return type of a method.
+		// Some classes are found out at runtime, for example, when they are the return type of a method.
 		if (clazzObjs == null) {
 			objects.put(clazz, new LinkedList<CanonicalObject>());
 			return null;
 		}
 		
-		/*
-		if (clazzObjs == null) {
-			clazzObjs = new LinkedList<>();
-			objects.put(clazz, clazzObjs);
-		}
-		*/
-		
-		for (CanonicalObject currObj: clazzObjs) 
+		for (CanonicalObject currObj: clazzObjs)
 			if (currObj.getObject() == obj) 
 				return currObj;
 		

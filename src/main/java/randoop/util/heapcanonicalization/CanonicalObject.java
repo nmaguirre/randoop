@@ -38,13 +38,13 @@ public class CanonicalObject {
 
 			List<CanonicalField> arrFields = new LinkedList<>();
 			if (arrLength > heap.getMaxArrayObjects()) {
-				if (CanonizerLog.isLoggingOn())
-					CanonizerLog.logLine("CANONICALIZER INFO: only considering the first " + heap.getMaxArrayObjects() + 
+				if (CanonicalizerLog.isLoggingOn())
+					CanonicalizerLog.logLine("CANONICALIZER INFO: only considering the first " + heap.getMaxArrayObjects() + 
 							" elements of an array of size " + arrLength);
 				arrLength = heap.getMaxArrayObjects();
 			}
 			for (int i = 0; i < arrLength; i++) 
-				arrFields.add(new CanonicalField(i, clazz, clazz.getArrayElementsType()));
+				arrFields.add(new CanonicalField(i, clazz, null));//clazz.getArrayElementsType()));
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, arrFields);
 		}
 		return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, clazz.getCanonicalFields());

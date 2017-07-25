@@ -41,18 +41,17 @@ public class HeapCanonicalizer {
 		this.maxBFSDepth = maxBFSDepth;
 	}
 	
-	public Entry<CanonicalizationResult, CanonicalHeap> traverseBreadthFirstAndCanonize(Object root) {	
-		return traverseBreadthFirstAndCanonize(root, new FieldExtensionsDummyCollector());
+	public Entry<CanonicalizationResult, CanonicalHeap> traverseBreadthFirstAndCanonicalize(Object root) {	
+		return traverseBreadthFirstAndCanonicalize(root, new FieldExtensionsDummyCollector());
 	}
 
-	// Canonize the heap in a breadth first manner, starting at root,
+	// Canonicalize the heap in a breadth first manner, starting at root,
 	// and enlarge the extensions during the process. 
 	// Returns true iff at least an element is added to the extensions.
-	public Entry<CanonicalizationResult, CanonicalHeap> traverseBreadthFirstAndCanonize(Object root, FieldExtensionsCollector collector) {
-
-		if (CanonizerLog.isLoggingOn()) {
-			CanonizerLog.logLine("----------");
-			CanonizerLog.logLine("Starting BFS traversal");
+	public Entry<CanonicalizationResult, CanonicalHeap> traverseBreadthFirstAndCanonicalize(Object root, FieldExtensionsCollector collector) {
+		if (CanonicalizerLog.isLoggingOn()) {
+			CanonicalizerLog.logLine("----------");
+			CanonicalizerLog.logLine("Starting BFS traversal");
 		}
 
 		CanonicalHeap resHeap = new CanonicalHeap(store, maxObjects, maxArrayObjs);
@@ -75,34 +74,42 @@ public class HeapCanonicalizer {
 					!currObj.isNull() && 
 					!currObj.isPrimitive() : "Null/Primitive objects are never added to workQueue";
 
-			if (CanonizerLog.isLoggingOn()) 
-				CanonizerLog.logLine("Current object: " + currObj.toString());
+			if (CanonicalizerLog.isLoggingOn()) 
+				CanonicalizerLog.logLine("Current object: " + currObj.toString());
 
 			Entry<CanonicalizationResult, List<CanonicalField>> getFieldsRes = currObj.getCanonicalFields(); 
 			if (getFieldsRes.getKey() != CanonicalizationResult.OK) {
-				if (CanonizerLog.isLoggingOn()) 
-					CanonizerLog.logLine("Canonization error: " + getFieldsRes.getKey().toString());
+				if (CanonicalizerLog.isLoggingOn()) 
+					CanonicalizerLog.logLine("Canonicalization error: " + getFieldsRes.getKey().toString());
 				return new AbstractMap.SimpleEntry<CanonicalizationResult, CanonicalHeap>(getFieldsRes.getKey(), null);
 			}
 
 			for (CanonicalField currField: getFieldsRes.getValue()) {
-
 				Object fieldValue = currField.getValue(currObj);
-				Entry<CanonicalizationResult, CanonicalObject> valueCanonizationRes = resHeap.getCanonicalObject(fieldValue);
+				CanonicalClass fieldValType = null;
+				// Ensure a canonical class for fieldValue is created and if it is,
+				// update its field distance accordingly
+				if (fieldValue != null) {
+					int newFieldDistance = 0;
+					if (currObj.getObject() != dummyRoot) {
+						newFieldDistance = currObjType.getFieldDistance()+1;
+					}
+					fieldValType = store.getUpdateOrCreateCanonicalClass(fieldValue.getClass(), newFieldDistance);
+				}
+				Entry<CanonicalizationResult, CanonicalObject> valueCanonizationRes = resHeap.getExistingOrCreateCanonicalObject(fieldValue, fieldValType);
 				if (valueCanonizationRes.getKey() != CanonicalizationResult.OK) {
-					if (CanonizerLog.isLoggingOn()) 
-						CanonizerLog.logLine("Canonization error: " + valueCanonizationRes.getKey().toString());
+					if (CanonicalizerLog.isLoggingOn()) 
+						CanonicalizerLog.logLine("Canonicalization error: " + valueCanonizationRes.getKey().toString());
 					return new AbstractMap.SimpleEntry<CanonicalizationResult, CanonicalHeap>(valueCanonizationRes.getKey(), null);
 				}
 
 				CanonicalObject canonicalValue = valueCanonizationRes.getValue();
-				if (CanonizerLog.isLoggingOn()) 
-					CanonizerLog.logLine("	field value: " + /*currfield.toString()*/ currField.getName() + "->"  + canonicalValue.toString());
+				if (CanonicalizerLog.isLoggingOn()) 
+					CanonicalizerLog.logLine("	field value: " + /*currfield.toString()*/ currField.getName() + "->"  + canonicalValue.toString());
 
 				if (!canonicalValue.isNull() && 
 						!canonicalValue.isPrimitive() 
 						&& visited.add(canonicalValue)) {
-					//workQueue.add(new AbstractMap.SimpleEntry<>(canonicalValue, currFieldDistance));	
 					if (currDepth < maxBFSDepth-1) {
 						if (canonicalValue.isArray())
 							// Arrays elements don't count for BFS depth 
@@ -114,8 +121,8 @@ public class HeapCanonicalizer {
 				// Treat cobj current field;
 				CanonicalizationResult addToFieldExtRes = collector.collect(currField, currObj, canonicalValue);
 				if (addToFieldExtRes != CanonicalizationResult.OK) {
-					if (CanonizerLog.isLoggingOn()) 
-						CanonizerLog.logLine("Canonization error: " + addToFieldExtRes.toString());
+					if (CanonicalizerLog.isLoggingOn()) 
+						CanonicalizerLog.logLine("Canonicalization error: " + addToFieldExtRes.toString());
 					return new AbstractMap.SimpleEntry<CanonicalizationResult, CanonicalHeap>(addToFieldExtRes, null);
 				}
 				// printVectorComponent(cobj)
@@ -125,9 +132,9 @@ public class HeapCanonicalizer {
 			// printVectorComponent(cobj)
 		}
 
-		if (CanonizerLog.isLoggingOn()) {
-			CanonizerLog.logLine("Finishing BFS traversal");
-			CanonizerLog.logLine("----------");
+		if (CanonicalizerLog.isLoggingOn()) {
+			CanonicalizerLog.logLine("Finishing BFS traversal");
+			CanonicalizerLog.logLine("----------");
 		}
 		return new AbstractMap.SimpleEntry<CanonicalizationResult, CanonicalHeap>(CanonicalizationResult.OK, resHeap);
 	}

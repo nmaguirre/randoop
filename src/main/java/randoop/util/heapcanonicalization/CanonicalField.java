@@ -76,7 +76,8 @@ public class CanonicalField {
 	}
 
 	public String toString() {
-		return "{" + getName() + ",ID=" + ID + ",class="+ clazz.getName() + ",type=" + type.getName() + "}";
+		String typeStr = (type == null) ? "null" : type.getName();
+		return "{" + getName() + ",ID=" + ID + ",class="+ clazz.getName() + ",type=" + typeStr + "}";
 	}
 	
 }

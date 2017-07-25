@@ -62,7 +62,7 @@ public class TestVectorCanonization {
 		obj.add(4);
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
 		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
@@ -105,7 +105,7 @@ public class TestVectorCanonization {
 		obj.add(4);
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
 		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
@@ -147,7 +147,7 @@ public class TestVectorCanonization {
 		obj.add(4);
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
 		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
@@ -189,7 +189,7 @@ public class TestVectorCanonization {
 		}
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.LIMITS_EXCEEDED);
 
 	}
@@ -231,7 +231,7 @@ public class TestVectorCanonization {
 		obj.add(4);
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
 		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
@@ -273,7 +273,7 @@ public class TestVectorCanonization {
 		}
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.ARRAY_LIMITS_EXCEEDED);
 
 	}
@@ -316,7 +316,7 @@ public class TestVectorCanonization {
 		obj.add(1);
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
 		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
@@ -358,7 +358,7 @@ public class TestVectorCanonization {
 		obj.add(0);
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
 		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
@@ -400,7 +400,7 @@ public class TestVectorCanonization {
 		obj.insert(3);
 		
 		/** Canonizar el objeto creado **/
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
 		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));

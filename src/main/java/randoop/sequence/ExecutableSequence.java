@@ -49,7 +49,7 @@ import randoop.util.heapcanonicalization.CanonicalClass;
 import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
-import randoop.util.heapcanonicalization.CanonizerLog;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
@@ -855,7 +855,7 @@ public class ExecutableSequence {
 	   for (Object o: objects) {
 		   if (o != null) {
 			   FieldExtensionsByTypeCollector collector = new FieldExtensionsByTypeCollector(GenInputsAbstract.string_maxlen);
-			   Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonize(o, collector);
+			   Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonicalize(o, collector);
 			   if (res.getKey() != CanonicalizationResult.OK)
 				   throw new BugInFieldExtensionsCanonicalization("Structure exceeding limits. We don't support these yet.");
 			   extensions.add(collector.getExtensions());
@@ -926,47 +926,47 @@ public class ExecutableSequence {
 			   if (!isPrimitive(obj)) {
 				   res = ExtendExtensionsResult.EXTENDED;
 				   sequence.addActiveVar(index, i);
-				    if (CanonizerLog.isLoggingOn()) {
-				    	CanonizerLog.logLine("----------");
-				    	CanonizerLog.logLine("Object enlarges reference extensions. Object extensions:");
-				    	CanonizerLog.logLine(ext.toString());
-				    	CanonizerLog.logLine("----------");
+				    if (CanonicalizerLog.isLoggingOn()) {
+				    	CanonicalizerLog.logLine("----------");
+				    	CanonicalizerLog.logLine("Object enlarges reference extensions. Object extensions:");
+				    	CanonicalizerLog.logLine(ext.toString());
+				    	CanonicalizerLog.logLine("----------");
 				    }
 			   }
 			   else {
 				   res = lift(res, ExtendExtensionsResult.EXTENDED_PRIMITIVE);
-				   if (CanonizerLog.isLoggingOn()) {
-					   CanonizerLog.logLine("----------");
-					   CanonizerLog.logLine("Value enlarges primitive extensions. Value extensions:");
-					   CanonizerLog.logLine(ext.toString());
-					   CanonizerLog.logLine("----------");
+				   if (CanonicalizerLog.isLoggingOn()) {
+					   CanonicalizerLog.logLine("----------");
+					   CanonicalizerLog.logLine("Value enlarges primitive extensions. Value extensions:");
+					   CanonicalizerLog.logLine(ext.toString());
+					   CanonicalizerLog.logLine("----------");
 				   }
 			   }
 		   }
 		   else {
-			   if (CanonizerLog.isLoggingOn()) {
-				   CanonizerLog.logLine("----------");
-				   CanonizerLog.logLine("Extensions not enlarged.");
-				   CanonizerLog.logLine("----------");
+			   if (CanonicalizerLog.isLoggingOn()) {
+				   CanonicalizerLog.logLine("----------");
+				   CanonicalizerLog.logLine("Extensions not enlarged.");
+				   CanonicalizerLog.logLine("----------");
 			   }
 		   }
 	   }
 
-	   if (CanonizerLog.isLoggingOn() && res != ExtendExtensionsResult.NOT_EXTENDED) {
-		   CanonizerLog.logLine("----------");
-		   CanonizerLog.logLine("Former global extensions:");
-		   CanonizerLog.logLine(globalExt.toString());
-		   CanonizerLog.logLine("----------");
+	   if (CanonicalizerLog.isLoggingOn() && res != ExtendExtensionsResult.NOT_EXTENDED) {
+		   CanonicalizerLog.logLine("----------");
+		   CanonicalizerLog.logLine("Former global extensions:");
+		   CanonicalizerLog.logLine(globalExt.toString());
+		   CanonicalizerLog.logLine("----------");
 	   }
 
 	   for (FieldExtensions ext: enlargingExt)
 		   globalExt.addAll(ext);
 	   
-	   if (CanonizerLog.isLoggingOn() && res != ExtendExtensionsResult.NOT_EXTENDED) {
-		   CanonizerLog.logLine("----------");
-		   CanonizerLog.logLine("New global extensions:");
-		   CanonizerLog.logLine(globalExt.toString());
-		   CanonizerLog.logLine("----------");
+	   if (CanonicalizerLog.isLoggingOn() && res != ExtendExtensionsResult.NOT_EXTENDED) {
+		   CanonicalizerLog.logLine("----------");
+		   CanonicalizerLog.logLine("New global extensions:");
+		   CanonicalizerLog.logLine(globalExt.toString());
+		   CanonicalizerLog.logLine("----------");
 	   }
 
 	   return res;

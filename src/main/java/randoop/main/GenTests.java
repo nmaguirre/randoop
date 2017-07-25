@@ -63,7 +63,7 @@ import randoop.util.ReflectionExecutor;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
-import randoop.util.heapcanonicalization.CanonizerLog;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
@@ -473,11 +473,11 @@ public class GenTests extends GenInputsAbstract {
     	FieldBasedGenLog.logLine("**********");
     }
     
-    if (CanonizerLog.isLoggingOn()) {
-    	CanonizerLog.logLine("\n\n**********");
-    	CanonizerLog.logLine("Canonical classes:");
-    	CanonizerLog.logLine(AbstractGenerator.store.toString());
-    	CanonizerLog.logLine("**********");
+    if (CanonicalizerLog.isLoggingOn()) {
+    	CanonicalizerLog.logLine("\n\n**********");
+    	CanonicalizerLog.logLine("Canonical classes:");
+    	CanonicalizerLog.logLine(AbstractGenerator.store.toString());
+    	CanonicalizerLog.logLine("**********");
     }
 
     /* Generate tests */
@@ -497,17 +497,17 @@ public class GenTests extends GenInputsAbstract {
     	FieldBasedGenLog.logLine("**********");
     }
     
-    if (CanonizerLog.isLoggingOn()) {
-    	CanonizerLog.logLine("\n\n**********");
-    	CanonizerLog.logLine("Canonical classes:");
-    	CanonizerLog.logLine(AbstractGenerator.store.toString());
-    	CanonizerLog.logLine("**********");
+    if (CanonicalizerLog.isLoggingOn()) {
+    	CanonicalizerLog.logLine("\n\n**********");
+    	CanonicalizerLog.logLine("Canonical classes:");
+    	CanonicalizerLog.logLine(AbstractGenerator.store.toString());
+    	CanonicalizerLog.logLine("**********");
 
     	if (CandidateVectorsWriter.isEnabled()) {
-			CanonizerLog.logLine("\n\n**********");
-			CanonizerLog.logLine("Candidate Vectors Field Extensions:");
-			CanonizerLog.logLine(AbstractGenerator.candVectExtensions.toString());
-			CanonizerLog.logLine("**********");
+			CanonicalizerLog.logLine("\n\n**********");
+			CanonicalizerLog.logLine("Candidate Vectors Field Extensions:");
+			CanonicalizerLog.logLine(AbstractGenerator.candVectExtensions.toString());
+			CanonicalizerLog.logLine("**********");
     	}
     }
     

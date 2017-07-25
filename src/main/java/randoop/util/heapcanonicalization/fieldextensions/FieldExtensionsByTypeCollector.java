@@ -3,7 +3,7 @@ package randoop.util.heapcanonicalization.fieldextensions;
 import randoop.util.heapcanonicalization.CanonicalField;
 import randoop.util.heapcanonicalization.CanonicalObject;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
-import randoop.util.heapcanonicalization.CanonizerLog;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
 
 public class FieldExtensionsByTypeCollector implements FieldExtensionsCollector {
 	
@@ -53,8 +53,8 @@ public class FieldExtensionsByTypeCollector implements FieldExtensionsCollector 
 				if (str.length() > maxStrLen) {
 					// For now, do not throw an error and trim the string up to the given limit.
 					//return CanonicalizationResult.STRING_LIMITS_EXCEEDED;
-					if (CanonizerLog.isLoggingOn())
-						CanonizerLog.log("CANONICALIZER INFO: Trimmed string from size " + str.length() + " to " + maxStrLen);
+					if (CanonicalizerLog.isLoggingOn())
+						CanonicalizerLog.log("CANONICALIZER INFO: Trimmed string from size " + str.length() + " to " + maxStrLen);
 					val = str.substring(0, maxStrLen);
 				}
 			}

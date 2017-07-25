@@ -13,7 +13,7 @@ import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalObject;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
-import randoop.util.heapcanonicalization.CanonizerLog;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.DummyHeapRoot;
 
 public class CandidateVectorGenerator {
@@ -66,11 +66,11 @@ public class CandidateVectorGenerator {
 					addCandidateVectorFields(heap, canonicalClass, i, header);
 		}	
 		
-	    if (CanonizerLog.isLoggingOn()) {
-	    	CanonizerLog.logLine("**********");
-	    	CanonizerLog.logLine("Candidate vectors structure:");
-	    	CanonizerLog.logLine(header.toString());
-	    	CanonizerLog.logLine("**********");
+	    if (CanonicalizerLog.isLoggingOn()) {
+	    	CanonicalizerLog.logLine("**********");
+	    	CanonicalizerLog.logLine("Candidate vectors structure:");
+	    	CanonicalizerLog.logLine(header.toString());
+	    	CanonicalizerLog.logLine("**********");
 	    }
 		
 		return header;
@@ -109,11 +109,11 @@ public class CandidateVectorGenerator {
 					addNullObjectToCandidateVector(canonicalClass, heap, res);
 		}	
 
-		if (CanonizerLog.isLoggingOn()) {
-			CanonizerLog.logLine("**********");
-			CanonizerLog.logLine("Canonical vector:");
-			CanonizerLog.logLine(res.toString());
-			CanonizerLog.logLine("**********");
+		if (CanonicalizerLog.isLoggingOn()) {
+			CanonicalizerLog.logLine("**********");
+			CanonicalizerLog.logLine("Canonical vector:");
+			CanonicalizerLog.logLine(res.toString());
+			CanonicalizerLog.logLine("**********");
 		}
 		
 		return res;

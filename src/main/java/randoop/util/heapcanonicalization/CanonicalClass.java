@@ -23,7 +23,7 @@ public class CanonicalClass {
 	private final boolean isInterface;
 	private final CanonicalClass ancestor;
 	private final Class<?> clazz;
-	private final CanonicalClass arrObjectsType;
+	//private final CanonicalClass arrObjectsType;
 	private final CanonicalStore store;
 	private int fieldDistance;
 
@@ -37,23 +37,26 @@ public class CanonicalClass {
 		try {
 			cls = Class.forName(name);
 		} catch (ClassNotFoundException e) {
-			if (CanonizerLog.isLoggingOn())
-				CanonizerLog.logLine("CANONICALIZER INFO: Class for name " + name + " not found, assuming it's a primitive type.");
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("CANONICALIZER INFO: Class for name " + name + " not found, assuming it's a primitive type.");
 		}
 		clazz = cls;
 		isObject = isObject(clazz);
 		isPrimitive = isPrimitive(clazz);
 		isArray = isArray(clazz);
-		arrObjectsType = (!isArray) ? null : store.getOrUpdateCanonicalClass(clazz.getComponentType().getName(), fieldDistance);
+		//arrObjectsType = (!isArray) ? null : store.getUpdateOrCreateCanonicalClass(clazz.getComponentType(), fieldDistance);
 		isInterface = isInterface(clazz);
 		isAbstract = isAbstract(clazz);
 		
 		if (isObject || isPrimitive)
 			this.fieldDistance = 0;
+		else if (isArray)
+			// For lack of a better method, for the moment field distance of arrays is hardcoded to 1.
+			this.fieldDistance = 1;
 		else
 			this.fieldDistance = fieldDistance;
-		if (CanonizerLog.isLoggingOn())
-			CanonizerLog.logLine("CANONICALIZER INFO: Class " + name + " created. Field distance=" + this.fieldDistance);
+		if (CanonicalizerLog.isLoggingOn())
+			CanonicalizerLog.logLine("CANONICALIZER INFO: Class " + name + " created. Field distance=" + this.fieldDistance);
 		
 		ancestor = canonicalizeAncestors();
 		if (this.fieldDistance < maxFieldDistance)
@@ -75,7 +78,7 @@ public class CanonicalClass {
 		 */
 		if (isObject || isPrimitive || isArray || isInterface) return null;
 
-		CanonicalClass ancestor = store.getOrUpdateCanonicalClass(clazz.getSuperclass().getName(), fieldDistance);
+		CanonicalClass ancestor = store.getUpdateOrCreateCanonicalClass(clazz.getSuperclass(), fieldDistance);
 		if (!ancestor.isPrimitive() && !ancestor.clazz.equals(Object.class)) {
 			return ancestor;
 		}
@@ -104,7 +107,7 @@ public class CanonicalClass {
 			if (fldType.getName().equals(name))
 				fCanonicalType = this;
 			else 
-				fCanonicalType = store.getOrUpdateCanonicalClass(fldType.getName(), fieldDistance+1);
+				fCanonicalType = store.getUpdateOrCreateCanonicalClass(fldType.getName(), fieldDistance+1);
 			fields.add(new CanonicalField(fld, this, fCanonicalType));
 		}
 	}
@@ -207,10 +210,12 @@ public class CanonicalClass {
 		return res + "]";
 	}
 
+	/*
 	public CanonicalClass getArrayElementsType() {
 		assert isArray: "Asking for the type of objects of an array for a non array class";
 		return arrObjectsType;
 	}
+	*/
 	
 	public boolean hasFieldReferencingItself() {
 		for (CanonicalField f: fields)
@@ -220,21 +225,28 @@ public class CanonicalClass {
 		return false;
 	}
 
-	public void updateFieldDistance(int fieldDistance) {
-		if (isObject || isPrimitive || this.fieldDistance <= fieldDistance)
+	public void updateFieldDistance(int fieldDistance, int maxFieldDistance) {
+		if (isObject || isPrimitive || isArray || this.fieldDistance <= fieldDistance)
 			return;
 		
 		this.fieldDistance = fieldDistance;
-		if (CanonizerLog.isLoggingOn())
-			CanonizerLog.logLine("CANONICALIZER INFO: Updated class " + name + ". Field distance=" + fieldDistance);
+		if (CanonicalizerLog.isLoggingOn())
+			CanonicalizerLog.logLine("CANONICALIZER INFO: Updated class " + name + ". Field distance=" + fieldDistance);
 
-		if (isArray)
-			arrObjectsType.updateFieldDistance(fieldDistance);
-		else {
-			if (ancestor != null)
-				ancestor.updateFieldDistance(fieldDistance);
-			canonicalizeFields();
+		/*
+		if (isArray) {
+			return;
+			//arrObjectsType.updateFieldDistance(fieldDistance, maxFieldDistance);
 		}
+		*/
+		if (ancestor != null)
+			ancestor.updateFieldDistance(fieldDistance, maxFieldDistance);
+		if (fieldDistance < maxFieldDistance)
+			canonicalizeFields();
+	}
+
+	public int getFieldDistance() {
+		return fieldDistance;
 	}
 
 }

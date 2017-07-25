@@ -40,7 +40,7 @@ import randoop.util.heapcanonicalization.CanonicalClass;
 import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
-import randoop.util.heapcanonicalization.CanonizerLog;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
@@ -331,10 +331,10 @@ private int maxsize;
 	// Use the new canonizer to generate a candidate vector for receiver object 
     // of the last method of the sequence
     private void makeCanonicalVectorsForLastStatement(ExecutableSequence eSeq) {
-		if (CanonizerLog.isLoggingOn()) {
-			CanonizerLog.logLine("**********");
-			CanonizerLog.logLine("Canonizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
-			CanonizerLog.logLine("**********");
+		if (CanonicalizerLog.isLoggingOn()) {
+			CanonicalizerLog.logLine("**********");
+			CanonicalizerLog.logLine("Canonizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
+			CanonicalizerLog.logLine("**********");
 		}	
 
 		List<Integer> activeVars = eSeq.sequence.getActiveVars(eSeq.sequence.size() -1);
@@ -348,18 +348,18 @@ private int maxsize;
 
 			if (activeVars != null && !activeVars.contains(index)) 
 				continue;
-			if (CanonizerLog.isLoggingOn())
-				CanonizerLog.logLine("INFO: Active variable index: " + index);
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("INFO: Active variable index: " + index);
 			
 			Entry<CanonicalizationResult, CanonicalHeap> res;
-			CanonicalClass rootClass = store.getCanonicalClass(o);
+			CanonicalClass rootClass = (o==null) ? null : store.getCanonicalClass(o.getClass());
 			// FIXME: Should check the compile time type of o instead of its runtime type to 
 			// avoid generating null objects of other types? 
 			if (o == null || (o != null && store.isGenerationClass(rootClass))) {
 				// Root is not an object we are interested in generating a candidate vector for.
 				// Notice that we are always interested in generating a candidate object for null, 
 				// even if we don't know its type.
-				res = AbstractGenerator.newCanonicalizer.traverseBreadthFirstAndCanonize(o);
+				res = AbstractGenerator.newCanonicalizer.traverseBreadthFirstAndCanonicalize(o);
 				if (res.getKey() == CanonicalizationResult.OK) {
 					CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(res.getValue());
 							//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
@@ -371,12 +371,12 @@ private int maxsize;
 				else {
 					// assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
 					if (res.getKey() != CanonicalizationResult.OK) {
-						if (CanonizerLog.isLoggingOn()) {
-							CanonizerLog.logLine("----------");
-							CanonizerLog.logLine("Not canonizing an object with more than " + 
+						if (CanonicalizerLog.isLoggingOn()) {
+							CanonicalizerLog.logLine("----------");
+							CanonicalizerLog.logLine("Not canonizing an object with more than " + 
 									AbstractGenerator.fbg_max_objects + " objects of the same type");
-							CanonizerLog.logLine("Error message: " + res.getKey());
-							CanonizerLog.logLine("----------");
+							CanonicalizerLog.logLine("Error message: " + res.getKey());
+							CanonicalizerLog.logLine("----------");
 						}
 					}
 				}
@@ -414,8 +414,8 @@ private int maxsize;
     
     if (FieldBasedGenLog.isLoggingOn())
     	FieldBasedGenLog.logLine("\n\n----- Current sequence ----- \n" + eSeq.toCodeString());
-    if (CanonizerLog.isLoggingOn())
-    	CanonizerLog.logLine("\n\n----- Current sequence ----- \n" + eSeq.toCodeString());
+    if (CanonicalizerLog.isLoggingOn())
+    	CanonicalizerLog.logLine("\n\n----- Current sequence ----- \n" + eSeq.toCodeString());
    
     // Original randoop behaviour
     if (field_based_gen == FieldBasedGenType.DISABLED) {
