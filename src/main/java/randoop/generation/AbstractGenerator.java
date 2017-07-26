@@ -37,6 +37,7 @@ import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsFieldE
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensions;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByType;
+import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStrings;
 import randoop.util.fieldbasedcontrol.RandomPerm;
 import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.predicate.AlwaysFalse;
@@ -73,8 +74,10 @@ public abstract class AbstractGenerator {
 	public void initNewCanonicalizer(Collection<String> classNames, int maxObjects, int maxArrayObjs, int bfsDepth, int fieldDistance) {
 	    store = new CanonicalStore(classNames, fieldDistance);
 		newCanonicalizer = new HeapCanonicalizer(store, maxObjects, maxArrayObjs, bfsDepth);
-		globalExtensions = new FieldExtensionsByType();
-
+		if (fbg_low_level_primitive)
+			globalExtensions = new FieldExtensionsByType();
+		else
+			globalExtensions = new FieldExtensionsStrings();
 	}
 	
 	
@@ -176,6 +179,9 @@ public abstract class AbstractGenerator {
   		+ " This may negatively affect runtime performance.")
   public static boolean fbg_precise_extension_detection = true;
 
+  @Option("Deal with the low level (binary) representation of primitive types in field extensions.")
+  public static boolean fbg_low_level_primitive = true;
+
   @Option("Save tests ending with observers.")
   public static boolean field_based_gen_save_observers = true;
 
@@ -198,14 +204,14 @@ public abstract class AbstractGenerator {
   
   @Option("Save test only if the last operation was used at most (#test gen./fbg_not_extending_ops_ratio)+1 times in tests"
   		+ "not extending the extensions.")
-  public static int fbg_save_not_extending_ratio = 1000;//500;
+  public static int fbg_save_not_extending_ratio = 500;
 
   @Option("Max times an observer can be executed in a test not extending the extensions.")
   public static int field_based_gen_max_non_extending_observer_tests_ratio = 500;
   
   @Option("Save negative test only if the last operation was used at most (#test gen./fbg_save_negatives_ratio)+1 times in tests"
 	  		+ "not extending the extensions.")
-  public static int fbg_save_negatives_ratio = 1000; //500;
+  public static int fbg_save_negatives_ratio = 500;
 
   @Option("Generation stops when this many tests are discarded.")
   public static int max_discarded_tests = 100000;
@@ -602,7 +608,7 @@ private int genFirstAdditionalObsErrorSeqs;
    *         output
    */
   public int numOutputSequences() {
-    return /*outErrorSeqs.size()*/ + outRegressionSeqs.size();
+    return outErrorSeqs.size() + outRegressionSeqs.size();
   }
 
   public int numRegressionSequences() {
@@ -636,7 +642,7 @@ private int genFirstAdditionalObsErrorSeqs;
   
   private boolean saveRarelyExtendingOperation(ExecutableSequence eSeq) {
 	int ratio = (numRegressionSequences() / fbg_save_not_extending_ratio) + 1;
-	return eSeq.getLastStmtOperation().timesExecutedInSavePositiveTests < ratio;
+	return eSeq.getLastStmtOperation().timesExecutedInSavedPositiveTests < ratio;
   }
   
   
@@ -845,7 +851,7 @@ private int genFirstAdditionalObsErrorSeqs;
      	  FieldBasedGenLog.logLine("Positive tests saved: " + positiveTestsSaved);
     	  FieldBasedGenLog.logLine("Positive tests extending reference extensions: " + positiveReferenceExtendingTests);
     	  FieldBasedGenLog.logLine("Positive tests extending primitive extensions: " + positivePrimitiveExtendingTests);
-    	  FieldBasedGenLog.logLine("Postiive tests discarded: " + positiveTestsDropped);
+    	  FieldBasedGenLog.logLine("Positive tests discarded: " + positiveTestsDropped);
     	  FieldBasedGenLog.logLine("Negative tests saved: " + negativeTestsSaved);
     	  FieldBasedGenLog.logLine("Negative tests discarded: " + negativeTestsDropped);
     	  FieldBasedGenLog.logLine("Tests excceding limits: " + testsExceedingLimits);
@@ -891,7 +897,7 @@ private int genFirstAdditionalObsErrorSeqs;
    	  System.out.println("Positive tests saved: " + positiveTestsSaved);
    	  System.out.println("Positive tests extending reference extensions: " + positiveReferenceExtendingTests);
    	  System.out.println("Positive tests extending primitive extensions: " + positivePrimitiveExtendingTests);
-   	  System.out.println("Postiive tests discarded: " + positiveTestsDropped);
+   	  System.out.println("Positive tests discarded: " + positiveTestsDropped);
    	  System.out.println("Negative tests saved: " + negativeTestsSaved);
    	  System.out.println("Negative tests discarded: " + negativeTestsDropped);
    	  System.out.println("Tests excceding limits: " + testsExceedingLimits);
@@ -981,7 +987,7 @@ private int genFirstAdditionalObsErrorSeqs;
 		  saveSubsumedCandidates();
 		  positiveTestsSaved++;
 		  savedTests++;
-		  eSeq.getLastStmtOperation().timesExecutedInSavePositiveTests++;
+		  eSeq.getLastStmtOperation().timesExecutedInSavedPositiveTests++;
 		  if (field_based_gen_extend_with_observers)
 			  positiveRegressionSeqs.add(eSeq);
 		  if (FieldBasedGenLog.isLoggingOn()) 
@@ -989,6 +995,7 @@ private int genFirstAdditionalObsErrorSeqs;
 	  }
 	  else {
 		  positiveTestsDropped++;
+		  discardedTests++;
 		  if (FieldBasedGenLog.isLoggingOn()) 
 			  FieldBasedGenLog.logLine("> Current positive sequence discarded.");
 	  }
@@ -1025,6 +1032,7 @@ private int genFirstAdditionalObsErrorSeqs;
 	  }
 	  else {
 		  negativeTestsDropped++;
+		  discardedTests++;
 		  if (FieldBasedGenLog.isLoggingOn())
 			  FieldBasedGenLog.logLine("> Current negative sequence discarded.");
 	  }

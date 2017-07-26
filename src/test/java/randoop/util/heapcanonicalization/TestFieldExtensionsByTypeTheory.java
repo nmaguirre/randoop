@@ -1,4 +1,4 @@
-package randoop.util.heapcanonization;
+package randoop.util.heapcanonicalization;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;

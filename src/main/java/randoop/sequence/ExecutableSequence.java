@@ -43,21 +43,19 @@ import randoop.util.fieldbasedcontrol.CanonizerClass;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
+import randoop.util.fieldbasedcontrol.FieldExtensionsStrings;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.Tuple;
-import randoop.util.heapcanonicalization.CanonicalClass;
 import randoop.util.heapcanonicalization.CanonicalHeap;
-import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
-import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
-import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
 import randoop.util.heapcanonicalization.fieldextensions.BugInFieldExtensionsCanonicalization;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensions;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByType;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByTypeCollector;
+import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsCollector;
+import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsCollector;
 
 /**
  * An ExecutableSequence wraps a {@link Sequence} with functionality for
@@ -854,7 +852,11 @@ public class ExecutableSequence {
 	   List<FieldExtensions> extensions = new ArrayList<>();
 	   for (Object o: objects) {
 		   if (o != null) {
-			   FieldExtensionsByTypeCollector collector = new FieldExtensionsByTypeCollector(GenInputsAbstract.string_maxlen);
+			   FieldExtensionsCollector collector;
+			   if (AbstractGenerator.fbg_low_level_primitive)
+				   collector = new FieldExtensionsByTypeCollector(GenInputsAbstract.string_maxlen);
+			   else 
+				   collector = new FieldExtensionsStringsCollector(GenInputsAbstract.string_maxlen);
 			   Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonicalize(o, collector);
 			   if (res.getKey() != CanonicalizationResult.OK)
 				   throw new BugInFieldExtensionsCanonicalization("Structure exceeding limits. We don't support these yet.");
@@ -902,7 +904,7 @@ public class ExecutableSequence {
 	   
 	   ExtendExtensionsResult res = ExtendExtensionsResult.NOT_EXTENDED;
 	   int index = sequence.size()-1;
-	   Statement stmt = sequence.getStatement(index);
+	   //Statement stmt = sequence.getStatement(index);
 
 	   List<FieldExtensions> enlargingExt = new LinkedList<>();
 	   for (int i = 0; i < objects.size(); i++) {

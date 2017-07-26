@@ -513,7 +513,7 @@ public abstract class TypedOperation implements Operation {
 
   public int timesExecutedInSavedNegativeTests = 0;
 
-  public int timesExecutedInSavePositiveTests = 0;
+  public int timesExecutedInSavedPositiveTests = 0;
   
   
 //  public int timesExecutedInNotExtendingModifiers = 0;

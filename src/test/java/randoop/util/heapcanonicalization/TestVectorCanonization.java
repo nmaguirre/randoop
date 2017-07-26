@@ -1,4 +1,4 @@
-package randoop.util.heapcanonization;
+package randoop.util.heapcanonicalization;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,10 +14,6 @@ import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByTypeCollector;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsCollector;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsCollector;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsNonPrimitiveCollector;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,23 +24,35 @@ import java.util.Set;
 /**
  * A few tests for the vector canonization algorithm.
  */
-public class TestFieldExtensionsStrings {
+public class TestVectorCanonization {
    
 	@Test
-	public void testSinglyLinedListWithInnerNode() {
+	public void testSinglyLinkedListWithInnerNode() {
+		
 		String headerOracle = "randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o1.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o1.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o2.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o2.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o3.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o3.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o4.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o4.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o5.next,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner$Node->o5.value,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o1.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o1.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o2.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o2.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o3.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o3.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o4.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o4.size,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o5.header,randoop.test.datastructures.singlylistinner.SinglyLinkedListInner->o5.size,randoop.util.heapcanonicalization.DummyHeapRoot->o1.theroot";
-		String vectorOracle = "2,0,3,2,4,3,0,4,0,0,1,3,0,0,0,0,0,0,0,0,1";	
+		String vectorOracle = "2,0,3,2,4,3,0,4,0,0,1,3,0,0,0,0,0,0,0,0,1";
 		
 		int maxObjects = 5;
 		Set<String> classNames = new HashSet<String>();
 		classNames.add(SinglyLinkedListInner.class.getName());
+		
+		// O lo que es lo mismo que la linea anterior:
+		// classNames.add("java.util.LinkedList");
 
 		/** Inicializar clases que hacen la canonizacion **/
 		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
 		// por clase en los vectores candidatos
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
+		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
 	
+		/* Descomentar esto para imprimir el header de los vectores candidatos */
+		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
+		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
+		System.out.println(header.toString());
+		Assert.assertTrue(header.toString().equals(headerOracle));
+		
 		/** Crear el objeto a canonizar. Esto es lo unico que cambia, el resto del codigo es siempre igual **/
 		//List<Integer> obj = new LinkedList<>();
 		//obj.add(2);
@@ -54,23 +62,12 @@ public class TestFieldExtensionsStrings {
 		obj.add(4);
 		
 		/** Canonizar el objeto creado **/
-		FieldExtensionsCollector collector = new FieldExtensionsStringsCollector();
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj, collector);
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
-		System.out.println(collector.getExtensions().toString());
+		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+		Assert.assertTrue(candVect.toString().equals(vectorOracle));
 
-		FieldExtensionsCollector collector2 = new FieldExtensionsStringsNonPrimitiveCollector();
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes2 = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj, collector2);
-		Assert.assertTrue(canonRes2.getKey() == CanonicalizationResult.OK);
-		System.out.println(collector2.getExtensions().toString());
-		
-		FieldExtensionsCollector collector3 = new FieldExtensionsByTypeCollector(maxObjects);
-		Entry<CanonicalizationResult, CanonicalHeap> canonRes3 = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj, collector3);
-		Assert.assertTrue(canonRes3.getKey() == CanonicalizationResult.OK);
-		System.out.println(collector3.getExtensions().toString());
-		
 	}	
-	
 	
 	
 	@Test

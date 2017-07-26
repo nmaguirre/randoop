@@ -51,8 +51,8 @@ public class CanonicalClass {
 		if (isObject || isPrimitive)
 			this.fieldDistance = 0;
 		else if (isArray)
-			// For lack of a better method, for the moment field distance of arrays is hardcoded to 1.
-			this.fieldDistance = 1;
+			// For lack of a better method, for the moment the field distance of arrays is always set to maxFieldDistance-1.
+			this.fieldDistance = maxFieldDistance-1;
 		else
 			this.fieldDistance = fieldDistance;
 		if (CanonicalizerLog.isLoggingOn())
