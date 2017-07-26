@@ -22,6 +22,7 @@ import randoop.types.Substitution;
 import randoop.types.Type;
 import randoop.types.TypeTuple;
 import randoop.types.TypeVariable;
+import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 
 /**
  * Type decorator of {@link Operation} objects.
@@ -518,33 +519,45 @@ public abstract class TypedOperation implements Operation {
   
 //  public int timesExecutedInNotExtendingModifiers = 0;
 
-  private FBExecutionState fbExecState = FBExecutionState.NOT_EXECUTED;
+  	private FBExecutionState fbExecState = FBExecutionState.NOT_EXECUTED;
   
 	public boolean notExecuted() {
 		return fbExecState == FBExecutionState.NOT_EXECUTED;
-	}
-
-	public boolean isObserver() {
-		return fbExecState == FBExecutionState.OBSERVER;
-	}
-
-	public boolean isFinalObserver() {
-		return fbExecState == FBExecutionState.FINALOBSERVER;
-	}
-
-	public void setModifier() {
-		fbExecState = FBExecutionState.MODIFIER;
 	}
 
 	public boolean isModifier() {
 		return fbExecState == FBExecutionState.MODIFIER;
 	}
 
+	public void setModifier() {
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("> Operation " + toString() + " flagged as modifier because it extends extensions.");
+		fbExecState = FBExecutionState.MODIFIER;
+	}
+
+	public void setModifier(int i) {
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("> Operation " + toString() + " flagged as modifier. Modified var index: " + i);
+		fbExecState = FBExecutionState.MODIFIER;
+	}
+
+	public boolean isObserver() {
+		return fbExecState == FBExecutionState.OBSERVER;
+	}
+
 	public void setObserver() {
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("> Operation " + toString() + " flagged as an observer");
 		fbExecState = FBExecutionState.OBSERVER;
 	}
 
+	public boolean isFinalObserver() {
+		return fbExecState == FBExecutionState.FINALOBSERVER;
+	}
+
 	public void setFinalObserver() {
+		if (FieldBasedGenLog.isLoggingOn())
+			FieldBasedGenLog.logLine("> Operation " + toString() + " flagged as final observer");
 		fbExecState = FBExecutionState.FINALOBSERVER;
 	}
 

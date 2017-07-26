@@ -544,7 +544,7 @@ public class ExecutableSequence {
 						  }
 
 						  op.observerTimesExecuted++;
-						  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
+						  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.fbg_final_observer_after) {
 							  op.setFinalObserver(); 
 							  if (FieldBasedGenLog.isLoggingOn())
 								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
@@ -779,7 +779,7 @@ public class ExecutableSequence {
     				  }
 
     				  op.observerTimesExecuted++;
-    				  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
+    				  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.fbg_final_observer_after) {
     					  op.setFinalObserver(); 
     					  if (FieldBasedGenLog.isLoggingOn())
     						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
@@ -863,19 +863,21 @@ public class ExecutableSequence {
 			   extensions.add(collector.getExtensions());
 		   }
 		   else
+			   // We don't save sequences for building null objects
 			   extensions.add(null);
 	   }
+   
+	   
 	   return extensions; 
    }
    
    
    private boolean isPrimitive(Object o) {
 	   Class<?> cls = o.getClass();
-	   return NonreceiverTerm.isNonreceiverType(cls);
-	   /* TODO We may treat these as primitives
+	   return NonreceiverTerm.isNonreceiverType(cls) ||
+	   		// We treat these as primitives
 				  cls.equals(BigInteger.class) || 
 				  cls.equals(BigDecimal.class);
-				  */
    }
    
    private ExtendExtensionsResult lift(ExtendExtensionsResult oldres, ExtendExtensionsResult newres) {
@@ -993,19 +995,17 @@ public class ExecutableSequence {
 	      List<Variable> inputs = sequence.getInputs(i);
 	      Object[] inputVariables;
 	      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
-	      /*
 	      TypedOperation op = null;
-	      // TODO: Don't do observer detection yet.
-	      if (i == sequence.size()-1) {
+
+	      if (i == sequence.size()-1 && AbstractGenerator.fbg_observer_detection) {
 	    	  op = sequence.getStatement(i).getOperation();
 	    	  logOperationType(op);
-			  if (sequence.size() > 1 && (op.notExecuted() || op.isObserver())) {
-				  List<Object> objs = getObjectsForStatement(i, null, inputVariables);
-				  lastStmtExtBeforeExecution = createExtensionsForAllObjects(objs, canonicalizer);
-			  }
+	    	  if (sequence.size() > 1 && (op.notExecuted() || op.isObserver())) {
+	    		  List<Object> objs = getObjectsForStatement(i, null, inputVariables);
+	    		  lastStmtExtBeforeExecution = createExtensionsForAllObjects(objs, canonicalizer);
+	    	  }
 	      }
-	      */
-	      
+
 	      visitor.visitBeforeStatement(this, i);
 	      executeStatement(sequence, executionResults.theList, i, inputVariables);
 	      // make sure statement executed
@@ -1032,113 +1032,59 @@ public class ExecutableSequence {
 	      if (i == sequence.size()-1 && statementResult instanceof NormalExecution) {
 	    	  Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
 	    	  List<Object> objs = getObjectsForStatement(i, retVal, inputVariables);
+	    	  // TODO: Optimize by not creating extesions for observers?
 	    	  lastStmtExtAfterExecution = createExtensionsForAllObjects(objs, canonicalizer);
 	    	  enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
-	      }
 	    	  
-	      // TODO: update operation types according to extensions for observer detection.
-	      // We need to figure out what to do with operations that never extend extensions.
-	      
-	    	  
-	    	  /*
-			   if (enlargesExtensions == ExtendedExtensionsResult.EXTENDED && getLastStmtOperation().isModifier())
-				   getLastStmtOperation().timesExecutedInExtendingModifiers++;
- 
-	    	  
-
-	    		  if (op.isFinalObserver()) {
-	    			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, false);
-	    			  createLastStmtActiveVars();
-	    		  } 
-	    		  else {
-	    			  lastStmtNextExt = createExtensionsForAllObjects(i, ((NormalExecution)statementResult).getRuntimeValue(), inputVariables, canonizer, true);
-	    			  createLastStmtActiveVars();
-
-	    			  // check if the current op is an observer or a modifier
-	    			  if (!op.isModifier()) { 
-	    				  if (sequence.size() == 1) {
-	    					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
-	    						  if (lastStmtNextExt.get(j) != null) { 							  
-	    							  if (FieldBasedGenLog.isLoggingOn())
-	    								  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
-
-	    							  op.setModifier();
+	    	  if (AbstractGenerator.fbg_observer_detection) {
+	    		  // Update operation types according to their behavior w.r.t. extensions for observer detection.
+	    		  if (enlargesExtensions == ExtendExtensionsResult.EXTENDED) 
+	    			  op.setModifier();
+	    		  // FIXME: Leave final observers for the second phase only?
+	    		  if (!op.isModifier()/* && !op.isFinalObserver()*/) {
+	    			  // Check if we have to set op to observer or a modifier due to the current execution 
+	    			  if (sequence.size() == 1) {
+	    				  for (int j = 0; j < lastStmtExtAfterExecution.size(); j++) {
+	    					  if (lastStmtExtAfterExecution.get(j) != null && !isPrimitive(objs.get(j))) { 							  
+	    						  op.setModifier(j);
+	    						  break;
+	    					  }
+	    				  }
+	    			  }
+	    			  else { //sequence.size() > 1 
+	    				  assert lastStmtExtBeforeExecution.size() == lastStmtExtBeforeExecution.size(): 
+	    					  "Extensions before and after must be of the same size";
+	    				  for (int j = 0; j < lastStmtExtAfterExecution.size(); j++) {
+	    					  assert !(lastStmtExtBeforeExecution.get(j) != null && lastStmtExtAfterExecution.get(j) == null):
+	    						  "Extensions before execution are not null but became null after";
+	    					  if (lastStmtExtAfterExecution.get(j) == null || isPrimitive(objs.get(j)))
+	    						  continue;
+	    					  else {
+	    						  if (!lastStmtExtAfterExecution.get(j).equals(lastStmtExtBeforeExecution.get(j))) {
+	    							  op.setModifier(j);
 	    							  break;
 	    						  }
 	    					  }
 	    				  }
-	    				  else { //sequence.size() > 1 
-	    					  assert lastStmtFormerExt.size() == lastStmtNextExt.size();
-	    					  for (int j = 0; j < lastStmtNextExt.size(); j++) {
-	    						  assert !(lastStmtFormerExt.get(j) != null && lastStmtNextExt.get(j) == null);
-
-	    						  if (lastStmtFormerExt.get(j) == null && lastStmtNextExt.get(j) == null)
-	    							  continue;
-	    						  else {
-	    							  if (!lastStmtNextExt.get(j).equals(lastStmtFormerExt.get(j))) {
-	    								  if (FieldBasedGenLog.isLoggingOn())
-	    									  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as modifier");
-
-	    								  op.setModifier();
-	    								  // if (AbstractGenerator.field_based_gen == FieldBasedGenType.DISABLED || secondPhase)
-	    								  break;
-	    							  }
-	    						  }
-	    					  }
-	    				  }
-	    			  }
-
-	    			  // If it's not a modifier, mark the current action as an observer or final observer
-	    			  if (!op.isModifier()) {
-	    				  // First check if the current observer produces a new primitive value
-	    				  if (!secondPhase && !op.getOutputType().isVoid()) {
-	    					  Object obj = ((NormalExecution)statementResult).getRuntimeValue();
-	    					  if (obj != null && isObjectPrimtive(obj)) {
-	    						  if (canonizer.traverseBreadthFirstAndEnlargeExtensions(obj, canonizer.getPrimitiveExtensions()) == ExtendedExtensionsResult.EXTENDED) {
-	    							  endsWithObserverReturningNewValue = true;
-
-	    							  if (FieldBasedGenLog.isLoggingOn())
-	    								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " was added to primitive field bounds");				
-	    						  }
-	    						  else 
-	    							  if (FieldBasedGenLog.isLoggingOn())
-	    								  FieldBasedGenLog.logLine("> Value " + obj.toString() + " already belongs to primitive field bounds");				
-	    					  }
-	    				  }
-
-	    				  op.observerTimesExecuted++;
-	    				  if (secondPhase && op.observerTimesExecuted > AbstractGenerator.field_based_gen_observer_executions_before_final) {
-	    					  op.setFinalObserver(); 
-	    					  if (FieldBasedGenLog.isLoggingOn())
-	    						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as final observer");
-	    				  }
-	    				  else {
-	    					  op.setObserver();
-	    					  if (FieldBasedGenLog.isLoggingOn())
-	    						  FieldBasedGenLog.logLine("> Operation " + op.toString() + " flagged as observer");
-	    				  }
-
-	    			  }
-
+	    			  } 
 	    		  }
-
+	    		  // If it's not a modifier, mark the current action as an observer or final observer
 	    		  if (!op.isModifier()) {
-	    			  endsWithObserver = true;
-	    			  if (FieldBasedGenLog.isLoggingOn()) 
-	    				  FieldBasedGenLog.logLine("> The current sequence ends with an observer");
-	    		  }
-	    		  else 
-	    			  if (FieldBasedGenLog.isLoggingOn()) 
-	    				  FieldBasedGenLog.logLine("> The current sequence ends with a modifier");
+	    			  // FIXME: Leave final observers for the second phase only?
+	    			  /*
+	    			  if (op.observerTimesExecuted > AbstractGenerator.fbg_final_observer_after) 
+	    				  op.setFinalObserver(); 
+	    			  else 
+	    			  */
+	    			  if (!op.isObserver())
+	    				  op.setObserver();
+	    			  op.observerTimesExecuted++;
+	    		  } 
+	    		  assert !op.notExecuted(): "Action was executed but flagged as not executed.";
 	    	  }
-	    	  else {
-	    		  // Execution failed, if the operation is not executed mark it as an observer for the moment
-	    		  if (op.notExecuted())
-	    			  op.setObserver();
-	       	  }
-	      }
-	      */
-	    	  
+
+	      	}
+
 	      visitor.visitAfterStatement(this, i);
 	    }
 	    visitor.visitAfterSequence(this);
