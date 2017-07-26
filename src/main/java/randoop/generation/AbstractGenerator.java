@@ -189,7 +189,7 @@ public abstract class AbstractGenerator {
   public static int field_based_gen_negative_observers_per_test = 0; 
   
   @Option("Max number of observers to be added to each test.")
-  public static int field_based_gen_observers_per_test = 50; 
+  public static int fbg_observers_per_test = 50; 
   
   /*
   @Option("Max number of lines reserved for observers from the max number of lines given by the --maxsize parameter.")
@@ -439,7 +439,7 @@ public abstract class AbstractGenerator {
    */
   public List<ExecutableSequence> outRegressionSeqs = new ArrayList<>();
 
-  public List<ExecutableSequence> positiveRegressionSeqs = new ArrayList<>();
+  public List<ExecutableSequence> modifierRegressionSeqs = new ArrayList<>();
   public List<ExecutableSequence> observerRegressionSeqs = new ArrayList<>();
 
   /**
@@ -760,8 +760,10 @@ private int genFirstAdditionalObsErrorSeqs;
 			  FieldBasedGenLog.logLine("**** ERROR: Execution of the current sequence failed");
 	  }
 
-   	  eSeq.clearExtensions();
-   	  eSeq.clearExecutionResults();
+   	  if (!count_objects) {
+   		  eSeq.clearExtensions();
+   		  eSeq.clearExecutionResults();
+   	  }
      
       if (dump_sequences) {
         System.out.printf("Sequence after execution:%n%s%n", eSeq.toString());
@@ -780,7 +782,6 @@ private int genFirstAdditionalObsErrorSeqs;
    	long secondPhaseStartTime = System.currentTimeMillis();
 
     boolean displayStopped = false;
-   	/*
     if (count_objects) {
     	if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
     		progressDisplay.display();
@@ -801,23 +802,19 @@ private int genFirstAdditionalObsErrorSeqs;
     			operationsPermutable.add(op);
 
     	if (FieldBasedGenLog.isLoggingOn())
-    		FieldBasedGenLog.logLine("\n\n>> Second phase starting...");
+    		FieldBasedGenLog.logLine("\n\n>> Second phase for modifiers starting...\n");
 
-    	extendModifierTestsWithObserverOps(positiveRegressionSeqs, operationsPermutable, false);
+    	extendModifierTestsWithObservers(modifierRegressionSeqs, operationsPermutable, false);
 
-		*/
-    	/*
     	if (field_based_gen_save_observers) {
     		if (FieldBasedGenLog.isLoggingOn())
-    			FieldBasedGenLog.logLine("\n\n>> Second phase of the generation first approach for tests ending with observers starting");
+    			FieldBasedGenLog.logLine("\n\n>> Second phase for observers starting...\n");
     		extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
     	}
-    	*/
-   		/*
+
     	if (FieldBasedGenLog.isLoggingOn())
-    		FieldBasedGenLog.logLine("\n\n>> Second phase finished.");
+    		FieldBasedGenLog.logLine("\n\n>> Second phase finished.\n");
     }
-    */
 
    	long secondPhaseTime = System.currentTimeMillis() - secondPhaseStartTime;
 
@@ -992,8 +989,12 @@ private int genFirstAdditionalObsErrorSeqs;
 		  positiveTestsSaved++;
 		  savedTests++;
 		  eSeq.getLastStmtOperation().timesExecutedInSavedPositiveTests++;
-		  if (fbg_observer_detection)
-			  positiveRegressionSeqs.add(eSeq);
+		  if (fbg_observer_detection) {
+			 if (eSeq.getLastStmtOperation().isModifier()) 
+				 modifierRegressionSeqs.add(eSeq);
+			 else
+				 observerRegressionSeqs.add(eSeq);
+		  }
 		  if (FieldBasedGenLog.isLoggingOn()) 
 			  FieldBasedGenLog.logLine("> Current positive sequence saved.");
 	  }
@@ -1335,81 +1336,74 @@ private int genFirstAdditionalObsErrorSeqs;
   } 
   */
 
-  private void extendModifierTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean observers) {
+  private void extendModifierTestsWithObservers(List<ExecutableSequence> modiferSequencesToExtend, List<TypedOperation> operationsPermutable, boolean observers) {
 	  // Generation first add one of each observer operation to the end of the sequence
-	  for (ExecutableSequence eSeq: sequencesToExtend) {
+	  for (ExecutableSequence eSeq: modiferSequencesToExtend) {
+		  if (FieldBasedGenLog.isLoggingOn()) 
+			  FieldBasedGenLog.logLine("> Sequence to be extended\n" + eSeq.sequence.toCodeString());
 		  
-		  if (!field_based_gen_extend_subsumed && subsumed_sequences.contains(eSeq.sequence)) continue;
-		  
-		  // TODO: If the sequence ends with a method incorrectly deemed modifier continue to the next sequence
-		  // Implement a method to get the last method of a sequence.
-		  List<Type> seqLastStmtTypes = eSeq.sequence.getTypesForLastStatement();
-		  List<Boolean> isLastStmtVarActive = eSeq.getLastStmtActiveVars();
-		  assert seqLastStmtTypes.size() == isLastStmtVarActive.size();
-		  
-		  List<Integer> candidates = new ArrayList<>();
-		  for (int j = 0; j < seqLastStmtTypes.size(); j++) {
-			  if (isLastStmtVarActive.get(j)) 
-				  candidates.add(j);
-		  }
-
-		  if (candidates.isEmpty()) {
+		  if (!field_based_gen_extend_subsumed && subsumed_sequences.contains(eSeq.sequence)) {
 			  if (FieldBasedGenLog.isLoggingOn()) 
-				  FieldBasedGenLog.logLine("> Current sequence cannot be extended\n" + eSeq.sequence.toCodeString());
-			  
+				  FieldBasedGenLog.logLine("> Current sequence is subsumed and will not be extended");
 			  continue;
 		  }
 		  
+		  // TODO: If the sequence ends with a method incorrectly deemed modifier continue to the next sequence
+		  // Implement a method to get the last method of a sequence.
+		  List<Integer> candidates = null;
+		  if (eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED) {
+			  candidates = eSeq.getLastStmtActiveIndexes(); 
+			  assert !candidates.isEmpty(): "The sequence extended extensions, it must have an active index";
+		  }
+		  else {
+			  candidates = new ArrayList<>();
+			  candidates.addAll(eSeq.getLastStmtNonPrimIndexes());
+			  assert !candidates.isEmpty(): "The sequence ended with a modifier, it must have an active index";
+		  }
+
 		  int j = Randomness.randomMember(candidates);
 		  ExecutableSequence neweSeq = eSeq;
+		  List<Type> seqLastStmtTypes = eSeq.sequence.getTypesForLastStatement();
 		  Type observedType = seqLastStmtTypes.get(j);
 		  int observedIndex = j;
 
 		  if (FieldBasedGenLog.isLoggingOn()) {
-			  FieldBasedGenLog.logLine("\n>> First phase modifier sequence to extend:\n " + neweSeq.sequence.toCodeString());
+			  //FieldBasedGenLog.logLine("\n>> First phase modifier sequence to extend:\n " + neweSeq.sequence.toCodeString());
 			  FieldBasedGenLog.logLine("> Type to extend: " + observedType);
 			  FieldBasedGenLog.logLine("> Index of type to extend: " + observedIndex);
 		  }
-				  
+
 		  int currTestNegativeObservers = 0;
 		  int currTestObservers = 0;
 		  RandomPerm.randomPermutation(operationsPermutable);
 		  // Should randomly mix the operations list each time we do this to avoid always the same execution order.
 		  for (TypedOperation operation: operationsPermutable) {
-
-			  if (currTestObservers > field_based_gen_observers_per_test) {
+			  if (currTestObservers > fbg_observers_per_test) {
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> Maximum number of observers exceeded for the current test. Continue with the next test");
-				  
 				  // This sequence is already too large, continue with the next sequence
 				  break;
 			  }
-			  
+			  /*
 			  if (stopSecondPhase()) { 
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
 				  System.out.println("WARNING: Second Phase stopped due to time constraints");
 				  return;
 			  }
-			  
-			  /*
-			  if (FieldBasedGenLog.isLoggingOn()) {
-				  FieldBasedGenLog.logLine("\n> Sequence being extended:\n " + neweSeq.sequence.toCodeString());
-				  FieldBasedGenLog.logLine("> Observed type: " + observedType);
-				  FieldBasedGenLog.logLine("> Observed index: " + observedIndex);
-			  }
-		  
-			  if (FieldBasedGenLog.isLoggingOn())
-				  FieldBasedGenLog.logLine("> Operation: " + operation.toString());
 			  */
+			  
+			  if (FieldBasedGenLog.isLoggingOn()) {
+				  FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
+				  FieldBasedGenLog.logLine("> with operation: " + operation.toString());
+			  }
 
 			  if (!operation.isObserver() && !operation.isFinalObserver()) {
 				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore");
+					  FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore.");
 				  //System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
 				  continue;
 			  }
-
 			  if (operation.isConstructorCall()) {
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
@@ -1435,17 +1429,18 @@ private int genFirstAdditionalObsErrorSeqs;
 			  for (int i = 0; i < inputTypes.size(); i++) {
 				  Type inputType = inputTypes.get(i);
 				  Variable randomVariable;
-				  
+				  /*
 				  if (FieldBasedGenLog.isLoggingOn()) 
 					  FieldBasedGenLog.logLine("> Input type: " + inputType.toString());
-
+					  */
 				  Sequence chosenSeq;
 				  if (i == opIndex) {
 					  chosenSeq = neweSeq.sequence; 
 					  randomVariable = chosenSeq.getVariablesOfLastStatement().get(observedIndex);
-
+					  /*
 					  if (FieldBasedGenLog.isLoggingOn()) 
 						  FieldBasedGenLog.logLine("> Current sequence selected as input: ");
+						  */
 				  }
 				  else {
 					  SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
@@ -1453,23 +1448,19 @@ private int genFirstAdditionalObsErrorSeqs;
 						  error = true;
 						  break;
 					  }
-
 					  chosenSeq = Randomness.randomMember(l);
 					  randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);
-
-					  if (FieldBasedGenLog.isLoggingOn()) 
+					  /*
+					  if (FieldBasedGenLog.isLoggingOn()) {
 						  FieldBasedGenLog.logLine("> Random sequence selected as input: ");
-
-					  if (FieldBasedGenLog.isLoggingOn()) 
 						  FieldBasedGenLog.logLine(chosenSeq.toCodeString());
+					  }
+					  */
 				  }
-
 				  // Now, find values that satisfy the constraint set.
-
 				  if (randomVariable == null) {
 					  throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
 				  }
-
 				  // Fail, if we were unlucky and selected a null or primitive value as the
 				  // receiver for a method call.
 				  if (i == 0
@@ -1477,11 +1468,9 @@ private int genFirstAdditionalObsErrorSeqs;
 						  && !(operation.isStatic())
 						  && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
 								  || randomVariable.getType().isPrimitive())) {
-
 					  error = true;
 					  break;
 				  }
-
 				  variables.add(totStatements + randomVariable.index);
 				  sequences.add(chosenSeq);
 				  totStatements += chosenSeq.size();
@@ -1495,23 +1484,25 @@ private int genFirstAdditionalObsErrorSeqs;
 			  int startIndex = startIndexRef[0];
 			  int endIndex = startIndex + neweSeq.sequence.size()-1;
 			  
+			  /*
 			  if (FieldBasedGenLog.isLoggingOn()) {
 				  //FieldBasedGenLog.logLine("> Concatenation result: \n" + concatSeq.toCodeString());
 				  //FieldBasedGenLog.logLine("> Indexed sequence: \n" + neweSeq.sequence.toCodeString());
 				  FieldBasedGenLog.logLine("> Indexes of the sequence to be extended within the concatenation result: " + startIndex + ", " + endIndex);
 			  }
-			  
+			  */
 			  // Figure out input variables.
 			  List<Variable> inputs = new ArrayList<>();
 			  for (Integer oneinput : isequences.indices) {
 				  Variable v = concatSeq.getVariable(oneinput);
 				  inputs.add(v);
 			  }
-
 			  Sequence newSequence = concatSeq.extend(operation, inputs);
+  			  if (FieldBasedGenLog.isLoggingOn())
+				  FieldBasedGenLog.logLine("> Resulting sequence: \n" + newSequence.toCodeString()); 
 
 			  // Discard if sequence is larger than size limit
-			  if (newSequence.size() > GenInputsAbstract.maxsize) {
+  			  if (newSequence.size() > GenInputsAbstract.maxsize) {
 				  if (Log.isLoggingOn()) {
 					  Log.logLine(
 							  "Sequence discarded because size "
@@ -1519,20 +1510,22 @@ private int genFirstAdditionalObsErrorSeqs;
 									  + " exceeds maximum allowed size "
 									  + GenInputsAbstract.maxsize);
 				  }
+
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Current sequence is too large. Try another one"); 
 				  // This sequence is too large, try another one 
+				  // TODO: This might be inefficient, maybe we should break here
 				  continue;
 			  }
-
+			  
 			  num_sequences_generated++;
-
+			  
 			  if (this.allSequences.contains(newSequence)) {
 				  if (Log.isLoggingOn()) {
 					  Log.logLine("Sequence discarded because the same sequence was previously created.");
 				  }
-
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> The current sequence was generated twice in the second phase \n"); 
-
 				  continue;
 			  }
 
@@ -1685,14 +1678,16 @@ private int genFirstAdditionalObsErrorSeqs;
 private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequencesToExtend, List<TypedOperation> operationsPermutable, boolean extendOnlyPrimitive, boolean observers) {
 	  // Generation first add one of each observer operation to the end of the sequence
 	  for (ExecutableSequence eSeq: sequencesToExtend) {
-
-		  if (!field_based_gen_extend_subsumed && subsumed_sequences.contains(eSeq.sequence)) continue;
+		  if (FieldBasedGenLog.isLoggingOn()) 
+			  FieldBasedGenLog.logLine("> Sequence to be extended\n" + eSeq.sequence.toCodeString());
 		  
-		  ExecutableSequence neweSeq = eSeq;
-		  
-		  if (FieldBasedGenLog.isLoggingOn()) {
-			  FieldBasedGenLog.logLine("\n>> First phase observer sequence to extend:\n " + neweSeq.sequence.toCodeString());
+		  if (!field_based_gen_extend_subsumed && subsumed_sequences.contains(eSeq.sequence)) {
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> Current sequence is subsumed and will not be extended");
+			  continue;
 		  }
+
+		  ExecutableSequence neweSeq = eSeq;
 
 		  // TODO: If the sequence ends with a method incorrectly deemed modifier continue to the next sequence
 		  // Implement a method to get the last method of a sequence.
@@ -1701,14 +1696,19 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 		  RandomPerm.randomPermutation(operationsPermutable);
 		  // Should randomly mix the operations list each time we do this to avoid always the same execution order.
 		  for (TypedOperation operation: operationsPermutable) {
-
-			  if (currTestObservers > field_based_gen_observers_per_test) {
+			  if (currTestObservers > fbg_observers_per_test) {
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> Maximum number of observers exceeded for the current test. Continue with the next test");
 				  // This sequence is already too large, continue with the next sequence
 				  break;
 			  }
 			  
+			  if (FieldBasedGenLog.isLoggingOn()) {
+				  FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
+				  FieldBasedGenLog.logLine("> with operation: " + operation.toString());
+			  }
+			  
+			  /*
 			  if (stopSecondPhase()) { 
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
@@ -1717,40 +1717,30 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 				  
 				  return;
 			  }
+			  */
+			  if (!operation.isObserver() && !operation.isFinalObserver()) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Current operation flagged as a modifier in the second phase, don't use it to extend tests anymore");
+				  //System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
+				  continue;
+			  }
+			  if (operation.isConstructorCall()) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Current operation is a constructor, don't use it to extend tests");
+				  continue;
+			  }
 
 			  int lastIndex = neweSeq.sequence.size() - 1;
-
-			  if (FieldBasedGenLog.isLoggingOn())
-				  FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
-
 			  TypedOperation seqLastStmtOp = neweSeq.sequence.getStatement(lastIndex).getOperation();
 
 			  TypeTuple seqLastStmtInputTypes = seqLastStmtOp.getInputTypes();
 			  TypeTuple seqLastStmtOutputTypes = new TypeTuple();
 
-			  List<Boolean> isLastStmtVarActive = neweSeq.getLastStmtActiveVars();
+			  List<Boolean> isLastStmtVarActive = neweSeq.getLastStmtNonPrimIndexesList();
 			  if (!seqLastStmtOp.getOutputType().isVoid())
 				  seqLastStmtOutputTypes.list.add(seqLastStmtOp.getOutputType());
 			  for (int i = 0; i < seqLastStmtInputTypes.size(); i++)
 				  seqLastStmtOutputTypes.list.add(seqLastStmtInputTypes.get(i));
-
-			  /*
-			  if (FieldBasedGenLog.isLoggingOn())
-				  FieldBasedGenLog.logLine("> Operation: " + operation.toString());
-			  */
-
-			  if (!operation.isObserver() && !operation.isFinalObserver()) {
-				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore");
-				  //System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
-				  continue;
-			  }
-
-			  if (operation.isConstructorCall()) {
-				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("> The current operation is a constructor, don't use it to extend tests");
-				  continue;
-			  }
 
 			  // The first integer of the tuple is the index of the variable chosen from newSeq, 
 			  // the second integer is the corresponding index of a compatible type in operation
@@ -1762,8 +1752,6 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 					  continue;
 			  }
 			  
-			  
-
 			  List<Sequence> sequences = new ArrayList<>();
 			  int totStatements = 0;
 			  List<Integer> variables = new ArrayList<>();
@@ -1831,11 +1819,13 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 			  int startIndex = startIndexRef[0];
 			  int endIndex = startIndex + neweSeq.sequence.size() -1;
 			  
+			  /*
 			  if (FieldBasedGenLog.isLoggingOn()) {
 //				  FieldBasedGenLog.logLine("> Concatenation result: \n" + concatSeq.toCodeString());
 //				  FieldBasedGenLog.logLine("> Indexed sequence: \n" + neweSeq.sequence.toCodeString());
 				  FieldBasedGenLog.logLine("> Indexes of the sequence to be extended within the concatenation result: " + startIndex + ", " + endIndex);
 			  }
+			  */
 			  // Sequence concatSeq = Sequence.concatenate(isequences.sequences);
 
 			  // Figure out input variables.
@@ -1856,7 +1846,11 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 									  + " exceeds maximum allowed size "
 									  + GenInputsAbstract.maxsize);
 				  }
+
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Current sequence is too large. Try another one"); 
 				  // This sequence is too large, try another one 
+				  // TODO: This might be inefficient, maybe we should break here
 				  continue;
 			  }
 

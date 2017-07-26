@@ -838,6 +838,36 @@ public class ExecutableSequence {
   	  }
    }
    
+   
+   private List<Boolean> lastStmtNonPrimIndexesList;
+   private Set<Integer> lastStmtNonPrimIndexes;
+   
+   
+   public List<Boolean> getLastStmtNonPrimIndexesList() {
+	   return lastStmtNonPrimIndexesList;
+   }
+
+   public Set<Integer> getLastStmtNonPrimIndexes() {
+	   return lastStmtNonPrimIndexes;
+   }
+   
+   public List<Integer> getLastStmtActiveIndexes() {
+	   return sequence.getActiveVars(sequence.size()-1);
+   }
+  
+   private void computeLastStmtNonPrimIndexes(List<Object> objs) {
+	   lastStmtNonPrimIndexes = new HashSet<>();
+	   lastStmtNonPrimIndexesList = new ArrayList<>();
+	   for (int i = 0; i < objs.size(); i++) {
+		   if (objs.get(i) == null || !isPrimitive(objs.get(i))) {
+			   lastStmtNonPrimIndexesList.add(true);
+			   lastStmtNonPrimIndexes.add(i);
+		   }
+		   else 
+			   lastStmtNonPrimIndexesList.add(false);
+	   }
+   }
+   
    private List<Object> getObjectsForStatement(int i, Object statementResult, Object[] inputVariables) {
 	   Statement stmt = sequence.getStatement(i);
 	   List<Object> objects = new ArrayList<>();
@@ -1032,6 +1062,7 @@ public class ExecutableSequence {
 	      if (i == sequence.size()-1 && statementResult instanceof NormalExecution) {
 	    	  Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
 	    	  List<Object> objs = getObjectsForStatement(i, retVal, inputVariables);
+	    	  computeLastStmtNonPrimIndexes(objs);
 	    	  // TODO: Optimize by not creating extesions for observers?
 	    	  lastStmtExtAfterExecution = createExtensionsForAllObjects(objs, canonicalizer);
 	    	  enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
@@ -1044,8 +1075,9 @@ public class ExecutableSequence {
 	    		  if (!op.isModifier()/* && !op.isFinalObserver()*/) {
 	    			  // Check if we have to set op to observer or a modifier due to the current execution 
 	    			  if (sequence.size() == 1) {
-	    				  for (int j = 0; j < lastStmtExtAfterExecution.size(); j++) {
-	    					  if (lastStmtExtAfterExecution.get(j) != null && !isPrimitive(objs.get(j))) { 							  
+   						  // There is an object that is not primitive
+	    				  if (!lastStmtNonPrimIndexes.isEmpty()) {
+	    					  for (Integer j: lastStmtNonPrimIndexes) {
 	    						  op.setModifier(j);
 	    						  break;
 	    					  }
@@ -1057,7 +1089,8 @@ public class ExecutableSequence {
 	    				  for (int j = 0; j < lastStmtExtAfterExecution.size(); j++) {
 	    					  assert !(lastStmtExtBeforeExecution.get(j) != null && lastStmtExtAfterExecution.get(j) == null):
 	    						  "Extensions before execution are not null but became null after";
-	    					  if (lastStmtExtAfterExecution.get(j) == null || isPrimitive(objs.get(j)))
+	    					  if (!lastStmtNonPrimIndexes.contains(j))
+	    						  // Object at index j is primitive
 	    						  continue;
 	    					  else {
 	    						  if (!lastStmtExtAfterExecution.get(j).equals(lastStmtExtBeforeExecution.get(j))) {
