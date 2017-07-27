@@ -170,14 +170,11 @@ private int maxsize;
 	}
 	*/
 
-    this.maxsize = GenInputsAbstract.maxsize;
-    /*
-    if (field_based_gen != FieldBasedGenType.DISABLED)
-    	this.maxsize = GenInputsAbstract.maxsize - AbstractGenerator.field_based_gen_reserved_observer_lines;
+    //this.maxsize = GenInputsAbstract.maxsize;
+    if (AbstractGenerator.fbg_observer_detection)
+    	this.maxsize = GenInputsAbstract.maxsize - ((int) (GenInputsAbstract.maxsize * AbstractGenerator.fbg_observer_lines));
     else
     	this.maxsize = GenInputsAbstract.maxsize;
-    	*/
-    
   }
   
   
@@ -252,18 +249,22 @@ private int maxsize;
 
     	try {
     		if (extendedSeq.hasNonExecutedStatements())
-    			eSeq.executeFBSecondPhase(executionVisitor, checkGenerator, canonizer);
+    			//eSeq.executeFBSecondPhase(executionVisitor, checkGenerator, canonizer);
+    			eSeq.executeFB(executionVisitor, checkGenerator, newCanonicalizer, null);
     		else
-    			eSeq.executeFBSecondPhaseNoReexecute(executionVisitor, checkGenerator, canonizer, extendedSeq, startIndex, endIndex);
+    			//eSeq.executeFBSecondPhaseNoReexecute(executionVisitor, checkGenerator, canonizer, extendedSeq, startIndex, endIndex);
+    			eSeq.executeFBNoReExecute(executionVisitor, checkGenerator, newCanonicalizer, null, extendedSeq, startIndex, endIndex);
     	} catch (CanonizationErrorException e) {
     		// TODO Auto-generated catch block
     		e.printStackTrace();
     	}
 
+    	/*
     	if (FieldBasedGenLog.isLoggingOn()) {
     		FieldBasedGenLog.logLine("> Executed current sequence: ");
     		FieldBasedGenLog.logLine(eSeq.sequence.toCodeString());
     	}
+    	*/
 
     	endTime = System.nanoTime();
     	eSeq.exectime = endTime - startTime;

@@ -8,7 +8,6 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -19,7 +18,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import randoop.ExceptionalExecution;
 import randoop.ExecutionOutcome;
 import randoop.ExecutionVisitor;
@@ -43,7 +41,6 @@ import randoop.util.fieldbasedcontrol.CanonizerClass;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
-import randoop.util.fieldbasedcontrol.FieldExtensionsStrings;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.Tuple;
 import randoop.util.heapcanonicalization.CanonicalHeap;
@@ -821,9 +818,7 @@ public class ExecutableSequence {
   }
   
 
-   public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonicalizer canonicalizer, FieldExtensions globalExt) {
-	   executeFB(visitor, gen, true, canonicalizer, globalExt);
-   }
+
   
    private void logOperationType(TypedOperation op) {
   	  if (FieldBasedGenLog.isLoggingOn()) {
@@ -859,12 +854,12 @@ public class ExecutableSequence {
 	   lastStmtNonPrimIndexes = new HashSet<>();
 	   lastStmtNonPrimIndexesList = new ArrayList<>();
 	   for (int i = 0; i < objs.size(); i++) {
-		   if (objs.get(i) == null || !isPrimitive(objs.get(i))) {
+		   if (objs.get(i) == null || isPrimitive(objs.get(i))) 
+			   lastStmtNonPrimIndexesList.add(false);
+		   else { 
 			   lastStmtNonPrimIndexesList.add(true);
 			   lastStmtNonPrimIndexes.add(i);
 		   }
-		   else 
-			   lastStmtNonPrimIndexesList.add(false);
 	   }
    }
    
@@ -1006,6 +1001,8 @@ public class ExecutableSequence {
 	   return res;
    }
 
+   /*
+   // Pass globalExt == null to not enlarge global extensions, i.e., to perform the second phase.
    private void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, 
 		   HeapCanonicalizer canonicalizer, FieldExtensions globalExt) {
 
@@ -1030,7 +1027,7 @@ public class ExecutableSequence {
 	      if (i == sequence.size()-1 && AbstractGenerator.fbg_observer_detection) {
 	    	  op = sequence.getStatement(i).getOperation();
 	    	  logOperationType(op);
-	    	  if (sequence.size() > 1 && (op.notExecuted() || op.isObserver())) {
+	    	  if (sequence.size() > 1 && (!op.isModifier() && !op.isFinalObserver())) {
 	    		  List<Object> objs = getObjectsForStatement(i, null, inputVariables);
 	    		  lastStmtExtBeforeExecution = createExtensionsForAllObjects(objs, canonicalizer);
 	    	  }
@@ -1065,14 +1062,17 @@ public class ExecutableSequence {
 	    	  computeLastStmtNonPrimIndexes(objs);
 	    	  // TODO: Optimize by not creating extesions for observers?
 	    	  lastStmtExtAfterExecution = createExtensionsForAllObjects(objs, canonicalizer);
-	    	  enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
+	    	  
+	    	  // globalExt == null in the second phase, as we do not want to enlarge the global extensions at that point
+	    	  if (globalExt != null)
+	    		  enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
 	    	  
 	    	  if (AbstractGenerator.fbg_observer_detection) {
 	    		  // Update operation types according to their behavior w.r.t. extensions for observer detection.
 	    		  if (enlargesExtensions == ExtendExtensionsResult.EXTENDED) 
 	    			  op.setModifier();
 	    		  // FIXME: Leave final observers for the second phase only?
-	    		  if (!op.isModifier()/* && !op.isFinalObserver()*/) {
+	    		  if (!op.isModifier() && !op.isFinalObserver()) {
 	    			  // Check if we have to set op to observer or a modifier due to the current execution 
 	    			  if (sequence.size() == 1) {
    						  // There is an object that is not primitive
@@ -1102,16 +1102,12 @@ public class ExecutableSequence {
 	    			  } 
 	    		  }
 	    		  // If it's not a modifier, mark the current action as an observer or final observer
-	    		  if (!op.isModifier()) {
-	    			  // FIXME: Leave final observers for the second phase only?
-	    			  /*
+	    		  if (!op.isModifier() && !op.isFinalObserver()) {
+    				  op.observerTimesExecuted++;
 	    			  if (op.observerTimesExecuted > AbstractGenerator.fbg_final_observer_after) 
 	    				  op.setFinalObserver(); 
-	    			  else 
-	    			  */
-	    			  if (!op.isObserver())
+	    			  else if (!op.isObserver())
 	    				  op.setObserver();
-	    			  op.observerTimesExecuted++;
 	    		  } 
 	    		  assert !op.notExecuted(): "Action was executed but flagged as not executed.";
 	    	  }
@@ -1123,6 +1119,162 @@ public class ExecutableSequence {
 	    visitor.visitAfterSequence(this);
 	   	checks = gen.visit(this);
 	  }
+   */
+   
+   
+   public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonicalizer canonicalizer, FieldExtensions globalExt) {
+	   executeFBNoReExecute(visitor, gen, true, canonicalizer, globalExt, null, 0, 0);
+   }
+   
+   public void executeFBNoReExecute(ExecutionVisitor visitor, TestCheckGenerator gen,  
+		   HeapCanonicalizer canonicalizer, FieldExtensions globalExt, 
+		   ExecutableSequence extendedSeq, int startIndex, int endIndex) { 
+	   executeFBNoReExecute(visitor, gen, true, canonicalizer, globalExt, extendedSeq, startIndex, endIndex);
+   }
+   
+   // Pass globalExt == null to not enlarge global extensions, i.e., to perform the second phase.
+   private void executeFBNoReExecute(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, 
+		   HeapCanonicalizer canonicalizer, FieldExtensions globalExt, 
+		   ExecutableSequence extendedSeq, int startIndex, int endIndex) {
+
+	   visitor.initialize(this);
+
+	   // reset execution result values
+	   hasNullInput = false;
+	   executionResults.theList.clear();
+	   int extendedSeqCurrInd = 0;
+	   for (int i = 0; i < sequence.size(); i++) {
+		   if (extendedSeq != null && i >= startIndex && i <= endIndex) {
+			   // These statements were already executed in extendedSeq
+			   executionResults.theList.add(extendedSeq.executionResults.theList.get(extendedSeqCurrInd));
+			   extendedSeqCurrInd++;
+		   }
+		   else	
+			   executionResults.theList.add(NotExecuted.create());
+	   }
+
+	   List<FieldExtensions> lastStmtExtBeforeExecution = null;
+	   List<FieldExtensions> lastStmtExtAfterExecution = null;
+
+	   for (int i = 0; i < this.sequence.size(); i++) {
+
+		   if (extendedSeq != null && i >= startIndex && i <= endIndex) continue;
+
+		   // Find and collect the input values to i-th statement.
+		   List<Variable> inputs = sequence.getInputs(i);
+		   Object[] inputVariables;
+		   inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+		   TypedOperation op = null;
+
+		   if (i == sequence.size()-1 && AbstractGenerator.fbg_observer_detection) {
+			   op = sequence.getStatement(i).getOperation();
+			   
+			   if (op.getName().equals("removeAll")) {
+				   int w = 0;
+				   w++;
+			   }
+			   logOperationType(op);
+			   
+			   if (sequence.size() > 1 && !op.isModifier() && !op.isFinalObserver()) {
+				   List<Object> objs = getObjectsForStatement(i, null, inputVariables);
+				   lastStmtExtBeforeExecution = createExtensionsForAllObjects(objs, canonicalizer);
+			   }
+		   }
+
+		   visitor.visitBeforeStatement(this, i);
+		   executeStatement(sequence, executionResults.theList, i, inputVariables);
+		   // make sure statement executed
+		   ExecutionOutcome statementResult = getResult(i);
+		   if (statementResult instanceof NotExecuted) {
+			   throw new Error("Unexecuted statement in sequence: " + this.toString());
+		   }
+		   // make sure no exception before final statement of sequence
+		   if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
+			   if (ignoreException) {
+				   // this preserves previous behavior, which was simply to return if
+				   // exception occurred
+				   break;
+			   } else {
+				   String msg =
+						   "Encountered exception before final statement of error-revealing test (statement "
+								   + i
+								   + "): ";
+				   throw new Error(
+						   msg + ((ExceptionalExecution) statementResult).getException().getMessage());
+			   }
+		   }
+
+		   if (i == sequence.size()-1 && statementResult instanceof NormalExecution) {
+			   Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
+			   List<Object> objs = getObjectsForStatement(i, retVal, inputVariables);
+			   computeLastStmtNonPrimIndexes(objs);
+			   // TODO: Optimize by not creating extesions for observers?
+			   lastStmtExtAfterExecution = createExtensionsForAllObjects(objs, canonicalizer);
+
+			   // globalExt == null in the second phase, as we do not want to enlarge the global extensions at that point
+			   if (globalExt != null)
+				   enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
+
+			   if (AbstractGenerator.fbg_observer_detection) {
+				   // Update operation types according to their behavior w.r.t. extensions for observer detection.
+				   /* This is not always true due to new objects being generated by the randoop array generation heuristic.
+				   if (enlargesExtensions == ExtendExtensionsResult.EXTENDED) 
+					   op.setModifier();
+					   */
+				   // FIXME: Leave final observers for the second phase only?
+				   if (!op.isModifier() && !op.isFinalObserver()) {
+					   // Check if we have to set op to observer or a modifier due to the current execution 
+					   if (sequence.size() == 1) {
+						   // There is an object that is not primitive
+						   if (!lastStmtNonPrimIndexes.isEmpty()) {
+							   for (Integer j: lastStmtNonPrimIndexes) {
+								   op.setModifier(j);
+								   break;
+							   }
+						   }
+					   }
+					   else { //sequence.size() > 1 
+						   assert lastStmtExtBeforeExecution.size() == lastStmtExtBeforeExecution.size(): 
+							   "Extensions before and after must be of the same size";
+						   for (int j = 0; j < lastStmtExtAfterExecution.size(); j++) {
+							   assert !(lastStmtExtBeforeExecution.get(j) != null && lastStmtExtAfterExecution.get(j) == null):
+								   "Extensions before execution are not null but became null after";
+							   if (!lastStmtNonPrimIndexes.contains(j))
+								   // Object at index j is primitive
+								   continue;
+							   else {
+								   if (!lastStmtExtAfterExecution.get(j).equals(lastStmtExtBeforeExecution.get(j))) {
+									   op.setModifier(j);
+									   break;
+								   }
+							   }
+						   }
+					   } 
+				   }
+				   // If it's not a modifier, mark the current action as an observer or final observer
+				   if (!op.isModifier() && !op.isFinalObserver()) {
+					   op.observerTimesExecuted++;
+					   if (op.observerTimesExecuted > AbstractGenerator.fbg_final_observer_after) 
+						   op.setFinalObserver(); 
+					   else /*if (!op.isObserver())*/
+						   op.setObserver();
+				   } 
+				   assert !op.notExecuted(): "Action was executed but flagged as not executed.";
+			   }
+
+		   }
+
+		   visitor.visitAfterStatement(this, i);
+	   }
+	   visitor.visitAfterSequence(this);
+	   checks = gen.visit(this);
+   } 
+   
+   
+   
+   
+   
+   
   
   
   public TypedOperation getLastStmtOperation() {
