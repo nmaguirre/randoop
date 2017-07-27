@@ -31,6 +31,7 @@ import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
+import randoop.util.heapcanonicalization.candidatevectors.BugInCandidateVectorsCanonicalization;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsFieldExtensions;
@@ -81,17 +82,27 @@ public abstract class AbstractGenerator {
 	}
 	
 	
-	public void initNewCanonicalizerForVectorization(Collection<String> classNames, int maxObjects) {
-		store = new CanonicalStore(classNames);
+	public void initNewCanonicalizerForVectorization(Collection<String> classNames, int maxObjects, int fieldDistance) {
+		store = new CanonicalStore(classNames, fieldDistance);
 		newCanonicalizer = new HeapCanonicalizer(store, maxObjects);
 		// Initialize the candidate vector generator with the canonical classes that were mined from the code,
 		// before the generation starts.
-		candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		if (rem_unused_in_cand_vect) {                                                                                                                                                                           
+			if (classNames.size() != 1)                                                                                                                                                                          
+				throw new BugInCandidateVectorsCanonicalization("Only one testclass can be used for generation in this randoop version.");                                                                       
+			for (String s: classNames)                                                                                                                                                                           
+				candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames(), s, store);                                                                                                   
+		}                                                                                                                                                                                                        
+		else                                                                                                                                                                                                     
+			candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames()); 
+
 		CanonicalHeap heap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = AbstractGenerator.candVectGenerator.makeCandidateVectorsHeader(heap);
 		AbstractGenerator.candVectExtensions = new CandidateVectorsFieldExtensions(header);
 		CandidateVectorsWriter.logLine(header.toString());
 	}
+
+
 	
 	
   // The set of all primitive values seen during generation and execution
@@ -153,6 +164,9 @@ public abstract class AbstractGenerator {
   @Option("Do not canonicalize structures having more than this number of objects of a single reference type.")
   public static int fbg_max_objects = Integer.MAX_VALUE;
   
+  @Option("Hacky way of removing unused objects in candidate vectors for data structure test generation")
+  public static boolean rem_unused_in_cand_vect = true;
+  
   @Option("Only canonicalize up to this number of elements in arrays.")
   public static int fbg_max_array_objs = 5000;
 
@@ -189,13 +203,13 @@ public abstract class AbstractGenerator {
   public static int field_based_gen_negative_observers_per_test = 0; 
   
   @Option("Max number of observers to be added to each test.")
-  public static int fbg_observers_per_test = 50; 
+  public static int fbg_observers_per_test = 30; 
   
   @Option("Percentage of lines reserved for observers when --fbg-observer-detection is true, from the max number of lines given by the --maxsize parameter.")
-  public static double fbg_observer_lines = 0.25;//200; 
+  public static double fbg_observer_lines = 0.40;//200; 
   
   @Option("Max times an observer must be used in tests to flag it final.")
-  public static int fbg_final_observer_after = 20;
+  public static int fbg_final_observer_after = 30;
 
   @Option("Max times a modifier can be executed in a test not extending the extensions.")
   public static int field_based_gen_non_extending_modifiers_ratio = 1000;
@@ -215,7 +229,7 @@ public abstract class AbstractGenerator {
   public static int max_discarded_tests = 100000;
 
   @Option("Second phase TO.")
-  public static int field_based_gen_second_phase_timeout_millis = 300000;
+  public static int fbg_extend_with_observers_TO = 90000;
  
   @Option("Count the number of different objects generated by tests. For the field based approach it counts the number of "
   		+ "objects generated during the first phase (it doesn't continue with the second phase.")
@@ -502,7 +516,7 @@ private int genFirstAdditionalObsErrorSeqs;
     assert operations != null;
 
     this.maxTimeMillis = timeMillis;
-    this.secondPhaseMaxTimeMillis = maxTimeMillis + field_based_gen_second_phase_timeout_millis; 
+    this.secondPhaseMaxTimeMillis = maxTimeMillis + fbg_extend_with_observers_TO; 
     this.maxGeneratedSequences = maxGeneratedSequences;
     this.maxOutputSequences = maxOutSequences;
     this.operations = operations;
@@ -1390,14 +1404,12 @@ private int genFirstAdditionalObsErrorSeqs;
 				  // This sequence is already too large, continue with the next sequence
 				  break;
 			  }
-			  /*
 			  if (stopSecondPhase()) { 
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
 				  System.out.println("WARNING: Second Phase stopped due to time constraints");
 				  return;
 			  }
-			  */
 			  
 			  if (FieldBasedGenLog.isLoggingOn()) {
 				  FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
@@ -1521,7 +1533,7 @@ private int genFirstAdditionalObsErrorSeqs;
 					  FieldBasedGenLog.logLine("> Current sequence is too large. Try another one"); 
 				  // This sequence is too large, try another one 
 				  // TODO: This might be inefficient, maybe we should break here
-				  continue;
+				  break;
 			  }
 			  
 			  num_sequences_generated++;
@@ -1732,8 +1744,6 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 				  FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
 				  FieldBasedGenLog.logLine("> with operation: " + operation.toString());
 			  }
-			  
-			  /*
 			  if (stopSecondPhase()) { 
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
@@ -1742,7 +1752,6 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 				  
 				  return;
 			  }
-			  */
 			  if (!operation.isObserver() && !operation.isFinalObserver()) {
 				  if (FieldBasedGenLog.isLoggingOn())
 					  FieldBasedGenLog.logLine("> Current operation flagged as a modifier in the second phase, don't use it to extend tests anymore");
@@ -1876,7 +1885,7 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 					  FieldBasedGenLog.logLine("> Current sequence is too large. Try another one"); 
 				  // This sequence is too large, try another one 
 				  // TODO: This might be inefficient, maybe we should break here
-				  continue;
+				  break;
 			  }
 
 			  if (FieldBasedGenLog.isLoggingOn())

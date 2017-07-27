@@ -83,7 +83,12 @@ public class CandidateVectorGenerator {
 	
 	private void addCandidateVectorFields(CanonicalHeap heap, CanonicalClass clazz, int objNum, CandidateVector<String> header) {
 		for (CanonicalField fld: clazz.getCanonicalFields()) 
-			header.addComponent(clazz.getName() + "->o" + objNum + "." + fld.getName());
+			if (!fld.getName().equals("serialVersionUID"))
+				header.addComponent(clazz.getName() + "->o" + objNum + "." + fld.getName());
+			else 
+			    if (CanonicalizerLog.isLoggingOn())
+			    	CanonicalizerLog.logLine("CANONIZER INFO: Skipping field: " + fld.getName());
+				
 	}
 
 	private void addCandidateVectorArrayFields(CanonicalHeap heap, CanonicalClass clazz, int objNum, CandidateVector<String> header) {
@@ -123,9 +128,12 @@ public class CandidateVectorGenerator {
 		if (canonicalClass.isArray())
 			for (int i = 0; i < heap.getMaxObjects(); i++)
 				v.addComponent(NULL_INT_REPRESENTATION);
-		else
-			for (int i = 0; i < canonicalClass.getCanonicalFields().size(); i++)
-				v.addComponent(NULL_INT_REPRESENTATION);
+		else {
+			for (CanonicalField fld: canonicalClass.getCanonicalFields()) {
+				if (!fld.getName().equals("serialVersionUID"))
+					v.addComponent(NULL_INT_REPRESENTATION);
+			}
+		}
 	}
 
 	private void addToCandidateVector(CanonicalObject obj, CanonicalHeap heap, CandidateVector<Integer> v) {
@@ -136,6 +144,9 @@ public class CandidateVectorGenerator {
 		
 		int fieldNumber = 0;
 		for (CanonicalField fld: getFieldsRes.getValue()) {
+			if (fld.getName().equals("serialVersionUID")) 
+				continue;
+
 			Object value = fld.getValue(obj);
 			Map.Entry<CanonicalizationResult, CanonicalObject> canRes = heap.getCanonicalObject(value);
 			assert canRes.getKey() == CanonicalizationResult.OK : 

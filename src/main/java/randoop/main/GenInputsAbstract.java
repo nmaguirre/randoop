@@ -615,7 +615,7 @@ public abstract class GenInputsAbstract extends CommandHandler {
   public static FileWriter fbg_log = null;
   
   @Option("Disable contract checking during field based generation (very expensive when tests get large)")
-  public static boolean field_based_gen_disable_contracts = true;
+  public static boolean fbg_disable_contracts = true;
   
   @Option("<filename> Name of a file to which save the generated candidate vectors")
   public static FileWriter cand_vect_file = null;

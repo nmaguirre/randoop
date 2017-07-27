@@ -97,7 +97,7 @@ public class OperationModel {
     classLiteralMap = new MultiMap<>();
     annotatedTestValues = new LinkedHashSet<>();
     contracts = new ContractSet();
-    if (!GenInputsAbstract.field_based_gen_disable_contracts) {
+    if (!GenInputsAbstract.fbg_disable_contracts) {
 		contracts.add(EqualsReflexive.getInstance());
 		contracts.add(EqualsSymmetric.getInstance());
 		contracts.add(EqualsHashcode.getInstance());
