@@ -89,7 +89,7 @@ public class SequenceWithExceptionalExecutionTest {
                 new ContractSet(),
                 new MultiMap<Type, TypedOperation>(),
                 new HashSet<TypedOperation>());
-    es.executeFB(new DummyVisitor(), gen);
+    es.execute(new DummyVisitor(), gen);
 
     assertFalse("sequence should not have unexecuted statements", es.hasNonExecutedStatements());
     assertFalse("sequence should not have failure", es.hasFailure());

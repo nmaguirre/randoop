@@ -180,7 +180,7 @@ public class SequenceTests {
         sequenceLines, Arrays.asList(sequence.toParsableString().split(Globals.lineSep)), testId);
 
     ExecutableSequence ds = new ExecutableSequence(sequence);
-    ds.executeFB(new DummyVisitor(), testGen);
+    ds.execute(new DummyVisitor(), testGen);
     checkListsEqual(expectedCode, Arrays.asList(ds.toCodeString().split(Globals.lineSep)), testId);
   }
 

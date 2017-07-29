@@ -41,7 +41,7 @@ public class VectorizationUtils {
 		// Canonicalize each object in the collection
 		for (Object obj : collection) {
 			// Canonize the current obj
-			Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonize(obj);
+			Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 			if (canonRes.getKey() != CanonicalizationResult.OK) {
 				// El objeto es mas grande de lo que se permite almacenar en el vector candidato
 				System.out.println("Canonization error: Object too large.");

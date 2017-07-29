@@ -20,15 +20,17 @@ public class FieldExtensionsStringsCollector implements FieldExtensionsCollector
 	}
 	
 	// pre: object cannot be null or primitive.
+	/*
 	private String objectRepresentation(CanonicalObject object) {
 		return object.getCanonicalClass().getName() + object.getIndex();
 	}
+	*/
 
 	@Override
 	// pre: currObj cannot be null or primitive.
 	public CanonicalizationResult collect(CanonicalField currField, CanonicalObject currObj, CanonicalObject canonicalValue) {
 		String fieldStr = currObj.getCanonicalClass().getName() + "." + currField.getName();
-		String objStr = objectRepresentation(currObj); 
+		String objStr = currObj.stringRepresentation(); 
 		
 		if (!collectPrimitives() && (canonicalValue.isNull() || canonicalValue.isPrimitive()))
 			return CanonicalizationResult.OK;
@@ -53,7 +55,7 @@ public class FieldExtensionsStringsCollector implements FieldExtensionsCollector
 			valueStr = val.toString();
 		}
 		else
-			valueStr = objectRepresentation(canonicalValue);
+			valueStr = canonicalValue.stringRepresentation();
 		
 		extensions.addPairToField(fieldStr, objStr, valueStr);
 		

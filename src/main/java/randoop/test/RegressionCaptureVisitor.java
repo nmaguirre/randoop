@@ -122,12 +122,6 @@ public final class RegressionCaptureVisitor implements TestCheckGenerator {
               // System.out.printf ("considering String check for seq %08X\n",
               // s.seq_id());
               String str = (String) o;
-              // Don't create assertions over strings that look like raw object
-              // references.
-              if (Value.looksLikeObjectToString(str)) {
-                // System.out.printf ("ignoring Object.toString obs %s%n", str);
-                continue;
-              }
               // Don't create assertions over strings that are really
               // long, as this can cause the generate unit tests to be
               // unreadable and/or non-compilable due to Java
@@ -138,6 +132,15 @@ public final class RegressionCaptureVisitor implements TestCheckGenerator {
                       "Ignoring a string that exceeds the maximum length of "
                           + GenInputsAbstract.string_maxlen);
                 }
+                continue;
+              }
+              // Don't create assertions over strings that look like raw object
+              // references.
+              // PABLO: This was above the previous if. But if the string is too long is not 
+              // a very good idea to analyze it to see if looksLikeObjectToString, becuase this 
+              // is too runtime heavy.
+              if (Value.looksLikeObjectToString(str)) {
+                // System.out.printf ("ignoring Object.toString obs %s%n", str);
                 continue;
               }
             }

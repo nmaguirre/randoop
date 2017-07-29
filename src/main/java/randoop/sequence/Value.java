@@ -163,6 +163,10 @@ public class Value {
     if (s == null) {
       throw new IllegalArgumentException("s is null");
     }
+    
+    // PABLO: Don't cache too large strings.
+    if (s.length() > GenInputsAbstract.string_maxlen)
+    	return false;
 
     // Optimization: return cached value if available.
     Boolean b = stringLengthOKCached.get(s);

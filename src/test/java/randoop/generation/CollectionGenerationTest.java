@@ -72,7 +72,7 @@ public class CollectionGenerationTest {
     assertThat("should only be four output types", outputTypeSet.size(), is(equalTo(4)));
 
     ExecutableSequence es = new ExecutableSequence(sequence);
-    es.executeFB(new DummyVisitor(), new DummyCheckGenerator());
+    es.execute(new DummyVisitor(), new DummyCheckGenerator());
   }
 
   @Test

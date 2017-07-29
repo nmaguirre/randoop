@@ -190,8 +190,9 @@ private int maxsize;
     for (Sequence s : componentManager.getAllPrimitiveSequences()) {
       ExecutableSequence es = new ExecutableSequence(s);
 
-      if (field_based_gen == FieldBasedGenType.DISABLED)
+      //if (field_based_gen == FieldBasedGenType.DISABLED)
     	 es.execute(new DummyVisitor(), new DummyCheckGenerator()); 
+    	 /*
       else {
 		  try {
 			es.executeFB(new DummyVisitor(), new DummyCheckGenerator(), null);
@@ -201,6 +202,7 @@ private int maxsize;
 		  }
       }
     	  
+
       /*
       if (field_based_gen != FieldBasedGenType.DISABLED) {
 		  try {
@@ -277,25 +279,11 @@ private int maxsize;
 
 	}
   
+    /*
     @Override
   public void executeExtendedSequence(ExecutableSequence eSeq) {
 
     long startTime = System.nanoTime();
-
-    /*
-    if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
-      componentManager.clearGeneratedSequences();
-    }
-
-    if (eSeq == null) {
-      return null;
-    }
-
-    if (GenInputsAbstract.dontexecute) {
-      this.componentManager.addGeneratedSequence(eSeq.sequence);
-      return null;
-    }
-    */
 
     setCurrentSequence(eSeq.sequence);
 
@@ -326,7 +314,7 @@ private int maxsize;
     eSeq.gentime = gentime;
     
   }
-
+*/
 
     
 	// Use the new canonizer to generate a candidate vector for receiver object 
@@ -583,11 +571,21 @@ private int maxsize;
         }
         seq.sequence.clearActiveFlag(i);
 
+        /* PABLO: Original randoop behaviour: bad because it analyses very long strings.
         boolean looksLikeObjToString =
             (runtimeValue instanceof String)
                 && Value.looksLikeObjectToString((String) runtimeValue);
         boolean tooLongString =
             (runtimeValue instanceof String) && !Value.stringLengthOK((String) runtimeValue);
+            */
+        
+        boolean tooLongString =
+            (runtimeValue instanceof String) && !Value.stringLengthOK((String) runtimeValue);
+        boolean looksLikeObjToString =  
+            (runtimeValue instanceof String)
+                && ((tooLongString) ? false : Value.looksLikeObjectToString((String) runtimeValue));
+       
+        
         if (runtimeValue instanceof Double && Double.isNaN((double) runtimeValue)) {
           runtimeValue = Double.NaN; // canonicalize NaN value
         }

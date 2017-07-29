@@ -114,7 +114,7 @@ public class ExceptionPredicateTest {
 
     seq = seq.extend(conOp, inputVariables);
     ExecutableSequence s = new ExecutableSequence(seq);
-    s.executeFB(new DummyVisitor(), new DummyCheckGenerator());
+    s.execute(new DummyVisitor(), new DummyCheckGenerator());
 
     assertFalse("null input NPE is not error", isError.test(exec, s));
     assertFalse("null input NPE is not invalid", isInvalid.test(exec, s));

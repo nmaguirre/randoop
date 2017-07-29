@@ -9,13 +9,10 @@ import org.junit.Test;
 public class JChartNewTests {
 
 	
-	
-	
 	@Test
     public void test1113() throws Throwable {
-		System.out.println((int)' ');
-		System.out.println((int)'#');
-		
+		java.lang.String[] str_array3 = org.apache.commons.lang3.StringUtils.substringsBetween("-141041041", "100a10a100a1a1\uFFFD100a10a100a1a1\u0000100a10a100a1a1", "\uFFFD\u0000");
+		System.out.println(str_array3);
 	}
 	
 	     @Test

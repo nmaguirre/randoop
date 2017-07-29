@@ -774,7 +774,7 @@ private int genFirstAdditionalObsErrorSeqs;
 	  }
 
    	  if (!count_objects) {
-   		  eSeq.clearExtensions();
+   		  //eSeq.clearExtensions();
    		  eSeq.clearExecutionResults();
    	  }
      
@@ -1359,6 +1359,13 @@ private int genFirstAdditionalObsErrorSeqs;
 	  for (ExecutableSequence eSeq: modiferSequencesToExtend) {
 		  assert eSeq.getLastStmtOperation().isModifier(): "We only extend modifiers in this method";
 		  
+		  if (stopSecondPhase()) { 
+			  if (FieldBasedGenLog.isLoggingOn())
+				  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
+			  System.out.println("WARNING: Second Phase stopped due to time constraints");
+			  return;
+		  }
+		  
 		  if (FieldBasedGenLog.isLoggingOn()) 
 			  FieldBasedGenLog.logLine("> Sequence to be extended\n" + eSeq.sequence.toCodeString());
 		  
@@ -1378,7 +1385,14 @@ private int genFirstAdditionalObsErrorSeqs;
 		  else {
 			  candidates = new ArrayList<>();
 			  candidates.addAll(eSeq.getLastStmtNonPrimIndexes());
-			  assert !candidates.isEmpty(): "The sequence ended with a modifier, it must have an active index";
+			  // It might be that the only non primitive object in the sequence is null. 
+			  if (candidates.isEmpty()) {
+				  // Try to extend the sequence as an observer sequence.
+				  observerRegressionSeqs.add(eSeq);
+				  if (FieldBasedGenLog.isLoggingOn()) 
+					  FieldBasedGenLog.logLine("> Current sequence non primitives are null, there is nothing to observe.");
+				  continue;
+			  }
 		  }
 
 		  int j = Randomness.randomMember(candidates);
@@ -1403,12 +1417,6 @@ private int genFirstAdditionalObsErrorSeqs;
 					  FieldBasedGenLog.logLine("> Maximum number of observers exceeded for the current test. Continue with the next test");
 				  // This sequence is already too large, continue with the next sequence
 				  break;
-			  }
-			  if (stopSecondPhase()) { 
-				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
-				  System.out.println("WARNING: Second Phase stopped due to time constraints");
-				  return;
 			  }
 			  
 			  if (FieldBasedGenLog.isLoggingOn()) {
@@ -1689,10 +1697,10 @@ private int genFirstAdditionalObsErrorSeqs;
 				  eSeq2ndPhase.clearExecutionResults();
 			  }
 
-			  eSeq2ndPhase.clearExtensions();
+			  //eSeq2ndPhase.clearExtensions();
 		  }
 		  
-		  neweSeq.clearExtensions();
+		  //neweSeq.clearExtensions();
 		  neweSeq.clearExecutionResults();
 		  if (!neweSeq.equals(eSeq)) {
 			  if (FieldBasedGenLog.isLoggingOn())
@@ -1715,6 +1723,15 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 //			  " is " + eSeq.getLastStmtOperation().fbExecState;
 		  assert !eSeq.getLastStmtOperation().notExecuted(): "Operation must have been executed at this point";
 		  
+		  if (stopSecondPhase()) { 
+			  if (FieldBasedGenLog.isLoggingOn())
+				  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
+
+			  System.out.println("WARNING: Second Phase stopped due to time constraints");
+			  
+			  return;
+		  }
+
 		  if (FieldBasedGenLog.isLoggingOn()) 
 			  FieldBasedGenLog.logLine("> Sequence to be extended\n" + eSeq.sequence.toCodeString());
 		  
@@ -1743,14 +1760,6 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 			  if (FieldBasedGenLog.isLoggingOn()) {
 				  FieldBasedGenLog.logLine("\n> Starting an attempt to extend sequence:\n " + neweSeq.sequence.toCodeString());
 				  FieldBasedGenLog.logLine("> with operation: " + operation.toString());
-			  }
-			  if (stopSecondPhase()) { 
-				  if (FieldBasedGenLog.isLoggingOn())
-					  FieldBasedGenLog.logLine("\n> WARNING: Second Phase stopped due to time constraints");
-
-				  System.out.println("WARNING: Second Phase stopped due to time constraints");
-				  
-				  return;
 			  }
 			  if (!operation.isObserver() && !operation.isFinalObserver()) {
 				  if (FieldBasedGenLog.isLoggingOn())
@@ -2022,10 +2031,10 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 				  eSeq2ndPhase.clearExecutionResults();
 			  }
 			  
-			  eSeq2ndPhase.clearExtensions();
+			  //eSeq2ndPhase.clearExtensions();
 		  }
 
-		  neweSeq.clearExtensions();
+		  //neweSeq.clearExtensions();
 		  neweSeq.clearExecutionResults();
 		  if (!neweSeq.equals(eSeq)) {
 			  if (FieldBasedGenLog.isLoggingOn())
@@ -2084,11 +2093,11 @@ private void processLastSequenceStatement(ExecutableSequence seq) {
 			  Log.logLine("Making index " + i + " inactive (value is a primitive)");
 		  }
 
-		  boolean looksLikeObjToString =
-				  (runtimeValue instanceof String)
-				  && Value.looksLikeObjectToString((String) runtimeValue);
 		  boolean tooLongString =
 				  (runtimeValue instanceof String) && !Value.stringLengthOK((String) runtimeValue);
+		  boolean looksLikeObjToString =  
+			  (runtimeValue instanceof String)
+			  && ((tooLongString) ? false : Value.looksLikeObjectToString((String) runtimeValue));
 		  if (runtimeValue instanceof Double && Double.isNaN((double) runtimeValue)) {
 			  runtimeValue = Double.NaN; // canonicalize NaN value
 		  }

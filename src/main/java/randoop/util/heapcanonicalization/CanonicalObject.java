@@ -104,5 +104,14 @@ public class CanonicalObject {
 			return "[type=" + clazz.getName() + ",index=" + index + "]";
 	}
 	
+	// pre: object cannot be null or primitive.
+	public String stringRepresentation() {
+		if (isPrimitive())
+			return getObject().toString();
+		else
+			return getCanonicalClass().getName() + ":" + getIndex();
+			//return getCanonicalClass().getID() + ":" + getIndex();
+	}
+	
 	
 }

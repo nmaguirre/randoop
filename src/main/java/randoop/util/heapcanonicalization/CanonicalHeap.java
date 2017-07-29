@@ -27,8 +27,6 @@ public class CanonicalHeap {
 		objects = new LinkedHashMap<>();
 		/*
 		if (CandidateVectorsWriter.isEnabled()) {
-			// Candidate vectors need heaps with the shape of the classes provided
-			// FIXME: Maybe not?
 			for (String className: store.getAllCanonicalClassnames()) {
 				CanonicalClass canonicalClass = store.getCanonicalClass(className);
 				if (!canonicalClass.isPrimitive())
@@ -89,7 +87,10 @@ public class CanonicalHeap {
 	}
 	
 	public List<CanonicalObject> getObjectsForClass(CanonicalClass clazz) {
-		return objects.get(clazz); 
+		List<CanonicalObject> res = objects.get(clazz);
+		if (res == null)
+			return new LinkedList<>();
+		return res;
 	}
 	
 	public int getMaxObjects() {

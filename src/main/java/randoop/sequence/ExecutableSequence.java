@@ -128,8 +128,10 @@ public class ExecutableSequence {
   public boolean endsWithObserverReturningNewValue;
   public boolean endsWithObserver;
 	
+  /*
   private List<FieldExtensionsIndexes> lastStmtFormerExt;
   private List<FieldExtensionsIndexes> lastStmtNextExt;
+  */
 
 
  /** The underlying sequence. */
@@ -366,6 +368,7 @@ public class ExecutableSequence {
   }
   
 
+  /*
   public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen) {
 	  try {
 		  executeFB(visitor, gen, true, null, false);
@@ -374,7 +377,7 @@ public class ExecutableSequence {
 		  e.printStackTrace();
 	  }
   }
-
+	*/
   
   /**
    * Executes sequence, stopping on exceptions.
@@ -385,11 +388,14 @@ public class ExecutableSequence {
    *          the check generator for tests
  * @throws CanonizationErrorException 
    */
+  /*
   public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 	  executeFB(visitor, gen, true, canonizer, false);
   }
+  */
   
   
+  /*
    public void executeFBSecondPhase(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 	  executeFB(visitor, gen, true, canonizer, true);
   }
@@ -575,6 +581,7 @@ public class ExecutableSequence {
 		   	checks = gen.visit(this);
 		
 	}
+	*/
 
    
    public Object getLastStmtReceiverObject() {
@@ -640,6 +647,7 @@ public class ExecutableSequence {
  * @param canonizer 
  * @throws CanonizationErrorException 
    */
+   /*
   private void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, boolean ignoreException, HeapCanonizerRuntimeEfficient canonizer, boolean secondPhase)  throws CanonizationErrorException {
 
     visitor.initialize(this);
@@ -816,6 +824,7 @@ public class ExecutableSequence {
    	checks = gen.visit(this);
   
   }
+  */
   
 
 
@@ -861,6 +870,8 @@ public class ExecutableSequence {
 			   lastStmtNonPrimIndexes.add(i);
 		   }
 	   }
+	   if (FieldBasedGenLog.isLoggingOn())
+		   FieldBasedGenLog.logLine("> Non primitive indexes: " + lastStmtNonPrimIndexes);
    }
    
    private List<Object> getObjectsForStatement(int i, Object statementResult, Object[] inputVariables) {
@@ -1281,10 +1292,12 @@ public class ExecutableSequence {
 	  return sequence.getStatement(sequence.size() - 1).getOperation();
   } 
 
+  /*
   public void clearExtensions() {
 	 lastStmtFormerExt = null;
 	 lastStmtNextExt = null;
   }
+  */
   
    public void clearExecutionResults() {
 	 executionResults.theList.clear();
@@ -1484,10 +1497,13 @@ public class ExecutableSequence {
 	  
    }
    
+   /*
    public boolean lastStatementVarIsPrimitive(int varIndex) {
 	   return lastStmtNextExt.get(varIndex) == null;
    }
+   */
 
+   /*
    private List<Boolean> lastStmtActiveVars;
 
    public List<Boolean> getLastStmtActiveVars() { 
@@ -1499,8 +1515,10 @@ public class ExecutableSequence {
 	   for (FieldExtensionsIndexes fe: lastStmtNextExt)
 		   lastStmtActiveVars.add(fe != null);
    }
+   */
    
    
+   /*
    public void tryToEnlargeExtensions(HeapCanonizerRuntimeEfficient canonizer) throws CanonizationErrorException {
 	   if (lastStmtNextExt == null) {
 		   enlargesExtensions = ExtendExtensionsResult.LIMITS_EXCEEDED;
@@ -1552,6 +1570,7 @@ public class ExecutableSequence {
 		   getLastStmtOperation().timesExecutedInExtendingModifiers++;
 
    }
+   */
    
    
    public void enlargeExtensions(HeapCanonicalizer candVectCanonicalizer) {
