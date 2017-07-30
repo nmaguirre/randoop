@@ -121,16 +121,17 @@ public class CanonicalHeap {
 				CanonicalizerLog.logLine("Starting a mutation attempt:");
 			}
 			// 1- Pick a class whose objects are mutation candidates.
-			List<CanonicalClass> classes = new ArrayList<>(); 
+			List<CanonicalClass> candidateClasses = new ArrayList<>(); 
 			for (CanonicalClass c: objects.keySet()) {
-				if (!c.isObject() && !c.isPrimitive() && !c.getClass().equals(DummyHeapRoot.class))
-					classes.add(c);
+				if (!c.isObject() && !c.isPrimitive() && store.isClassFromCode(c) &&
+						!c.getName().equals(DummyHeapRoot.class.getName()))
+					candidateClasses.add(c);
 			}
-			assert !classes.isEmpty(): "There cannot be no non-primitive classes";
-			int rdmClassInd = Randomness.nextRandomInt(classes.size());
-			CanonicalClass rdmClass = classes.get(rdmClassInd);
+			assert !candidateClasses.isEmpty(): "There cannot be no non-primitive classes";
+			int rdmClassInd = Randomness.nextRandomInt(candidateClasses.size());
+			CanonicalClass rdmClass = candidateClasses.get(rdmClassInd);
 			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Randomly picked a class:" + rdmClass.toString());
+				CanonicalizerLog.logLine("Randomly picked a class:" + rdmClass.getName());
 
 			// 2- Pick an object of the selected class.
 			List<CanonicalObject> objs = objects.get(rdmClass);
@@ -147,9 +148,21 @@ public class CanonicalHeap {
 				CanonicalizerLog.logLine("Randomly picked an object:" + toMutate.stringRepresentation());
 			
 			// 3- Pick the field to be mutated.
-			List<CanonicalField> flds = rdmClass.getCanonicalFields();
-			int rdmFldInd = Randomness.nextRandomInt(flds.size());
-			CanonicalField rdmFld = flds.get(rdmFldInd);			
+			List<CanonicalField> candidateFields = new ArrayList<>(); 
+			for (CanonicalField fld: rdmClass.getCanonicalFields()) {
+				CanonicalClass fType = fld.getCanonicalType();
+				if (!fType.isObject() && !fType.isPrimitive() && store.isClassFromCode(fType))
+					candidateFields.add(fld);
+			}			
+			if (candidateFields.isEmpty()) {
+				// No objects of the selected class available to mutate.
+				retriesLeft--;
+				if (CanonicalizerLog.isLoggingOn())
+					CanonicalizerLog.logLine("No fields available to mutate. Retrying...");
+				continue;
+			}
+			int rdmFldInd = Randomness.nextRandomInt(candidateFields.size());
+			CanonicalField rdmFld = candidateFields.get(rdmFldInd);			
 			if (CanonicalizerLog.isLoggingOn())
 				CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
 
@@ -183,14 +196,14 @@ public class CanonicalHeap {
 			int rdmValInd = Randomness.nextRandomInt(candidateValues.size());
 			CanonicalObject rdmValue = candidateValues.get(rdmValInd);
 			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Randomly picked a value for the field:" + rdmValue.stringRepresentation());		
+				CanonicalizerLog.logLine("Randomly picked a value for the field: " + rdmValue.stringRepresentation());		
 
 			// 5- set toMutate.rdmFld = rdmValue
 			rdmFld.setValue(toMutate, rdmValue);
 			succeeded = true;
 			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Mutation successful. " + toMutate.stringRepresentation() + "." + 
-						rdmFld.stringRepresentation(toMutate) + " = " + rdmValue.stringRepresentation());
+				CanonicalizerLog.logLine("Mutation successful. Field " + rdmFld.stringRepresentation(toMutate) + " of object " + 
+						toMutate.stringRepresentation() + " set to " + rdmValue.stringRepresentation());
 		}
 
 		if (!succeeded)

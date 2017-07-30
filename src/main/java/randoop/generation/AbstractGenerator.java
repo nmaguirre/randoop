@@ -103,10 +103,10 @@ public abstract class AbstractGenerator {
 			if (classNames.size() != 1)                                                                                                                                                                          
 				throw new BugInCandidateVectorsCanonicalization("Only one testclass can be used for generation in this randoop version.");                                                                       
 			for (String s: classNames)                                                                                                                                                                           
-				candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames(), s, store);                                                                                                   
+				candVectGenerator = new CandidateVectorGenerator(store, s);                                                                                                   
 		}                                                                                                                                                                                                        
 		else                                                                                                                                                                                                     
-			candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames()); 
+			candVectGenerator = new CandidateVectorGenerator(store); 
 
 		CanonicalHeap heap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = AbstractGenerator.candVectGenerator.makeCandidateVectorsHeader(heap);
@@ -654,7 +654,7 @@ private int genFirstAdditionalObsErrorSeqs;
 			CanonicalClass rootClass = (obj==null) ? null : store.getCanonicalClass(obj.getClass());
 			// FIXME: Should check the compile time type of o instead of its runtime type to 
 			// avoid generating null objects of other types? 
-			if (/*o == null ||*/ (obj != null && store.isGenerationClass(rootClass))) {
+			if (/*o == null ||*/ (obj != null && store.isMainClass(rootClass))) {
 				// Root is not an object we are interested in generating a candidate vector for.
 				// Notice that we are always interested in generating a candidate object for null, 
 				// even if we don't know its type.
@@ -664,14 +664,14 @@ private int genFirstAdditionalObsErrorSeqs;
 					if (!mutateStructures) {
 						CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
 						//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
-						candVectExtensions.addToExtensions(candidateVector);
-						VectorsWriter.logLine(candidateVector.toString());
 						if (CanonicalizerLog.isLoggingOn()) {
 							CanonicalizerLog.logLine("----------");
 							CanonicalizerLog.logLine("New vector:");
 							CanonicalizerLog.logLine(candidateVector.toString());
 							CanonicalizerLog.logLine("----------");
 						}
+						candVectExtensions.addToExtensions(candidateVector);
+						VectorsWriter.logLine(candidateVector.toString());
 					}
 					else {
 						boolean eqPrev = false;
@@ -692,18 +692,19 @@ private int genFirstAdditionalObsErrorSeqs;
 							// Object could not be mutated outsied the extensions
 							continue;
 						// Canonicalize the mutated object.
-						res = newCanonicalizer.traverseBreadthFirstAndCanonicalize(obj);	
+						res = newCanonicalizer.traverseBreadthFirstAndCanonicalize(obj);
+						CanonicalHeap mutatedHeap = res.getValue();
 						formerMutatedObjs.add(obj);
 						assert res.getKey() == CanonicalizationResult.OK: "Mutation does not add objects to the structure";
 						// Write the vector representation of the mutated object as a negative instance.
-						CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);	
-						NegativeVectorsWriter.logLine(candidateVector.toString());
+						CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(mutatedHeap);	
 						if (CanonicalizerLog.isLoggingOn()) {
 							CanonicalizerLog.logLine("----------");
 							CanonicalizerLog.logLine("New mutated vector:");
 							CanonicalizerLog.logLine(candidateVector.toString());
 							CanonicalizerLog.logLine("----------");
 						}
+						NegativeVectorsWriter.logLine(candidateVector.toString());
 					}
 				}
 				else {

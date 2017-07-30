@@ -113,7 +113,7 @@ public class FieldExtensionStrings {
 	}
 
 	public Set<String> getValues(String object) {
-		return extension.get(fieldname);
+		return extension.get(object);
 	}
 	
 }

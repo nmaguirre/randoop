@@ -22,8 +22,8 @@ public class CandidateVectorGenerator {
 	private final Set<String> classesFromCode = new LinkedHashSet<>();
 	private final Set<String> singletonClasses = new HashSet<>();
 	
-	public CandidateVectorGenerator(Set<String> classesFromCode, String rootClass, CanonicalStore store) {
-		this(classesFromCode);
+	public CandidateVectorGenerator(CanonicalStore store, String rootClass) {
+		this(store);
 		CanonicalClass cls = store.getCanonicalClass(rootClass);
 		/*
 		 *  FIXME: Hack to avoid saving space for many instances of the root class in candidate vectors.
@@ -37,8 +37,8 @@ public class CandidateVectorGenerator {
 	// Should be passed only those classes that were obtained from the code of the classes
 	// we will canonize, before test generation starts. In this way, classes added to 
 	// the store later during generation are ignored.
-	public CandidateVectorGenerator(Set<String> classesFromCode) {
-		this.classesFromCode.addAll(classesFromCode);
+	public CandidateVectorGenerator(CanonicalStore store) {
+		this.classesFromCode.addAll(store.getClassnamesFromCode());
 		singletonClasses.add(DummyHeapRoot.class.getName());
 	}
 	

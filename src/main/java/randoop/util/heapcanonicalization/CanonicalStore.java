@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,10 @@ import java.util.Set;
 public class CanonicalStore {
 
 	private final Map<String, CanonicalClass> classes = new LinkedHashMap<>();
-	private final Set<String> genClasses = new HashSet<>();
+	private final Set<String> mainClasses = new HashSet<>();
+	// Contains the names of the stored classes at the moment of analyzing the source code of the main classes.
+	// It excludes all the new classes that appeared during the execution of the tests. Used for vectorization.
+	private final Set<String> classesFromCode = new LinkedHashSet<>();
 	private final int maxFieldDistance;
 	
 	public CanonicalStore(Collection<String> classNames) {
@@ -21,12 +25,21 @@ public class CanonicalStore {
 
 	public CanonicalStore(Collection<String> classNames, int maxFieldDistance) {
 		this.maxFieldDistance = maxFieldDistance;
-		genClasses.addAll(classNames);
+		mainClasses.addAll(classNames);
 		List<String> sortedNames = new LinkedList<>(classNames);
 		sortedNames.add(DummyHeapRoot.class.getName());
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
 			getUpdateOrCreateCanonicalClass(name, 0);
+		// These are the names of the classes at the moment of analyzing the source code
+		// of the classes in classNames.
+		classesFromCode.addAll(getAllCanonicalClassnames());
+		/*
+		for (String clsName: getAllCanonicalClassnames()) {
+			if (!clsName.equals(DummyHeapRoot.class.getName()))
+				classesFromCode.add(clsName);
+		}
+		*/
 	}
 	
 	
@@ -113,9 +126,19 @@ public class CanonicalStore {
 		return res;
 	}
 
-	public boolean isGenerationClass(CanonicalClass clazz) {
-		return genClasses.contains(clazz.getName());
+	public boolean isMainClass(CanonicalClass clazz) {
+		return mainClasses.contains(clazz.getName());
 	}	
+	
+	public boolean isClassFromCode(CanonicalClass clazz) {
+		return classesFromCode.contains(clazz.getName());
+	}
+
+	// Returns the names of the stored classes at the moment of analyzing the source code of the main classes.
+	// It excludes all the new classes that appeared during the execution of the tests.
+	public Set<String> getClassnamesFromCode() {
+		return classesFromCode;
+	}
 
 	/*
 	public CanonicalStore clone() {

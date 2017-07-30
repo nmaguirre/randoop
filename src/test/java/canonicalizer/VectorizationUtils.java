@@ -33,8 +33,7 @@ public class VectorizationUtils {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		//CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames());
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(candVectCanonizer.getStore().getAllCanonicalClassnames(),
-				objClazz.getName(), store);
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store, objClazz.getName());
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
 		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(emptyHeap);
 		System.out.println(header.toString());

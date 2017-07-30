@@ -84,16 +84,22 @@ public class CanonicalClass {
 		}
 		return null;
 	}
-		
+
 	private void canonicalizeFields() {
+		canonicalizeFields(false);
+	}
+		
+	private void canonicalizeFields(boolean update) {
 		/* 
 		 * Ugly hack to deal with weird randoop test:
 		 * Object o = new Object();
 		 */
 		if (isObject || isPrimitive || isArray || isInterface) return;
 
-		if (ancestor != null)
-			fields.addAll(ancestor.getCanonicalFields());
+		if (!update) {
+			if (ancestor != null)
+				fields.addAll(ancestor.getCanonicalFields());
+		}
 		
 		List<Field> sortedFields = Arrays.asList(clazz.getDeclaredFields());
 		Collections.sort(sortedFields, new FieldComparatorByName());
@@ -108,7 +114,9 @@ public class CanonicalClass {
 				fCanonicalType = this;
 			else 
 				fCanonicalType = store.getUpdateOrCreateCanonicalClass(fldType.getName(), fieldDistance+1);
-			fields.add(new CanonicalField(fld, this, fCanonicalType));
+			
+			if (!update)
+				fields.add(new CanonicalField(fld, this, fCanonicalType));
 		}
 	}
   	
@@ -242,7 +250,7 @@ public class CanonicalClass {
 		if (ancestor != null)
 			ancestor.updateFieldDistance(fieldDistance, maxFieldDistance);
 		if (fieldDistance < maxFieldDistance)
-			canonicalizeFields();
+			canonicalizeFields(true);
 	}
 
 	public int getFieldDistance() {

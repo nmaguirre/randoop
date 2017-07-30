@@ -1021,29 +1021,34 @@ public class ExecutableSequence {
 				    	CanonicalizerLog.logLine("----------");
 			   }
 		   }
-
+	   }
+	   
+	   if (res == ExtendExtensionsResult.NOT_EXTENDED) {
+		   assert enlargingExt.isEmpty(): "Extensions were not enlarged";
 		   if (CanonicalizerLog.isLoggingOn()) {
 				   CanonicalizerLog.logLine("----------");
 				   CanonicalizerLog.logLine("Extensions not enlarged.");
 				   CanonicalizerLog.logLine("----------");
 		   } 
 	   }
+	   else {
+		   assert !enlargingExt.isEmpty(): "Extensions were enlarged";
+		   if (CanonicalizerLog.isLoggingOn()) {
+			   CanonicalizerLog.logLine("----------");
+			   CanonicalizerLog.logLine("Former global extensions:");
+			   CanonicalizerLog.logLine(globalExt.toString());
+			   CanonicalizerLog.logLine("----------");
+		   }
 
-	   if (CanonicalizerLog.isLoggingOn() && res != ExtendExtensionsResult.NOT_EXTENDED) {
-		   CanonicalizerLog.logLine("----------");
-		   CanonicalizerLog.logLine("Former global extensions:");
-		   CanonicalizerLog.logLine(globalExt.toString());
-		   CanonicalizerLog.logLine("----------");
-	   }
+		   for (FieldExtensions ext: enlargingExt)
+			   globalExt.addAll(ext);
 
-	   for (FieldExtensions ext: enlargingExt)
-		   globalExt.addAll(ext);
-	   
-	   if (CanonicalizerLog.isLoggingOn() && res != ExtendExtensionsResult.NOT_EXTENDED) {
-		   CanonicalizerLog.logLine("----------");
-		   CanonicalizerLog.logLine("New global extensions:");
-		   CanonicalizerLog.logLine(globalExt.toString());
-		   CanonicalizerLog.logLine("----------");
+		   if (CanonicalizerLog.isLoggingOn()) {
+			   CanonicalizerLog.logLine("----------");
+			   CanonicalizerLog.logLine("New global extensions:");
+			   CanonicalizerLog.logLine(globalExt.toString());
+			   CanonicalizerLog.logLine("----------");
+		   }
 	   }
 
 	   return res;

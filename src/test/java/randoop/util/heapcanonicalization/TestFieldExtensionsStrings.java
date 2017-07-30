@@ -92,7 +92,7 @@ public class TestFieldExtensionsStrings {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store);
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
@@ -134,7 +134,7 @@ public class TestFieldExtensionsStrings {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store);
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
@@ -176,7 +176,7 @@ public class TestFieldExtensionsStrings {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store);
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
@@ -218,7 +218,7 @@ public class TestFieldExtensionsStrings {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store);
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
@@ -260,7 +260,7 @@ public class TestFieldExtensionsStrings {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store);
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
@@ -302,7 +302,7 @@ public class TestFieldExtensionsStrings {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store);
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
@@ -343,7 +343,7 @@ public class TestFieldExtensionsStrings {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store);
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
@@ -385,7 +385,7 @@ public class TestFieldExtensionsStrings {
 		CanonicalStore store = new CanonicalStore(classNames);
 		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, maxObjects);
 		// El generador de vectores candidatos toma los nombres de las clases que el canonizador saco del codigo fuente
-		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store.getAllCanonicalClassnames());
+		CandidateVectorGenerator candVectGenerator = new CandidateVectorGenerator(store);
 	
 		/* Descomentar esto para imprimir el header de los vectores candidatos */
 		CanonicalHeap emptyHeap = new CanonicalHeap(store, maxObjects);
