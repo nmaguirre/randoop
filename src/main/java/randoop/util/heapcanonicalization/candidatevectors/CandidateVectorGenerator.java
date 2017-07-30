@@ -114,12 +114,14 @@ public class CandidateVectorGenerator {
 					addNullObjectToCandidateVector(canonicalClass, heap, res);
 		}	
 
+		/*
 		if (CanonicalizerLog.isLoggingOn()) {
 			CanonicalizerLog.logLine("**********");
 			CanonicalizerLog.logLine("Canonical vector:");
 			CanonicalizerLog.logLine(res.toString());
 			CanonicalizerLog.logLine("**********");
 		}
+		*/
 		
 		return res;
 	}

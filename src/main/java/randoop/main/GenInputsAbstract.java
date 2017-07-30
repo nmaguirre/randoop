@@ -617,11 +617,14 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Disable contract checking during field based generation (very expensive when tests get large)")
   public static boolean fbg_disable_contracts = true;
   
-  @Option("<filename> Name of a file to which save the generated candidate vectors")
-  public static FileWriter cand_vect_file = null;
+  @Option("<filename> Name of a file to which to save the generated vectors")
+  public static FileWriter vectors_file = null;
 
-  @Option("<filename> Name of a file to which to log lots of information about heap canonization")
-  public static FileWriter canonizer_log = null;
+  @Option("<filename> Name of a file to which to save the generated negative vectors")
+  public static FileWriter negative_vectors_file = null;
+
+  @Option("<filename> Name of a file to which to log lots of information about heap canonicalization")
+  public static FileWriter canonicalizer_log = null;
   
   
 

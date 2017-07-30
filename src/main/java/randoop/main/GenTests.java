@@ -68,7 +68,7 @@ import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsFieldExtensions;
-import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
+import randoop.util.heapcanonicalization.candidatevectors.VectorsWriter;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
@@ -381,7 +381,7 @@ public class GenTests extends GenInputsAbstract {
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
-    if (CandidateVectorsWriter.isEnabled())
+    if (VectorsWriter.isEnabled())
     	explorer.initNewCanonicalizerForVectorization(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_field_distance);
     else
     	explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_max_array_objs, 
@@ -503,7 +503,7 @@ public class GenTests extends GenInputsAbstract {
     	CanonicalizerLog.logLine(AbstractGenerator.store.toString());
     	CanonicalizerLog.logLine("**********");
 
-    	if (CandidateVectorsWriter.isEnabled()) {
+    	if (VectorsWriter.isEnabled()) {
 			CanonicalizerLog.logLine("\n\n**********");
 			CanonicalizerLog.logLine("Candidate Vectors Field Extensions:");
 			CanonicalizerLog.logLine(AbstractGenerator.candVectExtensions.toString());
@@ -511,8 +511,8 @@ public class GenTests extends GenInputsAbstract {
     	}
     }
     
-    if (CandidateVectorsWriter.isEnabled()) 
-    	CandidateVectorsWriter.logLine(AbstractGenerator.candVectExtensions.toString());
+    if (VectorsWriter.isEnabled()) 
+    	VectorsWriter.logLine(AbstractGenerator.candVectExtensions.toString());
 
     /* post generation */
     if (GenInputsAbstract.dont_output_tests) {

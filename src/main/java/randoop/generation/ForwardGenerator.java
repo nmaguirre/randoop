@@ -44,7 +44,7 @@ import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
-import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsWriter;
+import randoop.util.heapcanonicalization.candidatevectors.VectorsWriter;
 
 
 /**
@@ -57,7 +57,7 @@ public class ForwardGenerator extends AbstractGenerator {
   // public FieldExtensions fieldExtensionsCanonizer;
   // public boolean fieldBasedGen = true;
   //public boolean fieldBasedGen = false;
-  private int canonizationErrorNum = 0;
+//  private int canonizationErrorNum = 0;
   //	public boolean weightedRandomSelection = true;
   // public boolean weightedRandomSelection = false;
   
@@ -317,61 +317,7 @@ private int maxsize;
 */
 
     
-	// Use the new canonizer to generate a candidate vector for receiver object 
-    // of the last method of the sequence
-    private void makeCanonicalVectorsForLastStatement(ExecutableSequence eSeq) {
-		if (CanonicalizerLog.isLoggingOn()) {
-			CanonicalizerLog.logLine("**********");
-			CanonicalizerLog.logLine("Canonizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
-			CanonicalizerLog.logLine("**********");
-		}	
 
-		List<Integer> activeVars = eSeq.sequence.getActiveVars(eSeq.sequence.size() -1);
-		if (activeVars != null)
-			assert AbstractGenerator.field_based_gen == FieldBasedGenType.EXTENSIONS: 
-					"Active vars are only computed when running field based generation.";
-		
-		int index = -1;
-		for (Object o: eSeq.getLastStmtRuntimeObjects()) {
-			index++;
-
-			if (activeVars != null && !activeVars.contains(index)) 
-				continue;
-			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("INFO: Active variable index: " + index);
-			
-			Entry<CanonicalizationResult, CanonicalHeap> res;
-			CanonicalClass rootClass = (o==null) ? null : store.getCanonicalClass(o.getClass());
-			// FIXME: Should check the compile time type of o instead of its runtime type to 
-			// avoid generating null objects of other types? 
-			if (o == null || (o != null && store.isGenerationClass(rootClass))) {
-				// Root is not an object we are interested in generating a candidate vector for.
-				// Notice that we are always interested in generating a candidate object for null, 
-				// even if we don't know its type.
-				res = AbstractGenerator.newCanonicalizer.traverseBreadthFirstAndCanonicalize(o);
-				if (res.getKey() == CanonicalizationResult.OK) {
-					CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(res.getValue());
-							//CandidateVectorGenerator.printAsCandidateVector(res.getValue());
-					candVectExtensions.addToExtensions(candidateVector);
-					// FIXME: Assuming candidate vector writer is enabled, otherwise we don't reach this code.
-					// if (CandidateVectorsWriter.isEnabled())
-					CandidateVectorsWriter.logLine(candidateVector.toString());
-				}
-				else {
-					// assert res.getKey() == CanonizationResult.LIMITS_EXCEEDED: "No other error message implemented yet.";
-					if (res.getKey() != CanonicalizationResult.OK) {
-						if (CanonicalizerLog.isLoggingOn()) {
-							CanonicalizerLog.logLine("----------");
-							CanonicalizerLog.logLine("Not canonizing an object with more than " + 
-									AbstractGenerator.fbg_max_objects + " objects of the same type");
-							CanonicalizerLog.logLine("Error message: " + res.getKey());
-							CanonicalizerLog.logLine("----------");
-						}
-					}
-				}
-			}
-		}
-    }
     
   
  
@@ -415,8 +361,6 @@ private int maxsize;
     	processSequence(eSeq);
     	if (eSeq.sequence.hasActiveFlags()) {
     		componentManager.addGeneratedSequence(eSeq.sequence);
-    		if (CandidateVectorsWriter.isEnabled())
-    			makeCanonicalVectorsForLastStatement(eSeq);
     	}
     }
     else {
@@ -428,6 +372,8 @@ private int maxsize;
     	startTime = endTime; // reset start time.
 
     	processSequence(eSeq);
+    	
+
     	
     	/* 
     	 * Not needed anymore.
@@ -454,8 +400,7 @@ private int maxsize;
 			else
 				componentManager.addGeneratedSequence(eSeq.sequence);
 				*/
-    		if (CandidateVectorsWriter.isEnabled())
-    			makeCanonicalVectorsForLastStatement(eSeq);
+
     	}
 
     }

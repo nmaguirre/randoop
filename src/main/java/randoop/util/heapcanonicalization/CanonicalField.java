@@ -65,19 +65,35 @@ public class CanonicalField {
 			try {
 				target = field.get(canObj.getObject());
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				System.out.println("Cannot find field: " + field.getName());
+				System.out.println("Cannot find existing field: " + field.getName());
 				System.out.println("Error object: " + canObj.getObject());
 				assert false: "Cannot find an existing field";
 				System.exit(1);
 			}
 			return target;
 		}
-		//heap.getCanonicalObject(target);
 	}
 
 	public String toString() {
 		String typeStr = (type == null) ? "null" : type.getName();
 		return "{" + getName() + ",ID=" + ID + ",class="+ clazz.getName() + ",type=" + typeStr + "}";
+	}
+	
+	public void setValue(CanonicalObject obj, CanonicalObject val) {
+		try {
+			field.set(obj.getObject(), val.getObject());
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			System.out.println("Cannot find existing field: " + field.getName());
+			System.out.println("Error objects: " + obj.getObject() + ", " + val.getObject());
+			assert false: "Cannot find an existing field";
+			System.exit(1);
+		}
+	}
+
+	// The parameter is needed because this might be called for an object whose type 
+	// is a subclass of the class where the field is defined.
+	public String stringRepresentation(CanonicalObject obj) {
+		return obj.getCanonicalClass().getName() + "." + getName();
 	}
 	
 }

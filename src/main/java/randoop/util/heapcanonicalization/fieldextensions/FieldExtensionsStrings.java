@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class FieldExtensionsStrings implements FieldExtensions {
 	
@@ -119,6 +120,14 @@ public class FieldExtensionsStrings implements FieldExtensions {
 		} else if (!extensions.equals(other.extensions))
 			return false;
 		return true;
+	}
+
+	@Override
+	public Set<String> getValuesFor(String field, String object) {
+		FieldExtensionStrings ext = extensions.get(field);
+		if (ext == null)
+			return null;
+		return ext.getValues(object);
 	}
 	
 

@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-public final class CandidateVectorsWriter {
+public final class VectorsWriter {
 
-  private CandidateVectorsWriter() {
+  private VectorsWriter() {
     throw new IllegalStateException("no instance");
   }
 
@@ -34,8 +34,8 @@ public final class CandidateVectorsWriter {
     }
 
     try {
-      GenInputsAbstract.cand_vect_file.write(s);
-      GenInputsAbstract.cand_vect_file.flush();
+      GenInputsAbstract.vectors_file.write(s);
+      GenInputsAbstract.vectors_file.flush();
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -48,9 +48,9 @@ public final class CandidateVectorsWriter {
     }
 
     try {
-      GenInputsAbstract.cand_vect_file.write(s);
-      GenInputsAbstract.cand_vect_file.write(Globals.lineSep);
-      GenInputsAbstract.cand_vect_file.flush();
+      GenInputsAbstract.vectors_file.write(s);
+      GenInputsAbstract.vectors_file.write(Globals.lineSep);
+      GenInputsAbstract.vectors_file.flush();
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -63,9 +63,9 @@ public final class CandidateVectorsWriter {
     }
 
     try {
-      GenInputsAbstract.cand_vect_file.write(Globals.lineSep + Globals.lineSep);
-      GenInputsAbstract.cand_vect_file.write(s.toString());
-      GenInputsAbstract.cand_vect_file.flush();
+      GenInputsAbstract.vectors_file.write(Globals.lineSep + Globals.lineSep);
+      GenInputsAbstract.vectors_file.write(s.toString());
+      GenInputsAbstract.vectors_file.flush();
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -79,11 +79,11 @@ public final class CandidateVectorsWriter {
     }
 
     try {
-      GenInputsAbstract.cand_vect_file.write("Statements : " + Globals.lineSep);
+      GenInputsAbstract.vectors_file.write("Statements : " + Globals.lineSep);
       for (TypedOperation t : model) {
-        GenInputsAbstract.cand_vect_file.write(t.toString());
-        GenInputsAbstract.cand_vect_file.write(Globals.lineSep);
-        GenInputsAbstract.cand_vect_file.flush();
+        GenInputsAbstract.vectors_file.write(t.toString());
+        GenInputsAbstract.vectors_file.write(Globals.lineSep);
+        GenInputsAbstract.vectors_file.flush();
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -92,6 +92,6 @@ public final class CandidateVectorsWriter {
   }
 
   public static boolean isEnabled() {
-    return GenInputsAbstract.cand_vect_file != null;
+    return GenInputsAbstract.vectors_file != null;
   }
 }

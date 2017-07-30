@@ -111,5 +111,9 @@ public class FieldExtensionStrings {
 			return false;
 		return true;
 	}
+
+	public Set<String> getValues(String object) {
+		return extension.get(fieldname);
+	}
 	
 }

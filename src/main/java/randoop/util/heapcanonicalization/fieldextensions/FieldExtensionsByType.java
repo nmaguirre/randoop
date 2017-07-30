@@ -2,6 +2,7 @@ package randoop.util.heapcanonicalization.fieldextensions;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class FieldExtensionsByType implements FieldExtensions {
 	
@@ -99,6 +100,12 @@ public class FieldExtensionsByType implements FieldExtensions {
 		} else if (!primitiveExtensions.equals(other.primitiveExtensions))
 			return false;
 		return true;
+	}
+
+	@Override
+	public Set<String> getValuesFor(String field, String object) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

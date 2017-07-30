@@ -29,7 +29,7 @@ public class FieldExtensionsStringsCollector implements FieldExtensionsCollector
 	@Override
 	// pre: currObj cannot be null or primitive.
 	public CanonicalizationResult collect(CanonicalField currField, CanonicalObject currObj, CanonicalObject canonicalValue) {
-		String fieldStr = currObj.getCanonicalClass().getName() + "." + currField.getName();
+		String fieldStr = currField.stringRepresentation(currObj);  
 		String objStr = currObj.stringRepresentation(); 
 		
 		if (!collectPrimitives() && (canonicalValue.isNull() || canonicalValue.isPrimitive()))

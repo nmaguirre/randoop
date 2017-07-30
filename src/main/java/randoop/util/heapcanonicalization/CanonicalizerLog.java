@@ -34,8 +34,8 @@ public final class CanonicalizerLog {
     }
 
     try {
-      GenInputsAbstract.canonizer_log.write(s);
-      GenInputsAbstract.canonizer_log.flush();
+      GenInputsAbstract.canonicalizer_log.write(s);
+      GenInputsAbstract.canonicalizer_log.flush();
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -48,9 +48,9 @@ public final class CanonicalizerLog {
     }
 
     try {
-      GenInputsAbstract.canonizer_log.write(s);
-      GenInputsAbstract.canonizer_log.write(Globals.lineSep);
-      GenInputsAbstract.canonizer_log.flush();
+      GenInputsAbstract.canonicalizer_log.write(s);
+      GenInputsAbstract.canonicalizer_log.write(Globals.lineSep);
+      GenInputsAbstract.canonicalizer_log.flush();
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);
@@ -63,9 +63,9 @@ public final class CanonicalizerLog {
     }
 
     try {
-      GenInputsAbstract.canonizer_log.write(Globals.lineSep + Globals.lineSep);
-      GenInputsAbstract.canonizer_log.write(s.toString());
-      GenInputsAbstract.canonizer_log.flush();
+      GenInputsAbstract.canonicalizer_log.write(Globals.lineSep + Globals.lineSep);
+      GenInputsAbstract.canonicalizer_log.write(s.toString());
+      GenInputsAbstract.canonicalizer_log.flush();
 
     } catch (IOException e) {
       e.printStackTrace();
@@ -79,11 +79,11 @@ public final class CanonicalizerLog {
     }
 
     try {
-      GenInputsAbstract.canonizer_log.write("Statements : " + Globals.lineSep);
+      GenInputsAbstract.canonicalizer_log.write("Statements : " + Globals.lineSep);
       for (TypedOperation t : model) {
-        GenInputsAbstract.canonizer_log.write(t.toString());
-        GenInputsAbstract.canonizer_log.write(Globals.lineSep);
-        GenInputsAbstract.canonizer_log.flush();
+        GenInputsAbstract.canonicalizer_log.write(t.toString());
+        GenInputsAbstract.canonicalizer_log.write(Globals.lineSep);
+        GenInputsAbstract.canonicalizer_log.flush();
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -92,6 +92,6 @@ public final class CanonicalizerLog {
   }
 
   public static boolean isLoggingOn() {
-    return GenInputsAbstract.canonizer_log != null;
+    return GenInputsAbstract.canonicalizer_log != null;
   }
 }
