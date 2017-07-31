@@ -48,6 +48,10 @@ public class CanonicalField {
 		return clazz;
 	}
 	
+	public boolean isObjectType() {
+		return type.isObject();
+	}
+	
 	public boolean isPrimitiveType() {
 		return type.isPrimitive();
 	}

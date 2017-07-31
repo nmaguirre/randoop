@@ -21,9 +21,14 @@ public class CandidateVectorGenerator {
 	private static int NULL_INT_REPRESENTATION = AbstractGenerator.cand_vect_null_rep; //Integer.MIN_VALUE;
 	private final Set<String> classesFromCode = new LinkedHashSet<>();
 	private final Set<String> singletonClasses = new HashSet<>();
+	private final boolean noPrimitiveFields;
 	
 	public CandidateVectorGenerator(CanonicalStore store, String rootClass) {
-		this(store);
+		this(store, rootClass, false);
+	}
+
+	public CandidateVectorGenerator(CanonicalStore store, String rootClass, boolean noPrimitiveFields) {
+		this(store, noPrimitiveFields);
 		CanonicalClass cls = store.getCanonicalClass(rootClass);
 		/*
 		 *  FIXME: Hack to avoid saving space for many instances of the root class in candidate vectors.
@@ -33,13 +38,17 @@ public class CandidateVectorGenerator {
 			singletonClasses.add(rootClass);
 	}
 	
+	public CandidateVectorGenerator(CanonicalStore store) {
+		this(store, false);
+	}
 	
 	// Should be passed only those classes that were obtained from the code of the classes
 	// we will canonize, before test generation starts. In this way, classes added to 
 	// the store later during generation are ignored.
-	public CandidateVectorGenerator(CanonicalStore store) {
+	public CandidateVectorGenerator(CanonicalStore store, boolean noPrimitiveFields) {
 		this.classesFromCode.addAll(store.getClassnamesFromCode());
 		singletonClasses.add(DummyHeapRoot.class.getName());
+		this.noPrimitiveFields = noPrimitiveFields;
 	}
 	
 	public CandidateVector<String> makeCandidateVectorsHeader(CanonicalHeap heap) {
@@ -77,18 +86,21 @@ public class CandidateVectorGenerator {
 	}
 	
 	private boolean ignoreCanonicalClassInCandidateVectors(CanonicalClass clazz) {
-		return clazz.isPrimitive() || clazz.isAbstract() || clazz.isInterface();
+		return clazz.isPrimitive() || clazz.isAbstract() || clazz.isInterface() || clazz.isObject();
 				//|| !classesFromCode.contains(clazz.getName());
 	}
 	
 	private void addCandidateVectorFields(CanonicalHeap heap, CanonicalClass clazz, int objNum, CandidateVector<String> header) {
-		for (CanonicalField fld: clazz.getCanonicalFields()) 
-			if (!fld.getName().equals("serialVersionUID"))
-				header.addComponent(clazz.getName() + "->o" + objNum + "." + fld.getName());
-			else 
+		for (CanonicalField fld: clazz.getCanonicalFields()) {
+			if (fld.getName().equals("serialVersionUID")) {
 			    if (CanonicalizerLog.isLoggingOn())
 			    	CanonicalizerLog.logLine("CANONIZER INFO: Skipping field: " + fld.getName());
-				
+			}
+			else {
+				if (!noPrimitiveFields || (/*!fld.isObjectType() &&*/ !fld.isPrimitiveType()))
+					header.addComponent(clazz.getName() + "->o" + objNum + "." + fld.getName());
+			}
+		}
 	}
 
 	private void addCandidateVectorArrayFields(CanonicalHeap heap, CanonicalClass clazz, int objNum, CandidateVector<String> header) {
@@ -114,15 +126,6 @@ public class CandidateVectorGenerator {
 					addNullObjectToCandidateVector(canonicalClass, heap, res);
 		}	
 
-		/*
-		if (CanonicalizerLog.isLoggingOn()) {
-			CanonicalizerLog.logLine("**********");
-			CanonicalizerLog.logLine("Canonical vector:");
-			CanonicalizerLog.logLine(res.toString());
-			CanonicalizerLog.logLine("**********");
-		}
-		*/
-		
 		return res;
 	}
 	
@@ -132,8 +135,9 @@ public class CandidateVectorGenerator {
 				v.addComponent(NULL_INT_REPRESENTATION);
 		else {
 			for (CanonicalField fld: canonicalClass.getCanonicalFields()) {
-				if (!fld.getName().equals("serialVersionUID"))
-					v.addComponent(NULL_INT_REPRESENTATION);
+				if (!fld.getName().equals("serialVersionUID")) 
+					if (!noPrimitiveFields || (/*!fld.isObjectType() &&*/ !fld.isPrimitiveType()))
+						v.addComponent(NULL_INT_REPRESENTATION);
 			}
 		}
 	}
@@ -142,11 +146,13 @@ public class CandidateVectorGenerator {
 		int comp;
 		Map.Entry<CanonicalizationResult, List<CanonicalField>> getFieldsRes = obj.getCanonicalFields();
 		assert getFieldsRes.getKey() == CanonicalizationResult.OK : 
-			"The heap should not be modified the heap while printing a candidate vector.";
+			"The heap should not be modified while printing a candidate vector";
 		
 		int fieldNumber = 0;
 		for (CanonicalField fld: getFieldsRes.getValue()) {
-			if (fld.getName().equals("serialVersionUID")) 
+			if (fld.getName().equals("serialVersionUID"))
+				continue; 
+			if (noPrimitiveFields && (/*fld.isObjectType() ||*/ fld.isPrimitiveType()))
 				continue;
 
 			Object value = fld.getValue(obj);
