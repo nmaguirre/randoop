@@ -626,6 +626,8 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("<filename> Name of a file to which to log lots of information about heap canonicalization")
   public static FileWriter canonicalizer_log = null;
   
+   @Option("Don't use randoop's default primitive values during generation")
+  public static boolean no_default_primitives = false;
   
 
   ///////////////////////////////////////////////////////////////////

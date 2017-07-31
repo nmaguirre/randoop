@@ -879,7 +879,7 @@ private int genFirstAdditionalObsErrorSeqs;
 					  if (VectorsWriter.isEnabled()) {
 						  if (CanonicalizerLog.isLoggingOn()) {
 							  CanonicalizerLog.logLine("**********");
-							  CanonicalizerLog.logLine("Canonizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
+							  CanonicalizerLog.logLine("Canonicalizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
 							  CanonicalizerLog.logLine("**********");
 						  }	
 						  makeCanonicalVectorsForLastStatement(eSeq);
@@ -967,7 +967,7 @@ private int genFirstAdditionalObsErrorSeqs;
     		if (eSeq.isNormalExecution()) {
     			if (CanonicalizerLog.isLoggingOn()) {
     				CanonicalizerLog.logLine("**********");
-    				CanonicalizerLog.logLine("Canonizing mutated objects in the last statement of sequence:\n" + eSeq.toCodeString());
+    				CanonicalizerLog.logLine("Canonicalizing mutated objects in the last statement of sequence:\n" + eSeq.toCodeString());
     				CanonicalizerLog.logLine("**********");
     			}	
     			makeCanonicalVectorsForLastStatement(eSeq, true);

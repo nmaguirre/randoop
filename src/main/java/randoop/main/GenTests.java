@@ -347,7 +347,8 @@ public class GenTests extends GenInputsAbstract {
      * - Add any values for TestValue annotated static fields in operationModel
      */
     Set<Sequence> components = new LinkedHashSet<>();
-    components.addAll(SeedSequences.defaultSeeds());
+    if (!no_default_primitives)
+    	components.addAll(SeedSequences.defaultSeeds());
     components.addAll(operationModel.getAnnotatedTestValues());
 
     ComponentManager componentMgr = new ComponentManager(components);
