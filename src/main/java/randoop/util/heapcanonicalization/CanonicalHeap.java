@@ -46,7 +46,7 @@ public class CanonicalHeap {
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, new CanonicalObject(obj, null, -1, this));
 		CanonicalClass cls = store.getCanonicalClass(obj.getClass());
 		assert cls != null : "This method should be called for existing canonical classes only";
-		return getExistingOrCreateCanonicalObject(obj,cls);
+		return getExistingOrCreateCanonicalObject(obj, cls);
 	}
 	
 
@@ -119,6 +119,7 @@ public class CanonicalHeap {
 			if (CanonicalizerLog.isLoggingOn()) {
 				CanonicalizerLog.logLine("----------");
 				CanonicalizerLog.logLine("Starting a mutation attempt:");
+				CanonicalizerLog.logLine("Heap contents:\n" + toString());
 			}
 			// 1- Pick a class whose objects are mutation candidates.
 			List<CanonicalClass> candidateClasses = new ArrayList<>(); 
@@ -131,10 +132,12 @@ public class CanonicalHeap {
 			int rdmClassInd = Randomness.nextRandomInt(candidateClasses.size());
 			CanonicalClass rdmClass = candidateClasses.get(rdmClassInd);
 			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Randomly picked a class:" + rdmClass.getName());
+				CanonicalizerLog.logLine("Randomly picked a class: " + rdmClass.getName());
 
 			// 2- Pick an object of the selected class.
 			List<CanonicalObject> objs = objects.get(rdmClass);
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Available objects for class: " + objs);
 			if (objs.isEmpty()) {
 				// No objects of the selected class available to mutate.
 				retriesLeft--;
@@ -168,9 +171,9 @@ public class CanonicalHeap {
 
 			// 4- Pick the value the selected field will be set to.
 			CanonicalClass fldType = rdmFld.getCanonicalType();
-			List<CanonicalObject> allValues = objects.get(fldType);
-			if (allValues == null)
-				allValues = new LinkedList<>();
+			List<CanonicalObject> allValues = new LinkedList<>();
+			if (objects.get(fldType) != null)
+				allValues.addAll(objects.get(fldType));
 			allValues.add(new CanonicalObject(null, null, -1, this));
 			if (CanonicalizerLog.isLoggingOn())
 				CanonicalizerLog.logLine("Available objects to set the field:" + allValues);
@@ -211,6 +214,15 @@ public class CanonicalHeap {
 				CanonicalizerLog.logLine("Retries limit exceeded. No mutation performed.");
 
 		return succeeded; 
+	}
+	
+	
+	public String toString() {
+		String res = "";
+		for (CanonicalClass cls: objects.keySet()) {
+			res += "class=" + cls.getName() + ", objects=" + objects.get(cls).toString() + "\n";
+		}
+		return res;
 	}
 	
 }
