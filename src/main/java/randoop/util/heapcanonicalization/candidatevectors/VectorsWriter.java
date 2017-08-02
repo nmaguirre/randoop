@@ -34,8 +34,8 @@ public final class VectorsWriter {
     }
 
     try {
-      GenInputsAbstract.vectors_file.write(s);
-      GenInputsAbstract.vectors_file.flush();
+      GenInputsAbstract.negative_vectors_file.write(s);
+      GenInputsAbstract.negative_vectors_file.flush();
     } catch (IOException e) {
       e.printStackTrace();
       System.exit(1);

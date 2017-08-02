@@ -628,6 +628,11 @@ public abstract class GenInputsAbstract extends CommandHandler {
   
    @Option("Don't use randoop's default primitive values during generation")
   public static boolean no_default_primitives = false;
+   
+   @Option("Reset static fields after the execution of each generated test")
+  public static boolean reset_static_fields = false;
+  
+   
   
 
   ///////////////////////////////////////////////////////////////////

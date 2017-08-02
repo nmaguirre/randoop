@@ -7,6 +7,7 @@ import randoop.*;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedOperation;
+import randoop.reloader.StaticFieldsReseter;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
 import randoop.sequence.Statement;
@@ -900,6 +901,15 @@ private int genFirstAdditionalObsErrorSeqs;
 		  if (FieldBasedGenLog.isLoggingOn()) 
 			  FieldBasedGenLog.logLine("**** ERROR: Execution of the current sequence failed");
 	  }
+   	  
+   	  if (GenInputsAbstract.reset_static_fields) {
+   		  if (FieldBasedGenLog.isLoggingOn()) 
+   			  FieldBasedGenLog.logLine("> Resetting static fields...");
+   		  StaticFieldsReseter.resetClasses();
+    	  if (FieldBasedGenLog.isLoggingOn()) 
+   			  FieldBasedGenLog.logLine("> Reset successful");
+   	  }
+   	  
 
    	  if (!count_objects && !VectorsWriter.isEnabled()) {
    		  //eSeq.clearExtensions();

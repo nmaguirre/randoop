@@ -36,6 +36,7 @@ import randoop.reflection.PackageVisibilityPredicate;
 import randoop.reflection.PublicVisibilityPredicate;
 import randoop.reflection.ReflectionPredicate;
 import randoop.reflection.VisibilityPredicate;
+import randoop.reloader.StaticFieldsReseter;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
 import randoop.sequence.SequenceExceptionError;
@@ -388,6 +389,9 @@ public class GenTests extends GenInputsAbstract {
     	explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_max_array_objs, 
     			AbstractGenerator.fbg_bfs_depth, AbstractGenerator.fbg_field_distance);
     
+    if (reset_static_fields)
+    	StaticFieldsReseter.setupReloader(classnames);
+
     /*
      * setup for check generation
      */
@@ -490,6 +494,10 @@ public class GenTests extends GenInputsAbstract {
 
       System.exit(1);
     }
+    
+    
+    if (reset_static_fields)
+    	StaticFieldsReseter.closeReloader();
     
     if (FieldBasedGenLog.isLoggingOn()) {
     	FieldBasedGenLog.logLine("\n\n**********");
