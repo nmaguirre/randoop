@@ -307,6 +307,10 @@ public class GenTests extends GenInputsAbstract {
     Set<String> methodSignatures =
         GenInputsAbstract.getStringSetFromFile(methodlist, "Error while reading method list file");
 
+    // Load the evosuite agent before loading classes, otherwise it won't work
+    if (reset_static_fields)
+    	StaticFieldsReseter.setupReloader(classnames);
+    
     OperationModel operationModel = null;
     try {
       operationModel =
@@ -327,6 +331,8 @@ public class GenTests extends GenInputsAbstract {
     }
     assert operationModel != null;
 
+    //StaticFieldsReseter.deactivateReloader();
+    
     if (!operationModel.hasClasses()) {
       System.out.println("No classes to test");
       System.exit(1);
@@ -341,6 +347,8 @@ public class GenTests extends GenInputsAbstract {
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.println("PUBLIC MEMBERS=" + model.size());
     }
+    
+
 
     /*
      * Initialize components:
@@ -389,8 +397,7 @@ public class GenTests extends GenInputsAbstract {
     	explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_max_array_objs, 
     			AbstractGenerator.fbg_bfs_depth, AbstractGenerator.fbg_field_distance);
     
-    if (reset_static_fields)
-    	StaticFieldsReseter.setupReloader(classnames);
+
 
     /*
      * setup for check generation
@@ -496,8 +503,10 @@ public class GenTests extends GenInputsAbstract {
     }
     
     
+    /*
     if (reset_static_fields)
-    	StaticFieldsReseter.closeReloader();
+    	StaticFieldsReseter.deactivateReloader();
+    	*/
     
     if (FieldBasedGenLog.isLoggingOn()) {
     	FieldBasedGenLog.logLine("\n\n**********");

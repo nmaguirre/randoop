@@ -1,6 +1,7 @@
 package randoop.operation;
 
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -243,4 +244,8 @@ public class FieldSet extends CallableOperation {
   public boolean satisfies(ReflectionPredicate predicate) {
     return field.satisfies(predicate);
   }
+
+	public Field getField() {
+		return field.getRawField();
+	}
 }

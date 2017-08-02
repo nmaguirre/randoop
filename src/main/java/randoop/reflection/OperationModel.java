@@ -1,6 +1,7 @@
 package randoop.reflection;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -23,11 +24,14 @@ import randoop.contract.ObjectContract;
 import randoop.generation.ComponentManager;
 import randoop.main.ClassNameErrorHandler;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.FieldSet;
 import randoop.operation.MethodCall;
 import randoop.operation.OperationParseException;
 import randoop.operation.OperationParser;
 import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
+import randoop.reloader.SimpleReloader;
+import randoop.reloader.StaticFieldsReseter;
 import randoop.sequence.Sequence;
 import randoop.test.ContractSet;
 import randoop.types.ClassOrInterfaceType;
@@ -302,6 +306,9 @@ public class OperationModel {
 
     // Collect classes under test
     Set<Class<?>> visitedClasses = new LinkedHashSet<>();
+    
+    if (GenInputsAbstract.reset_static_fields)
+    	StaticFieldsReseter.activateReloader();
     for (String classname : classnames) {
       Class<?> c = null;
       try {
@@ -359,6 +366,8 @@ public class OperationModel {
         }
       }
     }
+    if (GenInputsAbstract.reset_static_fields)
+    	StaticFieldsReseter.deactivateReloader();
   }
 
   /**
@@ -677,11 +686,66 @@ public class OperationModel {
           new OperationExtractor(classType, operationSet, reflectionPredicate, this),
           classType.getRuntimeClass());
     }
+
     for (TypedOperation operation : operationSet) {
-      addOperation(operation);
+    	// FIXME PABLO: Ugly hack to not let randoop assign to final static fields while using the evosuite loader
+    	if (GenInputsAbstract.reset_static_fields && ignoreFinalOperation(operation))
+    		continue;
+
+    	addOperation(operation);
     }
+    
   }
 
+  private boolean ignoreFinalOperation(TypedOperation operation) {
+	  if (operation instanceof TypedClassOperation) {
+		  TypedClassOperation op = (TypedClassOperation) operation;
+		  // __STATIC_RESET should not be available to randoop for execution.
+		  if (op.getName().endsWith("__STATIC_RESET"))
+			  return true;
+		  if (op.getOperation() instanceof FieldSet) {
+			  FieldSet fsop = (FieldSet) op.getOperation();
+			  // The evosuite loader removes the final modifiers from all fields.
+			  //if (fsop.isStatic()) {
+				  Field stField = fsop.getField();
+				  //System.out.println("> Processing static field " + stField.getName());
+				  Class<?> stFieldInstrType = stField.getDeclaringClass();
+				  String sfTypeName = stFieldInstrType.getName();
+				  //System.out.println("Field type " + sfTypeName);
+				  int i = 0; 
+				  Class<?> sfRealType = null;
+				  try {
+					  sfRealType = StaticFieldsReseter.getSimpleReloader().loadClass(sfTypeName);
+					  Field realsf = sfRealType.getField(stField.getName());
+					  realsf.setAccessible(true);
+					  if ((realsf.getModifiers() & Modifier.FINAL) != 0) {
+						  //System.out.println("FINAL static field " + stField.getName() + ", don't let randoop assign to it.");
+						  return true;
+					  }
+					  else {
+						  //System.out.println("Non final static field " + stField.getName());
+						  return false;
+					  }
+					  /*
+				  } catch (VerifyError e) {
+					  System.out.println("ERROR: Could not get field static field " + stField.getName() + 
+							  " from class " + sfTypeName + ". Marking operation as non accessible.");
+					  return true;
+					  */
+				  } catch (ClassNotFoundException | NoSuchFieldException | SecurityException e) {
+					  System.out.println("ERROR: checking wheter static field " + stField.getName() + 
+							  " failed. Could not load non instrumented class " + sfTypeName);
+					  e.printStackTrace();
+					  System.exit(0);
+				  }
+			  //}
+		  }
+	  }
+	  return false;
+  }
+
+  
+  
   /**
    * Create operations obtained by parsing method signatures and add each to this model.
    *

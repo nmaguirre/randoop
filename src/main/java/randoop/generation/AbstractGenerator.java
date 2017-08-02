@@ -903,11 +903,17 @@ private int genFirstAdditionalObsErrorSeqs;
 	  }
    	  
    	  if (GenInputsAbstract.reset_static_fields) {
-   		  if (FieldBasedGenLog.isLoggingOn()) 
+   		  long initTime = 0;
+   		  if (FieldBasedGenLog.isLoggingOn()) {
+   			  initTime = System.currentTimeMillis();
    			  FieldBasedGenLog.logLine("> Resetting static fields...");
+   		  }
    		  StaticFieldsReseter.resetClasses();
-    	  if (FieldBasedGenLog.isLoggingOn()) 
-   			  FieldBasedGenLog.logLine("> Reset successful");
+    	  if (FieldBasedGenLog.isLoggingOn()) {
+    		  long elapsed = System.currentTimeMillis() - initTime;
+   			  FieldBasedGenLog.logLine("> Reset successful: " + String.format("%d.%d", elapsed/1000, elapsed%1000) + "s");
+    	  }
+    	  //System.out.println("Reset static fields time: " + String.format("%d.%d", elapsed/1000, elapsed%1000) + "s");
    	  }
    	  
 
