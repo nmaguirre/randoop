@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import randoop.sequence.ExecutableSequence;
 import randoop.util.Log;
@@ -117,6 +118,82 @@ public class JunitFileWriter {
 
     return ret;
   }
+  
+  
+  public List<File> writeJUnitTestFilesReloader(List<List<ExecutableSequence>> seqPartition) {
+	  List<File> ret = new ArrayList<>();
+
+	  NameGenerator classNameGen = new NameGenerator(masterTestClassName);
+
+	  createOutputDir();
+
+	  for (List<ExecutableSequence> partition : seqPartition) {
+		  ret.add(writeTestClassReloader(partition, classNameGen.next()));
+	  }
+
+	  testClassCount = classNameGen.nameCount();
+
+	  return ret;
+  }
+  
+  
+  private File writeTestClassReloader(List<ExecutableSequence> sequences, String testClassName) {
+
+	    File file = new File(getDir(), testClassName + ".java");
+	    PrintStream out = createTextOutputStream(file);
+
+	    NameGenerator methodNameGen = new NameGenerator("test", 1, numDigits(sequences.size()));
+
+	    try {
+	      outputPackageName(out, packageName);
+	      out.println();
+	      out.println("import org.junit.FixMethodOrder;");
+	      out.println("import org.junit.Test;");
+	      out.println("import org.junit.runners.MethodSorters;");
+	      out.println("import org.junit.Before;");
+	      out.println("import org.junit.After;");
+	      out.println("import randoop.reloader.StaticFieldsReseter;");	      
+	      
+	      out.println();
+	      out.println("@FixMethodOrder(MethodSorters.NAME_ASCENDING)");
+	      out.println("public class " + testClassName + " {");
+	      out.println();
+	      out.println("  public static boolean debug = false;");
+	      out.println();
+	      
+	      out.println("  @Before");
+	      out.println("  public void before() {");
+	      out.println("    StaticFieldsReseter.activateReloader();");
+	      out.println("  }");
+	      out.println();
+	      
+	      out.println("  @After");
+	      out.println("  public void after() {");
+	      out.println("    StaticFieldsReseter.deactivateReloader();");
+	      out.println("    StaticFieldsReseter.resetAllClasses();");
+//	      out.println("    StaticFieldsReseter.resetClasses();");
+	      out.println("  }");
+	      out.println();
+
+	      for (ExecutableSequence s : sequences) {
+	        if (includeParsableString) {
+	          out.println("/*");
+	          out.println(s.sequence.toString());
+	          out.println("*/");
+	        }
+
+	        writeTest(out, testClassName, methodNameGen.next(), s);
+	        out.println();
+	      }
+	      out.println("}");
+	      classMethodCounts.put(testClassName, methodNameGen.nameCount());
+	    } finally {
+	      if (out != null) out.close();
+	    }
+
+	    return file;
+	  }
+  
 
   /**
    * writeTestClass writes a code sequence as a JUnit4 test class to a .java
@@ -263,6 +340,74 @@ public class JunitFileWriter {
     }
     return file;
   }
+  
+  
+  /**
+   * Writes a JUnit4 suite consisting of test classes from
+   * {@link #writeJUnitTestFiles(List)} and additional classes provided as a
+   * parameter. The file is written to the directory pointed to by writer object
+   * in a class whose name is the {@link #masterTestClassName}.
+   *
+   * @param additionalTestClassNames
+   *          a list of class names to be added to suite.
+   * @return {@link File} object for test suite file.
+   */
+  public File writeSuiteFileReloader(List<String> additionalTestClassNames, Set<String> resetClasses) {
+    File dir = this.getDir();
+    String suiteClassName = masterTestClassName;
+    File file = new File(dir, suiteClassName + ".java");
+
+    List<String> testClassNames = getTestClassNames();
+    if (additionalTestClassNames != null && !additionalTestClassNames.isEmpty()) {
+      testClassNames.addAll(additionalTestClassNames);
+    }
+
+    try (PrintStream out = createTextOutputStream(file)) {
+      outputPackageName(out, packageName);
+
+      out.println();
+      out.println("import org.junit.runner.RunWith;");
+      out.println("import org.junit.runners.Suite;");
+      out.println("import org.junit.BeforeClass;");
+      out.println("import java.util.HashSet;");
+      out.println("import java.util.Set;");
+      out.println("import randoop.reloader.StaticFieldsReseter;");
+ 
+      out.println();
+      out.println("@RunWith(Suite.class)");
+      out.println("@Suite.SuiteClasses({");
+
+      /*
+       * should be done with a joiner - waiting until we can graduate to Java 8
+       */
+      Iterator<String> testIterator = testClassNames.iterator();
+      if (testIterator.hasNext()) {
+        out.print(testIterator.next() + ".class");
+        while (testIterator.hasNext()) {
+          out.println(", ");
+          out.print(testIterator.next() + ".class");
+        }
+        out.println();
+      }
+
+      out.println("})");
+      out.println("public class " + suiteClassName + "{");
+      out.println();
+      out.println("  @BeforeClass");
+      out.println("  public static void setup() {");
+      out.println("    Set<String> classes = new HashSet<String>();");
+      for (String cls: resetClasses) 
+    	  out.println("    classes.add(\"" + cls + "\");");
+      out.println("    StaticFieldsReseter.setupReloader(classes);");
+      out.println("  }");
+      out.println();
+      out.println("}");
+    }
+    return file;
+  }
+  
+  
+  
 
   /**
    * writeDriverFile writes non-reflective driver for tests as a main class. The

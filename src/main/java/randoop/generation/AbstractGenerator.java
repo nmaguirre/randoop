@@ -908,7 +908,7 @@ private int genFirstAdditionalObsErrorSeqs;
    			  initTime = System.currentTimeMillis();
    			  FieldBasedGenLog.logLine("> Resetting static fields...");
    		  }
-   		  StaticFieldsReseter.resetClasses();
+   		  StaticFieldsReseter.resetAllClasses();
     	  if (FieldBasedGenLog.isLoggingOn()) {
     		  long elapsed = System.currentTimeMillis() - initTime;
    			  FieldBasedGenLog.logLine("> Reset successful: " + String.format("%d.%d", elapsed/1000, elapsed%1000) + "s");

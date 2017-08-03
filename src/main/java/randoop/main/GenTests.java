@@ -308,8 +308,14 @@ public class GenTests extends GenInputsAbstract {
         GenInputsAbstract.getStringSetFromFile(methodlist, "Error while reading method list file");
 
     // Load the evosuite agent before loading classes, otherwise it won't work
-    if (reset_static_fields)
+    if (reset_static_fields) {
+		System.out.println("\n\n---- Loading reloader with classes:");
+		for (String str: classnames) {
+			System.out.print(str + ",");
+		}
+		System.out.println("\n\n");
     	StaticFieldsReseter.setupReloader(classnames);
+    }
     
     OperationModel operationModel = null;
     try {
@@ -784,10 +790,16 @@ public class GenTests extends GenInputsAbstract {
 
       JunitFileWriter jfw = new JunitFileWriter(output_dir, junit_package_name, junitClassname);
 
-      files.addAll(jfw.writeJUnitTestFiles(seqPartition));
+   	  if (reset_static_fields)
+   		  files.addAll(jfw.writeJUnitTestFilesReloader(seqPartition));
+   	  else
+   		  files.addAll(jfw.writeJUnitTestFiles(seqPartition));
 
       if (GenInputsAbstract.junit_reflection_allowed) {
-        files.add(jfw.writeSuiteFile(additionalJUnitClasses));
+    	  if (reset_static_fields)
+    		  files.add(jfw.writeSuiteFileReloader(additionalJUnitClasses, StaticFieldsReseter.getClassesToReload()));
+    	  else
+    		  files.add(jfw.writeSuiteFile(additionalJUnitClasses));
       } else {
         files.add(jfw.writeDriverFile());
       }

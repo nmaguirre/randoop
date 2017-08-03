@@ -29,6 +29,7 @@ import randoop.generation.ForwardGenerator;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedOperation;
+import randoop.reloader.StaticFieldsReseter;
 import randoop.test.Check;
 import randoop.test.TestCheckGenerator;
 import randoop.test.TestChecks;
@@ -1229,7 +1230,15 @@ public class ExecutableSequence {
 		   }
 
 		   visitor.visitBeforeStatement(this, i);
+		   
+		   if (GenInputsAbstract.reset_static_fields)
+			   StaticFieldsReseter.activateReloader();
+		   
 		   executeStatement(sequence, executionResults.theList, i, inputVariables);
+
+		   if (GenInputsAbstract.reset_static_fields)
+			   StaticFieldsReseter.deactivateReloader();
+
 		   // make sure statement executed
 		   ExecutionOutcome statementResult = getResult(i);
 		   if (statementResult instanceof NotExecuted) {
