@@ -730,11 +730,13 @@ public class OperationModel {
 						  //System.out.println("Non final static field " + stField.getName());
 						  return false;
 					  }
-					  /*
 				  } catch (VerifyError e) {
 					  System.out.println("ERROR: Could not get field static field " + stField.getName() + 
 							  " from class " + sfTypeName + ". Marking operation as non accessible.");
 					  return true;
+					  /*
+					  e.printStackTrace();
+					  System.exit(0);
 					  */
 				  } catch (ClassNotFoundException | NoSuchFieldException | SecurityException e) {
 					  System.out.println("ERROR: checking wheter static field " + stField.getName() + 

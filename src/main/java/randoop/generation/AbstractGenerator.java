@@ -908,7 +908,7 @@ private int genFirstAdditionalObsErrorSeqs;
    			  initTime = System.currentTimeMillis();
    			  FieldBasedGenLog.logLine("> Resetting static fields...");
    		  }
-   		  StaticFieldsReseter.resetClasses();;
+   		  StaticFieldsReseter.resetClasses();
     	  if (FieldBasedGenLog.isLoggingOn()) {
     		  long elapsed = System.currentTimeMillis() - initTime;
    			  FieldBasedGenLog.logLine("> Reset successful: " + String.format("%d.%d", elapsed/1000, elapsed%1000) + "s");
@@ -917,10 +917,12 @@ private int genFirstAdditionalObsErrorSeqs;
    	  }
    	  
 
-   	  if (!count_objects && !VectorsWriter.isEnabled()) {
+   	  /*
+   	  if (!count_objects && !VectorsWriter.isEnabled() && !GenInputsAbstract.reset_static_fields) {
    		  //eSeq.clearExtensions();
    		  eSeq.clearExecutionResults();
    	  }
+   	  */
      
       if (dump_sequences) {
         System.out.printf("Sequence after execution:%n%s%n", eSeq.toString());
@@ -1715,6 +1717,7 @@ private int genFirstAdditionalObsErrorSeqs;
 
 			  ExecutableSequence extendedSeq = new ExecutableSequence(newSequence);
 			  executeExtendedSequenceNoReexecute(extendedSeq, currentSeq, startIndex, endIndex);
+
 			  //processLastSequenceStatement(eSeq2ndPhase);
 
 			  if (extendedSeq.isNormalExecution() && operation.isModifier()) {
@@ -1755,8 +1758,7 @@ private int genFirstAdditionalObsErrorSeqs;
 						  if (FieldBasedGenLog.isLoggingOn()) 
 							  FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
 
-						  currentSeq.clearExecutionResults();
-						  extendedSeq.clearExecutionResults();
+						  resetExecutionResults(currentSeq, extendedSeq);
 					  } 
 					  else {
 						  // outRegressionSeqs.add(eSeq2ndPhase);
@@ -1810,9 +1812,7 @@ private int genFirstAdditionalObsErrorSeqs;
 
 							  }
 							  // Results are invalidated by the method that thrown the exception.
-							  extendedSeq.clearExecutionResults();
-							  currentSeq.clearExecutionResults();
-							  
+							  resetExecutionResults(currentSeq, extendedSeq);
 						  } 
 						  /*
 						  // Add newSequence's inputs to subsumed_sequences
@@ -1836,8 +1836,7 @@ private int genFirstAdditionalObsErrorSeqs;
 					  else
 						  genFirstAdditionalObsErrorSeqs++;
 					  
-					  currentSeq.clearExecutionResults();
-					  extendedSeq.clearExecutionResults();
+					  resetExecutionResults(currentSeq, extendedSeq);
 				  }
 			  }
 			  else {
@@ -1854,8 +1853,7 @@ private int genFirstAdditionalObsErrorSeqs;
 				  else
 					  genFirstAdditionalObsErrorSeqs++;
 				  
-				  currentSeq.clearExecutionResults();
-				  extendedSeq.clearExecutionResults();
+				  resetExecutionResults(currentSeq, extendedSeq);
 			  }
 
 		  }
@@ -1867,8 +1865,16 @@ private int genFirstAdditionalObsErrorSeqs;
 			  outRegressionSeqs.add(currentSeq);
 		  }
 	  }
+  }
+
+
+  private void resetExecutionResults(ExecutableSequence currentSeq, ExecutableSequence extendedSeq) {
+	  extendedSeq.clearExecutionResults();
+	  currentSeq.clearExecutionResults();
+	  if (GenInputsAbstract.reset_static_fields) 
+		  StaticFieldsReseter.resetClasses();
   } 
-  
+
   
   
 
@@ -2077,7 +2083,6 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 			  ExecutableSequence extendedSeq = new ExecutableSequence(newSequence);
 			  executeExtendedSequenceNoReexecute(extendedSeq, currentSeq, startIndex, endIndex);
 			  //processLastSequenceStatement(eSeq2ndPhase);
-//			  executeExtendedSequence(eSeq2ndPhase);
 
 			  if (extendedSeq.isNormalExecution() && operation.isModifier()) {
 				  if (FieldBasedGenLog.isLoggingOn())
@@ -2108,8 +2113,7 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 						  if (FieldBasedGenLog.isLoggingOn()) 
 							  FieldBasedGenLog.logLine("> Current sequence reveals a failure, saved it as an error revealing test");
 
-						  currentSeq.clearExecutionResults();
-						  extendedSeq.clearExecutionResults();
+						  resetExecutionResults(currentSeq, extendedSeq);
 					  } 
 					  else {
 						  //outRegressionSeqs.add(eSeq2ndPhase);
@@ -2152,8 +2156,8 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 								  if (FieldBasedGenLog.isLoggingOn()) 
 									  FieldBasedGenLog.logLine("> Negative observers per test limit exceeded. Discarding current sequence");
 							  }
-							  currentSeq.clearExecutionResults();
-							  extendedSeq.clearExecutionResults();
+
+							  resetExecutionResults(currentSeq, extendedSeq);
 						  } 
 						  
 					  }
@@ -2172,8 +2176,7 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 					  else
 						  genFirstAdditionalObsErrorSeqs++;
 				  
-					  currentSeq.clearExecutionResults();
-					  extendedSeq.clearExecutionResults();
+					  resetExecutionResults(currentSeq, extendedSeq);
 				  }
 			  }
 			  else {
@@ -2190,8 +2193,7 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 				  else
 					  genFirstAdditionalObsErrorSeqs++;
 
-				  currentSeq.clearExecutionResults();
-				  extendedSeq.clearExecutionResults();
+				  resetExecutionResults(currentSeq, extendedSeq);
 			  }
 			  
 		  }

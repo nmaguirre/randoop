@@ -21,6 +21,7 @@ public class SimpleReloader extends URLClassLoader {
     @Override
     public synchronized Class<?> loadClass(String name) throws ClassNotFoundException {
     	int pos;
+    	//System.out.println(">> Loading class: " + name);
     	if (classesToReload.contains(name) ||
     			((pos = name.lastIndexOf('$')) > 1 && classesToReload.contains(name.substring(0, pos)))) {
     		Class<?> c = loaded.get(name);

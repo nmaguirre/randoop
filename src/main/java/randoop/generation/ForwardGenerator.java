@@ -250,7 +250,7 @@ private int maxsize;
     	startTime = endTime; // reset start time.
 
     	try {
-    		if (extendedSeq.hasNonExecutedStatements())
+    		if (extendedSeq == null || extendedSeq.hasNonExecutedStatements())
     			//eSeq.executeFBSecondPhase(executionVisitor, checkGenerator, canonizer);
     			eSeq.executeFB(executionVisitor, checkGenerator, newCanonicalizer, null);
     		else
