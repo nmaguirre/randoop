@@ -307,8 +307,10 @@ public class OperationModel {
     // Collect classes under test
     Set<Class<?>> visitedClasses = new LinkedHashSet<>();
     
+    /*
     if (GenInputsAbstract.reset_static_fields)
     	StaticFieldsReseter.activateReloader();
+    	*/
     for (String classname : classnames) {
       Class<?> c = null;
       try {
@@ -366,8 +368,10 @@ public class OperationModel {
         }
       }
     }
+    /*
     if (GenInputsAbstract.reset_static_fields)
     	StaticFieldsReseter.deactivateReloader();
+    	*/
   }
 
   /**

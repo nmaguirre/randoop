@@ -161,17 +161,19 @@ public class JunitFileWriter {
 	      out.println("  public static boolean debug = false;");
 	      out.println();
 	      
+	      /*
 	      out.println("  @Before");
 	      out.println("  public void before() {");
 	      out.println("    StaticFieldsReseter.activateReloader();");
 	      out.println("  }");
 	      out.println();
+	      */
 	      
 	      out.println("  @After");
 	      out.println("  public void after() {");
-	      out.println("    StaticFieldsReseter.deactivateReloader();");
-	      out.println("    StaticFieldsReseter.resetAllClasses();");
-//	      out.println("    StaticFieldsReseter.resetClasses();");
+	      //out.println("    StaticFieldsReseter.deactivateReloader();");
+//	      out.println("    StaticFieldsReseter.resetAllClasses();");
+	      out.println("    StaticFieldsReseter.resetClasses();");
 	      out.println("  }");
 	      out.println();
 

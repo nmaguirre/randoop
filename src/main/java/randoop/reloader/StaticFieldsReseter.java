@@ -12,29 +12,27 @@ public class StaticFieldsReseter {
 	private static Set<String> classesToReload;
 	private static String [] classesToReloadArr;
 	private static ClassLoader simpleReloader;
+	private static boolean first = true;
 
 	public static void setupReloader(Set<String> clnames) { 
 		classesToReload = new HashSet<>();
 		classesToReload.addAll(clnames);
-		/*
-		for (String str: clnames) {
-			if (org.evosuite.runtime.classhandling.ClassResetter.getInstance().getResetMethod(str) != null)
-				classesToReload.add(str);
-		}
-		*/
+
+
+
 		classesToReloadArr = classesToReload.toArray(new String[0]);
 		simpleReloader = new SimpleReloader(classesToReload);
 		setupReloader();
 	}
 		
 		
-	public static void setupReloader() { 
+	private static void setupReloader() { 
 		/*
 		for (int i = 0; i < classerUnderTestArr.length; i++)
 	 		classerUnderTestArr[i] = classerUnderTestArr[i].replaceAll("\\.", "/");
 			*/
-		org.evosuite.runtime.classhandling.ClassResetter.getInstance().setClassLoader(ClassLoader.getSystemClassLoader());
 
+		org.evosuite.runtime.classhandling.ClassResetter.getInstance().setClassLoader(ClassLoader.getSystemClassLoader());
 		RuntimeSettings.useSeparateClassLoader = false;
 		RuntimeSettings.resetStaticState = true;
 		RuntimeSettings.maxNumberOfIterationsPerLoop = Integer.MAX_VALUE;
@@ -42,20 +40,28 @@ public class StaticFieldsReseter {
 		org.evosuite.runtime.agent.InstrumentingAgent.initialize(); 
 		org.evosuite.runtime.agent.InstrumentingAgent.deactivate(); 
 
-		//initializeClasses();
+		initializeClasses();
 		//RuntimeSettings.sandboxMode = SandboxMode.OFF;
 		//org.evosuite.runtime.agent.InstrumentingAgent.activate(); 
 	}
 
 	
-	/*
 	private static void initializeClasses() {
 
+		org.evosuite.runtime.agent.InstrumentingAgent.activate(); 
 		org.evosuite.runtime.classhandling.ClassStateSupport.initializeClasses(ClassLoader.getSystemClassLoader(),
-				classerUnderTestArr
-		);
-	  } 	
-	  */
+				classesToReloadArr	
+				);
+		org.evosuite.runtime.agent.InstrumentingAgent.deactivate(); 
+		// The first time we filter out the classes that do not have static fields 
+		Set<String> filteredClasses = new HashSet<>();
+		for (String str: classesToReload) {
+			if (org.evosuite.runtime.classhandling.ClassResetter.getInstance().getResetMethod(str) != null)
+				filteredClasses.add(str);
+		}
+		classesToReload = filteredClasses;
+		classesToReloadArr = classesToReload.toArray(new String[0]);
+	} 	
 	
 	public static Set<String> getClassesToReload() {
 		return classesToReload;
@@ -67,6 +73,7 @@ public class StaticFieldsReseter {
 				);
 	}
 
+	/*
 	public static void activateReloader() {	  
 		org.evosuite.runtime.agent.InstrumentingAgent.activate(); 
 	}
@@ -75,10 +82,13 @@ public class StaticFieldsReseter {
 	public static void deactivateReloader() {	  
 		org.evosuite.runtime.agent.InstrumentingAgent.deactivate(); 
 	}
+	*/
 
+	/*
 	public static void resetAllClasses() {	  
 		org.evosuite.runtime.classhandling.ClassResetter.getInstance().resetAll();
 	}
+	*/
 
 	public static ClassLoader getSimpleReloader() {
 		return simpleReloader;
