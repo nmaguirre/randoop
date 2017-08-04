@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 
 import randoop.test.datastructures.bstree.BSTree;
 import randoop.test.datastructures.singlylistinner.SinglyLinkedListInner;
+import randoop.types.PrimitiveType;
 import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
@@ -199,6 +200,32 @@ public class TestFieldExtensionsSimple {
 		*/
 		
 	}
+	
+	@Test
+	public void SimpleTest5() {
+		
+		Set<String> classNames = new HashSet<String>();
 
+		/** Inicializar clases que hacen la canonizacion **/
+		// El canonizador toma un set con el nombre de la clase principal, y la cantidad maxima de objetos
+		// por clase en los vectores candidatos
+		CanonicalStore store = new CanonicalStore(classNames);
+		HeapCanonicalizer candVectCanonizer = new HeapCanonicalizer(store, Integer.MAX_VALUE);
+		
+		FieldExtensionsCollector collector = new FieldExtensionsStringsCollector();
+		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(CanonicalizationResult.OK, collector);
+		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
+		FieldExtensionsStrings ext1 = (FieldExtensionsStrings) collector.getExtensions();
+		System.out.println(ext1.toString());
+		
+		collector = new FieldExtensionsStringsCollector();
+		canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(randoop.util.heapcanonicalization.fieldextensions.PrimitiveType.INTEGER, collector);
+		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
+		FieldExtensionsStrings ext2 = (FieldExtensionsStrings) collector.getExtensions();
+		System.out.println(ext2.toString());
+	
+
+	
+	}
 	
 }

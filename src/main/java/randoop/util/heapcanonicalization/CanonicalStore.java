@@ -58,7 +58,7 @@ public class CanonicalStore {
 	
 	public CanonicalClass getCanonicalClass(String name) {
 		CanonicalClass cls = classes.get(name);
-		assert cls != null : "This method should be called for existing canonical classes only";
+		assert cls != null : "Called for "+ name + " but this method should be called for existing canonical classes only. ";
 		return cls;
 	}
 	

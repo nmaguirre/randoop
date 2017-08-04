@@ -4,18 +4,52 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public enum PrimitiveType {
-	INTEGER,
-	SHORT,
-	CHAR,
-	BYTE,
-	BOOLEAN,
-	LONG,
-	FLOAT,
-	DOUBLE,
-	STRING,
-	ENUM, 
-	BIGINTEGER, 
-	BIGDECIMAL;
+	INTEGER ("java.lang.Integer"),
+	SHORT ("java.lang.Short"),
+	CHAR ("java.lang.Character"),
+	BYTE ("java.lang.Byte"),
+	BOOLEAN ("java.lang.Boolean"),
+	LONG ("java.lang.Long"),
+	FLOAT ("java.lang.Float"),
+	DOUBLE ("java.lang.Double"),
+	STRING ("java.lang.String"),
+	ENUM (""),
+	BIGINTEGER ("java.math.BigInteger"), 
+	BIGDECIMAL ("java.lang.BigDecimal");
+	
+	
+    private final String className;       
+
+    private PrimitiveType(String s) {
+        className = s;
+    }
+    
+    public String getClassName() {
+    	return className;
+    }
+    
+	public static PrimitiveType fromName(String s) {
+		switch (s) {
+		case "int": 
+			return INTEGER;
+		case "short":
+			return SHORT;
+		case "char":
+			return CHAR;
+		case "byte":
+			return BYTE;
+		case "boolean":
+			return BOOLEAN;
+		case "long":
+			return LONG;
+		case "float":
+			return FLOAT;
+		case "double":
+			return DOUBLE;
+		default:
+			throw new BugInPrimitiveTypeCanonicalization("Primitive type " + s + " not supported");
+		}
+	}
 	
 	public static PrimitiveType fromObject(Object o) {
 		if (o.getClass() == int.class || o.getClass() == Integer.class)
@@ -43,6 +77,6 @@ public enum PrimitiveType {
 		else if (o.getClass() == BigDecimal.class)
 			return BIGDECIMAL;
 		else 
-			throw new BugInFieldExtensionsCanonicalization("Bitwise canonization of " + o.getClass() + " not supported");
+			throw new BugInPrimitiveTypeCanonicalization("Primitive type " + o.getClass() + " not supported");
 	}
 }

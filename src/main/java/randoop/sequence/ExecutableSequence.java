@@ -49,7 +49,7 @@ import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
-import randoop.util.heapcanonicalization.fieldextensions.BugInFieldExtensionsCanonicalization;
+import randoop.util.heapcanonicalization.fieldextensions.BugInPrimitiveTypeCanonicalization;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensions;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsByTypeCollector;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsCollector;
@@ -896,7 +896,7 @@ public class ExecutableSequence {
 				   collector = new FieldExtensionsStringsCollector(GenInputsAbstract.string_maxlen);
 			   Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonicalize(o, collector);
 			   if (res.getKey() != CanonicalizationResult.OK)
-				   throw new BugInFieldExtensionsCanonicalization("Structure exceeding limits. We don't support these yet.");
+				   throw new BugInPrimitiveTypeCanonicalization("Structure exceeding limits. We don't support these yet.");
 			   extensions.add(collector.getExtensions());
 		   }
 		   else
