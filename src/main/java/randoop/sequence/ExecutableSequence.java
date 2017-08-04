@@ -909,7 +909,7 @@ public class ExecutableSequence {
    }
    
    
-   private boolean isPrimitive(Object o) {
+   public boolean isPrimitive(Object o) {
 	   Class<?> cls = o.getClass();
 	   return NonreceiverTerm.isNonreceiverType(cls) ||
 	   		// We treat these as primitives

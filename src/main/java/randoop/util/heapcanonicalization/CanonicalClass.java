@@ -42,8 +42,8 @@ public class CanonicalClass {
 		} catch (ClassNotFoundException e) {
 			if (CanonicalizerLog.isLoggingOn())
 				CanonicalizerLog.logLine("CANONICALIZER INFO: Class for name " + name + " not found, assuming it's a primitive type.");
-			// Add the corresponding reference primitive class;
-			store.getUpdateOrCreateCanonicalClass(PrimitiveType.fromName(name).getClassName(), 0);
+			// Add the corresponding reference primitive class?
+			// store.getUpdateOrCreateCanonicalClass(PrimitiveType.fromName(name).getClassName(), 0);
 		}
 		clazz = cls;
 		isObject = isObject(clazz);

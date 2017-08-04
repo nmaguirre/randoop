@@ -645,6 +645,9 @@ private int genFirstAdditionalObsErrorSeqs;
 		List<Object> formerMutatedObjs = new LinkedList<>();
 		for (Object obj: eSeq.getLastStmtRuntimeObjects()) {
 			index++;
+			
+			if (obj == null || eSeq.isPrimitive(obj))
+				continue;
 			/*
 			if (activeVars != null && !activeVars.contains(index)) 
 				continue;
@@ -653,10 +656,10 @@ private int genFirstAdditionalObsErrorSeqs;
 				*/
 			
 			Entry<CanonicalizationResult, CanonicalHeap> res;
-			CanonicalClass rootClass = (obj==null) ? null : store.getCanonicalClass(obj.getClass());
+			CanonicalClass rootClass = store.getCanonicalClass(obj.getClass());
 			// FIXME: Should check the compile time type of o instead of its runtime type to 
 			// avoid generating null objects of other types? 
-			if (/*o == null ||*/ (obj != null && store.isMainClass(rootClass))) {
+			if (store.isMainClass(rootClass)) {
 				// Root is not an object we are interested in generating a candidate vector for.
 				// Notice that we are always interested in generating a candidate object for null, 
 				// even if we don't know its type.
