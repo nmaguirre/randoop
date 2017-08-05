@@ -38,7 +38,6 @@ public class StaticFieldsReseter {
 		RuntimeSettings.maxNumberOfIterationsPerLoop = Integer.MAX_VALUE;
 
 		org.evosuite.runtime.agent.InstrumentingAgent.initialize(); 
-		org.evosuite.runtime.agent.InstrumentingAgent.deactivate(); 
 
 		initializeClasses();
 		//RuntimeSettings.sandboxMode = SandboxMode.OFF;
@@ -56,8 +55,9 @@ public class StaticFieldsReseter {
 		// The first time we filter out the classes that do not have static fields 
 		Set<String> filteredClasses = new HashSet<>();
 		for (String str: classesToReload) {
-			if (org.evosuite.runtime.classhandling.ClassResetter.getInstance().getResetMethod(str) != null)
+			if (org.evosuite.runtime.classhandling.ClassResetter.getInstance().getResetMethod(str) != null) {
 				filteredClasses.add(str);
+			}
 		}
 		classesToReload = filteredClasses;
 		classesToReloadArr = classesToReload.toArray(new String[0]);

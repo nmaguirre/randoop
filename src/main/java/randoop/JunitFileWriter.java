@@ -120,7 +120,7 @@ public class JunitFileWriter {
   }
   
   
-  public List<File> writeJUnitTestFilesReloader(List<List<ExecutableSequence>> seqPartition) {
+  public List<File> writeJUnitTestFilesReloader(List<List<ExecutableSequence>> seqPartition, Set<String> resetClasses) {
 	  List<File> ret = new ArrayList<>();
 
 	  NameGenerator classNameGen = new NameGenerator(masterTestClassName);
@@ -128,7 +128,7 @@ public class JunitFileWriter {
 	  createOutputDir();
 
 	  for (List<ExecutableSequence> partition : seqPartition) {
-		  ret.add(writeTestClassReloader(partition, classNameGen.next()));
+		  ret.add(writeTestClassReloader(partition, classNameGen.next(), resetClasses));
 	  }
 
 	  testClassCount = classNameGen.nameCount();
@@ -137,7 +137,7 @@ public class JunitFileWriter {
   }
   
   
-  private File writeTestClassReloader(List<ExecutableSequence> sequences, String testClassName) {
+  private File writeTestClassReloader(List<ExecutableSequence> sequences, String testClassName, Set<String> resetClasses) {
 
 	    File file = new File(getDir(), testClassName + ".java");
 	    PrintStream out = createTextOutputStream(file);
@@ -152,13 +152,29 @@ public class JunitFileWriter {
 	      out.println("import org.junit.runners.MethodSorters;");
 	      out.println("import org.junit.Before;");
 	      out.println("import org.junit.After;");
-	      out.println("import randoop.reloader.StaticFieldsReseter;");	      
+	      out.println("import org.junit.BeforeClass;");
+	      out.println("import java.util.HashSet;");
+	      out.println("import java.util.Set;");
+	      out.println("import randoop.reloader.StaticFieldsReseter;");	   
+	      out.println("import org.junit.runner.RunWith;");
+	      out.println("import org.evosuite.runtime.EvoRunner;");
+	      out.println("import org.evosuite.runtime.EvoRunnerParameters;");
 	      
 	      out.println();
+	      out.println("@RunWith(EvoRunner.class) @EvoRunnerParameters(mockJVMNonDeterminism = false, useVFS = false, useVNET = false, resetStaticState = true)");
 	      out.println("@FixMethodOrder(MethodSorters.NAME_ASCENDING)");
 	      out.println("public class " + testClassName + " {");
 	      out.println();
 	      out.println("  public static boolean debug = false;");
+	      out.println();
+	      
+	      out.println("  @BeforeClass");
+	      out.println("  public static void setup() {");
+	      out.println("    Set<String> classes = new HashSet<String>();");
+	      for (String cls: resetClasses) 
+	    	  out.println("    classes.add(\"" + cls + "\");");
+	      out.println("    StaticFieldsReseter.setupReloader(classes);");
+	      out.println("  }");
 	      out.println();
 	      
 	      /*
