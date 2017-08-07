@@ -372,9 +372,7 @@ private int maxsize;
     	startTime = endTime; // reset start time.
 
     	processSequence(eSeq);
-    	
 
-    	
     	/* 
     	 * Not needed anymore.
     	 * TODO: Support hashes again?

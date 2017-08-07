@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import randoop.generation.AbstractGenerator;
+
 
 public class CanonicalObject {
 
@@ -33,7 +35,8 @@ public class CanonicalObject {
 		assert !clazz.isPrimitive(): "Should never try to get the fields of primitive types";
 		if (clazz.isArray()) {
 			int arrLength = Array.getLength(object);
-			if (arrLength > heap.getMaxObjects())
+
+			if (AbstractGenerator.vectorization_hard_array_limits && arrLength > heap.getMaxObjects())
 				return new AbstractMap.SimpleEntry<>(CanonicalizationResult.ARRAY_LIMITS_EXCEEDED, null); 
 
 			List<CanonicalField> arrFields = new LinkedList<>();

@@ -3,6 +3,7 @@ package randoop.util.heapcanonicalization;
 import org.junit.Assert;
 import org.junit.Test;
 
+import randoop.generation.AbstractGenerator;
 import randoop.test.datastructures.binheap.BinomialHeap;
 import randoop.test.datastructures.bstree.BSTree;
 import randoop.test.datastructures.singlylist.SinglyLinkedList;
@@ -275,6 +276,7 @@ public class TestFieldExtensionsStrings {
 			obj.add(i);
 		}
 		
+		AbstractGenerator.vectorization_hard_array_limits = true;
 		/** Canonizar el objeto creado **/
 		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.ARRAY_LIMITS_EXCEEDED);

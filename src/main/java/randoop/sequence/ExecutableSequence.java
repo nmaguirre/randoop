@@ -895,8 +895,13 @@ public class ExecutableSequence {
 			   else 
 				   collector = new FieldExtensionsStringsCollector(GenInputsAbstract.string_maxlen);
 			   Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonicalize(o, collector);
-			   if (res.getKey() != CanonicalizationResult.OK)
-				   throw new BugInPrimitiveTypeCanonicalization("Structure exceeding limits. We don't support these yet.");
+			   if (res.getKey() != CanonicalizationResult.OK) {
+			   	//throw new BugInPrimitiveTypeCanonicalization("Structure exceeding limits. We don't support these yet.");
+				   // Structure exceeding limits. This sequence does not extends extensions
+				   if (FieldBasedGenLog.isLoggingOn()) 
+					   FieldBasedGenLog.logLine("> Structure exceeding limits. Current test won't be used as a generator.");
+				   return null;
+			   }
 			   extensions.add(collector.getExtensions());
 		   }
 		   else
@@ -994,7 +999,6 @@ public class ExecutableSequence {
 		   }
 	   }
 	   */
-	   
 	   
 	   for (Integer i: lastStmtNonPrimIndexes) {
 		   FieldExtensions ext = newExtensions.get(i);
@@ -1272,7 +1276,12 @@ public class ExecutableSequence {
 			   // globalExt == null in the second phase, as we do not want to enlarge the global extensions at that point
 			   if (globalExt != null) {
 				   lastStmtExtAfterExecution = createExtensionsForAllObjects(objs, canonicalizer);
-				   enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
+				   if (lastStmtExtAfterExecution == null)
+					   // An object exceeded the given limits
+					   // This sequence is not a generator
+					   enlargesExtensions = ExtendExtensionsResult.NOT_EXTENDED; 
+				   else
+					   enlargesExtensions = enlargeExtensions(objs, lastStmtExtAfterExecution, globalExt);
 			   }
 			   if (globalExt != null && AbstractGenerator.fbg_observer_detection) {
 				   // Update operation types according to their behavior w.r.t. extensions for observer detection.
@@ -1293,6 +1302,8 @@ public class ExecutableSequence {
 						   }
 					   }
 					   else { //sequence.size() > 1 
+						   assert lastStmtExtAfterExecution != null && lastStmtExtBeforeExecution != null:
+							   "Dropping objects exceeding limits together with observer detection is not implemented yet.";
 						   assert lastStmtExtBeforeExecution.size() == lastStmtExtBeforeExecution.size(): 
 							   "Extensions before and after must be of the same size";
 						   for (int j = 0; j < lastStmtExtAfterExecution.size(); j++) {

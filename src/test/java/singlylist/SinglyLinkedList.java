@@ -133,6 +133,7 @@ public class SinglyLinkedList implements Serializable {
 
 	}
    	
+	/*
 	public boolean repOK() {
         if (!repOkCommon())
             return false;
@@ -190,10 +191,6 @@ public class SinglyLinkedList implements Serializable {
         entries.setNullAllowed(true);
         entries.addClassDomain(f.createClassDomain(Node.class, numNodes));
 
-        /*IObjSet elems = f.createObjSet(SerializableObject.class);
-        elems.setNullAllowed(true);
-        elems.addClassDomain(f.createClassDomain(SerializableObject.class,
-                numElems));*/
         
         IIntSet values = f.createIntSet(minData, maxData);
         IIntSet sizes = f.createIntSet(minSize, maxSize);
@@ -206,5 +203,6 @@ public class SinglyLinkedList implements Serializable {
         return f;
 
     }
+*/
 }//End Class
 

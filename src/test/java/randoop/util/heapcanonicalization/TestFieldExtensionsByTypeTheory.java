@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 /**
- * A few tests for the vector canonization algorithm.
+ * A few tests for the vector canonicalization algorithm.
  */
 @RunWith(Theories.class)
 public class TestFieldExtensionsByTypeTheory {
