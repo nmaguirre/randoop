@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import randoop.util.Randomness;
@@ -115,12 +116,12 @@ public class CanonicalHeap {
 		int retriesLeft = retries;
 
 		boolean succeeded = false;
+		if (CanonicalizerLog.isLoggingOn()) {
+			CanonicalizerLog.logLine("----------");
+			CanonicalizerLog.logLine("Starting a mutation attempt:");
+			CanonicalizerLog.logLine("Heap contents:\n" + toString());
+		}
 		while (!succeeded && retriesLeft > 0) {
-			if (CanonicalizerLog.isLoggingOn()) {
-				CanonicalizerLog.logLine("----------");
-				CanonicalizerLog.logLine("Starting a mutation attempt:");
-				CanonicalizerLog.logLine("Heap contents:\n" + toString());
-			}
 			// 1- Pick a class whose objects are mutation candidates.
 			List<CanonicalClass> candidateClasses = new ArrayList<>(); 
 			for (CanonicalClass c: objects.keySet()) {
@@ -152,7 +153,9 @@ public class CanonicalHeap {
 			
 			// 3- Pick the field to be mutated.
 			List<CanonicalField> candidateFields = new ArrayList<>(); 
-			for (CanonicalField fld: rdmClass.getCanonicalFields()) {
+			Entry<CanonicalizationResult, List<CanonicalField>> objFieldsRes = toMutate.getCanonicalFields();
+			assert objFieldsRes.getKey() == CanonicalizationResult.OK: "Getting fields of object " + toMutate + " failed";
+			for (CanonicalField fld: objFieldsRes.getValue() /*rdmClass.getCanonicalFields()*/) {
 				CanonicalClass fType = fld.getCanonicalType();
 				if (!fld.isFinal() && !fType.isObject() && !fType.isPrimitive() && store.isClassFromCode(fType))
 					candidateFields.add(fld);

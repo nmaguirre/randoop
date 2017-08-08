@@ -99,9 +99,9 @@ public abstract class AbstractGenerator {
 
 		initNewCanonicalizer(classNames, maxObjects, maxArrayObjs, bfsDepth, fieldDistance);
 
-		vectorization_hard_array_limits = true;
+		//vectorization_hard_array_limits = true;
 
-		vectorCanonicalizer = new HeapCanonicalizer(store, vectMaxObjects);
+		vectorCanonicalizer = new HeapCanonicalizer(store, vectMaxObjects, vectMaxObjects);
 		// Initialize the candidate vector generator with the canonical classes that were mined from the code,
 		// before the generation starts.
 		if (vectorization_remove_unused) {                                                                                                                                                                           

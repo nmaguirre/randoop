@@ -21,11 +21,13 @@ public class CandidateVectorsFieldExtensions {
 	public boolean addToExtensions(CandidateVector<Integer> vector) {
 		assert vector.size() > 0: "Candidate vectors cannot be empty";
 
+//		System.out.println(vector.size());
 		assert vector.size() == extensions.size() : "All candidate vectors must be of the same size"
 				+ "Original size: " + extensions.size() + ", current size: " + vector.size();
 		if (vector.size() != extensions.size())
 			throw new BugInCandidateVectorsCanonicalization("Seen a candidate vector with a different size. "
 					+ "Original size: " + extensions.size() + ", current size: " + vector.size());
+		
 		
 		boolean extended = false;
 		for (int i = 0; i < extensions.size(); i++) 

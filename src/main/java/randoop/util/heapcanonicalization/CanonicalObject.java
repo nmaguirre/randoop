@@ -46,8 +46,14 @@ public class CanonicalObject {
 							" elements of an array of size " + arrLength);
 				arrLength = heap.getMaxArrayObjects();
 			}
-			for (int i = 0; i < arrLength; i++) 
-				arrFields.add(new CanonicalField(i, clazz, null));//clazz.getArrayElementsType()));
+			for (int i = 0; i < arrLength; i++) {
+				if (Array.get(object, 0) != null) {
+					CanonicalClass objClass = heap.getStore().getUpdateOrCreateCanonicalClass(Array.get(object, 0).getClass(), 2);
+					arrFields.add(new CanonicalField(i, clazz, objClass));//clazz.getArrayElementsType()));
+				}
+				else
+					arrFields.add(new CanonicalField(i, clazz, clazz.getArrayElementsType()));
+			}
 			return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, arrFields);
 		}
 		return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, clazz.getCanonicalFields());

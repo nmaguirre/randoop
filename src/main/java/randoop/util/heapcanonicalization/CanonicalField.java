@@ -63,19 +63,19 @@ public class CanonicalField {
 	}
 	
 	public boolean isObjectType() {
-		return type.isObject();
+		return /*(type == null) ? false: */ type.isObject();
 	}
 	
 	public boolean isPrimitiveType() {
-		return type.isPrimitive();
+		return /*(type == null) ? false:*/ type.isPrimitive();
 	}
 	
 	public boolean isArrayType() {
-		return type.isArray();
+		return /*(type == null) ? true:*/ type.isArray();
 	}
 
 	public Object getValue(CanonicalObject canObj) {
-		if (clazz.isArray()) {
+		if (field == null /*clazz.isArray()*/) {
 			return Array.get(canObj.getObject(), ID);
 		} 
 		else {
@@ -98,14 +98,21 @@ public class CanonicalField {
 	}
 	
 	public void setValue(CanonicalObject obj, CanonicalObject val) {
-		try {
-			field.set(obj.getObject(), val.getObject());
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			System.out.println("Cannot find existing field: " + field.getName());
-			System.out.println("Error objects: " + obj.getObject() + ", " + val.getObject());
-			assert false: "Cannot find an existing field";
-			System.exit(1);
+		if (field != null) {
+			try {
+				field.set(obj.getObject(), val.getObject());
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				System.out.println("Cannot find existing field: " + field.getName());
+				System.out.println("Error objects: " + obj.getObject() + ", " + val.getObject());
+				assert false: "Cannot find an existing field";
+				System.exit(1);
+			}
 		}
+		else {
+			// Array field
+			Array.set(obj.getObject(), ID, val.getObject());
+		}
+		
 	}
 
 	// The parameter is needed because this might be called for an object whose type 
