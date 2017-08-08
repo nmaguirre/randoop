@@ -154,7 +154,7 @@ public class CanonicalHeap {
 			List<CanonicalField> candidateFields = new ArrayList<>(); 
 			for (CanonicalField fld: rdmClass.getCanonicalFields()) {
 				CanonicalClass fType = fld.getCanonicalType();
-				if (!fType.isObject() && !fType.isPrimitive() && store.isClassFromCode(fType))
+				if (!fld.isFinal() && !fType.isObject() && !fType.isPrimitive() && store.isClassFromCode(fType))
 					candidateFields.add(fld);
 			}			
 			if (candidateFields.isEmpty()) {

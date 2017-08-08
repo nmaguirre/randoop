@@ -24,6 +24,14 @@ public class StaticFieldsReseter {
 		simpleReloader = new SimpleReloader(classesToReload);
 		setupReloader();
 	}
+	
+	
+	/*
+	public void addClassToReload(String className) {
+		
+		
+	}
+	*/
 		
 		
 	private static void setupReloader() { 
@@ -52,6 +60,13 @@ public class StaticFieldsReseter {
 				classesToReloadArr	
 				);
 		org.evosuite.runtime.agent.InstrumentingAgent.deactivate(); 
+		/*
+		for (String str:org.evosuite.runtime.classhandling.ClassResetter.getInstance().classesToReset) {
+			if (classesToReload.add(str))
+				System.out.println(str);
+		}
+		*/
+
 		// The first time we filter out the classes that do not have static fields 
 		Set<String> filteredClasses = new HashSet<>();
 		for (String str: classesToReload) {
@@ -73,7 +88,6 @@ public class StaticFieldsReseter {
 				);
 	}
 
-	/*
 	public static void activateReloader() {	  
 		org.evosuite.runtime.agent.InstrumentingAgent.activate(); 
 	}
@@ -81,8 +95,14 @@ public class StaticFieldsReseter {
 
 	public static void deactivateReloader() {	  
 		org.evosuite.runtime.agent.InstrumentingAgent.deactivate(); 
+		/*
+		for (String str:org.evosuite.runtime.classhandling.ClassResetter.getInstance().classesToReset) {
+			if (classesToReload.add(str))
+				System.out.println(str);
+		}
+		classesToReloadArr = classesToReload.toArray(new String[0]);
+		*/
 	}
-	*/
 
 	/*
 	public static void resetAllClasses() {	  

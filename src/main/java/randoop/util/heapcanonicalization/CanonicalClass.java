@@ -9,9 +9,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import randoop.BugInRandoopException;
-import randoop.util.heapcanonicalization.fieldextensions.PrimitiveType;
-
 
 public class CanonicalClass {
 
@@ -24,7 +21,7 @@ public class CanonicalClass {
 	private final boolean isArray;
 	private final boolean isAbstract;
 	private final boolean isInterface;
-	private final CanonicalClass ancestor;
+	private final List<CanonicalClass> ancestor;
 	private final Class<?> clazz;
 	//private final CanonicalClass arrObjectsType;
 	private final CanonicalStore store;
@@ -35,7 +32,9 @@ public class CanonicalClass {
 		ID = globalID++;
 		this.name = name;
 		fields = new LinkedList<>();
+		ancestor = new LinkedList<>();
 
+		System.out.println(name);
 		Class<?> cls = null;
 		try {
 			cls = Class.forName(name);
@@ -63,7 +62,7 @@ public class CanonicalClass {
 		if (CanonicalizerLog.isLoggingOn())
 			CanonicalizerLog.logLine("CANONICALIZER INFO: Class " + name + " created. Field distance=" + this.fieldDistance);
 		
-		ancestor = canonicalizeAncestors();
+		canonicalizeAncestors();
 		if (this.fieldDistance < maxFieldDistance)
 			canonicalizeFields();
 	}
@@ -76,18 +75,25 @@ public class CanonicalClass {
 		return (/*clazz == null || */isObject || isPrimitive || isArray) ? false : Modifier.isAbstract(clazz.getModifiers());
 	}
 
-	private CanonicalClass canonicalizeAncestors() {
+	private void canonicalizeAncestors() {
 		/* 
 		 * Ugly hack to deal with weird randoop test:
 		 * Object o = new Object();
 		 */
-		if (isObject || isPrimitive || isArray || isInterface) return null;
+		if (isObject || isPrimitive || isArray || isInterface) return;
 
-		CanonicalClass ancestor = store.getUpdateOrCreateCanonicalClass(clazz.getSuperclass(), fieldDistance);
-		if (!ancestor.isPrimitive() && !ancestor.clazz.equals(Object.class)) {
-			return ancestor;
+		List<Class<?>> interfaces = new LinkedList<>();
+		interfaces.addAll(Arrays.asList(clazz.getInterfaces()));
+		Collections.sort(interfaces, new ClassComparatorByName());
+		for (Class<?> interf: interfaces) {
+			CanonicalClass anc = store.getUpdateOrCreateCanonicalClass(interf, fieldDistance);
+			if (!anc.isPrimitive() && !anc.isObject()/*!ancestor.clazz.equals(Object.class)*/)
+				ancestor.add(anc);
 		}
-		return null;
+
+		CanonicalClass anc = store.getUpdateOrCreateCanonicalClass(clazz.getSuperclass(), fieldDistance);
+		if (!anc.isPrimitive() && !anc.isObject()/*!ancestor.clazz.equals(Object.class)*/)
+			ancestor.add(anc);
 	}
 
 	
@@ -96,10 +102,12 @@ public class CanonicalClass {
 		 * Ugly hack to deal with weird randoop test:
 		 * Object o = new Object();
 		 */
-		if (isObject || isPrimitive || isArray || isInterface) return;
+		if (isObject || isPrimitive || isArray) return;
 
-		if (ancestor != null)
-			fields.addAll(ancestor.getCanonicalFields());
+		if (!ancestor.isEmpty()) {
+			for (CanonicalClass anc: ancestor)
+				fields.addAll(anc.getCanonicalFields());
+		}
 		
 		List<Field> sortedFields = Arrays.asList(clazz.getDeclaredFields());
 		Collections.sort(sortedFields, new FieldComparatorByName());
@@ -179,7 +187,7 @@ public class CanonicalClass {
 		return ID;
 	}
 	
-	public CanonicalClass getAncestor() {
+	public List<CanonicalClass> getAncestor() {
 		return ancestor;
 	}
 
@@ -246,8 +254,11 @@ public class CanonicalClass {
 			//arrObjectsType.updateFieldDistance(fieldDistance, maxFieldDistance);
 		}
 		*/
-		if (ancestor != null)
-			ancestor.updateFieldDistance(fieldDistance, maxFieldDistance);
+		if (!ancestor.isEmpty()) {
+			for (CanonicalClass anc: ancestor)
+				anc.updateFieldDistance(fieldDistance, maxFieldDistance);
+		}
+		
 		if (fieldDistance < maxFieldDistance) {
 			fields.clear();
 			canonicalizeFields();

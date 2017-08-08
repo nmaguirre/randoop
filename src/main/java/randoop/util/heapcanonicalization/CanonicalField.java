@@ -2,6 +2,7 @@ package randoop.util.heapcanonicalization;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Map.Entry;
 
 public class CanonicalField {
@@ -9,6 +10,7 @@ public class CanonicalField {
 	private static int globalID = 0;
 	private final int ID;
 	private final Field field;
+	private final boolean isFinal;
 	private final CanonicalClass clazz;
 	private final CanonicalClass type;
 	private final String name;
@@ -17,6 +19,7 @@ public class CanonicalField {
 	public CanonicalField(Field field, CanonicalClass clazz, CanonicalClass type) {
 		ID = globalID++;
 		this.field = field;
+		this.isFinal = isFinalField();
 		field.setAccessible(true);
 		this.name = field.getName();
 		this.clazz = clazz;
@@ -28,10 +31,21 @@ public class CanonicalField {
 		ID = name;
 		this.name = Integer.toString(name);
 		this.field = null;
+		this.isFinal = isFinalField();
 		this.clazz = clazz;
 		this.type = type;
 	}
 
+	
+	private boolean isFinalField() {
+		return (field == null) ? false : Modifier.isFinal(field.getModifiers());
+	}
+	
+	public boolean isFinal() {
+		return isFinal;
+	}
+	
+	
 	public String getName() {
 		return name;
 	}
@@ -80,7 +94,7 @@ public class CanonicalField {
 
 	public String toString() {
 		String typeStr = (type == null) ? "null" : type.getName();
-		return "{" + getName() + ",ID=" + ID + ",class="+ clazz.getName() + ",type=" + typeStr + "}";
+		return "{" + getName() + ",ID=" + ID + ",class="+ clazz.getName() + ",type=" + typeStr + ",final=" + isFinal + "}";
 	}
 	
 	public void setValue(CanonicalObject obj, CanonicalObject val) {

@@ -167,6 +167,19 @@ public class JunitFileWriter {
 	      out.println();
 	      out.println("  public static boolean debug = false;");
 	      out.println();
+
+	      out.println("  private static final java.util.Properties defaultProperties = (java.util.Properties) java.lang.System.getProperties().clone();");
+	      out.println();
+	      
+	      out.println("  public static void setSystemProperties() {");
+	      out.println("    java.lang.System.setProperties((java.util.Properties) defaultProperties.clone());");
+	      out.println("    java.lang.System.setProperty(\"file.encoding\", \"UTF-8\");");
+	      out.println("    java.lang.System.setProperty(\"java.awt.headless\", \"true\");");
+	      out.println("    java.lang.System.setProperty(\"user.country\", \"US\");");
+	      out.println("    java.lang.System.setProperty(\"user.language\", \"en\");");
+	      out.println("    java.lang.System.setProperty(\"user.timezone\", \"America/Los_Angeles\");");
+	      out.println("  }");
+	      out.println();
 	      
 	      out.println("  @BeforeClass");
 	      out.println("  public static void setup() {");
@@ -177,13 +190,11 @@ public class JunitFileWriter {
 	      out.println("  }");
 	      out.println();
 	      
-	      /*
 	      out.println("  @Before");
 	      out.println("  public void before() {");
-	      out.println("    StaticFieldsReseter.activateReloader();");
+	      out.println("    setSystemProperties();");
 	      out.println("  }");
 	      out.println();
-	      */
 	      
 	      out.println("  @After");
 	      out.println("  public void after() {");

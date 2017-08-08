@@ -1999,7 +1999,12 @@ public class ExecutableSequence {
       // assert ((statement.isMethodCall() && !statement.isStatic()) ?
       // inputVariables[0] != null : true);
 
+      
+      //StaticFieldsReseter.activateReloader();
       ExecutionOutcome r = statement.execute(inputVariables, Globals.blackHole);
+      //StaticFieldsReseter.deactivateReloader();
+      
+      
       assert r != null;
       if (GenInputsAbstract.capture_output) {
         System.setOut(orig_out);

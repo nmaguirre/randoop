@@ -96,7 +96,7 @@ public abstract class AbstractGenerator {
 	
 	public void initNewCanonicalizerForVectorization(Collection<String> classNames, int maxObjects, 
 			int maxArrayObjs, int bfsDepth, int fieldDistance, int vectMaxObjects) {
-		
+
 		initNewCanonicalizer(classNames, maxObjects, maxArrayObjs, bfsDepth, fieldDistance);
 
 		vectorization_hard_array_limits = true;
@@ -840,6 +840,19 @@ private int genFirstAdditionalObsErrorSeqs;
 
 
    private int discardedTests; 
+   
+   
+   private static final java.util.Properties defaultProperties = (java.util.Properties) java.lang.System.getProperties().clone(); 
+
+   public static void setSystemProperties() {
+    
+       java.lang.System.setProperties((java.util.Properties) defaultProperties.clone()); 
+       java.lang.System.setProperty("file.encoding", "UTF-8"); 
+       java.lang.System.setProperty("java.awt.headless", "true"); 
+       java.lang.System.setProperty("user.country", "US"); 
+       java.lang.System.setProperty("user.language", "en"); 
+       java.lang.System.setProperty("user.timezone", "America/Los_Angeles"); 
+     }
   
   /**
    * Creates and executes new sequences until stopping criteria is met.
@@ -875,6 +888,10 @@ private int genFirstAdditionalObsErrorSeqs;
     discardedTests = 0;
     
     while (!stop()) {
+    	
+	  if (GenInputsAbstract.reset_static_fields) 
+		  // Reset system properties before executing each test
+		  setSystemProperties();
 
       // Notify listeners we are about to perform a generation step.
       if (listenerMgr != null) {
@@ -1004,6 +1021,7 @@ private int genFirstAdditionalObsErrorSeqs;
 
     	if (FieldBasedGenLog.isLoggingOn())
     		FieldBasedGenLog.logLine("\n\n>> Second phase for modifiers starting...\n");
+    	setSystemProperties();
 
     	extendModifierTestsWithObservers(modifierRegressionSeqs, operationsPermutable, false);
 
@@ -1750,7 +1768,9 @@ private int genFirstAdditionalObsErrorSeqs;
 
 			  this.allSequences.add(newSequence);	
 
+			  
 			  ExecutableSequence extendedSeq = new ExecutableSequence(newSequence);
+			  resetExecutionResults(currentSeq, extendedSeq);
 			  executeExtendedSequenceNoReexecute(extendedSeq, currentSeq, startIndex, endIndex);
 
 			  //processLastSequenceStatement(eSeq2ndPhase);
@@ -1906,8 +1926,10 @@ private int genFirstAdditionalObsErrorSeqs;
   private void resetExecutionResults(ExecutableSequence currentSeq, ExecutableSequence extendedSeq) {
 	  extendedSeq.clearExecutionResults();
 	  currentSeq.clearExecutionResults();
-	  if (GenInputsAbstract.reset_static_fields) 
+	  if (GenInputsAbstract.reset_static_fields) {
+		  setSystemProperties();
 		  StaticFieldsReseter.resetClasses();
+	  }
   } 
 
   
@@ -2116,6 +2138,7 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 			  this.allSequences.add(newSequence);	
 
 			  ExecutableSequence extendedSeq = new ExecutableSequence(newSequence);
+			  resetExecutionResults(currentSeq, extendedSeq);
 			  executeExtendedSequenceNoReexecute(extendedSeq, currentSeq, startIndex, endIndex);
 			  //processLastSequenceStatement(eSeq2ndPhase);
 

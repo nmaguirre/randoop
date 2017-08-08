@@ -399,7 +399,7 @@ public class GenTests extends GenInputsAbstract {
 
     if (VectorsWriter.isEnabled())
     	explorer.initNewCanonicalizerForVectorization(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_max_array_objs, 
-    			AbstractGenerator.fbg_bfs_depth, AbstractGenerator.fbg_field_distance, AbstractGenerator.vectorization_max_objects);
+    			AbstractGenerator.fbg_bfs_depth, /*AbstractGenerator.fbg_field_distance*/ Integer.MAX_VALUE, AbstractGenerator.vectorization_max_objects);
     else
     	explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_max_array_objs, 
     			AbstractGenerator.fbg_bfs_depth, AbstractGenerator.fbg_field_distance);
