@@ -121,5 +121,9 @@ public class CanonicalField {
 		return obj.getCanonicalClass().getName() + "." + getName();
 	}
 	
+	
+	public Field getField() {
+		return field;
+	}
 }
 

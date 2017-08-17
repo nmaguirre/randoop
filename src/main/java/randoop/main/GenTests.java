@@ -398,8 +398,9 @@ public class GenTests extends GenInputsAbstract {
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
     if (VectorsWriter.isEnabled())
-    	explorer.initNewCanonicalizerForVectorization(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.vectorization_max_objects, 
-    			AbstractGenerator.fbg_bfs_depth, /*AbstractGenerator.fbg_field_distance*/ Integer.MAX_VALUE, AbstractGenerator.vectorization_max_objects);
+    	explorer.initNewCanonicalizerForVectorization(classnames, AbstractGenerator.fbg_max_objects, 
+    			AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_bfs_depth, /*AbstractGenerator.fbg_field_distance*/ 
+    			Integer.MAX_VALUE, AbstractGenerator.vectorization_max_objects);
     else
     	explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_max_array_objs, 
     			AbstractGenerator.fbg_bfs_depth, AbstractGenerator.fbg_field_distance);
@@ -792,7 +793,8 @@ public class GenTests extends GenInputsAbstract {
       JunitFileWriter jfw = new JunitFileWriter(output_dir, junit_package_name, junitClassname);
 
    	  if (reset_static_fields)
-   		  files.addAll(jfw.writeJUnitTestFilesReloader(seqPartition, StaticFieldsReseter.getClassesToReload()));
+   		  files.addAll(jfw.writeJUnitTestFilesReloader(seqPartition, StaticFieldsReseter.getClassesToReload(), 
+   				  AbstractGenerator.systemProperties));
    	  else
    		  files.addAll(jfw.writeJUnitTestFiles(seqPartition));
 

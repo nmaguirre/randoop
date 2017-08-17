@@ -70,9 +70,13 @@ public class StaticFieldsReseter {
 		// The first time we filter out the classes that do not have static fields 
 		Set<String> filteredClasses = new HashSet<>();
 		for (String str: classesToReload) {
-			if (org.evosuite.runtime.classhandling.ClassResetter.getInstance().getResetMethod(str) != null) {
+			
+			if (str.endsWith("CheckLevel"))
 				filteredClasses.add(str);
-			}
+			
+			if (org.evosuite.runtime.classhandling.ClassResetter.getInstance().getResetMethod(str) != null) 
+				filteredClasses.add(str);
+			
 		}
 		classesToReload = filteredClasses;
 		classesToReloadArr = classesToReload.toArray(new String[0]);

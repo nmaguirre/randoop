@@ -21,7 +21,8 @@ public class CanonicalClass {
 	private final boolean isArray;
 	private final boolean isAbstract;
 	private final boolean isInterface;
-	private final List<CanonicalClass> ancestor;
+	private final List<CanonicalClass> ancestors;
+	private final List<CanonicalClass> descendants;
 	private final Class<?> clazz;
 	private final CanonicalClass arrObjectsType;
 	private final CanonicalStore store;
@@ -32,7 +33,8 @@ public class CanonicalClass {
 		ID = globalID++;
 		this.name = name;
 		fields = new LinkedList<>();
-		ancestor = new LinkedList<>();
+		ancestors = new LinkedList<>();
+		descendants = new LinkedList<>();
 
 //		System.out.println(name);
 		Class<?> cls = null;
@@ -89,13 +91,17 @@ public class CanonicalClass {
 		Collections.sort(interfaces, new ClassComparatorByName());
 		for (Class<?> interf: interfaces) {
 			CanonicalClass anc = store.getUpdateOrCreateCanonicalClass(interf, fieldDistance);
-			if (!anc.isPrimitive() && !anc.isObject()/*!ancestor.clazz.equals(Object.class)*/)
-				ancestor.add(anc);
+			if (!anc.isPrimitive() && !anc.isObject()/*!ancestor.clazz.equals(Object.class)*/) {
+				ancestors.add(anc);
+				anc.descendants.add(this);
+			}
 		}
 
 		CanonicalClass anc = store.getUpdateOrCreateCanonicalClass(clazz.getSuperclass(), fieldDistance);
-		if (!anc.isPrimitive() && !anc.isObject()/*!ancestor.clazz.equals(Object.class)*/)
-			ancestor.add(anc);
+		if (!anc.isPrimitive() && !anc.isObject()/*!ancestor.clazz.equals(Object.class)*/) {
+			ancestors.add(anc);
+			anc.descendants.add(this);
+		}
 	}
 
 	
@@ -106,8 +112,8 @@ public class CanonicalClass {
 		 */
 		if (isObject || isPrimitive || isArray) return;
 
-		if (!ancestor.isEmpty()) {
-			for (CanonicalClass anc: ancestor)
+		if (!ancestors.isEmpty()) {
+			for (CanonicalClass anc: ancestors)
 				fields.addAll(anc.getCanonicalFields());
 		}
 		
@@ -189,8 +195,12 @@ public class CanonicalClass {
 		return ID;
 	}
 	
-	public List<CanonicalClass> getAncestor() {
-		return ancestor;
+	public List<CanonicalClass> getAncestors() {
+		return ancestors;
+	}
+	
+	public List<CanonicalClass> getDescendants() {
+		return descendants;
 	}
 
 	public CanonicalStore getStore() {
@@ -254,8 +264,8 @@ public class CanonicalClass {
 			//arrObjectsType.updateFieldDistance(fieldDistance, maxFieldDistance);
 		}
 		*/
-		if (!ancestor.isEmpty()) {
-			for (CanonicalClass anc: ancestor)
+		if (!ancestors.isEmpty()) {
+			for (CanonicalClass anc: ancestors)
 				anc.updateFieldDistance(fieldDistance, maxFieldDistance);
 		}
 		

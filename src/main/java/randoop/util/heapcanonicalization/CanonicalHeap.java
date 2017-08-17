@@ -153,6 +153,7 @@ public class CanonicalHeap {
 			
 			// 3- Pick the field to be mutated.
 			List<CanonicalField> candidateFields = new ArrayList<>(); 
+			
 			Entry<CanonicalizationResult, List<CanonicalField>> objFieldsRes = toMutate.getCanonicalFields();
 			assert objFieldsRes.getKey() == CanonicalizationResult.OK: "Getting fields of object " + toMutate + " failed";
 			for (CanonicalField fld: objFieldsRes.getValue() /*rdmClass.getCanonicalFields()*/) {
@@ -173,13 +174,19 @@ public class CanonicalHeap {
 				CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
 
 			// 4- Pick the value the selected field will be set to.
-			CanonicalClass fldType = rdmFld.getCanonicalType();
 			List<CanonicalObject> allValues = new LinkedList<>();
+			CanonicalClass fldType = rdmFld.getCanonicalType();
 			if (objects.get(fldType) != null)
 				allValues.addAll(objects.get(fldType));
+			for (CanonicalClass descFldType: rdmFld.getCanonicalType().getDescendants()) {
+				if (objects.get(descFldType) != null)
+					allValues.addAll(objects.get(descFldType));
+			}
+			
 			allValues.add(new CanonicalObject(null, null, -1, this));
 			if (CanonicalizerLog.isLoggingOn())
 				CanonicalizerLog.logLine("Available objects to set the field:" + allValues);
+
 			Set<String> objsInExtensions = extensions.getValuesFor(rdmFld.stringRepresentation(toMutate), toMutate.stringRepresentation());
 			if (CanonicalizerLog.isLoggingOn())
 				CanonicalizerLog.logLine("Objects in extensions:" + objsInExtensions);

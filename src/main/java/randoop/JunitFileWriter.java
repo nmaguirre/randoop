@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import randoop.sequence.ExecutableSequence;
@@ -120,7 +121,8 @@ public class JunitFileWriter {
   }
   
   
-  public List<File> writeJUnitTestFilesReloader(List<List<ExecutableSequence>> seqPartition, Set<String> resetClasses) {
+  public List<File> writeJUnitTestFilesReloader(List<List<ExecutableSequence>> seqPartition, Set<String> resetClasses,
+		  Properties resetProperties) {
 	  List<File> ret = new ArrayList<>();
 
 	  NameGenerator classNameGen = new NameGenerator(masterTestClassName);
@@ -128,7 +130,7 @@ public class JunitFileWriter {
 	  createOutputDir();
 
 	  for (List<ExecutableSequence> partition : seqPartition) {
-		  ret.add(writeTestClassReloader(partition, classNameGen.next(), resetClasses));
+		  ret.add(writeTestClassReloader(partition, classNameGen.next(), resetClasses, resetProperties));
 	  }
 
 	  testClassCount = classNameGen.nameCount();
@@ -137,7 +139,8 @@ public class JunitFileWriter {
   }
   
   
-  private File writeTestClassReloader(List<ExecutableSequence> sequences, String testClassName, Set<String> resetClasses) {
+  private File writeTestClassReloader(List<ExecutableSequence> sequences, String testClassName, Set<String> resetClasses, 
+		  Properties resetProperties) {
 
 	    File file = new File(getDir(), testClassName + ".java");
 	    PrintStream out = createTextOutputStream(file);
@@ -153,6 +156,7 @@ public class JunitFileWriter {
 	      out.println("import org.junit.Before;");
 	      out.println("import org.junit.After;");
 	      out.println("import org.junit.BeforeClass;");
+	      out.println("import org.junit.AfterClass;");
 	      out.println("import java.util.HashSet;");
 	      out.println("import java.util.Set;");
 	      out.println("import randoop.reloader.StaticFieldsReseter;");	   
@@ -173,11 +177,12 @@ public class JunitFileWriter {
 	      
 	      out.println("  public static void setSystemProperties() {");
 	      out.println("    java.lang.System.setProperties((java.util.Properties) defaultProperties.clone());");
-	      out.println("    java.lang.System.setProperty(\"file.encoding\", \"UTF-8\");");
-	      out.println("    java.lang.System.setProperty(\"java.awt.headless\", \"true\");");
-	      out.println("    java.lang.System.setProperty(\"user.country\", \"US\");");
-	      out.println("    java.lang.System.setProperty(\"user.language\", \"en\");");
-	      out.println("    java.lang.System.setProperty(\"user.timezone\", \"America/Los_Angeles\");");
+	      for (String prop: resetProperties.stringPropertyNames()) {
+	    	  if (!prop.equals("line.separator")) 
+	    		  out.println("    java.lang.System.setProperty(\"" + prop + "\", \"" + resetProperties.getProperty(prop) + "\");");
+	    	  else
+	    		  out.println("    java.lang.System.setProperty(\"" + prop + "\", \"\\n\");");
+	      }
 	      out.println("  }");
 	      out.println();
 	      
@@ -187,6 +192,12 @@ public class JunitFileWriter {
 	      for (String cls: resetClasses) 
 	    	  out.println("    classes.add(\"" + cls + "\");");
 	      out.println("    StaticFieldsReseter.setupReloader(classes);");
+	      out.println("  }");
+	      out.println();
+	      
+	      out.println("  @AfterClass");
+	      out.println("  public static void cleanUp() {");
+	      out.println("    java.lang.System.setProperties((java.util.Properties) defaultProperties.clone());");
 	      out.println("  }");
 	      out.println();
 	      
