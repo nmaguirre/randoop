@@ -235,4 +235,19 @@ public class CanonicalHeap {
 		return res;
 	}
 	
+	
+	public Map<CanonicalClass, Integer> objectsPerClass() {
+		Map<CanonicalClass, Integer> res = new LinkedHashMap<>();
+		for (CanonicalClass cls: objects.keySet())
+			res.put(cls, objects.get(cls).size());
+		return res;
+	}
+
+	public boolean mutateObjectFieldOutsideExtensions(FieldExtensions globalExtensions, CanonicalClass cls,
+			int toMutateInd) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	
 }
