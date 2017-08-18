@@ -652,21 +652,44 @@ private int genFirstAdditionalObsErrorSeqs;
 	  Map<CanonicalClass, Integer> objsPerClass = objHeap.objectsPerClass();
 	  for (CanonicalClass cls: objsPerClass.keySet()) {
 		  for (int toMutateInd = 0; toMutateInd < objsPerClass.get(cls); toMutateInd++) {
-			  // Rebuild object before mutation
-			  eSeq.execute(executionVisitor, checkGenerator);
-			  Object mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
-			  // Canonicalize and mutate the current object
-			  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
-			  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
-			  CanonicalHeap toMutateHeap = res.getValue();			  
-			  int retries = 50;
-			  if (!toMutateHeap.mutateObjectFieldOutsideExtensions(globalExtensions, cls, toMutateInd, retries)) {
-				  // Object could not be mutated outside the extensions
-				  if (CanonicalizerLog.isLoggingOn()) 
-					  CanonicalizerLog.logLine("> Mutation of the current object failed");							   
-				  continue;
+			  
+			  int objRetries = 50;
+			  int positiveRetries = 50;
+			  boolean succeed = false;
+			  
+			  Entry<CanonicalizationResult, CanonicalHeap> res = null;
+			  while (!succeed && positiveRetries > 0) {
+
+				  // Rebuild object before mutation
+				  eSeq.execute(executionVisitor, checkGenerator);
+				  Object mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
+				  // Canonicalize and mutate the current object
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+				  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+				  CanonicalHeap toMutateHeap = res.getValue();			  
+				  if (!toMutateHeap.mutateObjectFieldOutsideExtensions(globalExtensions, cls, toMutateInd, objRetries)) {
+					  // Object could not be mutated outside the extensions
+					  if (CanonicalizerLog.isLoggingOn()) 
+						  CanonicalizerLog.logLine("> Mutation of the current object failed");							   
+					  break;
+				  }
+
+				  FieldExtensionsCollector collector = new FieldExtensionsStringsNonPrimitiveCollector(GenInputsAbstract.string_maxlen);
+				  assert !fbg_low_level_primitive: "Low level extensions not supported for vectorization";
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj, collector);
+				  assert res.getKey() == CanonicalizationResult.OK: "Mutation added objects to the structure";
+				  if (globalExtensions.containsAll(collector.getExtensions())) {
+					  // Positive structure built; retry
+					  positiveRetries--;
+					  if (CanonicalizerLog.isLoggingOn()) 
+						  CanonicalizerLog.logLine("> Mutation attempt failed because yielded structure is positive");							   
+				  }
+				  else
+					  succeed = true;
 			  }
-			  saveNegativeVector(mutObj);
+			  
+			  if (succeed)
+				  saveNegativeVector(res.getValue());
 		  }
 	  }
   }
@@ -697,12 +720,7 @@ private int genFirstAdditionalObsErrorSeqs;
 			  CanonicalizerLog.logLine("> Number of retries exceeded, mutation of the current object failed");							   
 		  return;
 	  }
-
-	  saveNegativeVector(obj);
-  }
-
-
-  private void saveNegativeVector(Object obj) {
+	  
 	  FieldExtensionsCollector collector = new FieldExtensionsStringsNonPrimitiveCollector(GenInputsAbstract.string_maxlen);
 	  assert !fbg_low_level_primitive: "Low level extensions not supported for vectorization";
 	  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(obj, collector);
@@ -713,8 +731,13 @@ private int genFirstAdditionalObsErrorSeqs;
 			  CanonicalizerLog.logLine("> Mutation attempt failed because yielded structure is positive");							   
 		  return;
 	  }
-	  
-	  CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(res.getValue());	
+
+	  saveNegativeVector(res.getValue());
+  }
+
+
+  private void saveNegativeVector(CanonicalHeap objHeap) {	  
+	  CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
 	  if (CanonicalizerLog.isLoggingOn()) {
 		  CanonicalizerLog.logLine("----------");
 		  CanonicalizerLog.logLine("New mutated vector:");
