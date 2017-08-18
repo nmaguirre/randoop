@@ -243,10 +243,91 @@ public class CanonicalHeap {
 		return res;
 	}
 
-	public boolean mutateObjectFieldOutsideExtensions(FieldExtensions globalExtensions, CanonicalClass cls,
-			int toMutateInd) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean mutateObjectFieldOutsideExtensions(FieldExtensions extensions, CanonicalClass cls,
+			int toMutateInd, int retries) {
+		int retriesLeft = retries;
+		boolean succeeded = false;
+		if (CanonicalizerLog.isLoggingOn()) {
+			CanonicalizerLog.logLine("----------");
+			CanonicalizerLog.logLine("Starting a mutation attempt:");
+			CanonicalizerLog.logLine("Heap contents:\n" + toString());
+		}
+		
+		while (!succeeded && retriesLeft > 0) {
+
+			CanonicalObject toMutate = objects.get(cls).get(toMutateInd);
+			// 3- Pick the field to be mutated.
+			List<CanonicalField> candidateFields = new ArrayList<>(); 
+			Entry<CanonicalizationResult, List<CanonicalField>> objFieldsRes = toMutate.getCanonicalFields();
+			assert objFieldsRes.getKey() == CanonicalizationResult.OK: "Getting fields of object " + toMutate + " failed";
+			for (CanonicalField fld: objFieldsRes.getValue() /*cls.getCanonicalFields()*/) {
+				CanonicalClass fType = fld.getCanonicalType();
+				if (!fld.isFinal() && !fType.isObject() && !fType.isPrimitive() && store.isClassFromCode(fType))
+					candidateFields.add(fld);
+			}			
+			if (candidateFields.isEmpty()) {
+				// No objects of the selected class available to mutate.
+				retriesLeft--;
+				if (CanonicalizerLog.isLoggingOn())
+					CanonicalizerLog.logLine("No fields available to mutate. Retrying...");
+				continue;
+			}
+			int rdmFldInd = Randomness.nextRandomInt(candidateFields.size());
+			CanonicalField rdmFld = candidateFields.get(rdmFldInd);			
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
+
+			// 4- Pick the value the selected field will be set to.
+			List<CanonicalObject> allValues = new LinkedList<>();
+			CanonicalClass fldType = rdmFld.getCanonicalType();
+			if (objects.get(fldType) != null)
+				allValues.addAll(objects.get(fldType));
+			for (CanonicalClass descFldType: rdmFld.getCanonicalType().getDescendants()) {
+				if (objects.get(descFldType) != null)
+					allValues.addAll(objects.get(descFldType));
+			}
+			
+			allValues.add(new CanonicalObject(null, null, -1, this));
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Available objects to set the field:" + allValues);
+
+			Set<String> objsInExtensions = extensions.getValuesFor(rdmFld.stringRepresentation(toMutate), toMutate.stringRepresentation());
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Objects in extensions:" + objsInExtensions);
+			if (objsInExtensions == null)
+				objsInExtensions = new HashSet<>();
+			List<CanonicalObject> candidateValues = new ArrayList<>();
+			for (CanonicalObject candidate: allValues) {
+				if (!objsInExtensions.contains(candidate.stringRepresentation()))
+					candidateValues.add(candidate);
+			}
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Objects outside extensions:" + candidateValues);
+			if (candidateValues.isEmpty()) {
+				// No values outside the extensions to select for mutation.
+				retriesLeft--;
+				if (CanonicalizerLog.isLoggingOn())
+					CanonicalizerLog.logLine("No objects ouside extensions. Retrying...");
+				continue;
+			}
+			int rdmValInd = Randomness.nextRandomInt(candidateValues.size());
+			CanonicalObject rdmValue = candidateValues.get(rdmValInd);
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Randomly picked a value for the field: " + rdmValue.stringRepresentation());		
+
+			// 5- set toMutate.rdmFld = rdmValue
+			rdmFld.setValue(toMutate, rdmValue);
+			succeeded = true;
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Mutation successful. Field " + rdmFld.stringRepresentation(toMutate) + " of object " + 
+						toMutate.stringRepresentation() + " set to " + rdmValue.stringRepresentation());
+		}
+
+		if (!succeeded)
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Retries limit exceeded. No mutation performed.");
+
+		return succeeded; 
 	}
 	
 	

@@ -659,7 +659,8 @@ private int genFirstAdditionalObsErrorSeqs;
 			  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
 			  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
 			  CanonicalHeap toMutateHeap = res.getValue();			  
-			  if (!toMutateHeap.mutateObjectFieldOutsideExtensions(globalExtensions, cls, toMutateInd)) {
+			  int retries = 50;
+			  if (!toMutateHeap.mutateObjectFieldOutsideExtensions(globalExtensions, cls, toMutateInd, retries)) {
 				  // Object could not be mutated outside the extensions
 				  if (CanonicalizerLog.isLoggingOn()) 
 					  CanonicalizerLog.logLine("> Mutation of the current object failed");							   
@@ -813,9 +814,6 @@ private int genFirstAdditionalObsErrorSeqs;
 	  }
   }
   
-  
-
-
 
 /**
    * Generate an individual test sequence
@@ -1122,7 +1120,7 @@ private int genFirstAdditionalObsErrorSeqs;
     	for (int i = 0; i < vectorization_repeat_mutation; i++) {
 			for (ExecutableSequence eSeq: outRegressionSeqs) {
 
-				if (vectorization_repeat_mutation > 1)
+				if (vectorization_repeat_mutation > 1/* && !vectorization_mutate_all_objects*/)
 					eSeq.execute(executionVisitor, checkGenerator);
 
 				if (eSeq.isNormalExecution()) {
