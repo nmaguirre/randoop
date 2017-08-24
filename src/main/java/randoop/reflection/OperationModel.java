@@ -692,6 +692,13 @@ public class OperationModel {
     }
 
     for (TypedOperation operation : operationSet) {
+    	
+    	if (operation.getName().equals("clone")) {
+			System.out.println("RANDOOP WARNING: Ignoring method " + operation.getName() + " to prevent "
+					+ "runtime errors.");
+    		continue;
+    	}
+    	
     	// FIXME PABLO: Ugly hack to not let randoop assign to final static fields while using the evosuite loader
     	if (GenInputsAbstract.reset_static_fields && ignoreFinalOperation(operation))
     		continue;
@@ -731,7 +738,7 @@ public class OperationModel {
 						  return false;
 					  }
 				  } catch (VerifyError e) {
-					  System.out.println("ERROR: Could not get field static field " + stField.getName() + 
+					  System.out.println("RANDOOP WARNING: Could not get field static field " + stField.getName() + 
 							  " from class " + sfTypeName + ". Marking operation as non accessible.");
 					  return true;
 					  /*
@@ -739,7 +746,7 @@ public class OperationModel {
 					  System.exit(0);
 					  */
 				  } catch (ClassNotFoundException | NoSuchFieldException | SecurityException e) {
-					  System.out.println("ERROR: checking wheter static field " + stField.getName() + 
+					  System.out.println("RANDOOP WARNING: checking wheter static field " + stField.getName() + 
 							  " failed. Could not load non instrumented class " + sfTypeName);
 					  e.printStackTrace();
 					  System.exit(0);

@@ -23,6 +23,7 @@ import randoop.util.ReflectionExecutor;
 import randoop.util.SimpleList;
 import randoop.util.Timer;
 import randoop.util.fieldbasedcontrol.CanonizerClass;
+import randoop.util.heapcanonicalization.DummyHeapRoot;
 import randoop.util.fieldbasedcontrol.FieldBasedGenLog;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
@@ -651,10 +652,13 @@ private int genFirstAdditionalObsErrorSeqs;
   private void mutateAFieldOfEachObjectAndGenNegativeVector(ExecutableSequence eSeq, int index, CanonicalHeap objHeap) { 
 	  Map<CanonicalClass, Integer> objsPerClass = objHeap.objectsPerClass();
 	  for (CanonicalClass cls: objsPerClass.keySet()) {
+		  if (cls.getName().equals(DummyHeapRoot.class.getName()))
+			  continue;
+		  
 		  for (int toMutateInd = 0; toMutateInd < objsPerClass.get(cls); toMutateInd++) {
 			  
-			  int objRetries = 50;
-			  int positiveRetries = 50;
+			  int objRetries = 30;
+			  int positiveRetries = 20;
 			  boolean succeed = false;
 			  
 			  Entry<CanonicalizationResult, CanonicalHeap> res = null;
@@ -670,8 +674,9 @@ private int genFirstAdditionalObsErrorSeqs;
 				  if (!toMutateHeap.mutateObjectFieldOutsideExtensions(globalExtensions, cls, toMutateInd, objRetries)) {
 					  // Object could not be mutated outside the extensions
 					  if (CanonicalizerLog.isLoggingOn()) 
-						  CanonicalizerLog.logLine("> Mutation of the current object failed");							   
-					  break;
+						  CanonicalizerLog.logLine("> Mutation of the current object failed");
+					  positiveRetries--;
+					  continue;
 				  }
 
 				  FieldExtensionsCollector collector = new FieldExtensionsStringsNonPrimitiveCollector(GenInputsAbstract.string_maxlen);
@@ -826,7 +831,7 @@ private int genFirstAdditionalObsErrorSeqs;
 			  else { // res.getKey() != CanonicalizationResult.OK
 				  if (CanonicalizerLog.isLoggingOn()) {
 					  CanonicalizerLog.logLine("----------");
-					  CanonicalizerLog.logLine("Not canonizing an object with more than " + 
+					  CanonicalizerLog.logLine("Not canonicalizing an object with more than " + 
 							  vectorization_max_objects + " objects of the same type");
 					  CanonicalizerLog.logLine("Error message: " + res.getKey());
 					  CanonicalizerLog.logLine("----------");
@@ -1043,6 +1048,9 @@ private int genFirstAdditionalObsErrorSeqs;
 						  }	
 						  makeCanonicalVectorsForLastStatement(eSeq);
 					  }
+					  
+					  if (count_objects)
+						  countNumberOfDifferentRuntimeObjects(eSeq);
 				  }
 				  else {
 					  treatNegativeSequence(eSeq);
@@ -1098,63 +1106,77 @@ private int genFirstAdditionalObsErrorSeqs;
    	long secondPhaseStartTime = System.currentTimeMillis();
 
     boolean displayStopped = false;
-    if (count_objects) {
+    if (!count_objects) {
+    	/*
     	if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
     		progressDisplay.display();
     		progressDisplay.shouldStop = true;
     	}
     	countNumberOfDifferentRuntimeObjects();
     	displayStopped = true;
-    }
-   	// Don't count objects and field based gen enabled, perform the second phase of the genfirst approach
-    else if (fbg_observer_detection) {
-    	genFirstAdditionalPositiveSeqs = 0;
-    	genFirstAdditionalNegativeSeqs = 0;
-    	genFirstAdditionalErrorSeqs = 0;
-    	
-    	for (ExecutableSequence eSeq: positiveRegressionSeqs) {
-		  if (eSeq.getLastStmtOperation().isModifier()) 
-			  modifierRegressionSeqs.add(eSeq);
-		  else
-			  observerRegressionSeqs.add(eSeq);
-    	}
+    	 */
 
-    	ArrayList<TypedOperation> operationsPermutable = new ArrayList<>();
-    	for (TypedOperation op: operations)
-    		if (op.isObserver() || op.isFinalObserver())
-    			operationsPermutable.add(op);
+    	/*
+  	  for (CanonicalClass cc: hashes.keySet()) {
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size());
+		  System.out.println("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size());
+	  }
 
-    	if (FieldBasedGenLog.isLoggingOn())
-    		FieldBasedGenLog.logLine("\n\n>> Second phase for modifiers starting...\n");
-    	setSystemProperties();
+	  if (FieldBasedGenLog.isLoggingOn())
+		  FieldBasedGenLog.logLine("Final count: " + totalObjCount); 
+	  System.out.println("Final count: " + totalObjCount);
+    	 */
+    	// Don't count objects and field based gen enabled, perform the second phase of the genfirst approach
+    	if (fbg_observer_detection) {
+    		genFirstAdditionalPositiveSeqs = 0;
+    		genFirstAdditionalNegativeSeqs = 0;
+    		genFirstAdditionalErrorSeqs = 0;
 
-    	extendModifierTestsWithObservers(modifierRegressionSeqs, operationsPermutable, false);
+    		for (ExecutableSequence eSeq: positiveRegressionSeqs) {
+    			if (eSeq.getLastStmtOperation().isModifier()) 
+    				modifierRegressionSeqs.add(eSeq);
+    			else
+    				observerRegressionSeqs.add(eSeq);
+    		}
 
-    	if (field_based_gen_save_observers) {
+    		ArrayList<TypedOperation> operationsPermutable = new ArrayList<>();
+    		for (TypedOperation op: operations)
+    			if (op.isObserver() || op.isFinalObserver())
+    				operationsPermutable.add(op);
+
     		if (FieldBasedGenLog.isLoggingOn())
-    			FieldBasedGenLog.logLine("\n\n>> Second phase for observers starting...\n");
-    		extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
+    			FieldBasedGenLog.logLine("\n\n>> Second phase for modifiers starting...\n");
+    		setSystemProperties();
+
+    		extendModifierTestsWithObservers(modifierRegressionSeqs, operationsPermutable, false);
+
+    		if (field_based_gen_save_observers) {
+    			if (FieldBasedGenLog.isLoggingOn())
+    				FieldBasedGenLog.logLine("\n\n>> Second phase for observers starting...\n");
+    			extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true);
+    		}
+
+    		if (FieldBasedGenLog.isLoggingOn())
+    			FieldBasedGenLog.logLine("\n\n>> Second phase finished.\n");
     	}
+    	else if (NegativeVectorsWriter.isEnabled()) {
+    		for (int i = 0; i < vectorization_repeat_mutation; i++) {
+    			for (ExecutableSequence eSeq: outRegressionSeqs) {
 
-    	if (FieldBasedGenLog.isLoggingOn())
-    		FieldBasedGenLog.logLine("\n\n>> Second phase finished.\n");
-    }
-    else if (NegativeVectorsWriter.isEnabled()) {
-    	for (int i = 0; i < vectorization_repeat_mutation; i++) {
-			for (ExecutableSequence eSeq: outRegressionSeqs) {
+    				if (vectorization_repeat_mutation > 1/* && !vectorization_mutate_all_objects*/)
+    					eSeq.execute(executionVisitor, checkGenerator);
 
-				if (vectorization_repeat_mutation > 1/* && !vectorization_mutate_all_objects*/)
-					eSeq.execute(executionVisitor, checkGenerator);
-
-				if (eSeq.isNormalExecution()) {
-					if (CanonicalizerLog.isLoggingOn()) {
-						CanonicalizerLog.logLine("**********");
-						CanonicalizerLog.logLine("Canonicalizing mutated objects in the last statement of sequence:\n" + eSeq.toCodeString());
-						CanonicalizerLog.logLine("**********");
-					}	
-					makeCanonicalVectorsForLastStatement(eSeq, true);
-				}
-			}
+    				if (eSeq.isNormalExecution()) {
+    					if (CanonicalizerLog.isLoggingOn()) {
+    						CanonicalizerLog.logLine("**********");
+    						CanonicalizerLog.logLine("Canonicalizing mutated objects in the last statement of sequence:\n" + eSeq.toCodeString());
+    						CanonicalizerLog.logLine("**********");
+    					}	
+    					makeCanonicalVectorsForLastStatement(eSeq, true);
+    				}
+    			}
+    		}
     	}
     }
     
@@ -1276,6 +1298,30 @@ private int genFirstAdditionalObsErrorSeqs;
           "Average method execution time (exceptional termination): "
               + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
     }
+    
+    if (count_objects) {
+    	/*
+    	if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
+    		progressDisplay.display();
+    		progressDisplay.shouldStop = true;
+    	}
+    	countNumberOfDifferentRuntimeObjects();
+    	displayStopped = true;
+    	*/
+  	  if (FieldBasedGenLog.isLoggingOn())
+		  FieldBasedGenLog.logLine("\n\n***** Objects count result *****\n\n"); 
+	  System.out.println("\n\n***** Objects count result *****\n\n");
+    	
+  	  for (CanonicalClass cc: hashes.keySet()) {
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size());
+		  System.out.println("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size());
+	  }
+
+	  if (FieldBasedGenLog.isLoggingOn())
+		  FieldBasedGenLog.logLine("Final count: " + totalObjCount + "\n\n"); 
+	  System.out.println("Final count: " + totalObjCount + "\n\n");
+    }
 
     // Notify listeners that exploration is ending.
     if (listenerMgr != null) {
@@ -1382,6 +1428,16 @@ private int genFirstAdditionalObsErrorSeqs;
 			  FieldBasedGenLog.logLine("> Current negative sequence discarded.");
 	  }
   }
+  
+  
+  private LongPair hashExtensions(String ext) {
+	  LongPair hash = new LongPair();
+	  byte [] bytesExt = ext.getBytes();
+	  
+	  MurmurHash3.murmurhash3_x64_128(bytesExt, 0, bytesExt.length - 1, 0, hash);
+	  
+	  return hash;
+  }
 	  
 
   private LongPair hashExtensions(FieldExtensionsIndexes ext) {
@@ -1393,6 +1449,7 @@ private int genFirstAdditionalObsErrorSeqs;
 	  return hash;
   }
   
+  /*
   private void countNumberOfDifferentRuntimeObjects() {
 	  // Count objects
 	  if (FieldBasedGenLog.isLoggingOn())
@@ -1453,7 +1510,114 @@ private int genFirstAdditionalObsErrorSeqs;
 	  if (FieldBasedGenLog.isLoggingOn())
 		  FieldBasedGenLog.logLine("Final count: " + totalObjCount); 
 	  System.out.println("Final count: " + totalObjCount);
+  } */
+  
+  
+  
+  private Map<CanonicalClass, Set<LongPair>> hashes = new HashMap<>();
+  private int totalObjCount = 0;
+  
+  
+
+  private void countNumberOfDifferentRuntimeObjects(ExecutableSequence eSeq) {
+	  List<Tuple<CanonicalClass, FieldExtensions>> lastStmtExt = eSeq.createExtensionsToCountObjects(newCanonicalizer);
+
+	  for (Tuple<CanonicalClass, FieldExtensions> t: lastStmtExt) {
+		  if (t == null) continue;
+
+		  CanonicalClass cc = t.getFirst();
+		  FieldExtensions ext = t.getSecond();
+		  Set<LongPair> hs = hashes.get(cc);
+		  if (hs == null) {
+			  hs = new HashSet<LongPair>();
+			  hashes.put(cc, hs);
+		  }
+		  String extStr = ext.toString();
+		  LongPair hash = hashExtensions(extStr);
+
+		  if (hs.add(hash)) {
+			  if (FieldBasedGenLog.isLoggingOn())
+				  FieldBasedGenLog.logLine("> New object counted:");
+
+			  totalObjCount++;
+		  }
+		  else {
+			  if (FieldBasedGenLog.isLoggingOn())
+				  FieldBasedGenLog.logLine("> Object was already counted before:");
+		  }
+
+		  if (FieldBasedGenLog.isLoggingOn()) 
+			  FieldBasedGenLog.logLine("> Type: " + cc.getName() + ", hash: ," + hash + " obj. ext.:\n" + extStr);
+
+	  }
   }
+
+  
+  private void countNumberOfDifferentRuntimeObjects() {
+	  // Count objects
+	  if (FieldBasedGenLog.isLoggingOn())
+		  FieldBasedGenLog.logLine("\n\n>> Starting to count objects generated during the first phase.");
+	  System.out.println("\n\n>> Starting to count objects generated during the first phase.");
+
+	  Map<CanonicalClass, Set<LongPair>> hashes = new HashMap<>();
+	  int totalObjCount = 0;
+
+	  for (ExecutableSequence eSeq: outRegressionSeqs) {
+		  /*
+		  eSeq.execute(executionVisitor, checkGenerator);
+		  */
+		  if (!eSeq.isNormalExecution()) {
+			  eSeq.clearExecutionResults();
+			  continue;
+		  }
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine(">> Current sequence:\n" + eSeq.toCodeString());
+
+		  List<Tuple<CanonicalClass, FieldExtensions>> lastStmtExt = eSeq.createExtensionsToCountObjects(newCanonicalizer);
+		  
+		  for (Tuple<CanonicalClass, FieldExtensions> t: lastStmtExt) {
+			  if (t == null) continue;
+
+			  CanonicalClass cc = t.getFirst();
+			  FieldExtensions ext = t.getSecond();
+			  Set<LongPair> hs = hashes.get(cc);
+			  if (hs == null) {
+				  hs = new HashSet<LongPair>();
+				  hashes.put(cc, hs);
+			  }
+			  String extStr = ext.toString();
+			  LongPair hash = hashExtensions(extStr);
+			  
+			  if (hs.add(hash)) {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> New object counted:");
+
+				  totalObjCount++;
+			  }
+			  else {
+				  if (FieldBasedGenLog.isLoggingOn())
+					  FieldBasedGenLog.logLine("> Object was already counted before:");
+			  }
+
+			  if (FieldBasedGenLog.isLoggingOn()) 
+				  FieldBasedGenLog.logLine("> Type: " + cc.getName() + ", hash: ," + hash + " obj. ext.:\n" + extStr);
+			  
+		  }
+
+		  eSeq.clearExecutionResults();
+	  }
+
+	  for (CanonicalClass cc: hashes.keySet()) {
+		  if (FieldBasedGenLog.isLoggingOn())
+			  FieldBasedGenLog.logLine("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size());
+		  System.out.println("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size());
+	  }
+
+	  if (FieldBasedGenLog.isLoggingOn())
+		  FieldBasedGenLog.logLine("Final count: " + totalObjCount); 
+	  System.out.println("Final count: " + totalObjCount);
+  }
+  
   
   
   // For using hashes instead of extensions to deal with redundancy
@@ -1732,6 +1896,9 @@ private int genFirstAdditionalObsErrorSeqs;
 		  int currTestNegativeObservers = 0;
 		  int currTestObservers = 0;
 		  RandomPerm.randomPermutation(operationsPermutable);
+		  
+  		  resetExecutionResults(currentSeq, null);
+		  
 		  // Should randomly mix the operations list each time we do this to avoid always the same execution order.
 		  for (TypedOperation operation: operationsPermutable) {
 			  if (currTestObservers > fbg_observers_per_test) {
@@ -1881,7 +2048,7 @@ private int genFirstAdditionalObsErrorSeqs;
 
 			  
 			  ExecutableSequence extendedSeq = new ExecutableSequence(newSequence);
-			  resetExecutionResults(currentSeq, extendedSeq);
+			  //resetExecutionResults(currentSeq, extendedSeq);
 			  executeExtendedSequenceNoReexecute(extendedSeq, currentSeq, startIndex, endIndex);
 
 			  //processLastSequenceStatement(eSeq2ndPhase);
@@ -2035,7 +2202,8 @@ private int genFirstAdditionalObsErrorSeqs;
 
 
   private void resetExecutionResults(ExecutableSequence currentSeq, ExecutableSequence extendedSeq) {
-	  extendedSeq.clearExecutionResults();
+	  if (extendedSeq != null)
+		  extendedSeq.clearExecutionResults();
 	  currentSeq.clearExecutionResults();
 	  if (GenInputsAbstract.reset_static_fields) {
 		  setSystemProperties();
@@ -2081,6 +2249,9 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 		  int currTestNegativeObservers = 0;
 		  int currTestObservers = 0;
 		  RandomPerm.randomPermutation(operationsPermutable);
+		  
+  		  resetExecutionResults(currentSeq, null);
+		  
 		  // Should randomly mix the operations list each time we do this to avoid always the same execution order.
 		  for (TypedOperation operation: operationsPermutable) {
 			  if (currTestObservers > fbg_observers_per_test) {
@@ -2249,7 +2420,7 @@ private void extendObserverTestsWithObserverOps(List<ExecutableSequence> sequenc
 			  this.allSequences.add(newSequence);	
 
 			  ExecutableSequence extendedSeq = new ExecutableSequence(newSequence);
-			  resetExecutionResults(currentSeq, extendedSeq);
+			  //resetExecutionResults(currentSeq, extendedSeq);
 			  executeExtendedSequenceNoReexecute(extendedSeq, currentSeq, startIndex, endIndex);
 			  //processLastSequenceStatement(eSeq2ndPhase);
 

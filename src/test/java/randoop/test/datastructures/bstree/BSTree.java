@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import randoop.CheckRep;
+
 
 /**
  * 
@@ -223,6 +225,7 @@ public class BSTree{
 	*/
 	
 	
+	@CheckRep
     public boolean repOK() {
         // checks that empty tree has size zero
         if (root == null)

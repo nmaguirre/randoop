@@ -44,6 +44,7 @@ import randoop.util.fieldbasedcontrol.FieldExtensionsIndexes;
 import randoop.util.fieldbasedcontrol.FieldExtensionsIndexesMap;
 import randoop.util.fieldbasedcontrol.HeapCanonizerRuntimeEfficient;
 import randoop.util.fieldbasedcontrol.Tuple;
+import randoop.util.heapcanonicalization.CanonicalClass;
 import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.CanonicalizerLog;
@@ -908,10 +909,41 @@ public class ExecutableSequence {
 			   // We don't save sequences for building null objects
 			   extensions.add(null);
 	   }
-   
-	   
 	   return extensions; 
    }
+   
+   
+   
+   public List<Tuple<CanonicalClass, FieldExtensions>> createExtensionsToCountObjects(HeapCanonicalizer canonicalizer) { 
+	   List<Object> objects = getLastStmtRuntimeObjects(); 
+	   List<Tuple<CanonicalClass, FieldExtensions>> extensions = new ArrayList<>();
+	   for (Object o: objects) {
+		   if (o != null) {
+			   FieldExtensionsCollector collector;
+			   if (AbstractGenerator.fbg_low_level_primitive)
+				   collector = new FieldExtensionsByTypeCollector(GenInputsAbstract.string_maxlen);
+			   else 
+				   collector = new FieldExtensionsStringsCollector(GenInputsAbstract.string_maxlen);
+			   Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonicalize(o, collector);
+			   if (res.getKey() != CanonicalizationResult.OK) {
+			   	//throw new BugInPrimitiveTypeCanonicalization("Structure exceeding limits. We don't support these yet.");
+				   // Structure exceeding limits. This sequence does not extends extensions
+				   if (FieldBasedGenLog.isLoggingOn()) 
+					   FieldBasedGenLog.logLine("> Structure exceeding limits. Current test won't be used as a generator.");
+				   return null;
+			   }
+			   extensions.add(new Tuple<CanonicalClass, FieldExtensions>(canonicalizer.getStore().getCanonicalClass(o.getClass()), collector.getExtensions()));
+		   }
+		   /*
+		   else
+			   // We don't save sequences for building null objects
+			   extensions.add(null);
+			   */
+	   }
+	   return extensions; 
+   }
+   
+   
    
    
    public boolean isPrimitive(Object o) {
@@ -1509,7 +1541,8 @@ public class ExecutableSequence {
    }
    
    
-  
+   
+   
   private boolean isObjectPrimtive(Object o) {
 	  Class<?> objectClass = o.getClass();
 	  return NonreceiverTerm.isNonreceiverType(objectClass) || 

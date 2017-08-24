@@ -62,7 +62,10 @@ public class Main {
 
     System.out.println("Locale: " + Locale.getDefault().toString());
     System.out.println("TimeZone: " + TimeZone.getDefault().toString());
-    
+    System.out.println("Library Path: " + System.getProperty("java.library.path"));
+    System.out.println("Java Class Path: " + System.getProperty("java.class.path"));
+    System.out.println("Java Home: " + System.getProperty("java.home"));
+        
     
     
     boolean success = false;

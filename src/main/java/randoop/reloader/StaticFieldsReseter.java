@@ -71,8 +71,10 @@ public class StaticFieldsReseter {
 		Set<String> filteredClasses = new HashSet<>();
 		for (String str: classesToReload) {
 			
+			/*
 			if (str.endsWith("CheckLevel"))
 				filteredClasses.add(str);
+				*/
 			
 			if (org.evosuite.runtime.classhandling.ClassResetter.getInstance().getResetMethod(str) != null) 
 				filteredClasses.add(str);
