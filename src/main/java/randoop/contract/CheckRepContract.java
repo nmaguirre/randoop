@@ -7,10 +7,15 @@ import java.util.Objects;
 
 import randoop.BugInRandoopException;
 import randoop.Globals;
+import randoop.generation.AbstractGenerator;
 import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
 import randoop.types.JavaTypes;
 import randoop.types.TypeTuple;
+import randoop.util.heapcanonicalization.CanonicalClass;
+import randoop.util.heapcanonicalization.CanonicalField;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
+import randoop.util.heapcanonicalization.candidatevectors.BugInCandidateVectorsCanonicalization;
 
 /**
  * Represents the contract that an object should conform to its representation
@@ -72,7 +77,29 @@ public final class CheckRepContract implements ObjectContract {
     if (declaringClass.equals(objects[0].getClass())) {
       try {
         if (returnsBoolean) {
-          return (Boolean) checkRepMethod.invoke(objects[0]);
+        	if (AbstractGenerator.vectorization_antlr_hack) {
+        		
+  			  boolean nonroot = false;
+  			  if (declaringClass.getName().endsWith("antlr.CommonTree")) {
+  				  CanonicalClass cls = AbstractGenerator.newCanonicalizer.getStore().getCanonicalClass(declaringClass);
+  				  for (CanonicalField f: cls.getCanonicalFields()) {
+  					  try {
+  						  if (f.getName().equals("parent") && f.getField().get(objects[0]) != null) {
+  							  nonroot = true;
+  							  if (CanonicalizerLog.isLoggingOn()) 
+  								  CanonicalizerLog.logLine("CANONICALIZER WARNING: Ignoring current object because it's not a heap root");
+  							  break;
+  						  }
+  					  } catch (IllegalArgumentException | IllegalAccessException e) {
+  						  throw new BugInCandidateVectorsCanonicalization("Cannot find existing field " + f.getName());
+  					  }
+  				  }
+  			  }
+  			  if (nonroot == true)
+  				  return true;
+
+        	}
+        	return (Boolean) checkRepMethod.invoke(objects[0]); 
         } else {
           checkRepMethod.invoke(objects[0]);
           return true;

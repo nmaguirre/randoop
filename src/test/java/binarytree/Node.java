@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Node {
+
+	//static Node hola = new Node();
 	
      Node left; // left child
 

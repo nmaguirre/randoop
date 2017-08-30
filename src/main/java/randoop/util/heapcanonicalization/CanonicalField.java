@@ -41,6 +41,12 @@ public class CanonicalField {
 		return (field == null) ? false : Modifier.isFinal(field.getModifiers());
 	}
 	
+	
+	public boolean isStatic() {
+		return (field == null) ? false : Modifier.isStatic(field.getModifiers());
+	}
+
+	
 	public boolean isFinal() {
 		return isFinal;
 	}

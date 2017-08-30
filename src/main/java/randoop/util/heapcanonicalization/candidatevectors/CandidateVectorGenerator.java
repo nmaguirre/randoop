@@ -86,12 +86,17 @@ public class CandidateVectorGenerator {
 	}
 	
 	private boolean ignoreCanonicalClassInCandidateVectors(CanonicalClass clazz) {
-		return clazz.isPrimitive() || clazz.isAbstract() || clazz.isInterface() || clazz.isObject();
+		return clazz.getName().equals("singlylist.Element") ||
+				clazz.getName().equals("doublylist.Element") ||
+				clazz.isPrimitive() || clazz.isAbstract() || clazz.isInterface() || clazz.isObject();
 				//|| !classesFromCode.contains(clazz.getName());
 	}
 	
 	private void addCandidateVectorFields(CanonicalHeap heap, CanonicalClass clazz, int objNum, CandidateVector<String> header) {
 		for (CanonicalField fld: clazz.getCanonicalFields()) {
+			if (AbstractGenerator.vectorization_ignore_static && fld.isStatic())
+				continue;
+			
 			if (fld.getName().equals("serialVersionUID")) {
 			    if (CanonicalizerLog.isLoggingOn())
 			    	CanonicalizerLog.logLine("CANONIZER INFO: Skipping field: " + fld.getName());
@@ -135,6 +140,9 @@ public class CandidateVectorGenerator {
 				v.addComponent(NULL_INT_REPRESENTATION);
 		else {
 			for (CanonicalField fld: canonicalClass.getCanonicalFields()) {
+				if (AbstractGenerator.vectorization_ignore_static && fld.isStatic())
+					continue;
+				
 				if (!fld.getName().equals("serialVersionUID")) 
 					if (!noPrimitiveFields || (/*!fld.isObjectType() &&*/ !fld.isPrimitiveType()))
 						v.addComponent(NULL_INT_REPRESENTATION);
@@ -150,6 +158,8 @@ public class CandidateVectorGenerator {
 		
 		int fieldNumber = 0;
 		for (CanonicalField fld: getFieldsRes.getValue()) {
+			if (AbstractGenerator.vectorization_ignore_static && fld.isStatic())
+				continue;
 			if (fld.getName().equals("serialVersionUID"))
 				continue; 
 			if (noPrimitiveFields && (/*fld.isObjectType() ||*/ fld.isPrimitiveType()))

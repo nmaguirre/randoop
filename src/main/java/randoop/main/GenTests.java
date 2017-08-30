@@ -66,6 +66,7 @@ import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
+import randoop.util.heapcanonicalization.candidatevectors.BadNegativeVectorsWriter;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsFieldExtensions;
@@ -536,6 +537,9 @@ public class GenTests extends GenInputsAbstract {
 			CanonicalizerLog.logLine("**********");
     	}
     }
+    
+    if (BadNegativeVectorsWriter.isEnabled()) 
+    	System.out.println("\n\n**** Bad negatives: " + AbstractGenerator.badNegativesCount + "\n\n");
     
     if (VectorsWriter.isEnabled()) 
     	VectorsWriter.logLine(AbstractGenerator.candVectExtensions.toString());

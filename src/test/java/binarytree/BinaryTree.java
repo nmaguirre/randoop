@@ -2,6 +2,7 @@ package binarytree;
 
 public class BinaryTree {
 
+	
 	Node root;
 	
 	int size;
