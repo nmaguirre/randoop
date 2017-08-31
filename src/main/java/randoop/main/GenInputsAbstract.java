@@ -162,6 +162,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
    */
   @Option("File containing class names that tests must exercise")
   public static File include_if_class_exercised = null;
+  
+  @Option("File containing class names that tests must exercise")
+  public static boolean compute_extensions = false;
 
   /**
    * Whether to output error-revealing tests.

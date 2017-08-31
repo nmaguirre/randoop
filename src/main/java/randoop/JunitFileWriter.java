@@ -25,22 +25,22 @@ import randoop.util.Log;
 public class JunitFileWriter {
 
   // The class of the main JUnit suite, and the prefix of the subsuite names.
-  private final String masterTestClassName;
+  protected final String masterTestClassName;
 
   // The package name of the main JUnit suite
-  private final String packageName;
+  protected final String packageName;
 
   // The directory where the JUnit files should be written to.
-  private final String dirName;
+  protected final String dirName;
 
-  private static boolean includeParsableString = false;
+  protected static boolean includeParsableString = false;
 
   /**
    * testClassCount indicates the number of test classes written for the code
    * partitions received by writeJUnitTestFiles. It is used to generate the list
    * of test class names.
    */
-  private int testClassCount = 0;
+  protected int testClassCount = 0;
 
   /**
    * classMethodCounts maps test class names to the number of methods in each
@@ -48,7 +48,7 @@ public class JunitFileWriter {
    * current convention is that a test method is named "test"+i for some integer
    * i.
    */
-  private Map<String, Integer> classMethodCounts = new LinkedHashMap<>();
+  protected Map<String, Integer> classMethodCounts = new LinkedHashMap<>();
 
   /**
    * JunitFileWriter creates an instance of class holding information needed to
@@ -129,7 +129,7 @@ public class JunitFileWriter {
    *          name of test class.
    * @return the File object for generated java file
    */
-  private File writeTestClass(List<ExecutableSequence> sequences, String testClassName) {
+  protected File writeTestClass(List<ExecutableSequence> sequences, String testClassName) {
 
     File file = new File(getDir(), testClassName + ".java");
     PrintStream out = createTextOutputStream(file);
@@ -183,7 +183,7 @@ public class JunitFileWriter {
    * @param s
    *          the {@link ExecutableSequence} for test method.
    */
-  private void writeTest(
+  protected void writeTest(
       PrintStream out, String className, String methodName, ExecutableSequence s) {
     out.println("  @Test");
     out.println("  public void " + methodName + "() throws Throwable {");
@@ -324,7 +324,7 @@ public class JunitFileWriter {
    * @param n  the number
    * @return the number of digits in string form of given number
    */
-  private int numDigits(int n) {
+  protected int numDigits(int n) {
     return (int) Math.log10(n) + 1;
   }
 
@@ -333,7 +333,7 @@ public class JunitFileWriter {
    * "prefix"+i for integer i. Pads the counter with zeros to ensure a minimum
    * number of digits determined by field digits.
    */
-  private class NameGenerator {
+  class NameGenerator {
 
     private int initialValue;
     private int counter;
@@ -391,7 +391,7 @@ public class JunitFileWriter {
     }
   }
 
-  private File getDir() {
+  protected File getDir() {
     File dir;
     if (dirName == null || dirName.length() == 0) dir = new File(System.getProperty("user.dir"));
     else dir = new File(dirName);
@@ -408,7 +408,7 @@ public class JunitFileWriter {
   }
 
   // TODO document and move to util directory.
-  private static String indent(String codeString) {
+  protected static String indent(String codeString) {
     StringBuilder indented = new StringBuilder();
     String[] lines = codeString.split(Globals.lineSep);
     for (String line : lines) {
@@ -417,12 +417,12 @@ public class JunitFileWriter {
     return indented.toString();
   }
 
-  private static void outputPackageName(PrintStream out, String packageName) {
+  protected static void outputPackageName(PrintStream out, String packageName) {
     boolean isDefaultPackage = packageName.length() == 0;
     if (!isDefaultPackage) out.println("package " + packageName + ";");
   }
 
-  private static PrintStream createTextOutputStream(File file) {
+  protected static PrintStream createTextOutputStream(File file) {
     try {
       return new PrintStream(file);
     } catch (IOException e) {

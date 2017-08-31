@@ -16,6 +16,7 @@ import plume.SimpleLog;
 import randoop.DummyVisitor;
 import randoop.ExecutionVisitor;
 import randoop.JunitFileWriter;
+import randoop.JunitFileWriterComputeExtensions;
 import randoop.MultiVisitor;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.ComponentManager;
@@ -599,7 +600,11 @@ public class GenTests extends GenInputsAbstract {
       List<List<ExecutableSequence>> seqPartition =
           CollectionsExt.chunkUp(new ArrayList<>(seqList), testsperfile);
 
-      JunitFileWriter jfw = new JunitFileWriter(output_dir, junit_package_name, junitClassname);
+      JunitFileWriter jfw;
+      if (!compute_extensions)
+    	  jfw = new JunitFileWriter(output_dir, junit_package_name, junitClassname);
+      else
+    	  jfw = new JunitFileWriterComputeExtensions(output_dir, junit_package_name, junitClassname);
 
       files.addAll(jfw.writeJUnitTestFiles(seqPartition));
 

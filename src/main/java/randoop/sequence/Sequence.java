@@ -498,6 +498,40 @@ public final class Sequence implements WeightedElement {
       }
     }
   }
+  
+  
+  public ArrayList<Variable> getStatementVariables(int index) {
+	  ArrayList<Variable> statementVars = new ArrayList<>();
+
+	  Statement stmt = this.statements.get(index);
+	  // Process return value
+	  if (!stmt.getOutputType().isVoid()) 
+		  statementVars.add(new Variable(this, index));
+
+	  // Process input arguments.
+	  if (stmt.inputs.size() != stmt.getInputTypes().size()) {
+		  throw new RuntimeException(
+				  stmt.inputs
+				  + ", "
+				  + stmt.getInputTypes()
+				  + ", "
+				  + stmt.toString());
+	  }
+
+	  List<Variable> v = this.getInputs(index);
+	  if (v.size() != stmt.getInputTypes().size()) {
+		  throw new RuntimeException();
+	  }
+
+	  for (int i = 0; i < v.size(); i++) {
+		  Variable actualArgument = v.get(i);
+		  assert stmt.getInputTypes().get(i).isAssignableFrom(actualArgument.getType());
+		  statementVars.add(actualArgument);
+	  }
+	  
+	  return statementVars;
+  }
+  
 
   /**
    * Representation invariant check.
