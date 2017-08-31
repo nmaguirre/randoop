@@ -601,7 +601,7 @@ public class GenTests extends GenInputsAbstract {
           CollectionsExt.chunkUp(new ArrayList<>(seqList), testsperfile);
 
       JunitFileWriter jfw;
-      if (!compute_extensions)
+      if (!extensions_coverage)
     	  jfw = new JunitFileWriter(output_dir, junit_package_name, junitClassname);
       else
     	  jfw = new JunitFileWriterComputeExtensions(output_dir, junit_package_name, junitClassname);

@@ -40,6 +40,7 @@ public class GlobalExtensions {
 	private static String outputFilename;
 
 	public static void extend(Object o) {
+
 		if (o == null) return;
 		
 		if (globalExtensions == null)
