@@ -285,6 +285,9 @@ public class ForwardGenerator extends AbstractGenerator {
         if (!looksLikeObjToString && !tooLongString && runtimePrimitivesSeen.add(runtimeValue)) {
           // Have not seen this value before; add it to the component set.
           componentManager.addGeneratedSequence(Sequence.createSequenceForPrimitive(runtimeValue));
+          
+          System.out.println(runtimeValue);
+          
         }
       } else {
         if (Log.isLoggingOn()) {

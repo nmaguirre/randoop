@@ -40,15 +40,14 @@ public class GlobalExtensions {
 	private static String outputFilename;
 
 	public static void extend(Object o) {
-
-		if (o == null) return;
-		
 		if (globalExtensions == null)
 			initialize();
 		else {
 			assert getCurrentUserPath().equals(userPath): "User path changed during execution of the tests";
 		}
-		
+		if (!createExtensions) return;
+		if (o == null) return;
+
 		extensionsCollector.initializeExtensions();
 		Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonicalize(o, extensionsCollector);
 		assert res.getKey().equals(CanonicalizationResult.OK): "Computation of extensions failed for an object";
@@ -84,7 +83,9 @@ public class GlobalExtensions {
 			input = new FileInputStream(userPath.resolve("tests.properties").toString());
 			prop.load(input);
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			System.out.println("Error: Could not find properties file: " + userPath.resolve("tests.properties"));
+			System.exit(1);
+			
 		}
 		
 		String logFileName = prop.getProperty("log.filename");
@@ -92,12 +93,12 @@ public class GlobalExtensions {
 			try {
 				canonicalizerLog = new FileWriter(userPath.resolve(logFileName).toString());
 			} catch (IOException e) {
-				System.out.println("Error: Log file: " + logFileName + " cannot be created");
+				System.out.println("Error: Log file: " + userPath.resolve(logFileName) + " cannot be created");
 				System.exit(1);
 			}
 		}
 		
-		if (prop.getProperty("create.extensions", "false").equals("true")) {
+		if (prop.getProperty("measure.coverage", "false").equals("true")) {
 			//System.out.println("INFO: Computing extensions during tests execution");
 			createExtensions = true;
 		}
@@ -137,7 +138,8 @@ public class GlobalExtensions {
 		else {
 			assert getCurrentUserPath().equals(userPath): "User path changed during execution of the tests";
 		}	
-		
+		if (!createExtensions) return;
+	
 		int size = ((FieldExtensionsStrings) globalExtensions).size();
 	
 		String absoluteFilename = userPath.resolve(outputFilename).toString();

@@ -1,20 +1,11 @@
 package randoop;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
-import org.junit.AfterClass;
 
 import randoop.sequence.ExecutableSequence;
-import randoop.util.Log;
 
 /**
  * JunitFileWriter is a class that for a collection of sequences, outputs Java

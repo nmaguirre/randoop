@@ -364,6 +364,8 @@ public abstract class GenInputsAbstract extends CommandHandler {
    *
    * Randoop never uses <code>null</code> for receiver values.
    */
+  @Option("Disable randoop contracts.")
+  public static boolean disable_contracts = false;
   ///////////////////////////////////////////////////////////////////
   @OptionGroup("Values used in tests")
   @Option("Use null as an input with the given frequency")
