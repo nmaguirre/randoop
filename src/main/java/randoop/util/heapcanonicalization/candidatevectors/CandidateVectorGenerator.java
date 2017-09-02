@@ -86,8 +86,10 @@ public class CandidateVectorGenerator {
 	}
 	
 	private boolean ignoreCanonicalClassInCandidateVectors(CanonicalClass clazz) {
-		return clazz.getName().equals("singlylist.Element") ||
-				clazz.getName().equals("doublylist.Element") ||
+		return 
+				clazz.getName().endsWith("Element") ||
+				/*clazz.getName().equals("singlylist.Element") ||
+				clazz.getName().equals("doublylist.Element") ||*/
 				clazz.isPrimitive() || clazz.isAbstract() || clazz.isInterface() || clazz.isObject();
 				//|| !classesFromCode.contains(clazz.getName());
 	}
