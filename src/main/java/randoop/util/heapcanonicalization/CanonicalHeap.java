@@ -262,7 +262,8 @@ public class CanonicalHeap {
 			assert objFieldsRes.getKey() == CanonicalizationResult.OK: "Getting fields of object " + toMutate + " failed";
 			for (CanonicalField fld: objFieldsRes.getValue() /*cls.getCanonicalFields()*/) {
 				CanonicalClass fType = fld.getCanonicalType();
-				if (!fld.isStatic() && !fld.isFinal() && !fType.isObject() && !fType.isPrimitive() && store.isClassFromCode(fType))
+				if (!fType.getName().endsWith("Element") &&
+						!fld.isStatic() && !fld.isFinal() && !fType.isObject() && !fType.isPrimitive() && store.isClassFromCode(fType))
 					candidateFields.add(fld);
 			}			
 			if (candidateFields.isEmpty()) {

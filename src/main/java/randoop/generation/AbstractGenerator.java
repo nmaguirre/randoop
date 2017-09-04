@@ -717,6 +717,8 @@ public static int badNegativesCount = 0;
 	  try {
 		  Method m = obj.getClass().getMethod("repOKNeg");
 		  if ((Boolean) m.invoke(obj)) {
+			  if (CanonicalizerLog.isLoggingOn()) 
+				  CanonicalizerLog.logLine("> Current structure is a false positive.");
 			  badNegativesCount++;
 			  BadNegativeVectorsWriter.logLine(negVect);
 		  }
