@@ -7,10 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Map.Entry;
 
+import randoop.util.heapcanonicalization.CanonicalClass;
 import randoop.util.heapcanonicalization.CanonicalHeap;
 import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
@@ -21,6 +26,8 @@ import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsCollecto
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStrings;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsCollector;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsNonPrimitiveCollector;
+import randoop.util.heapcanonicalization.fieldextensions.MurmurHash3;
+import randoop.util.heapcanonicalization.fieldextensions.MurmurHash3.LongPair;
 
 
 public class GlobalExtensions {
@@ -35,9 +42,46 @@ public class GlobalExtensions {
 	private static int maxArrayObjects; 
 	private static int maxStrLength; 
 	private static boolean createExtensions;
+	private static boolean countObjects;
 	private static boolean includePrimitives;
 	public static FileWriter canonicalizerLog;
 	private static String outputFilename;
+
+	private static Map<CanonicalClass, Set<LongPair>> hashes;
+	private static int totalObjCount;
+	
+	private static void countNumberOfDifferentRuntimeObjects(CanonicalClass cc, FieldExtensions ext) {
+		Set<LongPair> hs = hashes.get(cc);
+		if (hs == null) {
+			hs = new HashSet<LongPair>();
+			hashes.put(cc, hs);
+		}
+		String extStr = ext.toString();
+		LongPair hash = hashExtensions(extStr);
+
+		if (hs.add(hash)) {
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("> New object counted:");
+
+			totalObjCount++;
+		}
+		else {
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("> Object was already counted before:");
+		}
+
+		if (CanonicalizerLog.isLoggingOn()) 
+			CanonicalizerLog.logLine("> Type: " + cc.getName() + ", hash: ," + hash + " obj. ext.:\n" + extStr);
+	}
+
+	private static LongPair hashExtensions(String ext) {
+		LongPair hash = new LongPair();
+		byte [] bytesExt = ext.getBytes();
+
+		MurmurHash3.murmurhash3_x64_128(bytesExt, 0, bytesExt.length - 1, 0, hash);
+
+		return hash;
+	}	
 
 	public static void extend(Object o) {
 		if (globalExtensions == null)
@@ -45,21 +89,29 @@ public class GlobalExtensions {
 		else {
 			assert getCurrentUserPath().equals(userPath): "User path changed during execution of the tests";
 		}
-		if (!createExtensions) return;
 		if (o == null) return;
 
-		extensionsCollector.initializeExtensions();
-		Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonicalize(o, extensionsCollector);
-		assert res.getKey().equals(CanonicalizationResult.OK): "Computation of extensions failed for an object";
+		if (createExtensions || countObjects) {
+			extensionsCollector.initializeExtensions();
+			Entry<CanonicalizationResult, CanonicalHeap> res = canonicalizer.traverseBreadthFirstAndCanonicalize(o, extensionsCollector);
 
-		if (globalExtensions.addAll((FieldExtensionsStrings)extensionsCollector.getExtensions())) {
-			if (CanonicalizerLog.isLoggingOn()) {
-				CanonicalizerLog.logLine("**********");
-				CanonicalizerLog.logLine("Extensions extended:");
-				CanonicalizerLog.logLine(globalExtensions.toString());
-				CanonicalizerLog.logLine("Size: " + ((FieldExtensionsStrings) globalExtensions).size());
-				CanonicalizerLog.logLine("**********");
+			assert res.getKey().equals(CanonicalizationResult.OK): "Computation of extensions failed for an object";
+
+			if (createExtensions) {
+				if (globalExtensions.addAll((FieldExtensionsStrings)extensionsCollector.getExtensions())) {
+					if (CanonicalizerLog.isLoggingOn()) {
+						CanonicalizerLog.logLine("**********");
+						CanonicalizerLog.logLine("Extensions extended:");
+						CanonicalizerLog.logLine(globalExtensions.toString());
+						CanonicalizerLog.logLine("Size: " + ((FieldExtensionsStrings) globalExtensions).size());
+						CanonicalizerLog.logLine("**********");
+					}
+				}
 			}
+			
+			if (countObjects) 
+				countNumberOfDifferentRuntimeObjects(store.getCanonicalClass(o.getClass()), extensionsCollector.getExtensions());
+			
 		}
 			
 	}
@@ -73,6 +125,8 @@ public class GlobalExtensions {
 		globalExtensions = new FieldExtensionsStrings();
 		store = new CanonicalStore(new LinkedHashSet<String>(), maxFieldDistance);
 		canonicalizer = new HeapCanonicalizer(store, maxObjects, maxArrayObjects);
+		hashes = new HashMap<>();
+		totalObjCount = 0;
 	}
 
 	private static void readConfigFromFile() {
@@ -105,11 +159,18 @@ public class GlobalExtensions {
 		else {
 			createExtensions = false;
 		}
+		if (prop.getProperty("count.objects", "false").equals("true")) {
+			//System.out.println("INFO: Computing extensions during tests execution");
+			countObjects = true;
+		}
+		else {
+			countObjects = false;
+		}
 		maxFieldDistance = Integer.parseInt(prop.getProperty("max.field.distance", Integer.toString(Integer.MAX_VALUE))); 
 		maxObjects = Integer.parseInt(prop.getProperty("max.objects", Integer.toString(Integer.MAX_VALUE))); 
 		maxArrayObjects = Integer.parseInt(prop.getProperty("max.array.objects", Integer.toString(Integer.MAX_VALUE))); 
 		maxStrLength = Integer.parseInt(prop.getProperty("max.string.length", Integer.toString(Integer.MAX_VALUE))); 
-		outputFilename = prop.getProperty("output.filename", "extensions-size.txt");
+		outputFilename = prop.getProperty("output.filename", "coverage-result.txt");
 		if (prop.getProperty("include.primitives", "true").equals("true")) {
 			includePrimitives = true;
 			extensionsCollector = new FieldExtensionsStringsCollector(maxStrLength);
@@ -121,7 +182,8 @@ public class GlobalExtensions {
 		
 		if (CanonicalizerLog.isLoggingOn()) {
 			CanonicalizerLog.logLine("> Read configuration options: ");
-			CanonicalizerLog.logLine("    create.extensions="+createExtensions);
+			CanonicalizerLog.logLine("    measure.coverage="+createExtensions);
+			CanonicalizerLog.logLine("    count.objects="+countObjects);
 			CanonicalizerLog.logLine("    include.primitives="+includePrimitives);
 			CanonicalizerLog.logLine("    max.field.distance="+maxFieldDistance);
 			CanonicalizerLog.logLine("    max.objects="+maxObjects);
@@ -138,22 +200,24 @@ public class GlobalExtensions {
 		else {
 			assert getCurrentUserPath().equals(userPath): "User path changed during execution of the tests";
 		}	
-		if (!createExtensions) return;
-	
-		int size = ((FieldExtensionsStrings) globalExtensions).size();
-	
-		String absoluteFilename = userPath.resolve(outputFilename).toString();
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(absoluteFilename, true))) {
-			bw.write(prefix + size + "\n");
-		} catch (IOException e) {
-			System.out.println("Cound not open file: " + absoluteFilename);
-			System.exit(1);
-		}
-		
-		if (CanonicalizerLog.isLoggingOn()) {
-			CanonicalizerLog.logLine("**********");
-			CanonicalizerLog.logLine(prefix + size);
-			CanonicalizerLog.logLine("**********");
+		if (createExtensions || countObjects) {
+			String absoluteFilename = userPath.resolve(outputFilename).toString();
+			try (BufferedWriter bw = new BufferedWriter(new FileWriter(absoluteFilename, true))) {
+				if (createExtensions)
+					bw.write(prefix + " extensions size: " + ((FieldExtensionsStrings) globalExtensions).size() + "\n");
+				if (countObjects)
+					bw.write(prefix + " objects number: " + totalObjCount + "\n");
+			} catch (IOException e) {
+				System.out.println("Cound not open file: " + absoluteFilename);
+				System.exit(1);
+			}
+
+			if (CanonicalizerLog.isLoggingOn()) {
+				CanonicalizerLog.logLine("**********");
+				CanonicalizerLog.logLine(prefix + " extensions size: " + ((FieldExtensionsStrings) globalExtensions).size() + "\n");
+				CanonicalizerLog.logLine(prefix + " objects number: " + totalObjCount + "\n");
+				CanonicalizerLog.logLine("**********");
+			}
 		}
 	}
 	
