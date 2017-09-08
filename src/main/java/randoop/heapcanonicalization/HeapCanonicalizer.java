@@ -1,4 +1,4 @@
-package randoop.util.heapcanonicalization;
+package randoop.heapcanonicalization;
 
 import java.util.AbstractMap;
 import java.util.HashSet;
@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsCollector;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsDummyCollector;
+import randoop.heapcanonicalization.fieldextensions.FieldExtensionsCollector;
+import randoop.heapcanonicalization.fieldextensions.FieldExtensionsDummyCollector;
 
 import java.util.Queue;
 import java.util.Set;

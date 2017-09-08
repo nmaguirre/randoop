@@ -1,4 +1,4 @@
-package randoop.util.heapcanonicalization;
+package randoop.heapcanonicalization;
 
 public class LimitsExceededException extends Exception {
 

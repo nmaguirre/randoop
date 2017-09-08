@@ -15,19 +15,19 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import randoop.util.heapcanonicalization.CanonicalClass;
-import randoop.util.heapcanonicalization.CanonicalHeap;
-import randoop.util.heapcanonicalization.CanonicalStore;
-import randoop.util.heapcanonicalization.CanonicalizationResult;
-import randoop.util.heapcanonicalization.CanonicalizerLog;
-import randoop.util.heapcanonicalization.HeapCanonicalizer;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensions;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsCollector;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStrings;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsCollector;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensionsStringsNonPrimitiveCollector;
-import randoop.util.heapcanonicalization.fieldextensions.MurmurHash3;
-import randoop.util.heapcanonicalization.fieldextensions.MurmurHash3.LongPair;
+import randoop.heapcanonicalization.CanonicalClass;
+import randoop.heapcanonicalization.CanonicalHeap;
+import randoop.heapcanonicalization.CanonicalStore;
+import randoop.heapcanonicalization.CanonicalizationResult;
+import randoop.heapcanonicalization.CanonicalizerLog;
+import randoop.heapcanonicalization.HeapCanonicalizer;
+import randoop.heapcanonicalization.fieldextensions.FieldExtensions;
+import randoop.heapcanonicalization.fieldextensions.FieldExtensionsCollector;
+import randoop.heapcanonicalization.fieldextensions.FieldExtensionsStrings;
+import randoop.heapcanonicalization.fieldextensions.FieldExtensionsStringsCollector;
+import randoop.heapcanonicalization.fieldextensions.FieldExtensionsStringsNonPrimitiveCollector;
+import randoop.heapcanonicalization.fieldextensions.MurmurHash3;
+import randoop.heapcanonicalization.fieldextensions.MurmurHash3.LongPair;
 
 
 public class GlobalExtensions {
@@ -194,19 +194,31 @@ public class GlobalExtensions {
 		}
 	}
 
-	public static void writeTotal(String prefix) {
+	public static void writeTotal(boolean end) {
 		if (globalExtensions == null)
 			initialize();
 		else {
 			assert getCurrentUserPath().equals(userPath): "User path changed during execution of the tests";
 		}	
+		String prefix = "Initial";
+		if (end)
+			prefix = "Final";
+		
 		if (createExtensions || countObjects) {
 			String absoluteFilename = userPath.resolve(outputFilename).toString();
 			try (BufferedWriter bw = new BufferedWriter(new FileWriter(absoluteFilename, true))) {
 				if (createExtensions)
 					bw.write(prefix + " extensions size: " + ((FieldExtensionsStrings) globalExtensions).size() + "\n");
-				if (countObjects)
-					bw.write(prefix + " objects number: " + totalObjCount + "\n");
+				if (countObjects) {
+					bw.write(prefix + " objects count: " + totalObjCount + "\n");
+					if (prefix.equals("Final")) {
+						for (CanonicalClass cc: hashes.keySet()) {
+							bw.write("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size() + "\n");
+							if (CanonicalizerLog.isLoggingOn())
+								CanonicalizerLog.logLine("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size());
+						}
+					}
+				}
 			} catch (IOException e) {
 				System.out.println("Cound not open file: " + absoluteFilename);
 				System.exit(1);
@@ -214,8 +226,8 @@ public class GlobalExtensions {
 
 			if (CanonicalizerLog.isLoggingOn()) {
 				CanonicalizerLog.logLine("**********");
-				CanonicalizerLog.logLine(prefix + " extensions size: " + ((FieldExtensionsStrings) globalExtensions).size() + "\n");
-				CanonicalizerLog.logLine(prefix + " objects number: " + totalObjCount + "\n");
+				CanonicalizerLog.logLine(prefix + " extensions size: " + ((FieldExtensionsStrings) globalExtensions).size());
+				CanonicalizerLog.logLine(prefix + " objects number: " + totalObjCount);
 				CanonicalizerLog.logLine("**********");
 			}
 		}

@@ -1,8 +1,8 @@
-package randoop.util.heapcanonicalization.fieldextensions;
+package randoop.heapcanonicalization.fieldextensions;
 
-import randoop.util.heapcanonicalization.CanonicalField;
-import randoop.util.heapcanonicalization.CanonicalObject;
-import randoop.util.heapcanonicalization.CanonicalizationResult;
+import randoop.heapcanonicalization.CanonicalField;
+import randoop.heapcanonicalization.CanonicalObject;
+import randoop.heapcanonicalization.CanonicalizationResult;
 
 public interface FieldExtensionsCollector {
 	

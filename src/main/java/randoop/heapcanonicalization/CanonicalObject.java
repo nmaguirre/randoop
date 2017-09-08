@@ -1,12 +1,10 @@
-package randoop.util.heapcanonicalization;
+package randoop.heapcanonicalization;
 
 import java.lang.reflect.Array;
 import java.util.AbstractMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
-
-import randoop.generation.AbstractGenerator;
 
 
 public class CanonicalObject {

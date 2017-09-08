@@ -1,4 +1,4 @@
-package randoop.util.heapcanonicalization.fieldextensions;
+package randoop.heapcanonicalization.fieldextensions;
 
 public class BugInPrimitiveTypeCanonicalization extends RuntimeException {
 

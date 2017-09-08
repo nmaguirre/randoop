@@ -1,4 +1,4 @@
-package randoop.util.heapcanonicalization.fieldextensions;
+package randoop.heapcanonicalization.fieldextensions;
 
 import java.util.Set;
 

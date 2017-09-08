@@ -1,9 +1,9 @@
-package randoop.util.heapcanonicalization.fieldextensions;
+package randoop.heapcanonicalization.fieldextensions;
 
-import randoop.util.heapcanonicalization.CanonicalField;
-import randoop.util.heapcanonicalization.CanonicalObject;
-import randoop.util.heapcanonicalization.CanonicalizationResult;
-import randoop.util.heapcanonicalization.CanonicalizerLog;
+import randoop.heapcanonicalization.CanonicalField;
+import randoop.heapcanonicalization.CanonicalObject;
+import randoop.heapcanonicalization.CanonicalizationResult;
+import randoop.heapcanonicalization.CanonicalizerLog;
 
 public class FieldExtensionsStringsCollector implements FieldExtensionsCollector {
 	

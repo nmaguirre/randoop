@@ -1,4 +1,4 @@
-package randoop.util.heapcanonicalization;
+package randoop.heapcanonicalization;
 
 import java.lang.reflect.Field;
 import java.util.Comparator;

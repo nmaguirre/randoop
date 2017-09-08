@@ -1,4 +1,4 @@
-package randoop.util.heapcanonicalization;
+package randoop.heapcanonicalization;
 
 public enum ExtendExtensionsResult {
 	EXTENDED, 

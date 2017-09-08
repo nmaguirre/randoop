@@ -1,4 +1,4 @@
-package randoop.util.heapcanonicalization;
+package randoop.heapcanonicalization;
 
 import randoop.Globals;
 import randoop.operation.TypedOperation;

@@ -1,4 +1,4 @@
-package randoop.util.heapcanonicalization;
+package randoop.heapcanonicalization;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import randoop.heapcanonicalization.fieldextensions.FieldExtensions;
 import randoop.util.Randomness;
-import randoop.util.heapcanonicalization.fieldextensions.FieldExtensions;
 
 
 public class CanonicalHeap {
