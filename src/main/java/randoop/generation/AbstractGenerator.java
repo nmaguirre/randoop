@@ -724,7 +724,8 @@ public static int badNegativesCount = 0;
 		  }
 		  
 	  } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-		  System.out.println("ERROR: could not find repOKNeg methods to classify negatives");
+		  System.out.println("ERROR: problem occurred while trying to invoke repOKNeg method to classify negatives");
+		  e.printStackTrace();
 		  System.exit(0);
 	  }
   }
