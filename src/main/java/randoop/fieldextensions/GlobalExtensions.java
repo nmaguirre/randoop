@@ -1,7 +1,10 @@
 package randoop.fieldextensions;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,6 +51,7 @@ public class GlobalExtensions {
 	private static String outputFilename;
 
 	private static Map<CanonicalClass, Set<LongPair>> hashes;
+	private static Set<String> classesToCover;
 	private static int totalObjCount;
 	
 	private static void countNumberOfDifferentRuntimeObjects(CanonicalClass cc, FieldExtensions ext) {
@@ -82,6 +86,14 @@ public class GlobalExtensions {
 
 		return hash;
 	}	
+	
+	
+	public static boolean coverObject(Object o) {
+		if (classesToCover == null) 
+			return true;
+		
+		return classesToCover.contains(o.getClass().getName());
+	}
 
 	public static void extend(Object o) {
 		if (globalExtensions == null)
@@ -89,7 +101,7 @@ public class GlobalExtensions {
 		else {
 			assert getCurrentUserPath().equals(userPath): "User path changed during execution of the tests";
 		}
-		if (o == null) return;
+		if (o == null || !coverObject(o)) return;
 
 		if (createExtensions || countObjects) {
 			extensionsCollector.initializeExtensions();
@@ -113,7 +125,6 @@ public class GlobalExtensions {
 				countNumberOfDifferentRuntimeObjects(store.getCanonicalClass(o.getClass()), extensionsCollector.getExtensions());
 			
 		}
-			
 	}
 	
 	private static Path getCurrentUserPath() {
@@ -139,7 +150,21 @@ public class GlobalExtensions {
 		} catch (IOException ex) {
 			System.out.println("Error: Could not find properties file: " + userPath.resolve("tests.properties"));
 			System.exit(1);
-			
+		}
+		
+		String classesFile = null;
+		if ((classesFile = prop.getProperty("cover.classes")) != null) {
+			classesToCover = new LinkedHashSet<String>();
+			try (BufferedReader br = new BufferedReader(new FileReader(userPath.resolve(classesFile).toString()))) {
+				String line = "";
+				while ((line = br.readLine()) != null) {
+					classesToCover.add(line);
+					System.out.println("Covering: " + line);
+				}
+			} catch (IOException e) {
+				System.out.println("Error: Could not find file with classes to cover: " + userPath.resolve(classesFile));
+				System.exit(1);
+			}
 		}
 		
 		String logFileName = prop.getProperty("log.filename");
@@ -190,6 +215,7 @@ public class GlobalExtensions {
 			CanonicalizerLog.logLine("    max.array.objects="+maxArrayObjects);
 			CanonicalizerLog.logLine("    max.string.length="+maxStrLength);
 			CanonicalizerLog.logLine("    output.filename="+outputFilename);
+			CanonicalizerLog.logLine("    cover.classes="+classesFile);
 			CanonicalizerLog.logLine("\n");
 		}
 	}
@@ -207,8 +233,9 @@ public class GlobalExtensions {
 		if (createExtensions || countObjects) {
 			String absoluteFilename = userPath.resolve(outputFilename).toString();
 			try (BufferedWriter bw = new BufferedWriter(new FileWriter(absoluteFilename, true))) {
-				if (createExtensions)
-					bw.write(prefix + " extensions size: " + ((FieldExtensionsStrings) globalExtensions).size() + "\n");
+				if (createExtensions) {
+					bw.write(prefix + " extensions size: "+ ((FieldExtensionsStrings) globalExtensions).size() + "\n");
+				}
 				if (countObjects) {
 					bw.write(prefix + " objects count: " + totalObjCount + "\n");
 					if (prefix.equals("Final")) {

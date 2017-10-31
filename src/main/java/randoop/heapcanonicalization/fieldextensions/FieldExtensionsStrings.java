@@ -61,6 +61,35 @@ public class FieldExtensionsStrings implements FieldExtensions {
 		return size;
 	}
 
+	public String sizeString(String prefix) {
+		String res = "";
+		int size = 0;
+		for (String field: extensions.keySet()) {
+			FieldExtensionStrings s = extensions.get(field);
+			if (s != null) {
+				int currSize = s.size();
+				size += currSize;
+				res += field + " extensions size: " + currSize + "\n"; 
+			}
+		}
+		res += prefix + " extensions size: " + size;
+		return res;
+	}
+	
+	
+	public void sizeString(BufferedWriter bw, String prefix) throws IOException {
+		int size = 0;
+		for (String field: extensions.keySet()) {
+			FieldExtensionStrings s = extensions.get(field);
+			if (s != null) {
+				int currSize = s.size();
+				size += currSize;
+				bw.write(field + " size: " + currSize + "\n"); 
+			}
+		}
+		bw.write(prefix + " extensions size: " + size + "\n"); 
+	}
+	
 
 	public boolean isEmpty() {
 		return extensions.isEmpty();

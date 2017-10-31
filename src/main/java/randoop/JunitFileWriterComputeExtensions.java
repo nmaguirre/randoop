@@ -57,13 +57,13 @@ public class JunitFileWriterComputeExtensions extends JunitFileWriter {
       
       out.println("  @BeforeClass");
       out.println("  public static void beforeClass() {");
-      out.println("    randoop.fieldextensions.GlobalExtensions.writeTotal(\"Initial\");");
+      out.println("    randoop.fieldextensions.GlobalExtensions.writeTotal(false);");
       out.println("  }");
       out.println();
 
       out.println("  @AfterClass");
       out.println("  public static void afterClass() {");
-      out.println("    randoop.fieldextensions.GlobalExtensions.writeTotal(\"Final\");");
+      out.println("    randoop.fieldextensions.GlobalExtensions.writeTotal(true);");
       out.println("  }");
       out.println();
 
