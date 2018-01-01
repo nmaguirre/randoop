@@ -45,6 +45,7 @@ public class GlobalExtensions {
 	private static int maxArrayObjects; 
 	private static int maxStrLength; 
 	private static boolean createExtensions;
+	private static boolean computeDomainSize;
 	private static boolean countObjects;
 	private static boolean includePrimitives;
 	public static FileWriter canonicalizerLog;
@@ -116,6 +117,7 @@ public class GlobalExtensions {
 						CanonicalizerLog.logLine("Extensions extended:");
 						CanonicalizerLog.logLine(globalExtensions.toString());
 						CanonicalizerLog.logLine("Size: " + ((FieldExtensionsStrings) globalExtensions).size());
+						CanonicalizerLog.logLine("Domain size: " + ((FieldExtensionsStrings) globalExtensions).domainSize());
 						CanonicalizerLog.logLine("**********");
 					}
 				}
@@ -180,6 +182,9 @@ public class GlobalExtensions {
 		if (prop.getProperty("measure.coverage", "false").equals("true")) {
 			//System.out.println("INFO: Computing extensions during tests execution");
 			createExtensions = true;
+			if (prop.getProperty("compute.domain.size", "false").equals("true")) {
+				computeDomainSize = true;
+			}
 		}
 		else {
 			createExtensions = false;
@@ -235,6 +240,8 @@ public class GlobalExtensions {
 			try (BufferedWriter bw = new BufferedWriter(new FileWriter(absoluteFilename, true))) {
 				if (createExtensions) {
 					bw.write(prefix + " extensions size: "+ ((FieldExtensionsStrings) globalExtensions).size() + "\n");
+					if (computeDomainSize)
+						bw.write(prefix + " domain size: "+ ((FieldExtensionsStrings) globalExtensions).domainSize() + "\n");
 				}
 				if (countObjects) {
 					bw.write(prefix + " objects count: " + totalObjCount + "\n");
@@ -254,6 +261,7 @@ public class GlobalExtensions {
 			if (CanonicalizerLog.isLoggingOn()) {
 				CanonicalizerLog.logLine("**********");
 				CanonicalizerLog.logLine(prefix + " extensions size: " + ((FieldExtensionsStrings) globalExtensions).size());
+				CanonicalizerLog.logLine(prefix + " domain size: "+ ((FieldExtensionsStrings) globalExtensions).domainSize() + "\n");
 				CanonicalizerLog.logLine(prefix + " objects number: " + totalObjCount);
 				CanonicalizerLog.logLine("**********");
 			}

@@ -112,6 +112,7 @@ public class FieldExtensionStrings {
 		return true;
 	}
 
+	
 	public Set<String> getValues(String object) {
 		return extension.get(object);
 	}
@@ -127,4 +128,15 @@ public class FieldExtensionStrings {
 		return size;
 	}
 	
+
+	public int domainSize() {
+		Set<String> codomain = new LinkedHashSet<>();
+		for (String key: extension.keySet()) {
+			Set<String> s = extension.get(key);
+			if (s != null)
+				codomain.addAll(s);
+		}
+		return extension.keySet().size() * codomain.size();
+	}
+
 }

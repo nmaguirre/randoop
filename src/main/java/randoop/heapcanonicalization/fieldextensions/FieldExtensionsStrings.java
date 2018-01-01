@@ -60,6 +60,18 @@ public class FieldExtensionsStrings implements FieldExtensions {
 		}
 		return size;
 	}
+	
+	
+	public int domainSize() {
+		int size = 0;
+		for (String field: extensions.keySet()) {
+			FieldExtensionStrings s = extensions.get(field);
+			if (s != null)
+				size += s.domainSize();
+		}
+		return size;
+	}
+	
 
 	public String sizeString(String prefix) {
 		String res = "";
