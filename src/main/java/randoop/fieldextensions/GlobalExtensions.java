@@ -213,6 +213,7 @@ public class GlobalExtensions {
 		if (CanonicalizerLog.isLoggingOn()) {
 			CanonicalizerLog.logLine("> Read configuration options: ");
 			CanonicalizerLog.logLine("    measure.coverage="+createExtensions);
+			CanonicalizerLog.logLine("    compute.domain.size="+computeDomainSize);
 			CanonicalizerLog.logLine("    count.objects="+countObjects);
 			CanonicalizerLog.logLine("    include.primitives="+includePrimitives);
 			CanonicalizerLog.logLine("    max.field.distance="+maxFieldDistance);
