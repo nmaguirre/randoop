@@ -23,6 +23,11 @@ public class DummyHeapRoot {
 	public DummyHeapRoot(Object theroot) {
 		this.theroot = theroot;
 	}
+	
+
+	public boolean isNull() {
+		return theroot == null;
+	}
 
 }
 

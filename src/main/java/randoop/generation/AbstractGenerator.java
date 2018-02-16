@@ -190,6 +190,15 @@ public abstract class AbstractGenerator {
   @Option("Hacky way of removing unused objects in vectors for data structure test generation")
   public static boolean vectorization_remove_unused = false;
   
+  @Option("Mutate objects within extensions some times")
+  public static boolean vectorization_mutate_within_extensions = false;
+
+  @Option("Should be private.")
+  public static boolean vectorization_mutated_within_extensions = false;
+  
+  @Option("Mutate objects within extensions this percentage of the total number of mutations")
+  public static double vectorization_mutate_within_extensions_percentage = 0.1;
+  
   @Option("Don't include primitive values in vectors")
   public static boolean vectorization_no_primitives = false;
   
@@ -693,14 +702,23 @@ public static int badNegativesCount = 0;
 				  assert !fbg_low_level_primitive: "Low level extensions not supported for vectorization";
 				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj, collector);
 				  assert res.getKey() == CanonicalizationResult.OK: "Mutation added objects to the structure";
-				  if (globalExtensions.containsAll(collector.getExtensions())) {
+				  if (!vectorization_mutated_within_extensions && globalExtensions.containsAll(collector.getExtensions())) {
 					  // Positive structure built; retry
 					  positiveRetries--;
 					  if (CanonicalizerLog.isLoggingOn()) 
 						  CanonicalizerLog.logLine("> Mutation attempt failed because yielded structure is positive");							   
 				  }
-				  else
-					  succeed = true;
+				  else {
+					  // We don't want a null structure to be treated as negative. This problem arises when 
+					  // mutating within extensions only.
+					  if (vectorization_mutated_within_extensions && 
+							  mutObj instanceof DummyHeapRoot && ((DummyHeapRoot)mutObj).isNull()) {
+						  vectorization_mutated_within_extensions = false;
+					  }
+					  else
+						  succeed = true;
+				  }
+				  vectorization_mutated_within_extensions = false;
 			  }
 			  
 			  if (succeed) {

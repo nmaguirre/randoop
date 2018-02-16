@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import randoop.generation.AbstractGenerator;
 import randoop.util.Randomness;
 import randoop.util.heapcanonicalization.fieldextensions.FieldExtensions;
 
@@ -253,9 +254,16 @@ public class CanonicalHeap {
 			CanonicalizerLog.logLine("Heap contents:\n" + toString());
 		}
 		
+		boolean mutateWithinExtensions = false;
+		if (AbstractGenerator.vectorization_mutate_within_extensions && 
+				Randomness.weighedCoinFlip(AbstractGenerator.vectorization_mutate_within_extensions_percentage)) 		
+			mutateWithinExtensions = true;
+		
 		while (!succeeded && retriesLeft > 0) {
 
 			CanonicalObject toMutate = objects.get(cls).get(toMutateInd);
+			if (CanonicalizerLog.isLoggingOn()) 
+				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
 			// 3- Pick the field to be mutated.
 			List<CanonicalField> candidateFields = new ArrayList<>(); 
 			Entry<CanonicalizationResult, List<CanonicalField>> objFieldsRes = toMutate.getCanonicalFields();
@@ -297,13 +305,28 @@ public class CanonicalHeap {
 				CanonicalizerLog.logLine("Objects in extensions:" + objsInExtensions);
 			if (objsInExtensions == null)
 				objsInExtensions = new HashSet<>();
+			
 			List<CanonicalObject> candidateValues = new ArrayList<>();
-			for (CanonicalObject candidate: allValues) {
-				if (!objsInExtensions.contains(candidate.stringRepresentation()))
-					candidateValues.add(candidate);
+			if (!mutateWithinExtensions) {
+				for (CanonicalObject candidate: allValues) {
+					if (!objsInExtensions.contains(candidate.stringRepresentation()))
+						candidateValues.add(candidate);
+				}
+				if (CanonicalizerLog.isLoggingOn())
+					CanonicalizerLog.logLine("Mutating object outside extensions\nObjects outside extensions:" + candidateValues);
 			}
-			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Objects outside extensions:" + candidateValues);
+			else {
+				Object currFldVal = rdmFld.getValue(toMutate);
+				for (CanonicalObject candidate: allValues) {
+					String candStr = candidate.stringRepresentation();
+					if (candidate.getObject() != currFldVal && objsInExtensions.contains(candStr))
+						candidateValues.add(candidate);
+				}
+				
+				if (CanonicalizerLog.isLoggingOn())
+					CanonicalizerLog.logLine("Mutating object within extensions.\nObjects within extensions:" + candidateValues);
+			}
+			
 			if (candidateValues.isEmpty()) {
 				// No values outside the extensions to select for mutation.
 				retriesLeft--;
@@ -316,12 +339,16 @@ public class CanonicalHeap {
 			if (CanonicalizerLog.isLoggingOn())
 				CanonicalizerLog.logLine("Randomly picked a value for the field: " + rdmValue.stringRepresentation());		
 
+			
 			// 5- set toMutate.rdmFld = rdmValue
 			rdmFld.setValue(toMutate, rdmValue);
 			succeeded = true;
 			if (CanonicalizerLog.isLoggingOn())
 				CanonicalizerLog.logLine("Mutation successful. Field " + rdmFld.stringRepresentation(toMutate) + " of object " + 
 						toMutate.stringRepresentation() + " set to " + rdmValue.stringRepresentation());
+			
+			if (mutateWithinExtensions)
+				AbstractGenerator.vectorization_mutated_within_extensions = true;
 		}
 
 		if (!succeeded)
