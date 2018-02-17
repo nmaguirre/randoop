@@ -122,6 +122,12 @@ public class CanonicalHeap {
 			CanonicalizerLog.logLine("Starting a mutation attempt:");
 			CanonicalizerLog.logLine("Heap contents:\n" + toString());
 		}
+		
+		boolean mutateWithinExtensions = false;
+		if (AbstractGenerator.vectorization_mutate_within_extensions && 
+				Randomness.weighedCoinFlip(AbstractGenerator.vectorization_mutate_within_extensions_percentage)) 		
+			mutateWithinExtensions = true;
+		
 		while (!succeeded && retriesLeft > 0) {
 			// 1- Pick a class whose objects are mutation candidates.
 			List<CanonicalClass> candidateClasses = new ArrayList<>(); 
@@ -193,13 +199,18 @@ public class CanonicalHeap {
 				CanonicalizerLog.logLine("Objects in extensions:" + objsInExtensions);
 			if (objsInExtensions == null)
 				objsInExtensions = new HashSet<>();
-			List<CanonicalObject> candidateValues = new ArrayList<>();
+			
+			/* List<CanonicalObject> candidateValues = new ArrayList<>();
 			for (CanonicalObject candidate: allValues) {
 				if (!objsInExtensions.contains(candidate.stringRepresentation()))
 					candidateValues.add(candidate);
 			}
 			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Objects outside extensions:" + candidateValues);
+				CanonicalizerLog.logLine("Objects outside extensions:" + candidateValues); */
+			
+			List<CanonicalObject> candidateValues = candidatesToMutateField(mutateWithinExtensions, toMutate, rdmFld,
+					allValues, objsInExtensions);
+			
 			if (candidateValues.isEmpty()) {
 				// No values outside the extensions to select for mutation.
 				retriesLeft--;
@@ -218,6 +229,9 @@ public class CanonicalHeap {
 			if (CanonicalizerLog.isLoggingOn())
 				CanonicalizerLog.logLine("Mutation successful. Field " + rdmFld.stringRepresentation(toMutate) + " of object " + 
 						toMutate.stringRepresentation() + " set to " + rdmValue.stringRepresentation());
+			
+			if (mutateWithinExtensions)
+				AbstractGenerator.vectorization_mutated_within_extensions = true;
 		}
 
 		if (!succeeded)
@@ -306,26 +320,8 @@ public class CanonicalHeap {
 			if (objsInExtensions == null)
 				objsInExtensions = new HashSet<>();
 			
-			List<CanonicalObject> candidateValues = new ArrayList<>();
-			if (!mutateWithinExtensions) {
-				for (CanonicalObject candidate: allValues) {
-					if (!objsInExtensions.contains(candidate.stringRepresentation()))
-						candidateValues.add(candidate);
-				}
-				if (CanonicalizerLog.isLoggingOn())
-					CanonicalizerLog.logLine("Mutating object outside extensions\nObjects outside extensions:" + candidateValues);
-			}
-			else {
-				Object currFldVal = rdmFld.getValue(toMutate);
-				for (CanonicalObject candidate: allValues) {
-					String candStr = candidate.stringRepresentation();
-					if (candidate.getObject() != currFldVal && objsInExtensions.contains(candStr))
-						candidateValues.add(candidate);
-				}
-				
-				if (CanonicalizerLog.isLoggingOn())
-					CanonicalizerLog.logLine("Mutating object within extensions.\nObjects within extensions:" + candidateValues);
-			}
+			List<CanonicalObject> candidateValues = candidatesToMutateField(mutateWithinExtensions, toMutate, rdmFld,
+					allValues, objsInExtensions);
 			
 			if (candidateValues.isEmpty()) {
 				// No values outside the extensions to select for mutation.
@@ -356,6 +352,32 @@ public class CanonicalHeap {
 				CanonicalizerLog.logLine("Retries limit exceeded. No mutation performed.");
 
 		return succeeded; 
+	}
+
+	public List<CanonicalObject> candidatesToMutateField(boolean mutateWithinExtensions, CanonicalObject toMutate,
+			CanonicalField rdmFld, List<CanonicalObject> allValues, Set<String> objsInExtensions) {
+		List<CanonicalObject> candidateValues = new ArrayList<>();
+		
+		if (!mutateWithinExtensions) {
+			for (CanonicalObject candidate: allValues) {
+				if (!objsInExtensions.contains(candidate.stringRepresentation()))
+					candidateValues.add(candidate);
+			}
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Mutating object outside extensions\nObjects outside extensions:" + candidateValues);
+		}
+		else {
+			Object currFldVal = rdmFld.getValue(toMutate);
+			for (CanonicalObject candidate: allValues) {
+				String candStr = candidate.stringRepresentation();
+				if (candidate.getObject() != currFldVal && objsInExtensions.contains(candStr))
+					candidateValues.add(candidate);
+			}
+			
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Mutating object within extensions.\nObjects within extensions:" + candidateValues);
+		}
+		return candidateValues;
 	}
 	
 	

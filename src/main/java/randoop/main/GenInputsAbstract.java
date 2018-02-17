@@ -126,6 +126,11 @@ public abstract class GenInputsAbstract extends CommandHandler {
    */
   @Option("Do not call methods that match regular expression <string>")
   public static Pattern omitmethods = null;
+  
+  
+  @Option("Do not mutate fields that match regular expression <string>")
+  public static Pattern vectorization_dont_mutate_fields = null;
+
 
   /**
    * File that contains fully-qualified field names to be excluded

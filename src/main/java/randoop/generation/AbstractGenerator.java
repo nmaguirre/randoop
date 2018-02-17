@@ -780,10 +780,18 @@ public static int badNegativesCount = 0;
 	  assert !fbg_low_level_primitive: "Low level extensions not supported for vectorization";
 	  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(obj, collector);
 	  assert res.getKey() == CanonicalizationResult.OK: "Mutation added objects to the structure";
-	  if (globalExtensions.containsAll(collector.getExtensions())) {
+	  if (!vectorization_mutated_within_extensions && globalExtensions.containsAll(collector.getExtensions())) {
 		  // Positive structure built; retry
 		  if (CanonicalizerLog.isLoggingOn()) 
 			  CanonicalizerLog.logLine("> Mutation attempt failed because yielded structure is positive");							   
+		  return;
+	  }
+	  
+	  if (vectorization_mutated_within_extensions && 
+			  obj instanceof DummyHeapRoot && ((DummyHeapRoot)obj).isNull()) {
+		  vectorization_mutated_within_extensions = false;
+		  if (CanonicalizerLog.isLoggingOn()) 
+			  CanonicalizerLog.logLine("> Mutation attempt failed because of positive null structure");		
 		  return;
 	  }
 
