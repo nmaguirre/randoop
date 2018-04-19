@@ -253,7 +253,10 @@ public class CanonicalHeap {
 						}	
 						catch (NumberFormatException e3) {	
 							// res is boolean, string or char.
-							res = primStr;
+							if ("true".equalsIgnoreCase(primStr) || "false".equalsIgnoreCase(primStr))
+								res = Boolean.parseBoolean(primStr);
+							else
+								res = primStr;
 						}
 					}
 				}
