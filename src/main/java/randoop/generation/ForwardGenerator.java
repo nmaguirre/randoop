@@ -35,6 +35,7 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
+import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 
 /**
  * Randoop's forward, component-based generator.
@@ -110,7 +111,15 @@ public class ForwardGenerator extends AbstractGenerator {
     this.instantiator = componentManager.getTypeInstantiator();
 
     initializeRuntimePrimitivesSeen();
+
+    if (field_based_gen == FieldBasedGenType.EXTENSIONS && fbg_observer_detection)
+	    	this.maxsize = GenInputsAbstract.maxsize - ((int) (GenInputsAbstract.maxsize * AbstractGenerator.fbg_observer_lines));
+    else
+    		this.maxsize = GenInputsAbstract.maxsize;
+
   }
+
+  private int maxsize;
 
   /**
    * The runtimePrimitivesSeen set contains primitive values seen during
@@ -155,17 +164,32 @@ public class ForwardGenerator extends AbstractGenerator {
     long gentime = endTime - startTime;
     startTime = endTime; // reset start time.
 
-    eSeq.execute(executionVisitor, checkGenerator);
-
-    endTime = System.nanoTime();
-
-    eSeq.exectime = endTime - startTime;
-    startTime = endTime; // reset start time.
-
-    processSequence(eSeq);
-
-    if (eSeq.sequence.hasActiveFlags()) {
-      componentManager.addGeneratedSequence(eSeq.sequence);
+    if (field_based_gen == FieldBasedGenType.DISABLED) {
+	    eSeq.execute(executionVisitor, checkGenerator);
+	
+	    endTime = System.nanoTime();
+	
+	    eSeq.exectime = endTime - startTime;
+	    startTime = endTime; // reset start time.
+	
+	    processSequence(eSeq);
+	
+	    if (eSeq.sequence.hasActiveFlags()) {
+	      componentManager.addGeneratedSequence(eSeq.sequence);
+	    }
+    }
+    else {
+           // FB randoop behaviour
+           eSeq.executeFB(executionVisitor, checkGenerator, newCanonicalizer, globalExtensions);
+           endTime = System.nanoTime();
+           eSeq.exectime = endTime - startTime;
+           startTime = endTime; // reset start time.
+    
+           processSequence(eSeq);
+           
+           if (eSeq.sequence.hasActiveFlags() && eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED) {
+               componentManager.addFieldBasedActiveSequence(eSeq.sequence);
+           }
     }
 
     endTime = System.nanoTime();
@@ -381,7 +405,8 @@ public class ForwardGenerator extends AbstractGenerator {
     }
 
     // Discard if sequence is larger than size limit
-    if (newSequence.size() > GenInputsAbstract.maxsize) {
+    //if (newSequence.size() > GenInputsAbstract.maxsize) {
+    if (newSequence.size() > this.maxsize) {
       if (Log.isLoggingOn()) {
         Log.logLine(
             "Sequence discarded because size "
@@ -418,10 +443,18 @@ public class ForwardGenerator extends AbstractGenerator {
 
     // Keep track of any input sequences that are used in this sequence.
     // Tests that contain only these sequences are probably redundant.
-    for (Sequence is : sequences.sequences) {
-      subsumed_sequences.add(is);
+    if (field_based_gen == FieldBasedGenType.DISABLED) {
+		for (Sequence is : sequences.sequences) {
+		  subsumed_sequences.add(is);
+		}
     }
-
+    else {
+		subsumed_candidates = new LinkedHashSet<>();
+		for (Sequence is : sequences.sequences) {
+		  subsumed_candidates.add(is);
+	}
+    	
+    }
     return new ExecutableSequence(newSequence);
   }
 
@@ -632,7 +665,7 @@ public class ForwardGenerator extends AbstractGenerator {
       // case below
       // is by far the most common.
 
-      if (inputType.isArray()) {
+      if (!disable_collections_generation_heuristic && inputType.isArray()) {
 
         // 1. If T=inputTypes[i] is an array type, ask the component manager for
         // all sequences
@@ -646,7 +679,8 @@ public class ForwardGenerator extends AbstractGenerator {
             HelperSequenceCreator.createArraySequence(componentManager, inputType);
         l = new ListOfLists<>(l1, l2);
 
-      } else if (inputType.isParameterized()
+      } else if (!disable_collections_generation_heuristic && 
+    		  inputType.isParameterized()
           && ((InstantiatedType) inputType)
               .getGenericClassType()
               .isSubtypeOf(JDKTypes.COLLECTION_TYPE)) {
@@ -794,4 +828,44 @@ public class ForwardGenerator extends AbstractGenerator {
   public int numGeneratedSequences() {
     return allSequences.size();
   }
+  
+  @Override
+public void executeExtendedSequenceNoReexecute(ExecutableSequence eSeq, ExecutableSequence extendedSeq, int startIndex,
+		  int endIndex) {
+
+  	long startTime = System.nanoTime();
+
+  	setCurrentSequence(eSeq.sequence);
+
+  	long endTime = System.nanoTime();
+
+  	long gentime = endTime - startTime;
+  	startTime = endTime; // reset start time.
+
+  		if (extendedSeq == null || extendedSeq.hasNonExecutedStatements())
+  			//eSeq.executeFBSecondPhase(executionVisitor, checkGenerator, canonizer);
+  			eSeq.executeFB(executionVisitor, checkGenerator, newCanonicalizer, null);
+  		else
+  			//eSeq.executeFBSecondPhaseNoReexecute(executionVisitor, checkGenerator, canonizer, extendedSeq, startIndex, endIndex);
+  			eSeq.executeFBNoReExecute(executionVisitor, checkGenerator, newCanonicalizer, null, extendedSeq, startIndex, endIndex);
+
+  	endTime = System.nanoTime();
+  	eSeq.exectime = endTime - startTime;
+  	startTime = endTime; // reset start time.
+
+
+  	endTime = System.nanoTime();
+  	gentime += endTime - startTime;
+  	eSeq.gentime = gentime;
+
+	}
+
+ 
+
+  
+  
+  
+  
+  
+  
 }

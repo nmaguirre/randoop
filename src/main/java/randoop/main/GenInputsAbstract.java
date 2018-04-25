@@ -648,6 +648,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("<filename> Name of a file to which to log lots of information")
   public static FileWriter log = null;
 
+  @Option("<filename> Name of a file to which to log lots of information")
+  public static FileWriter canonicalizer_log = null;
+
   /**
    * Create sequences but never execute them. Used to test performance of
    * Randoop's sequence generation code.

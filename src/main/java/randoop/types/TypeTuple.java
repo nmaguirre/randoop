@@ -16,7 +16,7 @@ import plume.UtilMDE;
 public class TypeTuple implements Iterable<Type>, Comparable<TypeTuple> {
 
   /** The sequence of types in this type tuple. */
-  private final ArrayList<Type> list;
+  public final ArrayList<Type> list;
 
   /**
    * Creates a type tuple from the list of types, preserving the order.

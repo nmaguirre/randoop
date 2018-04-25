@@ -41,6 +41,15 @@ import randoop.util.SimpleList;
  * components from the collection.
  */
 public class ComponentManager {
+	
+	public void addFieldBasedActiveSequence(Sequence sequence) {
+		gralComponents.addFieldBased(sequence);
+	}
+	
+	
+	
+	
+	
 
   /**
    * The principal set of sequences used to create other, larger sequences by

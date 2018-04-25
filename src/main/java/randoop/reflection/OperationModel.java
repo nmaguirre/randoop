@@ -21,6 +21,7 @@ import randoop.contract.EqualsSymmetric;
 import randoop.contract.EqualsToNullRetFalse;
 import randoop.contract.EqualsTransitive;
 import randoop.contract.ObjectContract;
+import randoop.generation.AbstractGenerator;
 import randoop.generation.ComponentManager;
 import randoop.main.ClassNameErrorHandler;
 import randoop.operation.MethodCall;
@@ -84,18 +85,19 @@ public class OperationModel {
     classLiteralMap = new MultiMap<>();
     annotatedTestValues = new LinkedHashSet<>();
     contracts = new ContractSet();
-    contracts.add(EqualsReflexive.getInstance());
-    contracts.add(EqualsSymmetric.getInstance());
-    contracts.add(EqualsHashcode.getInstance());
-    contracts.add(EqualsToNullRetFalse.getInstance());
-    contracts.add(EqualsReturnsNormally.getInstance());
-    contracts.add(EqualsTransitive.getInstance());
-    contracts.add(CompareToReflexive.getInstance());
-    contracts.add(CompareToAntiSymmetric.getInstance());
-    contracts.add(CompareToEquals.getInstance());
-    contracts.add(CompareToSubs.getInstance());
-    contracts.add(CompareToTransitive.getInstance());
-
+    if (!AbstractGenerator.disable_contracts) {
+		contracts.add(EqualsReflexive.getInstance());
+		contracts.add(EqualsSymmetric.getInstance());
+		contracts.add(EqualsHashcode.getInstance());
+		contracts.add(EqualsToNullRetFalse.getInstance());
+		contracts.add(EqualsReturnsNormally.getInstance());
+		contracts.add(EqualsTransitive.getInstance());
+		contracts.add(CompareToReflexive.getInstance());
+		contracts.add(CompareToAntiSymmetric.getInstance());
+		contracts.add(CompareToEquals.getInstance());
+		contracts.add(CompareToSubs.getInstance());
+		contracts.add(CompareToTransitive.getInstance());
+    }
     exercisedClasses = new LinkedHashSet<>();
     operations = new TreeSet<>();
     classCount = 0;
@@ -340,12 +342,18 @@ public class OperationModel {
         } else if (c.isInterface()) {
           System.out.println("Ignoring " + c + " specified via --classlist or --testclass.");
         } else {
-          if (Modifier.isAbstract(c.getModifiers()) && !c.isEnum()) {
-            System.out.println(
-                "Ignoring abstract " + c + " specified via --classlist or --testclass.");
-          } else {
-            mgr.apply(c);
-          }
+        	// TODO:  && !c.isEnum() is necessary below?
+        		if (AbstractGenerator.allow_abstract_classes_methods && !c.isEnum()) {
+        			mgr.apply(c);
+        		}
+        		else {
+        			if (Modifier.isAbstract(c.getModifiers()) && !c.isEnum()) {
+        				System.out.println(
+        						"Ignoring abstract " + c + " specified via --classlist or --testclass.");
+        			} else {
+        				mgr.apply(c);
+        			}
+        		}
           if (exercisedClassnames.contains(classname)) {
             exercisedClasses.add(c);
           }

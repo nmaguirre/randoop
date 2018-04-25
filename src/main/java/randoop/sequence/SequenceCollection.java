@@ -18,6 +18,7 @@ import randoop.util.ArrayListSimpleList;
 import randoop.util.ListOfLists;
 import randoop.util.Log;
 import randoop.util.SimpleList;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
 
 /**
  * A collection of sequences that makes its efficient to ask for all the
@@ -52,6 +53,30 @@ import randoop.util.SimpleList;
  * sequence map.
  */
 public class SequenceCollection {
+	
+	public void addFieldBased(Sequence sequence) {
+		List<Type> formalTypes = sequence.getTypesForLastStatement();
+		List<Variable> arguments = sequence.getVariablesOfLastStatement();
+		assert formalTypes.size() == arguments.size();
+
+		// All the active vars are figured out during precise minimization
+		for (Integer i: sequence.getActiveVars(sequence.size()-1)) {
+			Variable argument = arguments.get(i);
+			assert formalTypes.get(i).isAssignableFrom(argument.getType())
+			: formalTypes.get(i).getName()
+			+ " should be assignable from "
+			+ argument.getType().getName();
+
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("> Extended extensions at var: " + argument.toString() + " (index " + i + ")");
+
+			Type type = formalTypes.get(i);
+			typeSet.add(type);
+			updateCompatibleMap(sequence, type);
+		}
+
+		checkRep();
+	}
 
   // We make it a list to make it easier to pick out an element at random.
   private Map<Type, ArrayListSimpleList<Sequence>> sequenceMap = new LinkedHashMap<>();

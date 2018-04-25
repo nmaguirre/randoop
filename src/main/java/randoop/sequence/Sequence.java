@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -36,6 +37,21 @@ import randoop.util.WeightedElement;
  * executes the sequence.
  */
 public final class Sequence implements WeightedElement {
+	
+	private Map<Integer, List<Integer>> activeVars = new LinkedHashMap<>();
+	
+	public void addActiveVar(int stmtIndex, int varIndex) {
+		List<Integer> l = activeVars.get(stmtIndex); 
+		if (l == null) {
+			l = new LinkedList<Integer>();
+			activeVars.put(stmtIndex, l);
+		}
+		l.add(varIndex);
+	}
+
+	public List<Integer> getActiveVars(int stmtIndex) {
+		return activeVars.get(stmtIndex);
+	}
 
   public double lastTimeUsed = java.lang.System.currentTimeMillis();
 
@@ -102,13 +118,36 @@ public final class Sequence implements WeightedElement {
     return new Variable(this, i);
   }
 
+  
+  public Variable randomVariableForTypeLastStatementFB(Type type) {
+	    if (type == null) throw new IllegalArgumentException("type cannot be null.");
+	    
+	    if (activeVars.isEmpty()) {
+	    		assert type.isObject() || type.isPrimitive() || type.isBoxedPrimitive() || 
+						  type.isArray(): "Non primitive sequence used, but not field based selection of inputs.";
+	    		return randomVariableForTypeLastStatement(type);
+	    }
+	    
+	    List<Variable> possibleIndices = new ArrayList<>(this.lastStatementVariables.size());
+	    for (Integer j: getActiveVars(size()-1)) {
+	    	  Variable i = lastStatementVariables.get(j);
+	    	  
+	      Statement s = statements.get(i.index);
+	      if (type.isAssignableFrom(s.getOutputType())) {
+	        possibleIndices.add(i);
+	      }
+	    }
+	    if (possibleIndices.isEmpty()) return null;
+	    return Randomness.randomMember(possibleIndices);
+	  }
+  
   /**
    * The variables involved in the last statement. This includes the output
    * variable.
    *
    * @return the variables used in the last statement of this sequence
    */
-  List<Variable> getVariablesOfLastStatement() {
+  public List<Variable> getVariablesOfLastStatement() {
     return this.lastStatementVariables;
   }
 
@@ -119,7 +158,7 @@ public final class Sequence implements WeightedElement {
    *
    * @return the types of the variables in the last statement of this sequence
    */
-  List<Type> getTypesForLastStatement() {
+  public List<Type> getTypesForLastStatement() {
     return this.lastStatementTypes;
   }
 
@@ -852,6 +891,31 @@ public final class Sequence implements WeightedElement {
     }
     return new Sequence(new ListOfLists<>(statements1), newHashCode, newNetSize);
   }
+  
+  /**
+  * Create a new sequence that is the concatenation of the given sequences.
+  *
+  * @param sequences
+  *          the list of sequences to concatenate
+  * @return the concatenation of the sequences in the list
+  */
+ public static Sequence concatenateAndGetIndexes(List<Sequence> sequences, Sequence indexedSeq, int [] startingIndex) {
+   List<SimpleList<Statement>> statements1 = new ArrayList<>();
+   int newHashCode = 0;
+   int newNetSize = 0;
+   int lastIndex = 0;
+   for (Sequence c : sequences) {
+     newHashCode += c.savedHashCode;
+     newNetSize += c.savedNetSize;
+     if (c.equals(indexedSeq)) {
+   	  startingIndex[0] = lastIndex;
+     }
+     lastIndex += c.size();
+     statements1.add(c.statements);
+   }
+   return new Sequence(new ListOfLists<>(statements1), newHashCode, newNetSize);
+ }
+
 
   /**
    * The inputs for the ith statement, as indices. An index equal to x means

@@ -175,11 +175,11 @@ public class GenTests extends GenInputsAbstract {
         GenInputsAbstract.getStringSetFromFile(omit_field_list, "Error reading field file");
 
     VisibilityPredicate visibility;
-    Package junitPackage = Package.getPackage(GenInputsAbstract.junit_package_name);
-    if (junitPackage == null || GenInputsAbstract.only_test_public_members) {
-      visibility = new PublicVisibilityPredicate();
+    if (GenInputsAbstract.junit_package_name == null
+    		|| GenInputsAbstract.only_test_public_members) {
+    		   visibility = new PublicVisibilityPredicate();
     } else {
-      visibility = new PackageVisibilityPredicate(junitPackage);
+    		visibility = new PackageVisibilityPredicate(GenInputsAbstract.junit_package_name);
     }
 
     ReflectionPredicate reflectionPredicate =
@@ -263,14 +263,18 @@ public class GenTests extends GenInputsAbstract {
     }
 
     List<TypedOperation> model = operationModel.getOperations();
-
+    
     if (model.isEmpty()) {
       Log.out.println("There are no methods to test. Exiting.");
       System.exit(1);
     }
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.println("PUBLIC MEMBERS=" + model.size());
+      System.out.println("MEMBERS:");
+      for (TypedOperation op: model)
+    	  	System.out.println(op.toString());
     }
+    
 
     /*
      * Initialize components:
@@ -314,6 +318,9 @@ public class GenTests extends GenInputsAbstract {
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
+    
+    explorer.initNewCanonicalizer(classnames);
+    
     /*
      * setup for check generation
      */
