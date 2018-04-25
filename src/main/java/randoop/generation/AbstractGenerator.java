@@ -5,11 +5,15 @@ import plume.OptionGroup;
 import plume.Unpublicized;
 import randoop.*;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
+import randoop.reflection.TypeInstantiator;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
 import randoop.sequence.Variable;
 import randoop.test.TestCheckGenerator;
+import randoop.types.ReferenceType;
+import randoop.types.Substitution;
 import randoop.types.Type;
 import randoop.types.TypeTuple;
 import randoop.util.Log;
@@ -49,7 +53,8 @@ import java.util.Set;
  */
 public abstract class AbstractGenerator {
 	
-	
+	protected TypeInstantiator instantiator;	
+
 	public static HeapCanonicalizer newCanonicalizer;
 	public static CanonicalStore store;
 	public static FieldExtensions globalExtensions;
@@ -116,7 +121,7 @@ public abstract class AbstractGenerator {
 	  public static boolean fbg_2nd_phase_simple_obs_detection = false; 
 	  
 	  @Option("Extend subsumed tests during the second phase.")
-	  public static boolean field_based_gen_extend_subsumed = false;
+	  public static boolean field_based_gen_extend_subsumed = true;
 
 	  @Option("Max number of observers to be added to each test.")
 	  public static int fbg_observers_per_test = 100; 
@@ -416,7 +421,7 @@ private int genFirstAdditionalErrorSeqs;
   
   /*
   private boolean saveRarelyExtendingOperation(ExecutableSequence eSeq) {
-	TypedOperation op = eSeq.getLastStmtOperation();
+	TypedOperation op = eSeq.lastStmtOp;
 	  
 	if (OperationClassifier.isModifier(op)) {
 		if (fbg_save_not_extending_modifier_ratio == 0)
@@ -462,25 +467,25 @@ private int genFirstAdditionalErrorSeqs;
 		  }
 		  else {
 			  // TODO: Need observer detection for the following line to work
-			  //if (eSeq.getLastStmtOperation().isModifier() && saveNonExtendingModifierSequence(eSeq)) {
+			  //if (eSeq.lastStmtOp.isModifier() && saveNonExtendingModifierSequence(eSeq)) {
  			  if (CanonicalizerLog.isLoggingOn()) 
  				  CanonicalizerLog.logLine("> Extensions not enlarged.");
 			  //if (saveRarelyExtendingOperation(eSeq)) {
  			  // TODO: Implement rarely extending operations
-			  if (true) {
-				  save = true; 
-				  if (OperationClassifier.isModifier(eSeq.getLastStmtOperation())) {
-					  //eSeq.getLastStmtOperation().timesExecutedInSavedPositiveModifiersTests++;
+			  //if (true) {
+				  if (OperationClassifier.isModifier(eSeq.lastStmtGenericOp)) {
+					  save = true; 
+					  //eSeq.lastStmtOp.timesExecutedInSavedPositiveModifiersTests++;
 					  notExtendingPositiveTestsSaved++;
 				  }
+				  /*
 				  else {
-					  //eSeq.getLastStmtOperation().timesExecutedInSavedPositiveObserversTests++;
-					  observerPositiveTestsSaved++;
+					  //eSeq.lastStmtOp.timesExecutedInSavedPositiveObserversTests++;
+					  //observerPositiveTestsSaved++;
+					  positiveTestsDropped++;
 				  }
-
-				  if (CanonicalizerLog.isLoggingOn()) 
-					  CanonicalizerLog.logLine("> The last operation is rarely used in tests enlarging extensions.");
-			  }
+				  */
+			  //}
 		  }
 
 	  if (save) {
@@ -490,7 +495,7 @@ private int genFirstAdditionalErrorSeqs;
 		  savedTests++;
 
 		  if (fbg_observer_detection) {
-			  assert !OperationClassifier.notExecuted(eSeq.getLastStmtOperation()): "Operation must be executed at this point";
+			  assert !OperationClassifier.notExecuted(eSeq.lastStmtGenericOp): "Operation must be executed at this point";
 			  positiveRegressionSeqs.add(eSeq);
 		  }
 		  if (CanonicalizerLog.isLoggingOn()) 
@@ -520,7 +525,7 @@ private int genFirstAdditionalErrorSeqs;
 		  saveSubsumedCandidates();
 		  negativeTestsSaved++;
 		  savedTests++;
-		  //eSeq.getLastStmtOperation().timesExecutedInSavedNegativeTests++;
+		  //eSeq.lastStmtOp.timesExecutedInSavedNegativeTests++;
 		  if (CanonicalizerLog.isLoggingOn()) 
 			  CanonicalizerLog.logLine("> Current negative sequence saved.");
 	  }
@@ -632,23 +637,27 @@ private int genFirstAdditionalErrorSeqs;
     
     // Second phase
 	if (field_based_gen == FieldBasedGenType.EXTENSIONS && fbg_observer_detection) {
+		System.out.println(">> Second phase started...");
 		long secondPhaseStartTime = System.currentTimeMillis();
 
 		genFirstAdditionalPositiveSeqs = 0;
 		genFirstAdditionalNegativeSeqs = 0;
 		genFirstAdditionalErrorSeqs = 0;
 
+		/*
 		for (ExecutableSequence eSeq: positiveRegressionSeqs) {
-			if (OperationClassifier.isModifier(eSeq.getLastStmtOperation())) 
+			if (OperationClassifier.isModifier(eSeq.lastStmtGenericOp)) 
 				modifierRegressionSeqs.add(eSeq);
-			else if (OperationClassifier.isObserver(eSeq.getLastStmtOperation()))
+			else if (OperationClassifier.isObserver(eSeq.lastStmtGenericOp))
 				observerRegressionSeqs.add(eSeq);
 		}
+		*/
+		modifierRegressionSeqs = positiveRegressionSeqs;
 
 		ArrayList<TypedOperation> simpleObservers = new ArrayList<>();
 		ArrayList<TypedOperation> operationsPermutable = new ArrayList<>();
 		for (TypedOperation op: operations) {
-			if (OperationClassifier.isObserver(op)/* || OperationClassifier.isFinalObserver(op)*/) {
+			if (OperationClassifier.isObserver(op)) { // || OperationClassifier.isFinalObserver(op)) {
 				if (fbg_repeat_observers == 1)
 					operationsPermutable.add(op);
 				else {
@@ -669,9 +678,11 @@ private int genFirstAdditionalErrorSeqs;
 
 		extendModifierTestsWithObservers(modifierRegressionSeqs, operationsPermutable, false, false);
 
+		/*
 		if (CanonicalizerLog.isLoggingOn())
 			CanonicalizerLog.logLine("\n\n>> Second phase for observers starting...\n");
 		extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true, false);
+		*/
 
 		if (CanonicalizerLog.isLoggingOn())
 			CanonicalizerLog.logLine("\n\n>> Second phase finished.\n");
@@ -682,6 +693,14 @@ private int genFirstAdditionalErrorSeqs;
 		long min = ((secondPhaseTime / 1000) / 60) % 60;
 		long hr = (((secondPhaseTime / 1000) / 60) / 60);
 		String secondPhaseTimeHumanReadable = hr + "h" + min + "m" + sec + "s";
+		
+		if (CanonicalizerLog.isLoggingOn()) {
+			CanonicalizerLog.logLine("------------");
+			CanonicalizerLog.logLine("Types of operations");
+			for (TypedOperation op: operations) {
+				CanonicalizerLog.logLine(op.toString() + " : " + OperationClassifier.getClassification(op));
+			}
+		}
 
 		System.out.println("\n\n> Generation ended.\n\n");
 		System.out.println("> First phase stats:");
@@ -709,18 +728,6 @@ private int genFirstAdditionalErrorSeqs;
 		System.out.println("Total discarded tests: " + discardedTests);
 		System.out.println("Second phase execution time: " + secondPhaseTimeHumanReadable);
 		System.out.println(""); 
-
-		System.out.println();
-		System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
-		System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());
-		System.out.println();
-		System.out.println(
-				"Average method execution time (normal termination):      "
-						+ String.format("%.3g", ReflectionExecutor.normalExecAvgMillis()));
-		System.out.println(
-				"Average method execution time (exceptional termination): "
-						+ String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
-
 	} 
     
 
@@ -754,7 +761,7 @@ private int genFirstAdditionalErrorSeqs;
 	  //List<ExecutableSequence> result = new LinkedList<>();
 	  for (ExecutableSequence eSeq: modiferSequencesToExtend) {
 		  if (!ignoreMaxSize)
-			  //assert eSeq.getLastStmtOperation().isModifier(): "We only extend modifiers in this method";
+			  //assert eSeq.lastStmtOp.isModifier(): "We only extend modifiers in this method";
 		  
 		  if (stopSecondPhase()) { 
 			  if (CanonicalizerLog.isLoggingOn())
@@ -799,6 +806,7 @@ private int genFirstAdditionalErrorSeqs;
 		  
 		  ExecutableSequence currentSeq = eSeq;
 		  List<Type> seqLastStmtTypes = eSeq.sequence.getTypesForLastStatement();
+		  Substitution<ReferenceType> extSeqLastSub = eSeq.lastOpSubstitution;
 		  Type observedType = seqLastStmtTypes.get(j);
 		  int observedIndex = j;
 
@@ -836,7 +844,7 @@ private int genFirstAdditionalErrorSeqs;
 				  CanonicalizerLog.logLine("> with operation: " + operation.toString());
 			  }
 
-			  if (!OperationClassifier.isObserver(operation)/* && !OperationClassifier.isFinalObserver(operation)*/) {
+			  if (!OperationClassifier.isObserver(operation)) { // && !OperationClassifier.isFinalObserver(operation)) {
 				  if (CanonicalizerLog.isLoggingOn())
 					  CanonicalizerLog.logLine("> The current operation has been flagged as a modifier in the second phase, don't use it to extend tests anymore.");
 				  //System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
@@ -846,6 +854,31 @@ private int genFirstAdditionalErrorSeqs;
 				  if (CanonicalizerLog.isLoggingOn())
 					  CanonicalizerLog.logLine("> The current operation is a constructor, don't use it to extend tests");
 				  continue;
+			  }
+			  
+			  // Perform a substitution if needed
+			  if (operation.isGeneric() || operation.hasWildcardTypes()) {
+				  try {
+					  operation = instantiator.instantiate((TypedClassOperation) operation, extSeqLastSub);
+				  } catch (AssertionError e) {
+					  if (operation.isMethodCall() || operation.isConstructorCall()) {
+						  String opName = operation.getOperation().getReflectionObject().toString();
+						  System.out.println("Instantiation error: " + opName + " , " + e);
+						  if (CanonicalizerLog.isLoggingOn())
+							  CanonicalizerLog.logLine("Instantiation error: " + opName + " , " + e);
+						  continue;
+						  //throw new RandoopInstantiationError(opName, e);
+					  }
+				  }
+				  if (operation == null) { //failed to instantiate generic
+					  if (CanonicalizerLog.isLoggingOn())
+						  CanonicalizerLog.logLine("Failed to instantiate generics");
+					  continue;
+				  }
+
+				  if (CanonicalizerLog.isLoggingOn()) {
+					  CanonicalizerLog.logLine("\n> Instantiated operation: " + operation.toString());
+				  }
 			  }
 
 			  // The first integer of the tuple is the index of the variable chosen from newSeq, 
@@ -1134,19 +1167,15 @@ private int genFirstAdditionalErrorSeqs;
   
   private Integer getRandomConnectionBetweenTypes(Type observedType, TypeTuple inputTypes) {
 	  List<Integer> l = new ArrayList<>();
-
 	  for (int j = 0; j < inputTypes.size(); j++) {
 		  if (inputTypes.get(j).isAssignableFrom(observedType)) {
 			  l.add(j);
 		  }
 	  }
 
-	  if (l.isEmpty())
-		  return null;
-	  else {
-		  Integer res = Randomness.randomMember(l);
-		  return res;
-	  }
+	  if (l.isEmpty()) return null;
+
+	  return Randomness.randomMember(l);
   }
 
 
@@ -1188,10 +1217,10 @@ private int genFirstAdditionalErrorSeqs;
 		  //List<ExecutableSequence> result = new LinkedList<>();
 		  for (ExecutableSequence eSeq: sequencesToExtend) {
 			  // We might add a modifier sequence here by mistake
-//			  assert eSeq.getLastStmtOperation().isObserver() || eSeq.getLastStmtOperation().isFinalObserver(): 
-//				  "We only extend observers in this method and " + eSeq.getLastStmtOperation().toString() + 
-//				  " is " + eSeq.getLastStmtOperation().fbExecState;
-			  //assert !eSeq.getLastStmtOperation().notExecuted(): "Operation must have been executed at this point";
+//			  assert eSeq.lastStmtOp.isObserver() || eSeq.lastStmtOp.isFinalObserver(): 
+//				  "We only extend observers in this method and " + eSeq.lastStmtOp.toString() + 
+//				  " is " + eSeq.lastStmtOp.fbExecState;
+			  //assert !eSeq.lastStmtOp.notExecuted(): "Operation must have been executed at this point";
 			  
 			  if (stopSecondPhase()) { 
 				  if (CanonicalizerLog.isLoggingOn())
@@ -1243,7 +1272,7 @@ private int genFirstAdditionalErrorSeqs;
 					  CanonicalizerLog.logLine("\n> Starting an attempt to extend sequence:\n " + currentSeq.sequence.toCodeString());
 					  CanonicalizerLog.logLine("> with operation: " + operation.toString());
 				  }
-				  if (!OperationClassifier.isObserver(operation)/* && !OperationClassifier.isFinalObserver(operation)*/) {
+				  if (!OperationClassifier.isObserver(operation)) {// && !OperationClassifier.isFinalObserver(operation)) {
 					  if (CanonicalizerLog.isLoggingOn())
 						  CanonicalizerLog.logLine("> Current operation flagged as a modifier in the second phase, don't use it to extend tests anymore");
 					  //System.out.println("> Operation " + operation.toString() + " has been flagged as a modifier by the field based approach, don't use it to build additional tests");
@@ -1267,6 +1296,33 @@ private int genFirstAdditionalErrorSeqs;
 				  for (int i = 0; i < seqLastStmtInputTypes.size(); i++)
 					  seqLastStmtOutputTypes.list.add(seqLastStmtInputTypes.get(i));
 
+				  /*
+				  // Perform a substitution if needed
+				  if (operation.isGeneric() || operation.hasWildcardTypes()) {
+					  try {
+						  operation = instantiator.instantiate((TypedClassOperation) operation, extSeqLastSub);
+					  } catch (AssertionError e) {
+						  if (operation.isMethodCall() || operation.isConstructorCall()) {
+							  String opName = operation.getOperation().getReflectionObject().toString();
+							  System.out.println("Instantiation error: " + opName + " , " + e);
+							  if (CanonicalizerLog.isLoggingOn())
+								  CanonicalizerLog.logLine("Instantiation error: " + opName + " , " + e);
+							  continue;
+							  //throw new RandoopInstantiationError(opName, e);
+						  }
+					  }
+					  if (operation == null) { //failed to instantiate generic
+						  if (CanonicalizerLog.isLoggingOn())
+							  CanonicalizerLog.logLine("Failed to instantiate generics");
+						  continue;
+					  }
+
+					  if (CanonicalizerLog.isLoggingOn()) {
+						  CanonicalizerLog.logLine("\n> Instantiated operation: " + operation.toString());
+					  }
+				  }
+				  */
+				  
 				  // The first integer of the tuple is the index of the variable chosen from newSeq, 
 				  // the second integer is the corresponding index of a compatible type in operation
 				  TypeTuple inputTypes = operation.getInputTypes();

@@ -119,27 +119,7 @@ public final class Sequence implements WeightedElement {
   }
 
   
-  public Variable randomVariableForTypeLastStatementFB(Type type) {
-	    if (type == null) throw new IllegalArgumentException("type cannot be null.");
-	    
-	    if (activeVars.isEmpty()) {
-	    		assert type.isObject() || type.isPrimitive() || type.isBoxedPrimitive() || 
-						  type.isArray(): "Non primitive sequence used, but not field based selection of inputs.";
-	    		return randomVariableForTypeLastStatement(type);
-	    }
-	    
-	    List<Variable> possibleIndices = new ArrayList<>(this.lastStatementVariables.size());
-	    for (Integer j: getActiveVars(size()-1)) {
-	    	  Variable i = lastStatementVariables.get(j);
-	    	  
-	      Statement s = statements.get(i.index);
-	      if (type.isAssignableFrom(s.getOutputType())) {
-	        possibleIndices.add(i);
-	      }
-	    }
-	    if (possibleIndices.isEmpty()) return null;
-	    return Randomness.randomMember(possibleIndices);
-	  }
+
   
   /**
    * The variables involved in the last statement. This includes the output
@@ -748,6 +728,30 @@ public final class Sequence implements WeightedElement {
     if (possibleIndices.isEmpty()) return null;
     return Randomness.randomMember(possibleIndices);
   }
+  
+  public Variable randomVariableForTypeLastStatementFB(Type type) {
+	    if (type == null) throw new IllegalArgumentException("type cannot be null.");
+	    
+	    if (activeVars.isEmpty()) {
+	    		assert type.isObject() || type.isPrimitive() || type.isBoxedPrimitive() || 
+						  type.isArray(): "Non primitive sequence used, but not field based selection of inputs.";
+	    		return randomVariableForTypeLastStatement(type);
+	    }
+	    
+	    List<Variable> possibleIndices = new ArrayList<>(this.lastStatementVariables.size());
+	    for (Integer j: getActiveVars(size()-1)) {
+	    	  Variable i = lastStatementVariables.get(j);
+	    	  
+	      Statement s = statements.get(i.index);
+	      if (type.isAssignableFrom(s.getOutputType())) {
+	        possibleIndices.add(i);
+	      }
+	    }
+	    if (possibleIndices.isEmpty()) return null;
+	    return Randomness.randomMember(possibleIndices);
+	  }
+  
+  
 
   void checkIndex(int i) {
     if (i < 0 || i > size() - 1) throw new IllegalArgumentException();

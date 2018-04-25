@@ -19,6 +19,7 @@ import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.NotExecuted;
 import randoop.generation.AbstractGenerator;
+import randoop.generation.ForwardGenerator;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedOperation;
@@ -29,6 +30,7 @@ import randoop.test.InvalidValueCheck;
 import randoop.test.TestCheckGenerator;
 import randoop.test.TestChecks;
 import randoop.types.ReferenceType;
+import randoop.types.Substitution;
 import randoop.types.Type;
 import randoop.util.IdentityMultiMap;
 import randoop.util.ProgressDisplay;
@@ -125,10 +127,15 @@ public class ExecutableSequence {
 		   return lastStmtNonPrimIndexes;
 	   }
 	   
-	   
+	   public TypedOperation lastStmtGenericOp;
+	   public Substitution<ReferenceType> lastOpSubstitution;
+
+	   /*
 	  public TypedOperation getLastStmtOperation() {
-		  return sequence.getStatement(sequence.size() - 1).getOperation();
+		  return lastStmtOp;
+		  //return sequence.getStatement(sequence.size() - 1).getOperation();
 	  } 
+	  */
 	
 	   public void executeFB(ExecutionVisitor visitor, TestCheckGenerator gen, HeapCanonicalizer canonicalizer, FieldExtensions globalExt) {
 		   executeFBNoReExecute(visitor, gen, true, canonicalizer, globalExt, null, 0, 0);
@@ -172,10 +179,11 @@ public class ExecutableSequence {
 			   List<Variable> inputs = sequence.getInputs(i);
 			   Object[] inputVariables;
 			   inputVariables = getRuntimeInputs(executionResults.theList, inputs);
-			   TypedOperation op = null;
+			   TypedOperation op = lastStmtGenericOp;
 
 			   if (globalExt != null && i == sequence.size()-1 && AbstractGenerator.fbg_observer_detection) {
-				   op = sequence.getStatement(i).getOperation();
+				   assert sequence.getStatement(i).getOperation().getName().equals(op.getName()) : "currentOperation does not match the last operation of the sequence";
+				   //op = sequence.getStatement(i).getOperation();
 				   if (sequence.size() > 1 && !OperationClassifier.isModifier(op)/* && !OperationClassifier.isFinalObserver(op)*/) {
 					   List<Object> objs = getObjectsForStatement(i, null, inputVariables);
 					   lastStmtExtBeforeExecution = createExtensionsForAllObjects(objs, canonicalizer);
@@ -233,10 +241,10 @@ public class ExecutableSequence {
 						   if (sequence.size() == 1) {
 							   // There is an object that is not primitive
 							   if (!lastStmtNonPrimIndexes.isEmpty()) {
-								   for (Integer j: lastStmtNonPrimIndexes) {
-									   OperationClassifier.setModifier(op);
-									   break;
-								   }
+								   //for (Integer j: lastStmtNonPrimIndexes) {
+									 OperationClassifier.setModifier(op);
+								//	   break;
+								 //  }
 							   }
 						   }
 						   else { //sequence.size() > 1 

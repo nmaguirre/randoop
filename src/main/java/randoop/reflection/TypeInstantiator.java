@@ -42,6 +42,8 @@ public class TypeInstantiator {
     this.inputTypes = inputTypes;
   }
 
+  public Substitution<ReferenceType> lastSubstitution;
+  
   public TypedClassOperation instantiate(TypedClassOperation operation) {
     assert operation.isGeneric() || operation.hasWildcardTypes()
         : "operation must be generic or have wildcards";
@@ -52,7 +54,7 @@ public class TypeInstantiator {
     // if declaring type of operation is generic, select instantiation
     ClassOrInterfaceType declaringType = operation.getDeclaringType();
     if (declaringType.isGeneric()) {
-      Substitution<ReferenceType> substitution;
+    	  Substitution<ReferenceType> substitution;
 
       // if operation creates objects of its declaring type, may create new instantiation
       if (operation.isConstructorCall()
@@ -68,6 +70,8 @@ public class TypeInstantiator {
       if (substitution == null) { // return null if fail to find instantiation
         return null;
       }
+      
+      lastSubstitution = substitution;
       // instantiate type parameters of declaring type
       operation = operation.apply(substitution);
     }
@@ -87,6 +91,42 @@ public class TypeInstantiator {
     // if operation == null failed to build instantiation
     return operation;
   }
+  
+  
+  
+  
+  public TypedClassOperation instantiate(TypedClassOperation operation, Substitution<ReferenceType> substitution) {
+	    assert operation.isGeneric() || operation.hasWildcardTypes()
+	        : "operation must be generic or have wildcards";
+
+	    //Need to allow for backtracking, because choice of instantiation for declaring type may fail
+	    //for generic operation --- OR maybe not
+
+	    // if declaring type of operation is generic, select instantiation
+	    ClassOrInterfaceType declaringType = operation.getDeclaringType();
+	    if (declaringType.isGeneric()) {
+
+	      // instantiate type parameters of declaring type
+	      operation = operation.apply(substitution);
+	    }
+	    // type parameters of declaring type are instantiated
+
+	    // if necessary, do capture conversion first
+	    if (operation != null && operation.hasWildcardTypes()) {
+	      if (Log.isLoggingOn()) {
+	        Log.logLine("Applying capture conversion to " + operation);
+	      }
+	      operation = operation.applyCaptureConversion();
+	    }
+	    if (operation != null) {
+	      operation = instantiateOperationTypes(operation);
+	    }
+
+	    // if operation == null failed to build instantiation
+	    return operation;
+	  }
+  
+  
 
   /**
    * Returns a substitution that instantiates the {@code SortedSet} type of the given constructor.

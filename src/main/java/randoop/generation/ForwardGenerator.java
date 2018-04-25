@@ -35,6 +35,7 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.ExtendExtensionsResult;
 
 /**
@@ -61,7 +62,7 @@ public class ForwardGenerator extends AbstractGenerator {
   // For testing purposes only.
   private final List<Sequence> allsequencesAsList = new ArrayList<>();
 
-  private final TypeInstantiator instantiator;
+
 
   // The set of all primitive values seen during generation and execution
   // of sequences. This set is used to tell if a new primitive value has
@@ -120,6 +121,7 @@ public class ForwardGenerator extends AbstractGenerator {
   }
 
   private int maxsize;
+//  public static TypedOperation currentOperation;
 
   /**
    * The runtimePrimitivesSeen set contains primitive values seen during
@@ -151,6 +153,12 @@ public class ForwardGenerator extends AbstractGenerator {
 
     if (eSeq == null) {
       return null;
+    }
+    
+    if (CanonicalizerLog.isLoggingOn()) {
+    		CanonicalizerLog.logLine("------------");
+    		CanonicalizerLog.logLine(" Created new sequence: " + eSeq.sequence.toCodeString());
+    		CanonicalizerLog.logLine("------------");
     }
 
     if (GenInputsAbstract.dontexecute) {
@@ -186,6 +194,15 @@ public class ForwardGenerator extends AbstractGenerator {
            startTime = endTime; // reset start time.
     
            processSequence(eSeq);
+           
+           // Hack to save constructors as we can't see the instiations of their types in runtime.
+           if (eSeq.sequence.size() == 1 && eSeq.lastStmtGenericOp.isConstructorCall()) {
+        	   	if (CanonicalizerLog.isLoggingOn())
+        	   		CanonicalizerLog.logLine("HACK: Save constructors no matter if they extend the extensions or not, as we can't see the instiations of their types in runtime for now, and "
+        	   				+ "dropping them means dropping ways of building valid structures.");
+        	   	eSeq.enlargesExtensions = ExtendExtensionsResult.EXTENDED;
+        	   	eSeq.sequence.addActiveVar(0, 0);
+           }
            
            if (eSeq.sequence.hasActiveFlags() && eSeq.enlargesExtensions == ExtendExtensionsResult.EXTENDED) {
                componentManager.addFieldBasedActiveSequence(eSeq.sequence);
@@ -348,6 +365,8 @@ public class ForwardGenerator extends AbstractGenerator {
       Log.logLine("Selected operation: " + operation.toString());
     }
 
+    TypedOperation genericOperation = operation;
+    instantiator.lastSubstitution = null;
     if (operation.isGeneric() || operation.hasWildcardTypes()) {
       try {
         operation = instantiator.instantiate((TypedClassOperation) operation);
@@ -455,7 +474,10 @@ public class ForwardGenerator extends AbstractGenerator {
 	}
     	
     }
-    return new ExecutableSequence(newSequence);
+    ExecutableSequence eSeq = new ExecutableSequence(newSequence);
+    eSeq.lastStmtGenericOp = genericOperation;
+    eSeq.lastOpSubstitution = instantiator.lastSubstitution;
+    return eSeq;
   }
 
   /**
