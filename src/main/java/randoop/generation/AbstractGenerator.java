@@ -472,20 +472,16 @@ private int genFirstAdditionalErrorSeqs;
  				  CanonicalizerLog.logLine("> Extensions not enlarged.");
 			  //if (saveRarelyExtendingOperation(eSeq)) {
  			  // TODO: Implement rarely extending operations
-			  //if (true) {
-				  if (OperationClassifier.isModifier(eSeq.lastStmtGenericOp)) {
-					  save = true; 
-					  //eSeq.lastStmtOp.timesExecutedInSavedPositiveModifiersTests++;
-					  notExtendingPositiveTestsSaved++;
-				  }
-				  /*
-				  else {
-					  //eSeq.lastStmtOp.timesExecutedInSavedPositiveObserversTests++;
-					  //observerPositiveTestsSaved++;
-					  positiveTestsDropped++;
-				  }
-				  */
-			  //}
+			  save = true; 
+			  if (OperationClassifier.isModifier(eSeq.lastStmtGenericOp)) {
+				  //eSeq.lastStmtOp.timesExecutedInSavedPositiveModifiersTests++;
+				  notExtendingPositiveTestsSaved++;
+			  }
+			  else {
+				  //eSeq.lastStmtOp.timesExecutedInSavedPositiveObserversTests++;
+				  observerPositiveTestsSaved++;
+				  //	  positiveTestsDropped++;
+			  }
 		  }
 
 	  if (save) {
@@ -638,6 +634,9 @@ private int genFirstAdditionalErrorSeqs;
     // Second phase
 	if (field_based_gen == FieldBasedGenType.EXTENSIONS && fbg_observer_detection) {
 		System.out.println(">> Second phase started...");
+		if (CanonicalizerLog.isLoggingOn())
+			CanonicalizerLog.logLine(">> Second phase started...");
+
 		long secondPhaseStartTime = System.currentTimeMillis();
 
 		genFirstAdditionalPositiveSeqs = 0;

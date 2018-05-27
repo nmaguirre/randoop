@@ -27,7 +27,7 @@ public class SeedSequencesTests {
     Package thisPackage = this.getClass().getPackage();
 
     Set<Sequence> annotatedTestValues = new LinkedHashSet<>();
-    ReflectionManager manager = new ReflectionManager(new PackageVisibilityPredicate(thisPackage));
+    ReflectionManager manager = new ReflectionManager(new PackageVisibilityPredicate(thisPackage.getName()));
     manager.add(new TestValueExtractor(annotatedTestValues));
 
     try {
@@ -79,7 +79,7 @@ public class SeedSequencesTests {
 
     Set<Sequence> s4 = new LinkedHashSet<>();
     ReflectionManager managerS4 =
-        new ReflectionManager(new PackageVisibilityPredicate(thisPackage));
+        new ReflectionManager(new PackageVisibilityPredicate(thisPackage.getName()));
     managerS4.add(new TestValueExtractor(s4));
 
     managerS4.apply(TestValueExamples.class);
