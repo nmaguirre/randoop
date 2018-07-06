@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -18,7 +19,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import canonicalizer.BFHeapCanonicalizer;
 import canonicalizer.java.BFJavaHeapCanonicalizer;
+import canonicalizer.java.BFJavaHeapSingleValueCanonicalizer;
 import canonicalizer.visitors.BoundedFieldExtensionsCollector;
 import canonicalizer.visitors.FieldExtensionsCollector;
 
@@ -28,8 +31,9 @@ import java.util.Map.Entry;
 
 public class GlobalExtensions {
 	
-	private static BFJavaHeapCanonicalizer canonicalizer;
-	private static Map<String, FieldExtensionsCollector> extensionsCollector;
+	private static BFHeapCanonicalizer canonicalizer;
+//	private static Map<String, FieldExtensionsCollector> extensionsCollector;
+	private static ExtensionsStore extensionsCollector;
 	private static Path userPath;
 	private static int maxFieldDistance; 
 	private static int maxObjects; 
@@ -39,6 +43,7 @@ public class GlobalExtensions {
 	*/
 	private static boolean createExtensions;
 	// private static boolean computeDomainSize;
+	private static boolean singleFieldValue;
 	private static boolean countObjects;
 	// private static boolean includePrimitives;
 	public static FileWriter canonicalizerLog;
@@ -48,6 +53,7 @@ public class GlobalExtensions {
 	private static Set<String> classesToCover;
 	private static int totalObjCount;
 	private static boolean initialized = false;
+	private static String logFileName;
 	
 	/*
 	private static void countNumberOfDifferentRuntimeObjects(CanonicalClass cc, FieldExtensions ext) {
@@ -92,47 +98,34 @@ public class GlobalExtensions {
 		
 		return classesToCover.contains(o.getClass().getName());
 	}
-	
-	
-	public static FieldExtensionsCollector extensionsCollectorForClass(String className) {
-		return extensionsCollector.get(className);
-	}
 
+	private static String globalExtMethod = "global";
+	
+	// Object o is an input for method
 	public static void extend(Object o) {
+		extend(o, globalExtMethod);
+	}
+	
+	private static int globalNumParam = 0;
+	// Object o is an input for method
+	public static void extend(Object o, String method) {
+		extend(o, globalExtMethod, globalNumParam);
+	}
+	
+	private static String CUT = "CUT";
+	// Object o is an input for method
+	public static void extend(Object o, String method, Integer numParam) {
 		if (!initialized)
 			initialize();
 
-
-		if (createExtensions 
-				//|| countObjects) {
-				) {
-				
+		if (createExtensions) {
 			if (o == null || !coverObject(o)) return;
 
-			 canonicalizer.canonicalize(o, extensionsCollectorForClass(o.getClass().getName()));
-
-			 /*
-			if (createExtensions) {
-				if (globalExtensions.addAll((FieldExtensionsStrings)extensionsCollector.getExtensions())) {
-					if (CanonicalizerLog.isLoggingOn()) {
-						CanonicalizerLog.logLine("**********");
-						CanonicalizerLog.logLine("Extensions extended:");
-						CanonicalizerLog.logLine(globalExtensions.toString());
-						CanonicalizerLog.logLine("Size: " + ((FieldExtensionsStrings) globalExtensions).size());
-						CanonicalizerLog.logLine("Domain size: " + ((FieldExtensionsStrings) globalExtensions).domainSize());
-						CanonicalizerLog.logLine("**********");
-					}
-				}
-			}
-			*/
-			
-			/*
-			if (countObjects) 
-				countNumberOfDifferentRuntimeObjects(store.getCanonicalClass(o.getClass()), extensionsCollector.getExtensions());
-				*/
+			 canonicalizer.canonicalize(o, extensionsCollector.getOrCreateCollectorForMethodParam(CUT/*o.getClass().getName()*/, method, numParam));
+					 //extensionsCollectorForClass(o.getClass().getName()));
 		}
 	}
-	
+
 	private static Path getCurrentUserPath() {
 		return Paths.get(".").toAbsolutePath().normalize();
 	}
@@ -140,10 +133,16 @@ public class GlobalExtensions {
 	private static void initialize() {
 		readConfigFromFile();
 		if (createExtensions) {
-			canonicalizer = new BFJavaHeapCanonicalizer();
-			extensionsCollector = new LinkedHashMap<>();
-			for (String clsName: classesToCover)
-				extensionsCollector.put(clsName, new BoundedFieldExtensionsCollector(maxObjects));
+			if (!singleFieldValue)
+				canonicalizer = new BFJavaHeapCanonicalizer(maxObjects);
+			else
+				canonicalizer = new BFJavaHeapSingleValueCanonicalizer(maxObjects);
+			
+			extensionsCollector = new ExtensionsStore(maxObjects);
+					//new LinkedHashMap<>();
+			//for (String clsName: classesToCover)
+			//	extensionsCollector.addClass(clsName);
+				//extensionsCollector.put(clsName, new BoundedFieldExtensionsCollector(maxObjects));
 		}
 		//hashes = new HashMap<>();
 		initialized = true;
@@ -176,28 +175,25 @@ public class GlobalExtensions {
 			}
 		}
 		
-		String logFileName = prop.getProperty("log.filename");
-		if (logFileName != null) {
-			try {
-				canonicalizerLog = new FileWriter(userPath.resolve(logFileName).toString());
-			} catch (IOException e) {
-				System.out.println("Error: Log file: " + userPath.resolve(logFileName) + " cannot be created");
-				System.exit(1);
-			}
-		}
+		logFileName = prop.getProperty("log.filename");
 		
 		if (prop.getProperty("measure.coverage", "false").equals("true")) {
 			//System.out.println("INFO: Computing extensions during tests execution");
 			createExtensions = true;
-			/*
-			if (prop.getProperty("compute.domain.size", "false").equals("true")) {
-				computeDomainSize = true;
-			}
-			*/
 		}
 		else {
 			createExtensions = false;
 		}
+		
+		if (prop.getProperty("single.value", "false").equals("true")) {
+			//System.out.println("INFO: Computing extensions during tests execution");
+			singleFieldValue = true;
+		}
+		else {
+			singleFieldValue = false;
+		}
+	
+		
 		if (prop.getProperty("count.objects", "false").equals("true")) {
 			//System.out.println("INFO: Computing extensions during tests execution");
 			countObjects = true;
@@ -210,33 +206,7 @@ public class GlobalExtensions {
 		//maxArrayObjects = Integer.parseInt(prop.getProperty("max.array.objects", Integer.toString(Integer.MAX_VALUE))); 
 		//maxStrLength = Integer.parseInt(prop.getProperty("max.string.length", Integer.toString(Integer.MAX_VALUE))); 
 		outputFilename = prop.getProperty("output.filename", "coverage-result.txt");
-		/*
-		if (prop.getProperty("include.primitives", "true").equals("true")) {
-			includePrimitives = true;
-			extensionsCollector = new FieldExtensionsStringsCollector(maxStrLength);
-		}
-		else {
-			includePrimitives = false;
-			extensionsCollector = new FieldExtensionsStringsNonPrimitiveCollector(maxStrLength);
-		}
-		*/
-		
-		/*
-		if (canonicalizerLog.isLoggingOn()) {
-			canonicalizerLog.logLine("> Read configuration options: ");
-			canonicalizerLog.logLine("    measure.coverage="+createExtensions);
-			canonicalizerLog.logLine("    compute.domain.size="+computeDomainSize);
-			canonicalizerLog.logLine("    count.objects="+countObjects);
-			canonicalizerLog.logLine("    include.primitives="+includePrimitives);
-			canonicalizerLog.logLine("    max.field.distance="+maxFieldDistance);
-			canonicalizerLog.logLine("    max.objects="+maxObjects);
-			canonicalizerLog.logLine("    max.array.objects="+maxArrayObjects);
-			canonicalizerLog.logLine("    max.string.length="+maxStrLength);
-			canonicalizerLog.logLine("    output.filename="+outputFilename);
-			canonicalizerLog.logLine("    cover.classes="+classesFile);
-			canonicalizerLog.logLine("\n");
-		}
-		*/
+
 	}
 
 	public static void writeTotal(boolean end) {
@@ -247,76 +217,72 @@ public class GlobalExtensions {
 		if (end)
 			prefix = "Final";
 		
-		if (createExtensions || countObjects) {
+		
+		if (end && createExtensions) {
+				//|| countObjects
 			String absoluteFilename = userPath.resolve(outputFilename).toString();
-			try (BufferedWriter bw = new BufferedWriter(new FileWriter(absoluteFilename, true))) {
+			try (BufferedWriter bw = new BufferedWriter(new FileWriter(absoluteFilename, false))) {
 				if (createExtensions) {
+					extensionsCollector.writeStatistics(bw, prefix);
+					/*
 					int totalExtSize = 0;
+					int avgExtSize = 0;
 					int totalExtDomSize = 0;
-					for (String clsName: extensionsCollector.keySet()) {
-						int clsExtSize = extensionsCollector.get(clsName).getExtensions().size();
-						int clsExtDomSize = extensionsCollector.get(clsName).getExtensions().domainSize();
-						bw.write(prefix + " " + clsName + " extensions size: "+ clsExtSize + "\n");
+					for (String clsName: extensionsCollector.getClasses()) {
+						SimpleEntry<Integer, Integer> res = extensionsCollector.extensionsSizeSumAvgForClass(clsName);
+						int sum = res.getKey();
+						int avg = res.getValue();
+						int clsExtDomSize = 0;
+						//extensionsCollector.get(clsName).getExtensions().domainSize();
+						bw.write(prefix + " " + clsName + " extensions size sum: "+ sum + "\n");
+						bw.write(prefix + " " + clsName + " extensions size avg: "+ avg + "\n");
 						bw.write(prefix + " " + clsName + " extensions domain size: "+ clsExtDomSize + "\n");
-						totalExtSize += clsExtSize;
+						totalExtSize += sum;
+						avgExtSize += avg;
 						totalExtDomSize += clsExtDomSize;
-						/*
-						if (computeDomainSize)
-							bw.write(prefix + " domain size: "+ ((FieldExtensionsStrings) globalExtensions).domainSize() + "\n");
-							*/
 					}
 					bw.write(prefix + " extensions size sum: "+ totalExtSize + "\n");
+					bw.write(prefix + " extensions size avg: "+ (avgExtSize/extensionsCollector.getClasses().size()) + "\n");
 					bw.write(prefix + " extensions domain size sum: "+ totalExtDomSize + "\n");
+					*/
 				}
-				/*
-				if (countObjects) {
-					bw.write(prefix + " objects count: " + totalObjCount + "\n");
-					if (prefix.equals("Final")) {
-						for (CanonicalClass cc: hashes.keySet()) {
-							bw.write("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size() + "\n");
-							if (CanonicalizerLog.isLoggingOn())
-								CanonicalizerLog.logLine("Type: " + cc.getName() + ", objects count: " + hashes.get(cc).size());
-						}
-					}
-				}
-				*/
+
 			} catch (IOException e) {
 				System.out.println("Cound not open file: " + absoluteFilename);
 				System.exit(1);
 			}
 
-			/*
-			if (canonicalizerLog.isLoggingOn()) {
-				canonicalizerLog.logLine("**********");
-				canonicalizerLog.logLine(prefix + " extensions size: " + ((FieldExtensionsStrings) globalExtensions).size());
-				canonicalizerLog.logLine(prefix + " domain size: "+ ((FieldExtensionsStrings) globalExtensions).domainSize() + "\n");
-				canonicalizerLog.logLine(prefix + " objects number: " + totalObjCount);
-				canonicalizerLog.logLine("**********");
-			}
-			*/
 			
 			if (end && isLoggingOn()) {
-				for (String clsName: extensionsCollector.keySet()) {
-					writeLogLine(clsName + " extensions:");
-					writeLogLine(extensionsCollector.get(clsName).getExtensions().toString());
-					/*
-					if (computeDomainSize)
-						bw.write(prefix + " domain size: "+ ((FieldExtensionsStrings) globalExtensions).domainSize() + "\n");
-						*/
-				}
-				try {
-					canonicalizerLog.close();
-				} catch (IOException e) {
-					System.out.println("Cound not close the log file");
-					System.exit(1);;
-				}
+				activateLogger();
+				writeLogLine(extensionsCollector.toString());
+				closeLogger();
 			}
 			
 		}
 	}
 	
+	
+	private static void activateLogger() {
+		try {
+			canonicalizerLog = new FileWriter(userPath.resolve(logFileName).toString());
+		} catch (IOException e) {
+			System.out.println("Error: Log file: " + userPath.resolve(logFileName) + " cannot be created");
+			System.exit(1);
+		}
+	}
+
+	private static void closeLogger() {
+		try {
+			canonicalizerLog.close();
+		} catch (IOException e) {
+			System.out.println("Cound not close the log file");
+			System.exit(1);;
+		}
+	}
+
 	private static boolean isLoggingOn() {
-		return canonicalizerLog != null;
+		return logFileName != null;
 	}
 	
 	private static void writeLogLine(String line) {

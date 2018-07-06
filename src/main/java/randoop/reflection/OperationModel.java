@@ -20,6 +20,7 @@ import randoop.contract.EqualsSymmetric;
 import randoop.contract.EqualsToNullRetFalse;
 import randoop.contract.EqualsTransitive;
 import randoop.contract.ObjectContract;
+import randoop.generation.AbstractGenerator;
 import randoop.generation.ComponentManager;
 import randoop.main.ClassNameErrorHandler;
 import randoop.main.GenInputsAbstract;
@@ -530,7 +531,20 @@ public class OperationModel {
         }
         return null;
       }
-      selectedTypes.add(Randomness.randomMember(candidates));
+
+      if (AbstractGenerator.instance_generics_integer) {
+    	  	for (int k = 0; k < candidates.size(); k++) {
+    		  ReferenceType t = candidates.get(k);
+    		  if (t.isBoxedPrimitive() && t.toString().equals("java.lang.Integer")) {
+    			  selectedTypes.add(t);
+    			  break;
+    		  }
+    	  	}
+    	  	if (selectedTypes.isEmpty())
+    		  assert false: "Could not instance generic type parameter with java.lang.Integer";
+      }
+      else
+    	  	selectedTypes.add(Randomness.randomMember(candidates));
     }
     return substitution.extend(Substitution.forArgs(parameters, selectedTypes));
   }

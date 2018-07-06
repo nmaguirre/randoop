@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.util.List;
 
-
+import randoop.generation.AbstractGenerator;
 import randoop.sequence.ExecutableSequence;
 
 /**
@@ -115,7 +115,10 @@ public class JunitFileWriterComputeExtensions extends JunitFileWriter {
                 + methodName
                 + "\"); }"));
     out.println();
-    out.println(indent(s.toCountExtensionsCodeString()));
+    if (!AbstractGenerator.extensions_by_method)
+    		out.println(indent(s.toCountExtensionsCodeString()));
+    else
+    		out.println(indent(s.toCountExtensionsByMethodCodeString()));
     out.println("  }");
   }
 

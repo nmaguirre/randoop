@@ -31,6 +31,13 @@ import java.util.Set;
  * @see ForwardGenerator
  */
 public abstract class AbstractGenerator {
+	
+  @OptionGroup(value = "Field based coverage options")
+  @Option("Instance class generics with integers only")
+  public static boolean instance_generics_integer = false;
+
+  @Option("Create extensions for each method, instead of a global set")
+  public static boolean extensions_by_method = false;
 
   @OptionGroup(value = "AbstractGenerator unpublicized options", unpublicized = true)
   @Unpublicized
