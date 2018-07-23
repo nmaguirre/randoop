@@ -37,7 +37,7 @@ public abstract class AbstractGenerator {
   public static boolean instance_generics_integer = false;
 
   @Option("Create extensions for each method, instead of a global set")
-  public static boolean extensions_by_method = false;
+  public static boolean extensions_by_method = true;
 
   @OptionGroup(value = "AbstractGenerator unpublicized options", unpublicized = true)
   @Unpublicized

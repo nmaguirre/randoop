@@ -17,6 +17,7 @@ import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.NotExecuted;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
 import randoop.test.Check;
 import randoop.test.TestCheckGenerator;
@@ -311,38 +312,49 @@ public class ExecutableSequence {
   	  TypedOperation op = stmt.getOperation();
 
   	  if (op.isConstructorCall() || op.isMethodCall()) {
-  		  // Extend extensions with each variable of the sequence
-  		  List<Variable> stmtVars = sequence.getStatementVariables(i);
+  		  TypedClassOperation typOp = (TypedClassOperation) op;
+//		  System.out.println(op.toString());
+  		  if (typOp.drawnFromClass != null) {
+  			  // Extend extensions with each variable of the sequence
+  			  List<Variable> stmtVars = sequence.getStatementVariables(i);
 
+  			  int j = 0;
+  			  // Returns a value; ignore it
+  			  if (!stmt.getOutputType().isVoid()) 
+  				  j = 1;
 
-  		  int j = 0;
-  		  // Returns a value; ignore it
-  		  if (!stmt.getOutputType().isVoid()) 
-  			  j = 1;
-
-  		  int inputNumber = 0;
-  		  for (; j<stmtVars.size(); j++) {
-  			  Variable v = stmtVars.get(j);
-  			  oneStatement.append("randoop.fieldextensions.GlobalExtensions.extend(");
-  			  String param = v.getName();
-  			  Statement statementCreatingVar = v.getDeclaringStatement();
-  			  if (statementCreatingVar.isPrimitiveInitialization()
-  					  && !statementCreatingVar.isNullInitialization()) {
-  				  String shortForm = statementCreatingVar.getShortForm();
-  				  assert shortForm != null: "Null primitive variable created";
-  				  if (shortForm != null) {
-  					  param = shortForm;
+  			  int inputNumber = 0;
+  			  for (; j<stmtVars.size(); j++) {
+  				  Variable v = stmtVars.get(j);
+  				  oneStatement.append("randoop.fieldextensions.GlobalExtensions.extend(");
+  				  String param = v.getName();
+  				  Statement statementCreatingVar = v.getDeclaringStatement();
+  				  if (statementCreatingVar.isPrimitiveInitialization()
+  						  && !statementCreatingVar.isNullInitialization()) {
+  					  String shortForm = statementCreatingVar.getShortForm();
+  					  assert shortForm != null: "Null primitive variable created";
+  					  if (shortForm != null) {
+  						  param = shortForm;
+  					  }
   				  }
+  				  oneStatement.append(param);
+  				  oneStatement.append(",\"");
+
+  				  String fromClass = typOp.drawnFromClass.getName();
+  				  int startGenerics = fromClass.indexOf("<");
+  				  if (startGenerics != -1)
+  					  fromClass = fromClass.substring(0, startGenerics);
+  				  oneStatement.append(fromClass);
+  				  oneStatement.append("\",\"");
+
+  				  //oneStatement.append(op.toParsableString());
+  				  oneStatement.append(op.toString());
+
+  				  oneStatement.append("\",");
+  				  oneStatement.append(inputNumber);
+  				  oneStatement.append(");").append(Globals.lineSep);
+  				  inputNumber++;
   			  }
-  			  oneStatement.append(param);
-  			  oneStatement.append(",\"");
-  			  //oneStatement.append(op.toParsableString());
-  			  oneStatement.append(op.toString());
-  			  oneStatement.append("\"");
-  			  oneStatement.append(",");
-  			  oneStatement.append(inputNumber);
-  			  oneStatement.append(");").append(Globals.lineSep);
-  			  inputNumber++;
   		  }
   	  }
 		  

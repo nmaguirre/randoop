@@ -693,6 +693,11 @@ public class OperationModel {
     }
     for (TypedOperation operation : operationSet) {
       addOperation(operation);
+      /*
+      System.out.println(operation.toString());
+      if (((TypedClassOperation) operation).drawnFromClass == null)
+		System.out.println(operation.toString());
+		*/
     }
   }
 
@@ -736,6 +741,9 @@ public class OperationModel {
    * @param operation the operation to instantiate and add to this model
    */
   private void addOperation(TypedOperation operation) {
+	  
+    ClassOrInterfaceType opType = ((TypedClassOperation) operation).drawnFromClass;
+    
     operation = instantiateOperationTypes(operation);
 
     // Note: capture conversion needs all type variables to be instantiated first
@@ -746,7 +754,11 @@ public class OperationModel {
       return;
     }
 
+    // PABLO: Don't let the drawnFromClass lose its value after capture 
+    ((TypedClassOperation) operation).drawnFromClass = opType;
+
     operations.add(operation);
+
   }
 
   /**

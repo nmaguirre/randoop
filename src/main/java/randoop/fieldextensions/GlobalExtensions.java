@@ -19,13 +19,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import canonicalizer.BFHeapCanonicalizer;
-import canonicalizer.java.BFJavaHeapCanonicalizer;
-import canonicalizer.java.BFJavaHeapSingleValueCanonicalizer;
-import canonicalizer.visitors.BoundedFieldExtensionsCollector;
-import canonicalizer.visitors.FieldExtensionsCollector;
-
 import java.util.Map.Entry;
+
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+
+import canonicalizer.BFHeapCanonicalizer;
+import extensions.FieldExtensionsCollector;
 
 
 
@@ -34,9 +33,11 @@ public class GlobalExtensions {
 	private static BFHeapCanonicalizer canonicalizer;
 //	private static Map<String, FieldExtensionsCollector> extensionsCollector;
 	private static ExtensionsStore extensionsCollector;
+	private static DiffObjsStore diffObjsCollector = new DiffObjsStore();
 	private static Path userPath;
 	private static int maxFieldDistance; 
 	private static int maxObjects; 
+	private static int maxArrayObjects; 
 	/*
 	private static int maxArrayObjects; 
 	private static int maxStrLength; 
@@ -98,9 +99,19 @@ public class GlobalExtensions {
 		
 		return classesToCover.contains(o.getClass().getName());
 	}
+	
+	public static boolean coverClass(String str) {
+		if (classesToCover == null) 
+			return true;
+		
+		return classesToCover.contains(str);
+	}
+
+	
 
 	private static String globalExtMethod = "global";
 	
+	/*
 	// Object o is an input for method
 	public static void extend(Object o) {
 		extend(o, globalExtMethod);
@@ -111,17 +122,24 @@ public class GlobalExtensions {
 	public static void extend(Object o, String method) {
 		extend(o, globalExtMethod, globalNumParam);
 	}
+	*/
 	
-	private static String CUT = "CUT";
 	// Object o is an input for method
-	public static void extend(Object o, String method, Integer numParam) {
+	public static void extend(Object o, String cls, String method, Integer numParam) {
 		if (!initialized)
 			initialize();
 
 		if (createExtensions) {
-			if (o == null || !coverObject(o)) return;
+			if (o == null || !coverClass(cls)) // !coverObject(o)) 
+				return;
 
-			 canonicalizer.canonicalize(o, extensionsCollector.getOrCreateCollectorForMethodParam(CUT/*o.getClass().getName()*/, method, numParam));
+			FieldExtensionsCollector ext = extensionsCollector.getOrCreateCollectorForMethodParam(cls, 
+					method, 
+					numParam);
+			canonicalizer.canonicalize(o, ext);
+			if (ext.extensionsWereExtended() /*&& coverObject(o)*/) {
+				diffObjsCollector.increaseNumObjsForMethodParam(cls, method, numParam);
+			}
 					 //extensionsCollectorForClass(o.getClass().getName()));
 		}
 	}
@@ -133,10 +151,9 @@ public class GlobalExtensions {
 	private static void initialize() {
 		readConfigFromFile();
 		if (createExtensions) {
-			if (!singleFieldValue)
-				canonicalizer = new BFJavaHeapCanonicalizer(maxObjects);
-			else
-				canonicalizer = new BFJavaHeapSingleValueCanonicalizer(maxObjects);
+			canonicalizer = new BFHeapCanonicalizer();
+			canonicalizer.setMaxArrayObjs(maxArrayObjects);
+			canonicalizer.setMaxFieldDistance(maxFieldDistance);
 			
 			extensionsCollector = new ExtensionsStore(maxObjects);
 					//new LinkedHashMap<>();
@@ -185,6 +202,7 @@ public class GlobalExtensions {
 			createExtensions = false;
 		}
 		
+		/*
 		if (prop.getProperty("single.value", "false").equals("true")) {
 			//System.out.println("INFO: Computing extensions during tests execution");
 			singleFieldValue = true;
@@ -192,6 +210,7 @@ public class GlobalExtensions {
 		else {
 			singleFieldValue = false;
 		}
+		*/
 	
 		
 		if (prop.getProperty("count.objects", "false").equals("true")) {
@@ -203,6 +222,7 @@ public class GlobalExtensions {
 		}
 		maxFieldDistance = Integer.parseInt(prop.getProperty("max.field.distance", Integer.toString(Integer.MAX_VALUE))); 
 		maxObjects = Integer.parseInt(prop.getProperty("max.objects", Integer.toString(Integer.MAX_VALUE))); 
+		maxArrayObjects = Integer.parseInt(prop.getProperty("max.arr.objects", Integer.toString(maxObjects)));
 		//maxArrayObjects = Integer.parseInt(prop.getProperty("max.array.objects", Integer.toString(Integer.MAX_VALUE))); 
 		//maxStrLength = Integer.parseInt(prop.getProperty("max.string.length", Integer.toString(Integer.MAX_VALUE))); 
 		outputFilename = prop.getProperty("output.filename", "coverage-result.txt");
@@ -224,6 +244,8 @@ public class GlobalExtensions {
 			try (BufferedWriter bw = new BufferedWriter(new FileWriter(absoluteFilename, false))) {
 				if (createExtensions) {
 					extensionsCollector.writeStatistics(bw, prefix);
+					diffObjsCollector.writeStatistics(bw, prefix);
+					
 					/*
 					int totalExtSize = 0;
 					int avgExtSize = 0;
@@ -256,6 +278,7 @@ public class GlobalExtensions {
 			if (end && isLoggingOn()) {
 				activateLogger();
 				writeLogLine(extensionsCollector.toString());
+				writeLogLine(diffObjsCollector.toString());
 				closeLogger();
 			}
 			

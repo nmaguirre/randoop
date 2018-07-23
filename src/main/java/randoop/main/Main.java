@@ -22,6 +22,7 @@ public class Main {
 
   // The main method simply calls nonStaticMain.
   public static void main(String[] args) {
+	System.out.println("TZ" + System.getProperty("user.timezone"));
 
     Main main = new Main();
     main.nonStaticMain(args);

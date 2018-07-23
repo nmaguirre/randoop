@@ -2,16 +2,14 @@ package randoop.fieldextensions;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import canonicalizer.visitors.BoundedFieldExtensionsCollector;
-import canonicalizer.visitors.FieldExtensions;
-import canonicalizer.visitors.FieldExtensionsCollector;
-import canonicalizer.visitors.IFieldExtensions;
+import extensions.BoundedFieldExtensionsCollector;
+import extensions.FieldExtensionsCollector;
+import extensions.IFieldExtensions;
+
 
 public class ExtensionsStore {
 
@@ -131,7 +129,10 @@ public class ExtensionsStore {
 			totalExtDomSize += clsExtDomSize;
 		}
 		bw.write(prefix + " extensions size sum: "+ totalExtSize + "\n");
-		bw.write(prefix + " extensions size avg: "+ (avgExtSize/getClasses().size()) + "\n");
+		int resavg = 0;
+		if (getClasses().size() > 0)
+			resavg = avgExtSize/getClasses().size();
+		bw.write(prefix + " extensions size avg: "+ resavg + "\n");
 		bw.write(prefix + " extensions domain size sum: "+ totalExtDomSize + "\n");
 	}
 	
