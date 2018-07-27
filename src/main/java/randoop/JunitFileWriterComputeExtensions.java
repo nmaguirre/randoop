@@ -115,10 +115,10 @@ public class JunitFileWriterComputeExtensions extends JunitFileWriter {
                 + methodName
                 + "\"); }"));
     out.println();
-    if (!AbstractGenerator.extensions_by_method)
+    /*if (!AbstractGenerator.extensions_by_method)
     		out.println(indent(s.toCountExtensionsCodeString()));
-    else
-    		out.println(indent(s.toCountExtensionsByMethodCodeString()));
+    else*/
+	out.println(indent(s.toCountExtensionsByMethodCodeString()));
     out.println("  }");
   }
 

@@ -8,9 +8,11 @@ import java.util.Set;
 
 import randoop.BugInRandoopException;
 import randoop.DummyVisitor;
+import randoop.ExecutionVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
+import randoop.fieldextensions.ExtensionsCollectorVisitor;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.Operation;
@@ -158,13 +160,24 @@ public class ForwardGenerator extends AbstractGenerator {
 
     processSequence(eSeq);
 
-    if (eSeq.sequence.hasActiveFlags()) {
-      componentManager.addGeneratedSequence(eSeq.sequence);
+    if (GenInputsAbstract.field_based_gen) {
+    		ExtensionsCollectorVisitor collector = (ExtensionsCollectorVisitor) executionVisitor;
+		if (collector.generatesNewOutput()) {
+			componentManager.addFieldBased(eSeq.sequence);
+		}
+		// The sequence does not generate new output or input
+		else if (!collector.testsWithNewInput())
+			return null;
     }
-
-    endTime = System.nanoTime();
-    gentime += endTime - startTime;
-    eSeq.gentime = gentime;
+    else {
+		if (eSeq.sequence.hasActiveFlags()) {
+			componentManager.addGeneratedSequence(eSeq.sequence);
+		}
+    }
+    
+	endTime = System.nanoTime();
+	gentime += endTime - startTime;
+	eSeq.gentime = gentime;
 
     return eSeq;
   }
@@ -173,6 +186,8 @@ public class ForwardGenerator extends AbstractGenerator {
   public Set<Sequence> getAllSequences() {
     return Collections.unmodifiableSet(this.allSequences);
   }
+  
+
 
   /**
    * Determines what indices in the given sequence are active. An active index i
@@ -603,7 +618,8 @@ public class ForwardGenerator extends AbstractGenerator {
       // case below
       // is by far the most common.
 
-      if (inputType.isArray()) {
+      if (GenInputsAbstract.collections_heuristic && 
+    		  inputType.isArray()) {
 
         // 1. If T=inputTypes[i] is an array type, ask the component manager for
         // all sequences
@@ -617,7 +633,8 @@ public class ForwardGenerator extends AbstractGenerator {
             HelperSequenceCreator.createArraySequence(componentManager, inputType);
         l = new ListOfLists<>(l1, l2);
 
-      } else if (inputType.isParameterized()
+      } else if (GenInputsAbstract.collections_heuristic &&
+    		  inputType.isParameterized()
           && ((InstantiatedType) inputType)
               .getGenericClassType()
               .isSubtypeOf(JDKTypes.COLLECTION_TYPE)) {

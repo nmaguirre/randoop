@@ -163,8 +163,40 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("File containing class names that tests must exercise")
   public static File include_if_class_exercised = null;
   
-  @Option("File containing class names that tests must exercise")
+
+  @OptionGroup(value = "Field based generation/coverage options")
+  /*
+  @Option("Create extensions for each method, instead of a global set")
+  public static boolean extensions_by_method = true;
+  */
+  @Option("Instrument tests to measure extensions coverage during execution")
   public static boolean extensions_coverage = false;
+
+  @Option("Instance class generics with integers only")
+  public static boolean instance_generics_integer = false;
+  
+  @Option("Generate tests using field based filtering")
+  public static boolean field_based_gen = false;
+
+  @Option("Generate debug information for field based generation")
+  public static boolean fbg_debug = false;
+  
+  @Option("File that lists classes to test using field based generation")
+  public static File fbg_classlist = null;
+  
+  @Option("Max objects to save in the field extensions")
+  public static int fbg_max_objects = Integer.MAX_VALUE;
+
+  @Option("Max array objects to be stored in the field extensions")
+  public static int fbg_max_arr_objects = Integer.MAX_VALUE;
+
+  @Option("Canonicalize classes with up to this field distance from the starting object")
+  public static int fbg_max_field_distance = Integer.MAX_VALUE;
+  
+  @Option("Use randoop's collections and arrays generation heuristic")
+  public static boolean collections_heuristic = true;
+
+  
 
   /**
    * Whether to output error-revealing tests.
@@ -658,6 +690,12 @@ public abstract class GenInputsAbstract extends CommandHandler {
     Set<String> classnames = getStringSetFromFile(classlist, errMessage);
     classnames.addAll(testclass);
     return classnames;
+  }
+  
+  public static Set<String> getClassnamesFBG() {
+	    String errMessage = "ERROR while reading list of classes to test using field based generation";
+	    Set<String> classnames = getStringSetFromFile(fbg_classlist, errMessage);
+	    return classnames;
   }
 
   public static Set<String> getStringSetFromFile(File listFile, String errMessage) {

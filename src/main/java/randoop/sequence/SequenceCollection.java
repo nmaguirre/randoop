@@ -166,6 +166,31 @@ public class SequenceCollection {
     checkRep();
   }
 
+  public void addFieldBased(Sequence sequence) {
+	  List<Type> formalTypes = sequence.getTypesForLastStatement();
+	  List<Variable> arguments = sequence.getVariablesOfLastStatement();
+	  assert formalTypes.size() == arguments.size();
+
+	  // All the active vars are figured out during precise minimization
+	  for (Integer i: sequence.getFBActiveFlags()) {
+		  Variable argument = arguments.get(i);
+		  assert formalTypes.get(i).isAssignableFrom(argument.getType())
+		  : formalTypes.get(i).getName()
+		  + " should be assignable from "
+		  + argument.getType().getName();
+
+		  /*
+		  System.out.println("> Extended extensions at var: " + argument.toString() + " (index " + i + ")");
+			*/
+		  
+		  Type type = formalTypes.get(i);
+		  typeSet.add(type);
+		  updateCompatibleMap(sequence, type);
+	  }
+
+	  checkRep();
+  }
+  
   /**
    * Add an entry from the given type to the sequence to the map.
    *

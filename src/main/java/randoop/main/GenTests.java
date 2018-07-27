@@ -18,6 +18,7 @@ import randoop.ExecutionVisitor;
 import randoop.JunitFileWriter;
 import randoop.JunitFileWriterComputeExtensions;
 import randoop.MultiVisitor;
+import randoop.fieldextensions.ExtensionsCollectorVisitor;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.ComponentManager;
 import randoop.generation.ForwardGenerator;
@@ -157,7 +158,18 @@ public class GenTests extends GenInputsAbstract {
 
     // get names of classes under test
     Set<String> classnames = GenInputsAbstract.getClassnamesFromArgs();
-
+    
+    // get the names of the clases to be tested using field based generation
+    Set<String> fbgClasses = null;
+    if (field_based_gen) {
+    		if (GenInputsAbstract.fbg_classlist == null)
+    			throw new Error("Flag --fbg-classlist must be set when --field-based-gen=true");
+    		fbgClasses = GenInputsAbstract.getClassnamesFBG();
+    }
+    
+    if (fbg_debug && !field_based_gen) 
+    		throw new Error("Flag --field_based_gen=true must be set when --fbg_debug=true");
+   
     // get names of classes that must be covered by output tests
     Set<String> coveredClassnames =
         GenInputsAbstract.getStringSetFromFile(
@@ -253,6 +265,10 @@ public class GenTests extends GenInputsAbstract {
       observers.addAll(observerMap.getValues(keyType));
     }
 
+    
+    
+    
+
     /*
      * Create the generator for this session.
      */
@@ -260,6 +276,8 @@ public class GenTests extends GenInputsAbstract {
     explorer =
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
+
+
 
     /*
      * setup for check generation
@@ -308,7 +326,7 @@ public class GenTests extends GenInputsAbstract {
     if (GenInputsAbstract.include_if_class_exercised != null) {
       visitors.add(new ExercisedClassVisitor(operationModel.getExercisedClasses()));
     }
-
+    
     // Install any user-specified visitors.
     if (!GenInputsAbstract.visitor.isEmpty()) {
       for (String visitorClsName : GenInputsAbstract.visitor) {
@@ -335,6 +353,14 @@ public class GenTests extends GenInputsAbstract {
     }
 
     explorer.addExecutionVisitor(visitor);
+
+    // FIXME: the usage of ExtensionsCollectorVisitor removes all the other visitors
+    if (GenInputsAbstract.field_based_gen)
+		explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
+				fbg_max_objects, 
+				fbg_max_arr_objects, 
+				fbg_max_field_distance));
+
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.printf("Explorer = %s\n", explorer);
@@ -602,9 +628,9 @@ public class GenTests extends GenInputsAbstract {
 
       JunitFileWriter jfw;
       if (!extensions_coverage)
-    	  jfw = new JunitFileWriter(output_dir, junit_package_name, junitClassname);
+    	  	jfw = new JunitFileWriter(output_dir, junit_package_name, junitClassname);
       else
-    	  jfw = new JunitFileWriterComputeExtensions(output_dir, junit_package_name, junitClassname);
+    	  	jfw = new JunitFileWriterComputeExtensions(output_dir, junit_package_name, junitClassname);
 
       files.addAll(jfw.writeJUnitTestFiles(seqPartition));
 

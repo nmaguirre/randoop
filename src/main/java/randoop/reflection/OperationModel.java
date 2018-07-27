@@ -532,7 +532,7 @@ public class OperationModel {
         return null;
       }
 
-      if (AbstractGenerator.instance_generics_integer) {
+      if (GenInputsAbstract.instance_generics_integer) {
     	  	for (int k = 0; k < candidates.size(); k++) {
     		  ReferenceType t = candidates.get(k);
     		  if (t.isBoxedPrimitive() && t.toString().equals("java.lang.Integer")) {

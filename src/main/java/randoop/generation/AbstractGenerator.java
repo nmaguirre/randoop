@@ -4,6 +4,7 @@ import plume.Option;
 import plume.OptionGroup;
 import plume.Unpublicized;
 import randoop.*;
+import randoop.fieldextensions.ExtensionsCollectorVisitor;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
@@ -32,13 +33,6 @@ import java.util.Set;
  */
 public abstract class AbstractGenerator {
 	
-  @OptionGroup(value = "Field based coverage options")
-  @Option("Instance class generics with integers only")
-  public static boolean instance_generics_integer = false;
-
-  @Option("Create extensions for each method, instead of a global set")
-  public static boolean extensions_by_method = true;
-
   @OptionGroup(value = "AbstractGenerator unpublicized options", unpublicized = true)
   @Unpublicized
   @Option("Dump each sequence to the log file")
@@ -166,6 +160,7 @@ public abstract class AbstractGenerator {
    * @param listenerManager
    *          Manager that stores and calls any listeners to use during
    *          generation. Can be null.
+ * @param executionVisitor2 
    */
   public AbstractGenerator(
       List<TypedOperation> operations,
@@ -181,7 +176,8 @@ public abstract class AbstractGenerator {
     this.maxGeneratedSequences = maxGeneratedSequences;
     this.maxOutputSequences = maxOutSequences;
     this.operations = operations;
-    this.executionVisitor = new DummyVisitor();
+	this.executionVisitor = new DummyVisitor();
+//    this.executionVisitor = executionVisitor;
     this.outputTest = new AlwaysFalse<>();
 
     if (componentManager == null) {
@@ -193,7 +189,7 @@ public abstract class AbstractGenerator {
     this.stopper = stopper;
     this.listenerMgr = listenerManager;
   }
-
+  
   /**
    * Registers test predicate with this generator for use while filtering
    * generated tests for output.
@@ -382,12 +378,21 @@ public abstract class AbstractGenerator {
       System.out.println(
           "Average method execution time (exceptional termination): "
               + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
+      
+
+      if (GenInputsAbstract.fbg_debug) {
+    	  	ExtensionsCollectorVisitor visitor = (ExtensionsCollectorVisitor) executionVisitor;
+    	  	for (TypedOperation op: operations) {
+    		  System.out.println(op.toString() + ": " + visitor.getOperationState(op));
+    	  	}
+      }
     }
 
     // Notify listeners that exploration is ending.
     if (listenerMgr != null) {
       listenerMgr.explorationEnd();
     }
+    
   }
 
   /**

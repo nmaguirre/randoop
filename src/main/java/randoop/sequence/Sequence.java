@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -1161,4 +1162,16 @@ public final class Sequence implements WeightedElement {
 
     return new Sequence().extend(TypedOperation.createPrimitiveInitialization(type, value));
   }
+  
+  // PABLO: Active flags for the last sequence statement according to field based filtering
+  List<Integer> fbActiveFlags = new LinkedList<Integer>();
+
+  public void setFBActiveFlag(int j) {
+	  fbActiveFlags.add(j);
+  }
+  
+  public List<Integer> getFBActiveFlags() {
+	  return fbActiveFlags;
+  }
+
 }

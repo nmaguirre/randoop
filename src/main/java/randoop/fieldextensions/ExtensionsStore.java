@@ -43,6 +43,12 @@ public class ExtensionsStore {
 		return c;
 	}
 	
+	
+	public FieldExtensionsCollector getOrCreateCollectorForMethodParam(String cls) {
+		// Create a dummy class and parameter number when these are not provided.
+		return getOrCreateCollectorForMethodParam(cls, "M", 0);
+	}
+
 	public FieldExtensionsCollector getOrCreateCollectorForMethodParam(String cls, String method, Integer numParam) {
 		Map<Integer, FieldExtensionsCollector> p = getOrCreateCollectorForMethod(cls, method);
 		FieldExtensionsCollector c = p.get(numParam);

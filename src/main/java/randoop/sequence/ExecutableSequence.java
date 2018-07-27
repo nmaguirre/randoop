@@ -501,6 +501,13 @@ public class ExecutableSequence {
     }
     return ros;
   }
+  
+  public Object[] getRuntimeInputs(int i) {
+      List<Variable> inputs = sequence.getInputs(i);
+      Object[] inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+      return inputVariables;
+  }
+
 
   /**
    * Returns the values for the given variables in the {@link Execution} object.

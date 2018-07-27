@@ -142,6 +142,11 @@ public class ComponentManager {
     gralComponents.add(sequence);
   }
 
+  public void addFieldBased(Sequence sequence) {
+	gralComponents.addFieldBased(sequence);
+  }
+  
+  
   /**
    * Removes any components sequences added so far, except for seed sequences,
    * which are preserved.
