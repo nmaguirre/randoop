@@ -1,5 +1,7 @@
 package randoop.fieldextensions;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import canonicalizer.BFHeapCanonicalizer;
@@ -25,6 +27,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 	private boolean newOutput;
 	private Set<String> classesUnderTest;
 	
+	// classesUnderTest = null to consider all classes as relevant
 	public ExtensionsCollectorVisitor(Set<String> classesUnderTest, int maxObjects, int maxArrayObjects, int maxFieldDistance) {
 		canonicalizer = new BFHeapCanonicalizer();
 		canonicalizer.setMaxArrayObjs(maxArrayObjects);
@@ -47,36 +50,61 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 		return opManager.getOperationState(op);
 	}
 	
+	public boolean testsMethodFromRelevantClass(ExecutableSequence sequence) {
+		if (classesUnderTest == null) 
+			return true;
+		
+		Statement stmt = sequence.sequence.getStatement(sequence.sequence.size()-1);
+		TypedOperation op = stmt.getOperation();
+		return classUnderTest(getOperationClass(op));	
+	}
+	
 	@Override
 	public void visitBeforeStatement(ExecutableSequence sequence, int i) {
 		if (sequence.sequence.size() == 1 || i != sequence.sequence.size() -1) return;
 		
 		Statement stmt = sequence.sequence.getStatement(i);
 		TypedOperation op = stmt.getOperation();
-		assert op.isConstructorCall() || op.isMethodCall(): op.toParsableString() + "is not a constructor or method call";
-
-		TypedClassOperation typOp = (TypedClassOperation) op;
-		assert typOp.drawnFromClass != null: op.toParsableString() + "is not associated to any input class";
-		
-		Object[] inputs = sequence.getRuntimeInputs(i);
-		String className = typOp.drawnFromClass.getName();
-		String classNameNoGenerics = className.substring(0, className.indexOf('<'));
 		String methodName = op.toString();
-
+		assert op.isConstructorCall() || op.isMethodCall(): op.toParsableString() + "is not a constructor or method call";
+		String className = getOperationClass(op);
 		// We only want to see if methods of classes under test are exercised with new objects
 		// For the remaining classes we drop any other sequence that is not a generator
-		if (!classUnderTest(classNameNoGenerics)) return;
-		
+		if (!classUnderTest(className)) return;
+
+		Object[] inputs = sequence.getRuntimeInputs(i);
 		for (int j = 0; j < inputs.length; j++) {
-			FieldExtensionsCollector collector = methodInputExt.getOrCreateCollectorForMethodParam(classNameNoGenerics, methodName, j);
+			FieldExtensionsCollector collector = methodInputExt.getOrCreateCollectorForMethodParam(className, methodName, j);
 			// makes extensionsWereExtended default to false
 			collector.start();
 			canonicalizer.canonicalize(inputs[j], collector);
 			newInput |= collector.extensionsWereExtended();
 		}
 	}
+	
+	private Map<String, String> classNameCache = new LinkedHashMap<>();
+
+	private String getOperationClass(TypedOperation op) {
+		TypedClassOperation typOp = (TypedClassOperation) op;
+		// FIXME: Hack for the sequence:
+		//			java.lang.Object obj0 = new java.lang.Object()
+		if (op.toParsableString().equals("java.lang.Object.<init>()"))
+			return "java.lang.Object";
+
+		assert typOp.drawnFromClass != null: op.toParsableString() + "is not associated to any input class";
+		
+		String className = typOp.drawnFromClass.getName();
+		String classNameNoGenerics = classNameCache.get(className);
+		if (classNameNoGenerics == null) {
+			classNameNoGenerics = className.substring(0, className.indexOf('<'));
+			classNameCache.put(className, classNameNoGenerics);
+		}
+		return classNameNoGenerics;
+	}
 
 	private boolean classUnderTest(String className) {
+		if (classesUnderTest == null) return true;
+
 		// Only consider classes marked as important to be tested by the user
 		// This is akin to try to cover a few classes that one wants to test
 		return classesUnderTest.contains(className);

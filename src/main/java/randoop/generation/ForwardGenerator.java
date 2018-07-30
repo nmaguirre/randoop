@@ -162,11 +162,16 @@ public class ForwardGenerator extends AbstractGenerator {
 
     if (GenInputsAbstract.field_based_gen) {
     		ExtensionsCollectorVisitor collector = (ExtensionsCollectorVisitor) executionVisitor;
-		if (collector.generatesNewOutput()) {
+		if (collector.generatesNewOutput()) 
 			componentManager.addFieldBased(eSeq.sequence);
-		}
-		// The sequence does not generate new output or input
-		else if (!collector.testsWithNewInput())
+		
+		// Save sequence when:
+		// 	- collector.testsMethodFromRelevantClass(eSeq) 
+		//  - (collector.testsWithNewInput() || collector.generatesNewOutput())
+		if (!collector.testsMethodFromRelevantClass(eSeq) || 
+				(!collector.testsWithNewInput() && 
+						!collector.generatesNewOutput()))
+			// The sequence does not belong to relevant classes, or it does but does not generate new input nor output
 			return null;
     }
     else {

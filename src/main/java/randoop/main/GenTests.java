@@ -162,9 +162,10 @@ public class GenTests extends GenInputsAbstract {
     // get the names of the clases to be tested using field based generation
     Set<String> fbgClasses = null;
     if (field_based_gen) {
-    		if (GenInputsAbstract.fbg_classlist == null)
-    			throw new Error("Flag --fbg-classlist must be set when --field-based-gen=true");
-    		fbgClasses = GenInputsAbstract.getClassnamesFBG();
+    		/*if (GenInputsAbstract.fbg_classlist == null)
+    			throw new Error("Flag --fbg-classlist must be set when --field-based-gen=true");*/
+ 		if (GenInputsAbstract.fbg_classlist != null)
+ 			fbgClasses = GenInputsAbstract.getClassnamesFBG();
     }
     
     if (fbg_debug && !field_based_gen) 
@@ -180,12 +181,22 @@ public class GenTests extends GenInputsAbstract {
         GenInputsAbstract.getStringSetFromFile(omit_field_list, "Error reading field file");
 
     VisibilityPredicate visibility;
-    Package junitPackage = Package.getPackage(GenInputsAbstract.junit_package_name);
+
+    if (GenInputsAbstract.junit_package_name == null
+    		|| GenInputsAbstract.only_test_public_members) {
+    		visibility = new PublicVisibilityPredicate();    
+    	}
+    	else {
+    		visibility = new PackageVisibilityPredicate(GenInputsAbstract.junit_package_name);
+    	}
+
+/*    Package junitPackage = Package.getPackage(GenInputsAbstract.junit_package_name);
     if (junitPackage == null || GenInputsAbstract.only_test_public_members) {
       visibility = new PublicVisibilityPredicate();
     } else {
       visibility = new PackageVisibilityPredicate(junitPackage);
     }
+    */
 
     ReflectionPredicate reflectionPredicate =
         new DefaultReflectionPredicate(omitmethods, omitFields);

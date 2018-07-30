@@ -20,7 +20,8 @@ import java.lang.reflect.Modifier;
 public class PackageVisibilityPredicate implements VisibilityPredicate {
 
   /** The package from which to test visibility of elements. */
-  private Package thePackage;
+//  private Package thePackage;
+  private String thePackage;
 
   /**
    * Create a predicate that tests visibility. Class members must either be
@@ -29,7 +30,8 @@ public class PackageVisibilityPredicate implements VisibilityPredicate {
    * @param thePackage
    *          the package to use for package accessibility test
    */
-  public PackageVisibilityPredicate(Package thePackage) {
+  public PackageVisibilityPredicate(String thePackage) {
+//  public PackageVisibilityPredicate(Package thePackage) {
     this.thePackage = thePackage;
   }
 
@@ -42,7 +44,9 @@ public class PackageVisibilityPredicate implements VisibilityPredicate {
   @Override
   public boolean isVisible(Class<?> c) {
     int mods = c.getModifiers() & Modifier.classModifiers();
-    return isVisible(mods, c.getPackage());
+    return (c.getDeclaringClass() == null || isVisible(c.getDeclaringClass()))
+    		&& isVisible(mods, c.getPackage());
+//    return isVisible(mods, c.getPackage());
   }
 
   /**
@@ -93,6 +97,7 @@ public class PackageVisibilityPredicate implements VisibilityPredicate {
    */
   private boolean isVisible(int mods, Package otherPackage) {
     return Modifier.isPublic(mods)
-        || (thePackage.equals(otherPackage) && !Modifier.isPrivate(mods));
+    		|| (thePackage.equals(otherPackage.getName()) && !Modifier.isPrivate(mods));
+//        || (thePackage.equals(otherPackage) && !Modifier.isPrivate(mods));
   }
 }

@@ -421,6 +421,8 @@ public abstract class AbstractGenerator {
    */
   // TODO replace this with filtering during generation
   public List<ExecutableSequence> getRegressionSequences() {
+    System.out.printf("Generated tests: %d%n", numGeneratedSequences());
+    System.out.printf("Regression test count before subsumption: %d%n", outRegressionSeqs.size());
     List<ExecutableSequence> unique_seqs = new ArrayList<>();
     Set<Sequence> subsumed_seqs = this.getSubsumedSequences();
     for (ExecutableSequence es : outRegressionSeqs) {
