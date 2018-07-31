@@ -175,8 +175,17 @@ public class CandidateVectorGenerator {
 			CanonicalObject canValue = canRes.getValue();
 			if (canValue.isNull()) 
 				comp = NULL_INT_REPRESENTATION;
-			else if (canValue.isPrimitive())
-				comp = canValue.getObject().hashCode();
+			else if (canValue.isPrimitive()) {
+				if (canValue.getObject() instanceof java.lang.Boolean) {
+					if (((Boolean)canValue.getObject())) 
+						comp = 1;
+					else
+						comp = 0;
+				}
+				else {
+					comp = canValue.getObject().hashCode();
+				}
+			}
 			else
 				// comp = canValue.getIndex();
 				// Start enumerating the objects from 1 to handle null=0 well
