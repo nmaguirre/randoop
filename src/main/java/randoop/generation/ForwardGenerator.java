@@ -168,9 +168,10 @@ public class ForwardGenerator extends AbstractGenerator {
 		// Save sequence when:
 		// 	- collector.testsMethodFromRelevantClass(eSeq) 
 		//  - (collector.testsWithNewInput() || collector.generatesNewOutput())
-		if (!collector.testsMethodFromRelevantClass(eSeq) || 
+		if (!GenInputsAbstract.fbg_save_all_tests &&
+				(!collector.testsMethodFromRelevantClass(eSeq) || 
 				(!collector.testsWithNewInput() && 
-						!collector.generatesNewOutput()))
+						!collector.generatesNewOutput())))
 			// The sequence does not belong to relevant classes, or it does but does not generate new input nor output
 			return null;
     }
