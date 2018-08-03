@@ -240,26 +240,26 @@ public class CanonicalHeap {
 				res = Integer.parseInt(primStr);
 			}
 			catch (NumberFormatException e) {
-				try {
+				/*try {
 					res = Double.parseDouble(primStr);
-				}
-				catch (NumberFormatException e1) {
+				} 
+				catch (NumberFormatException e1) { */
+				try {
+					res = Float.parseFloat(primStr);
+				}	
+				catch (NumberFormatException e2) {	
 					try {
-						res = Float.parseFloat(primStr);
+						res = Long.parseLong(primStr);
 					}	
-					catch (NumberFormatException e2) {	
-						try {
-							res = Long.parseLong(primStr);
-						}	
-						catch (NumberFormatException e3) {	
-							// res is boolean, string or char.
-							if ("true".equalsIgnoreCase(primStr) || "false".equalsIgnoreCase(primStr))
-								res = Boolean.parseBoolean(primStr);
-							else
-								res = primStr;
-						}
+					catch (NumberFormatException e3) {	
+						// res is boolean, string or char.
+						if ("true".equalsIgnoreCase(primStr) || "false".equalsIgnoreCase(primStr))
+							res = Boolean.parseBoolean(primStr);
+						else
+							res = primStr;
 					}
 				}
+				//}
 			}
 			allValues.add(new CanonicalObject(res, rdmFld.getCanonicalType(), -1, null));
 		}
