@@ -96,7 +96,11 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 		String className = typOp.drawnFromClass.getName();
 		String classNameNoGenerics = classNameCache.get(className);
 		if (classNameNoGenerics == null) {
-			classNameNoGenerics = className.substring(0, className.indexOf('<'));
+			if (className.indexOf('<') == -1)
+				classNameNoGenerics = className;
+			else
+				classNameNoGenerics = className.substring(0, className.indexOf('<'));
+
 			classNameCache.put(className, classNameNoGenerics);
 		}
 		return classNameNoGenerics;
@@ -157,6 +161,13 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 				varIndex++;
 			}
 
+			/*
+			// FIXME: Allow single constructor calls to be used as generators. 
+			// This allows to build generic structures instantiated with different types that otherwise would get discarded 
+			if (!newOutput && sequence.sequence.size() == 1 && sequence.sequence.getStatement(0).getOperation().isConstructorCall())
+				newOutput = true;
+				*/
+			
 		}
 	}
 	

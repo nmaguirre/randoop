@@ -40,15 +40,9 @@ import randoop.util.SimpleList;
  */
 public class ForwardGenerator extends AbstractGenerator {
 
-  /**
-   * The set of ALL sequences ever generated, including sequences that were
-   * executed and then discarded.
-   */
-  private final Set<Sequence> allSequences;
+
   private final Set<TypedOperation> observers;
 
-  /** Sequences that are used in other sequences (and are thus redundant) **/
-  private Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
 
   // For testing purposes only. If Globals.randooptestrun==false then the array
   // is never populated or queried. This set contains the same set of

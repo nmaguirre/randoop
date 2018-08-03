@@ -5,19 +5,26 @@ import plume.OptionGroup;
 import plume.Unpublicized;
 import randoop.*;
 import randoop.fieldextensions.ExtensionsCollectorVisitor;
+import randoop.fieldextensions.OperationManager.OpState;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
+import randoop.sequence.Variable;
 import randoop.test.TestCheckGenerator;
+import randoop.types.Type;
+import randoop.types.TypeTuple;
 import randoop.util.Log;
 import randoop.util.ProgressDisplay;
+import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
+import randoop.util.SimpleList;
 import randoop.util.Timer;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -48,6 +55,16 @@ public abstract class AbstractGenerator {
   @RandoopStat("Number of sequences generated that reveal a failure.")
   public int num_failing_sequences = 0;
 
+  
+  /** Sequences that are used in other sequences (and are thus redundant) **/
+  protected Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
+
+  /**
+   * The set of ALL sequences ever generated, including sequences that were
+   * executed and then discarded.
+   */
+  protected Set<Sequence> allSequences;
+  
   /**
    * The timer used to determine how much time has elapsed since the start of
    * generator and whether generation should stop.
@@ -362,6 +379,50 @@ public abstract class AbstractGenerator {
       }
     }
 
+    // This is not needed now, but might be helpful in the future
+    ExecutionVisitor visitorRef = executionVisitor;
+
+    // TODO: Second phase: Extend tests with observers
+    if (GenInputsAbstract.fbg_extend_with_observers > 0) {
+    /*
+    		for (ExecutableSequence eSeq: positiveRegressionSeqs) {
+    			if (eSeq.getLastStmtOperation().isModifier()) 
+    				modifierRegressionSeqs.add(eSeq);
+    			else
+    				observerRegressionSeqs.add(eSeq);
+    		}
+    		*/
+	    System.out.println("\nSecond phase starting...");
+
+       	long secondPhaseStartTime = System.currentTimeMillis();
+
+    	  	ExtensionsCollectorVisitor visitor = (ExtensionsCollectorVisitor) visitorRef;
+    		ArrayList<TypedOperation> simpleObserverOps = new ArrayList<>();
+    		ArrayList<TypedOperation> observerOps = new ArrayList<>();
+    		for (TypedOperation op: operations) {
+    			if (op.isConstructorCall()) continue;
+    			
+    			if (visitor.getOperationState(op) != OpState.MODIFIER) {
+    				if (op.isSimpleOp())
+    					simpleObserverOps.add(op);
+    				else
+    					observerOps.add(op);
+    			}
+    		}
+
+    		extendModifierTestsWithObservers(simpleObserverOps, observerOps);
+    		/*
+    		if (field_based_gen_save_observers) {
+    			extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true, false);
+    		}
+    */
+    		long secondPhaseTime = (System.currentTimeMillis() - secondPhaseStartTime) / 1000;
+
+    	    System.out.println("\nSecond phase execution time: " + secondPhaseTime  + " s");
+    }
+    
+    
+    
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();
       progressDisplay.shouldStop = true;
@@ -381,9 +442,9 @@ public abstract class AbstractGenerator {
       
 
       if (GenInputsAbstract.fbg_debug) {
-    	  	ExtensionsCollectorVisitor visitor = (ExtensionsCollectorVisitor) executionVisitor;
+    	  	ExtensionsCollectorVisitor visitor = (ExtensionsCollectorVisitor) visitorRef;
     	  	for (TypedOperation op: operations) {
-    		  System.out.println(op.toString() + ": " + visitor.getOperationState(op));
+    		  System.out.println(op.toString() + ": " + visitor.getOperationState(op) + ", Simple: " + op.isSimpleOp());
     	  	}
       }
     }
@@ -394,6 +455,232 @@ public abstract class AbstractGenerator {
     }
     
   }
+  
+ 
+	public static <T> void randomPermutation(List<T> l) {
+		for (int i = 0; i < l.size(); i++) {	
+			int exchangeInd = i + Randomness.nextRandomInt(l.size()-i);
+			T temp = l.get(i);
+			l.set(i, l.get(exchangeInd));
+			l.set(exchangeInd, temp);
+		}
+	}
+	
+	  private Integer getRandomConnectionBetweenTypes(Type observedType, TypeTuple inputTypes) {
+		  List<Integer> l = new ArrayList<>();
+		  for (int j = 0; j < inputTypes.size(); j++) {
+			  if (inputTypes.get(j).isAssignableFrom(observedType)) 
+				  l.add(j);
+		  }
+		  if (l.isEmpty()) return null;
+		  return Randomness.randomMember(l);
+	  }
+
+  
+   private void extendModifierTestsWithObservers(List<TypedOperation> simpleObs, List<TypedOperation> obs) {
+		  	  // Generation first adds one of each observer operation to the end of the sequence
+	   List<ExecutableSequence> firstPhaseSeqs = new ArrayList<>() ;
+	   for (ExecutableSequence s: outRegressionSeqs) {
+		   if (s.isNormalExecution() && !subsumed_sequences.contains(s.sequence)) 
+			   firstPhaseSeqs.add(s);
+	   }
+	   
+		  	  for (ExecutableSequence eSeq: firstPhaseSeqs) {
+		  		  // Implement a method to get the last method of a sequence.
+		  		  List<Integer> candidates = null;
+		  		  if (!eSeq.sequence.getFBActiveFlags().isEmpty()) {
+		  			  candidates = eSeq.sequence.getFBActiveFlags();
+		  		  }
+		  		  else {
+		  			  // TODO: Use runtime values compile time types to figure out 
+		  			  candidates = new ArrayList<>();
+		  			  candidates.addAll(eSeq.sequence.getLastStmtNonPrimitiveIndexes());
+	  				  // Only primitive values as parameters for this sequence, continue to the next one
+		  			  if (candidates.isEmpty()) continue;
+		  		  }
+		  
+		  		  int j = Randomness.randomMember(candidates);
+		  		  
+		  		  ExecutableSequence currentSeq = eSeq;
+		  		  List<Type> seqLastStmtTypes = eSeq.sequence.getTypesForLastStatement();
+		  		  Type observedType = seqLastStmtTypes.get(j);
+		  		  int observedIndex = j;
+		  
+		  		  randomPermutation(simpleObs);
+		  		  randomPermutation(obs);
+		  		  //resetExecutionResults(currentSeq, null);
+		  		  
+		  		  int opsCount = 0;
+		  		  int simpleObsInd = 0;
+		  		  int obsInd = 0;
+		  		  while (opsCount < GenInputsAbstract.fbg_extend_with_observers) {
+//		  		  for (TypedOperation operation: operationsPermutable) {
+		  			  /* if (operation.toString().contains("<get>") || operation.toString().contains("<set>")) {
+		  				  continue;
+		  			  } */
+		  			  
+		  			  // if (simpleObsInd == simpleObs.size() && obsInd == obs.size()) break;
+		  			  
+		  			  TypedOperation operation = null;
+		  			  // Take up to GenInputsAbstract.fbg_extend_with_observers/2 simple observers
+		  			  if (simpleObsInd < simpleObs.size() && opsCount < GenInputsAbstract.fbg_extend_with_observers/2)
+		  				  operation = simpleObs.get(simpleObsInd++);
+		  			  // And then start taking observer operations...
+		  			  else if (obsInd < obs.size())
+		  				  operation = obs.get(obsInd++);
+		  			  else
+		  				  // observer list exhausted
+		  				  break;
+		  			  
+	  				  //The current operation is a constructor, don't use it to extend tests";
+		  			  if (operation.isConstructorCall()) continue;
+		  
+		  			  // The first integer of the tuple is the index of the variable chosen from newSeq, 
+		  			  // the second integer is the corresponding index of a compatible type in operation
+		  			  TypeTuple inputTypes = operation.getInputTypes();
+		  			  Integer opIndex = getRandomConnectionBetweenTypes(observedType, inputTypes);
+  					  // The current operation cannot observe type observedType
+		  			  if (opIndex == null) continue;
+		  
+		  			  List<Sequence> sequences = new ArrayList<>();
+		  			  int totStatements = 0;
+		  			  List<Integer> variables = new ArrayList<>();
+		  			  boolean error = false;
+		  			  for (int i = 0; i < inputTypes.size(); i++) {
+		  				  Type inputType = inputTypes.get(i);
+		  				  Variable randomVariable;
+		  				  Sequence chosenSeq;
+		  				  if (i == opIndex) {
+		  					  chosenSeq = currentSeq.sequence; 
+		  					  randomVariable = chosenSeq.getVariablesOfLastStatement().get(observedIndex);
+		  				  }
+		  				  else {
+		  					  SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
+		  					  if (l.isEmpty()) {
+		  						  error = true;
+		  						  break;
+		  					  }
+		  					  chosenSeq = Randomness.randomMember(l);
+		  					  randomVariable = chosenSeq.randomVariableForTypeLastStatementFB(inputType);
+		  				  }
+		  				  // Now, find values that satisfy the constraint set.
+		  				  if (randomVariable == null) {
+		  					  throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
+		  				  }
+		  				  // Fail, if we were unlucky and selected a null or primitive value as the
+		  				  // receiver for a method call.
+		  				  if (i == 0
+		  						  && operation.isMessage()
+		  						  && !(operation.isStatic())
+		  						  && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
+		  								  || randomVariable.getType().isPrimitive())) {
+		  					  error = true;
+		  					  break;
+		  				  }
+		  				  variables.add(totStatements + randomVariable.index);
+		  				  sequences.add(chosenSeq);
+		  				  totStatements += chosenSeq.size();
+		  			  }
+		  
+		  			  if (error) continue;
+		  			  InputsAndSuccessFlag isequences = new InputsAndSuccessFlag(true, sequences, variables);
+		  			  
+		  			  int [] startIndexRef = {0};
+		  			  Sequence concatSeq = Sequence.concatenateAndGetIndexes(isequences.sequences, currentSeq.sequence, startIndexRef);
+		  			  int startIndex = startIndexRef[0];
+		  			  int endIndex = startIndex + currentSeq.sequence.size()-1;
+		  			  
+		  			  // Figure out input variables.
+		  			  List<Variable> inputs = new ArrayList<>();
+		  			  for (Integer oneinput : isequences.indices) {
+		  				  Variable v = concatSeq.getVariable(oneinput);
+		  				  inputs.add(v);
+		  			  }
+		  			  Sequence newSequence = concatSeq.extend(operation, inputs);
+
+		  			  // Discard if sequence is larger than size limit
+		    			  if (newSequence.size() > GenInputsAbstract.maxsize) {
+		  				  if (Log.isLoggingOn()) {
+		  					  Log.logLine(
+		  							  "Sequence discarded because size "
+		  									  + newSequence.size()
+		  									  + " exceeds maximum allowed size "
+		  									  + GenInputsAbstract.maxsize);
+		  				  }
+		  				  // This sequence is too large, try another one 
+		  				  break;
+		  			  }
+		  			  
+		  			  num_sequences_generated++;
+		  			  
+		  			  if (this.allSequences.contains(newSequence)) {
+		  				  if (Log.isLoggingOn()) {
+		  					  Log.logLine("Sequence discarded because the same sequence was previously created.");
+		  				  }
+		  				  continue;
+		  			  }
+		  			  this.allSequences.add(newSequence);	
+		  			  
+		  			  ExecutableSequence extendedSeq = new ExecutableSequence(newSequence);
+		  			  //resetExecutionResults(currentSeq, extendedSeq);
+		  			  
+		  			  extendedSeq.execute(new DummyVisitor(), checkGenerator);
+		  			  //executeExtendedSequenceNoReexecute(extendedSeq, currentSeq, startIndex, endIndex);
+		  			  //processLastSequenceStatement(eSeq2ndPhase);
+		  
+		  			  if (extendedSeq.hasFailure()) {
+		  				  num_failing_sequences++;
+		  			  }
+		  
+		  			  if (outputTest.test(extendedSeq)) {
+		  
+		  				  if (!extendedSeq.hasInvalidBehavior()) {
+		  					  if (extendedSeq.hasFailure()) {
+		  						  outErrorSeqs.add(extendedSeq);
+		  						  //resetExecutionResults(currentSeq, extendedSeq);
+		  					  } 
+		  					  else {
+		  						  // outRegressionSeqs.add(eSeq2ndPhase);
+		  						  if (extendedSeq.isNormalExecution()) {
+		  							  // continue extending this sequence;
+		  							  currentSeq = extendedSeq;
+		  
+		  							  // opIndex was calculated over operation's input types. observedIndex must be calculated over the output types of the operation 
+		  							  if (operation.getOutputType().isVoid())
+		  								  observedIndex = opIndex;
+		  							  else
+		  								  observedIndex = opIndex + 1;
+		  
+		  							  assert currentSeq.sequence.getTypesForLastStatement().get(observedIndex).equals(observedType);
+
+		  							  // Add newSequence's inputs to subsumed_sequences
+		  							  for (Sequence subsumed: isequences.sequences) {
+		  								  subsumed_sequences.add(subsumed);
+		  							  }	
+		  							  outRegressionSeqs.add(currentSeq);
+		  							  opsCount++;
+		  						  }
+		  						  // Current sequence execution threw an exception
+		  						  else {
+		  							  // Results are invalidated by the method that thrown the exception; discard it
+		  							  //resetExecutionResults(currentSeq, extendedSeq);
+		  						  } 
+		  					  }
+		  				  }
+		  				  else {
+		  					  // ERROR: Sequence with invalid behavior in the second phase
+		  					  //resetExecutionResults(currentSeq, extendedSeq);
+		  				  }
+		  			  }
+		  			  else {
+		  				  // ERROR: Failing sequence in the second phase
+		  				  //resetExecutionResults(currentSeq, extendedSeq);
+		  			  }
+		  		  }
+		  	  }
+	    }
+   
+  
 
   /**
    * Return all sequences generated by this object.

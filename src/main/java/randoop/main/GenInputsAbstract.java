@@ -181,6 +181,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Generate tests using field based filtering")
   public static boolean fbg_save_all_tests = false;
   
+  @Option("Extend tests with this number of observer operations after generation")
+  public static int fbg_extend_with_observers = 0;
+
   @Option("Generate debug information for field based generation")
   public static boolean fbg_debug = false;
   

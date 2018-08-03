@@ -168,8 +168,12 @@ public class GenTests extends GenInputsAbstract {
  			fbgClasses = GenInputsAbstract.getClassnamesFBG();
     }
     
-    if (fbg_debug && !field_based_gen) 
-    		throw new Error("Flag --field_based_gen=true must be set when --fbg_debug=true");
+    if (!field_based_gen) {
+    		if (fbg_debug) 
+   			throw new Error("Flag --field_based_gen=true must be set when --fbg_debug=true");
+    		if (fbg_extend_with_observers > 0) 
+   			throw new Error("Flag --field_based_gen=true must be set when --fbg_extend_with_observers > 0");
+    }
    
     // get names of classes that must be covered by output tests
     Set<String> coveredClassnames =

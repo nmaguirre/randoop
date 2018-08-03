@@ -103,7 +103,7 @@ public final class Sequence implements WeightedElement {
    *
    * @return the variables used in the last statement of this sequence
    */
-  List<Variable> getVariablesOfLastStatement() {
+  public List<Variable> getVariablesOfLastStatement() {
     return this.lastStatementVariables;
   }
 
@@ -114,8 +114,27 @@ public final class Sequence implements WeightedElement {
    *
    * @return the types of the variables in the last statement of this sequence
    */
-  List<Type> getTypesForLastStatement() {
+  public List<Type> getTypesForLastStatement() {
     return this.lastStatementTypes;
+  }
+  
+  private static boolean isNonreceiverType(Type type) {
+	    return type.isPrimitive()
+	        || type.isBoxedPrimitive()
+	        || type.isString()
+	        || type.getRuntimeClass().equals(Class.class);
+	  }
+  
+  public List<Integer> getLastStmtNonPrimitiveIndexes() {
+	  List<Integer> res = new LinkedList<>();
+	  int index = 0;
+	  for (Type type: getTypesForLastStatement()) {
+		  // If type is primitive
+		  if (!(isNonreceiverType(type) && !type.getRuntimeClass().equals(Class.class))) 
+			  res.add(index);
+		  index++;
+	  }
+	  return res;
   }
 
   /**
@@ -687,6 +706,28 @@ public final class Sequence implements WeightedElement {
     if (possibleIndices.isEmpty()) return null;
     return Randomness.randomMember(possibleIndices);
   }
+  
+  public Variable randomVariableForTypeLastStatementFB(Type type) {
+	    if (type == null) throw new IllegalArgumentException("type cannot be null.");
+	    
+	    if (getFBActiveFlags().isEmpty()) {
+	    		assert type.isObject() || type.isPrimitive() || type.isBoxedPrimitive() || 
+						  type.isArray(): "Non primitive sequence used, but not field based selection of inputs.";
+	    		return randomVariableForTypeLastStatement(type);
+	    }
+	    
+	    List<Variable> possibleIndices = new ArrayList<>(this.lastStatementVariables.size());
+	    for (Integer j: getFBActiveFlags()) {
+	    	  Variable i = lastStatementVariables.get(j);
+	    	  
+	      Statement s = statements.get(i.index);
+	      if (type.isAssignableFrom(s.getOutputType())) {
+	        possibleIndices.add(i);
+	      }
+	    }
+	    if (possibleIndices.isEmpty()) return null;
+	    return Randomness.randomMember(possibleIndices);
+	  }
 
   void checkIndex(int i) {
     if (i < 0 || i > size() - 1) throw new IllegalArgumentException();
@@ -829,6 +870,23 @@ public final class Sequence implements WeightedElement {
       statements1.add(c.statements);
     }
     return new Sequence(new ListOfLists<>(statements1), newHashCode, newNetSize);
+  }
+  
+  public static Sequence concatenateAndGetIndexes(List<Sequence> sequences, Sequence indexedSeq, int [] startingIndex) {
+	  List<SimpleList<Statement>> statements1 = new ArrayList<>();
+	  int newHashCode = 0;
+	  int newNetSize = 0;
+	  int lastIndex = 0;
+	  for (Sequence c : sequences) {
+		  newHashCode += c.savedHashCode;
+		  newNetSize += c.savedNetSize;
+		  if (c.equals(indexedSeq)) {
+			  startingIndex[0] = lastIndex;
+		  }
+		  lastIndex += c.size();
+		  statements1.add(c.statements);
+	  }
+	  return new Sequence(new ListOfLists<>(statements1), newHashCode, newNetSize);
   }
 
   /**

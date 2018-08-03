@@ -500,4 +500,22 @@ public abstract class TypedOperation implements Operation {
   public boolean isUncheckedCast() {
     return operation.isUncheckedCast();
   }
+  
+  private Boolean simpleOp = null;
+
+  public boolean isSimpleOp() {
+	  if (simpleOp != null) return simpleOp;
+
+	  int numNonPrim = 0;
+	  for (int i = 0; i < inputTypes.size(); i++) {
+		  Type type = inputTypes.get(i);
+		  // If type is not primitive
+		  if (!(isNonreceiverType(type) && !type.getRuntimeClass().equals(Class.class)))
+			  numNonPrim++;
+	  }
+
+	  simpleOp = numNonPrim <= 1;
+	  return simpleOp;
+  }
+  
 }
