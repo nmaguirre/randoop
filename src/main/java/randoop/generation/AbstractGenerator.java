@@ -411,13 +411,8 @@ public abstract class AbstractGenerator {
     		}
 
     		extendModifierTestsWithObservers(simpleObserverOps, observerOps);
-    		/*
-    		if (field_based_gen_save_observers) {
-    			extendObserverTestsWithObserverOps(observerRegressionSeqs, operationsPermutable, true, true, false);
-    		}
-    */
-    		long secondPhaseTime = (System.currentTimeMillis() - secondPhaseStartTime) / 1000;
 
+    		long secondPhaseTime = (System.currentTimeMillis() - secondPhaseStartTime) / 1000;
     	    System.out.println("\nSecond phase execution time: " + secondPhaseTime  + " s");
     }
     
@@ -444,7 +439,11 @@ public abstract class AbstractGenerator {
       if (GenInputsAbstract.fbg_debug) {
     	  	ExtensionsCollectorVisitor visitor = (ExtensionsCollectorVisitor) visitorRef;
     	  	for (TypedOperation op: operations) {
-    		  System.out.println(op.toString() + ": " + visitor.getOperationState(op) + ", Simple: " + op.isSimpleOp());
+    		  System.out.println(op.toString() + 
+		  ", \t\n Operation State: " + visitor.getOperationState(op) +
+    		  ", \t\n Modifier executions: " + visitor.getNumberOfModifierExecutions(op) +
+    		  ", \t\n Executions: " + visitor.getNumberOfExecutions(op) +
+    		  ", \t\n Simple: " + op.isSimpleOp());
     	  	}
       }
     }

@@ -184,6 +184,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Extend tests with this number of observer operations after generation")
   public static int fbg_extend_with_observers = 0;
 
+  @Option("Detect observers precisely using extensions")
+  public static boolean fbg_precise_observers_detection = false;
+  
   @Option("Avoid reexecuting while extending sequences with observers")
   public static boolean fbg_extend_no_reexecute = false; 
 

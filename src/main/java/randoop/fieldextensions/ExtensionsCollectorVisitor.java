@@ -27,7 +27,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 	private OperationManager opManager;
 	private boolean newInput;
 	private boolean newOutput;
-	private boolean observersDetection;
+	private boolean preciseObserversDetection;
 	private Set<String> classesUnderTest;
 	private IFieldExtensions [] prevExt;
 	private int maxObjects;
@@ -39,7 +39,8 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 	}
 	
 	// classesUnderTest = null to consider all classes as relevant
-	public ExtensionsCollectorVisitor(Set<String> classesUnderTest, int maxObjects, int maxArrayObjects, int maxFieldDistance, boolean observersDetection, int maxExecsToObs) {
+	public ExtensionsCollectorVisitor(Set<String> classesUnderTest, int maxObjects, int maxArrayObjects, 
+			int maxFieldDistance, boolean preciseObserversDetection, int maxExecsToObs) {
 		this.maxObjects= maxObjects;
 		this.maxArrayObjects = maxArrayObjects;
 		this.maxFieldDistance = maxFieldDistance;
@@ -50,7 +51,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 		outputExt = new ExtensionsStore(maxObjects);
 		opManager = new OperationManager(maxExecsToObs);
 		this.classesUnderTest = classesUnderTest;
-		this.observersDetection = observersDetection;
+		this.preciseObserversDetection = preciseObserversDetection;
 	}
 	
 	public boolean testsWithNewInput() {
@@ -65,6 +66,14 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 		return opManager.getOperationState(op);
 	}
 	
+	public int getNumberOfExecutions(TypedOperation op) {
+		return opManager.getNumberOfExecutions(op);
+	}
+	
+	public int getNumberOfModifierExecutions(TypedOperation op) {
+		return opManager.getNumberOfModifierExecutions(op);
+	}
+
 	public boolean testsMethodFromRelevantClass(ExecutableSequence sequence) {
 		if (classesUnderTest == null) 
 			return true;
@@ -88,7 +97,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 		if (!classUnderTest(className)) return;
 
 		Object[] inputs = sequence.getRuntimeInputs(i);
-		if (observersDetection && !opManager.modifierOrObserver(op))
+		if (preciseObserversDetection && !opManager.modifierOrObserver(op))
 			prevExt = new IFieldExtensions [inputs.length];
 		for (int j = 0; j < inputs.length; j++) {
 			FieldExtensionsCollector collector = methodInputExt.getOrCreateCollectorForMethodParam(className, methodName, j);
@@ -97,7 +106,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 			canonicalizer.canonicalize(inputs[j], collector);
 			newInput |= collector.extensionsWereExtended();
 
-			if (observersDetection && !opManager.modifierOrObserver(op) && inputs[j] != null) {
+			if (preciseObserversDetection && !opManager.modifierOrObserver(op) && inputs[j] != null) {
 				FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
 				canonicalizer.canonicalize(inputs[j], currExtCollector);
 				prevExt[j] = currExtCollector.getExtensions();
@@ -159,8 +168,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 					if (collector.extensionsWereExtended()) {
 						newOutput = true;
 						sequence.sequence.setFBActiveFlag(varIndex);
-						if (observersDetection)
-							opState = OpState.MODIFIER;
+						opState = OpState.MODIFIER;
 					}
 				}
 				varIndex++;
@@ -171,7 +179,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 			for (int j = 0; j < objsAfterExec.length; j++) {
 				Object curr = objsAfterExec[j];
 				
-				if (observersDetection && !opManager.modifierOrObserver(op) && curr != null) {
+				if (preciseObserversDetection && !opManager.modifierOrObserver(op) && curr != null) {
 					FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
 					canonicalizer.canonicalize(curr, currExtCollector);
 					if (!prevExt[j].equals(currExtCollector.getExtensions()))
@@ -187,17 +195,18 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 				if (collector.extensionsWereExtended()) {
 					newOutput = true;
 					sequence.sequence.setFBActiveFlag(varIndex);
+					if (!preciseObserversDetection)
+						opState = OpState.MODIFIER;
 				}
 
 				varIndex++;
 			}
 
-			if (observersDetection) {
-				if (opState == OpState.MODIFIER)
-					opManager.setModifier(op);
-				else
-					opManager.executed(op);
-			}
+			if (opState == OpState.MODIFIER)
+				opManager.setModifier(op);
+			else
+				opManager.executed(op);
+
 			/*
 			// FIXME: Allow single constructor calls to be used as generators. 
 			// This allows to build generic structures instantiated with different types that otherwise would get discarded 
