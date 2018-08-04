@@ -184,6 +184,12 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Extend tests with this number of observer operations after generation")
   public static int fbg_extend_with_observers = 0;
 
+  @Option("Avoid reexecuting while extending sequences with observers")
+  public static boolean fbg_extend_no_reexecute = false; 
+
+  @Option("Consider an operation observer after its been tested this number of times without changing state")
+  public static int fbg_observer_after_tests = Integer.MAX_VALUE; // 20;
+
   @Option("Generate debug information for field based generation")
   public static boolean fbg_debug = false;
   
@@ -198,7 +204,7 @@ public abstract class GenInputsAbstract extends CommandHandler {
 
   @Option("Canonicalize classes with up to this field distance from the starting object")
   public static int fbg_max_field_distance = Integer.MAX_VALUE;
-  
+
   @Option("Use randoop's collections and arrays generation heuristic")
   public static boolean collections_heuristic = true;
 

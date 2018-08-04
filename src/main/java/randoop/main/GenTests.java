@@ -370,12 +370,20 @@ public class GenTests extends GenInputsAbstract {
     explorer.addExecutionVisitor(visitor);
 
     // FIXME: the usage of ExtensionsCollectorVisitor removes all the other visitors
-    if (GenInputsAbstract.field_based_gen)
-		explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
-				fbg_max_objects, 
-				fbg_max_arr_objects, 
-				fbg_max_field_distance));
-
+    if (field_based_gen) {
+    		if (fbg_extend_with_observers > 0) 
+    			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
+    					fbg_max_objects, 
+					fbg_max_arr_objects, 
+					fbg_max_field_distance,
+					true,
+					fbg_observer_after_tests));
+		else
+			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
+					fbg_max_objects, 
+					fbg_max_arr_objects, 
+					fbg_max_field_distance));
+    }
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.printf("Explorer = %s\n", explorer);

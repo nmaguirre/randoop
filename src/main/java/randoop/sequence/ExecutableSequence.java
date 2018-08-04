@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import randoop.DummyVisitor;
 import randoop.ExceptionalExecution;
 import randoop.ExecutionOutcome;
 import randoop.ExecutionVisitor;
@@ -818,4 +819,79 @@ public class ExecutableSequence {
   public boolean coversClass(Class<?> c) {
     return executionResults.getCoveredClasses().contains(c);
   }
+
+  public void executeNoReexecute(DummyVisitor dummyVisitor, TestCheckGenerator checkGenerator, ExecutableSequence currSeq,
+		  int startIndex, int endIndex) {
+	  executeNoReexecute(dummyVisitor, checkGenerator, true, currSeq, startIndex, endIndex);
+  }
+  
+  public void clearExecutionResults() {
+	    executionResults.theList.clear();
+	    for (int i = 0; i < sequence.size(); i++) {
+		   executionResults.theList.add(NotExecuted.create());
+	    }
+	    checks = null;
+  }
+  
+  public void executeNoReexecute(DummyVisitor visitor, TestCheckGenerator gen, boolean ignoreException, ExecutableSequence currSeq,
+		  int startIndex, int endIndex) {
+
+	    visitor.initialize(this);
+
+	    // reset execution result values
+	    hasNullInput = false;
+	    executionResults.theList.clear();
+	    int extSeqInd = 0;
+	    for (int i = 0; i < sequence.size(); i++) {
+		   if (i >= startIndex && i <= endIndex) {
+			   // These statements might have been already executed in currSeq
+			   executionResults.theList.add(currSeq.executionResults.theList.get(extSeqInd));
+			   extSeqInd++;
+		   }
+		   else	
+			   executionResults.theList.add(NotExecuted.create());
+	    }
+
+	    for (int i = 0; i < this.sequence.size(); i++) {
+	    	  if (i >= startIndex && i <= endIndex && !(executionResults.theList.get(i) instanceof NotExecuted)) 
+	    			continue;
+
+	      // Find and collect the input values to i-th statement.
+	      List<Variable> inputs = sequence.getInputs(i);
+	      Object[] inputVariables;
+
+	      inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+
+	      visitor.visitBeforeStatement(this, i);
+	      executeStatement(sequence, executionResults.theList, i, inputVariables);
+
+	      // make sure statement executed
+	      ExecutionOutcome statementResult = getResult(i);
+	      if (statementResult instanceof NotExecuted) {
+	        throw new Error("Unexecuted statement in sequence: " + this.toString());
+	      }
+	      // make sure no exception before final statement of sequence
+	      if ((statementResult instanceof ExceptionalExecution) && i < sequence.size() - 1) {
+	        if (ignoreException) {
+	          // this preserves previous behavior, which was simply to return if
+	          // exception occurred
+	          break;
+	        } else {
+	          String msg =
+	              "Encountered exception before final statement of error-revealing test (statement "
+	                  + i
+	                  + "): ";
+	          throw new Error(
+	              msg + ((ExceptionalExecution) statementResult).getException().getMessage());
+	        }
+	      }
+
+	      visitor.visitAfterStatement(this, i);
+	    }
+
+	    visitor.visitAfterSequence(this);
+
+	    checks = gen.visit(this); 
+  }
+  
 }

@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Set;
 
 import canonicalizer.BFHeapCanonicalizer;
+import extensions.BoundedFieldExtensionsCollector;
 import extensions.FieldExtensionsCollector;
+import extensions.IFieldExtensions;
 import randoop.ExecutionOutcome;
 import randoop.ExecutionVisitor;
 import randoop.NormalExecution;
@@ -25,17 +27,30 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 	private OperationManager opManager;
 	private boolean newInput;
 	private boolean newOutput;
+	private boolean observersDetection;
 	private Set<String> classesUnderTest;
+	private IFieldExtensions [] prevExt;
+	private int maxObjects;
+	private int maxArrayObjects;
+	private int maxFieldDistance;
+
+	public ExtensionsCollectorVisitor(Set<String> classesUnderTest, int maxObjects, int maxArrayObjects, int maxFieldDistance) {
+		this(classesUnderTest, maxArrayObjects, maxArrayObjects, maxFieldDistance, false, Integer.MAX_VALUE);
+	}
 	
 	// classesUnderTest = null to consider all classes as relevant
-	public ExtensionsCollectorVisitor(Set<String> classesUnderTest, int maxObjects, int maxArrayObjects, int maxFieldDistance) {
+	public ExtensionsCollectorVisitor(Set<String> classesUnderTest, int maxObjects, int maxArrayObjects, int maxFieldDistance, boolean observersDetection, int maxExecsToObs) {
+		this.maxObjects= maxObjects;
+		this.maxArrayObjects = maxArrayObjects;
+		this.maxFieldDistance = maxFieldDistance;
 		canonicalizer = new BFHeapCanonicalizer();
 		canonicalizer.setMaxArrayObjs(maxArrayObjects);
 		canonicalizer.setMaxFieldDistance(maxFieldDistance);
 		methodInputExt = new ExtensionsStore(maxObjects);
 		outputExt = new ExtensionsStore(maxObjects);
-		opManager = new OperationManager();
+		opManager = new OperationManager(maxExecsToObs);
 		this.classesUnderTest = classesUnderTest;
+		this.observersDetection = observersDetection;
 	}
 	
 	public boolean testsWithNewInput() {
@@ -73,12 +88,20 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 		if (!classUnderTest(className)) return;
 
 		Object[] inputs = sequence.getRuntimeInputs(i);
+		if (observersDetection && !opManager.modifierOrObserver(op))
+			prevExt = new IFieldExtensions [inputs.length];
 		for (int j = 0; j < inputs.length; j++) {
 			FieldExtensionsCollector collector = methodInputExt.getOrCreateCollectorForMethodParam(className, methodName, j);
 			// makes extensionsWereExtended default to false
 			collector.start();
 			canonicalizer.canonicalize(inputs[j], collector);
 			newInput |= collector.extensionsWereExtended();
+
+			if (observersDetection && !opManager.modifierOrObserver(op) && inputs[j] != null) {
+				FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
+				canonicalizer.canonicalize(inputs[j], currExtCollector);
+				prevExt[j] = currExtCollector.getExtensions();
+			}
 		}
 	}
 	
@@ -120,10 +143,9 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 
 		ExecutionOutcome statementResult = sequence.getResult(i);	
 		TypedOperation op = sequence.sequence.getStatement(i).getOperation();
-		opManager.executed(op);
+		OpState opState = null; 
 		
 		if (statementResult instanceof NormalExecution) {
-
 			int varIndex = 0;
 			// Check whether the result value generates new objects
 			Statement stmt = sequence.sequence.getStatement(i);
@@ -137,7 +159,8 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 					if (collector.extensionsWereExtended()) {
 						newOutput = true;
 						sequence.sequence.setFBActiveFlag(varIndex);
-						opManager.setModifier(op);
+						if (observersDetection)
+							opState = OpState.MODIFIER;
 					}
 				}
 				varIndex++;
@@ -147,6 +170,14 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 			// Check whether the objects referenced by parameters are modified by the execution
 			for (int j = 0; j < objsAfterExec.length; j++) {
 				Object curr = objsAfterExec[j];
+				
+				if (observersDetection && !opManager.modifierOrObserver(op) && curr != null) {
+					FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
+					canonicalizer.canonicalize(curr, currExtCollector);
+					if (!prevExt[j].equals(currExtCollector.getExtensions()))
+						opState = OpState.MODIFIER;
+				}
+				
 				if (curr == null || isPrimitive(curr)) { varIndex++; continue; }
 				
 				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(curr.getClass().getName());
@@ -156,18 +187,23 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 				if (collector.extensionsWereExtended()) {
 					newOutput = true;
 					sequence.sequence.setFBActiveFlag(varIndex);
-					opManager.setModifier(op);
 				}
+
 				varIndex++;
 			}
 
+			if (observersDetection) {
+				if (opState == OpState.MODIFIER)
+					opManager.setModifier(op);
+				else
+					opManager.executed(op);
+			}
 			/*
 			// FIXME: Allow single constructor calls to be used as generators. 
 			// This allows to build generic structures instantiated with different types that otherwise would get discarded 
 			if (!newOutput && sequence.sequence.size() == 1 && sequence.sequence.getStatement(0).getOperation().isConstructorCall())
 				newOutput = true;
 				*/
-			
 		}
 	}
 	
@@ -180,6 +216,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 	public void initialize(ExecutableSequence executableSequence) {
 		newInput = false;
 		newOutput = false;
+		prevExt = null;
 	}
 
 	@Override
