@@ -367,7 +367,8 @@ public class ForwardGenerator extends AbstractGenerator {
     }
 
     // Discard if sequence is larger than size limit
-    if (newSequence.size() > GenInputsAbstract.maxsize) {
+    //if (newSequence.size() > GenInputsAbstract.maxsize) {
+    if (newSequence.size() > this.maxsize) {
       if (Log.isLoggingOn()) {
         Log.logLine(
             "Sequence discarded because size "

@@ -55,6 +55,7 @@ public abstract class AbstractGenerator {
   @RandoopStat("Number of sequences generated that reveal a failure.")
   public int num_failing_sequences = 0;
 
+  public int maxsize;
   
   /** Sequences that are used in other sequences (and are thus redundant) **/
   protected Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
@@ -205,6 +206,13 @@ public abstract class AbstractGenerator {
 
     this.stopper = stopper;
     this.listenerMgr = listenerManager;
+    
+    if (GenInputsAbstract.field_based_gen && 
+    		GenInputsAbstract.fbg_extend_with_observers > 0 && 
+    		GenInputsAbstract.fbg_observer_lines > 0)
+    		this.maxsize = GenInputsAbstract.maxsize - GenInputsAbstract.fbg_observer_lines;
+    else
+    		this.maxsize = GenInputsAbstract.maxsize;
   }
   
   /**

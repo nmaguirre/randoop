@@ -371,7 +371,7 @@ public class GenTests extends GenInputsAbstract {
 
     // FIXME: the usage of ExtensionsCollectorVisitor removes all the other visitors
     if (field_based_gen) {
-    		if (fbg_precise_observers_detection) 
+    		if (fbg_precise_observer_detection) 
     			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
     					fbg_max_objects, 
 					fbg_max_arr_objects, 
