@@ -115,8 +115,8 @@ public class CandidateVectorGenerator {
 			header.addComponent(clazz.getName() + "->o" + objNum + "[" + i + "]");
 	}	
 	
-	public CandidateVector<Integer> makeCandidateVectorFrom(CanonicalHeap heap) {
-		CandidateVector<Integer> res = new CandidateVector<>(); 
+	public CandidateVector<Object> makeCandidateVectorFrom(CanonicalHeap heap) {
+		CandidateVector<Object> res = new CandidateVector<>(); 
 		CanonicalStore store = heap.getStore();
 		for (String className: classesFromCode/*store.getAllCanonicalClassnames()*/) {
 			CanonicalClass canonicalClass = store.getCanonicalClass(className);
@@ -136,7 +136,7 @@ public class CandidateVectorGenerator {
 		return res;
 	}
 	
-	private void addNullObjectToCandidateVector(CanonicalClass canonicalClass, CanonicalHeap heap, CandidateVector<Integer> v) {
+	private void addNullObjectToCandidateVector(CanonicalClass canonicalClass, CanonicalHeap heap, CandidateVector<Object> v) {
 		if (canonicalClass.isArray())
 			for (int i = 0; i < heap.getMaxObjects(); i++)
 				v.addComponent(NULL_INT_REPRESENTATION);
@@ -152,8 +152,8 @@ public class CandidateVectorGenerator {
 		}
 	}
 
-	private void addToCandidateVector(CanonicalObject obj, CanonicalHeap heap, CandidateVector<Integer> v) {
-		int comp;
+	private void addToCandidateVector(CanonicalObject obj, CanonicalHeap heap, CandidateVector<Object> v) {
+		Object comp;
 		Map.Entry<CanonicalizationResult, List<CanonicalField>> getFieldsRes = obj.getCanonicalFields();
 		assert getFieldsRes.getKey() == CanonicalizationResult.OK : 
 			"The heap should not be modified while printing a candidate vector";
@@ -176,21 +176,25 @@ public class CandidateVectorGenerator {
 			if (canValue.isNull()) 
 				comp = NULL_INT_REPRESENTATION;
 			else if (canValue.isPrimitive()) {
-				if (canValue.getObject() instanceof java.lang.Boolean) {
+				if (canValue.getObject() instanceof java.lang.Float ||
+					canValue.getObject() instanceof java.lang.Double) 
+					// Add a float to the canonical vector.
+					// In all other cases we add an integer
+					comp = canValue.getObject();
+				else if (canValue.getObject() instanceof java.lang.Boolean) {
 					if (((Boolean)canValue.getObject())) 
 						comp = 1;
 					else
 						comp = 0;
 				}
-				else {
+				else 
 					comp = canValue.getObject().hashCode();
-				}
 			}
-			else
+			else 
 				// comp = canValue.getIndex();
 				// Start enumerating the objects from 1 to handle null=0 well
 				comp = canValue.getIndex() + 1;
-
+			
 			v.addComponent(comp);
 			fieldNumber++;
 		}

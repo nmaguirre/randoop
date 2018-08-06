@@ -7,18 +7,18 @@ import java.util.Set;
 
 public class CandidateVectorsFieldExtensions {
 	
-	private List<Set<Integer>> extensions = new ArrayList<>();
+	private List<Set<Object>> extensions = new ArrayList<>();
 
 	public CandidateVectorsFieldExtensions(CandidateVector<String> header) {
 		assert header.size() > 0: "Candidate vector header cannot be empty";
 		if (extensions.isEmpty()) {
 			for (int i = 0; i < header.size(); i++) {
-				extensions.add(new HashSet<Integer>());
+				extensions.add(new HashSet<Object>());
 			}
 		}
 	}
 
-	public boolean addToExtensions(CandidateVector<Integer> vector) {
+	public boolean addToExtensions(CandidateVector<Object> vector) {
 		assert vector.size() > 0: "Candidate vectors cannot be empty";
 
 //		System.out.println(vector.size());

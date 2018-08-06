@@ -802,7 +802,7 @@ public static int badNegativesCount = 0;
 
 
   private String saveNegativeVector(CanonicalHeap objHeap) {	  
-	  CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
+	  CandidateVector<Object> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
 	  if (CanonicalizerLog.isLoggingOn()) {
 		  CanonicalizerLog.logLine("----------");
 		  CanonicalizerLog.logLine("New mutated vector:");
@@ -874,7 +874,7 @@ public static int badNegativesCount = 0;
 				  CanonicalHeap objHeap = res.getValue();
 
 				  if (!mutateStructures) {
-					  CandidateVector<Integer> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
+					  CandidateVector<Object> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
 					  if (CanonicalizerLog.isLoggingOn()) {
 						  CanonicalizerLog.logLine("----------");
 						  CanonicalizerLog.logLine("New vector:");
