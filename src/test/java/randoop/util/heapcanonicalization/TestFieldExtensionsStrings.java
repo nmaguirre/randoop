@@ -111,7 +111,7 @@ public class TestFieldExtensionsStrings {
 		/** Canonizar el objeto creado **/
 		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
-		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+		CandidateVector<Object> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
 
 	}
@@ -153,7 +153,7 @@ public class TestFieldExtensionsStrings {
 		/** Canonizar el objeto creado **/
 		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
-		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+		CandidateVector<Object> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
 
 	}
@@ -237,7 +237,7 @@ public class TestFieldExtensionsStrings {
 		/** Canonizar el objeto creado **/
 		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
-		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+		CandidateVector<Object> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		System.out.println(candVect.toString());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
 	}
@@ -323,7 +323,7 @@ public class TestFieldExtensionsStrings {
 		/** Canonizar el objeto creado **/
 		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
-		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+		CandidateVector<Object> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
 
 	}
@@ -365,7 +365,7 @@ public class TestFieldExtensionsStrings {
 		/** Canonizar el objeto creado **/
 		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
-		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+		CandidateVector<Object> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
 
 	}
@@ -407,7 +407,7 @@ public class TestFieldExtensionsStrings {
 		/** Canonizar el objeto creado **/
 		Entry<CanonicalizationResult, CanonicalHeap> canonRes = candVectCanonizer.traverseBreadthFirstAndCanonicalize(obj);
 		Assert.assertTrue(canonRes.getKey() == CanonicalizationResult.OK);
-		CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+		CandidateVector<Object> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 		Assert.assertTrue(candVect.toString().equals(vectorOracle));
 
 	}

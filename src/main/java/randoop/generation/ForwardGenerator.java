@@ -535,7 +535,7 @@ private int maxsize;
         if (runtimeValue instanceof Float && Float.isNaN((float) runtimeValue)) {
           runtimeValue = Float.NaN; // canonicalize NaN value
         }
-        if (!looksLikeObjToString && !tooLongString && runtimePrimitivesSeen.add(runtimeValue)) {
+        if (save_primitive_return_values && !looksLikeObjToString && !tooLongString && runtimePrimitivesSeen.add(runtimeValue)) {
           // Have not seen this value before; add it to the component set.
           if (FieldBasedGenLog.isLoggingOn()) 
         	  FieldBasedGenLog.logLine("> New primitive value stored: " + runtimeValue.toString());

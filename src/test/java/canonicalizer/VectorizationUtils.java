@@ -46,7 +46,7 @@ public class VectorizationUtils {
 				System.out.println("Canonization error: Object too large.");
 				return; 
 			}
-			CandidateVector<Integer> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
+			CandidateVector<Object> candVect = candVectGenerator.makeCandidateVectorFrom(canonRes.getValue());
 			System.out.println(candVect.toString());
 		}
 		
