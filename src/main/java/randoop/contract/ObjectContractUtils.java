@@ -3,6 +3,7 @@ package randoop.contract;
 import randoop.ExecutionOutcome;
 import randoop.ExceptionalExecution;
 import randoop.NormalExecution;
+import randoop.main.GenInputsAbstract;
 import randoop.sequence.Variable;
 import randoop.util.ReflectionCode;
 import randoop.util.ReflectionExecutor;
@@ -85,7 +86,16 @@ public class ObjectContractUtils {
   public static String localizeContractCode(String str, Variable... vars) {
     for (int i = 0; i < vars.length; i++) {
       // See documentation for ObjectContract.toCommentString().
-      str = str.replaceAll("x" + i, vars[i].getName());
+    		if (!GenInputsAbstract.dummy_var_replacement_hack) {
+		   String pattern = "\\bx" + i + "\\b";
+		   str = str.replaceAll(pattern, vars[i].getName());
+		   //str = str.replaceAll("x" + i, vars[i].getName());
+    		}
+    		else {
+			str = str.replaceAll("\\+ x" + i + " \\+", "\\+ " + vars[i].getName() + " \\+");
+			str = str.replaceAll("x" + i + ".equals", vars[i].getName() + ".equals");
+			str = str.replaceAll("x" + i + " ==", vars[i].getName() + " ==");
+    		}
     }
     return str;
   }
