@@ -169,7 +169,8 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Create extensions for each method, instead of a global set")
   public static boolean extensions_by_method = true;
   */
-  @Option("String replacement hack to avoid replacing parts of strings by dummy variables in regression assertions")
+  @Option("String replacement hack to avoid replacing parts of strings by dummy variables in "
+  	+ "regression assertions. Without this hack randoop might produce failing regression assertions")
   public static boolean dummy_var_replacement_hack = false;
   
   @Option("Instrument tests to measure extensions coverage during execution")
