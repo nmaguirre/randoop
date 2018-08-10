@@ -90,7 +90,8 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 		Statement stmt = sequence.sequence.getStatement(i);
 		TypedOperation op = stmt.getOperation();
 		String methodName = op.toString();
-		assert op.isConstructorCall() || op.isMethodCall(): op.toParsableString() + "is not a constructor or method call";
+		// FIXME: var v = class.field are not method calls
+		//assert op.isConstructorCall() || op.isMethodCall(): op.toParsableString() + "is not a constructor or method call";
 		String className = getOperationClass(op);
 		// We only want to see if methods of classes under test are exercised with new objects
 		// For the remaining classes we drop any other sequence that is not a generator

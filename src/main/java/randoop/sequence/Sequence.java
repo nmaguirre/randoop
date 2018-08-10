@@ -711,8 +711,9 @@ public final class Sequence implements WeightedElement {
 	    if (type == null) throw new IllegalArgumentException("type cannot be null.");
 	    
 	    if (getFBActiveFlags().isEmpty()) {
-	    		assert type.isObject() || type.isPrimitive() || type.isBoxedPrimitive() || type.isString() /*|| 
-						  type.isArray()*/: "Non primitive sequence for type " + type.toString() + " used, but not field based selection of inputs.";
+	    		// FIXME: It can be a java.lang.Comparable
+	    		//assert type.isObject() || type.isPrimitive() || type.isBoxedPrimitive() || type.isString() /*
+			//			  type.isArray()*/: "Non primitive sequence for type " + type.toString() + " used, but not field based selection of inputs.";
 	    		return randomVariableForTypeLastStatement(type);
 	    }
 	    

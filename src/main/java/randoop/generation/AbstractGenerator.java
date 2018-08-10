@@ -410,7 +410,7 @@ public abstract class AbstractGenerator {
     		for (TypedOperation op: operations) {
     			if (op.isConstructorCall()) continue;
     			
-    			if (visitor.getOperationState(op) != OpState.MODIFIER) {
+    			if (visitor.getOperationState(op) != OpState.MODIFIER && visitor.getOperationState(op) != OpState.NOT_EXECUTED) {
     				if (op.isSimpleOp())
     					simpleObserverOps.add(op);
     				else
