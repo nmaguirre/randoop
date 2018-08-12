@@ -127,7 +127,7 @@ public class ForwardGenerator extends AbstractGenerator {
     if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
       componentManager.clearGeneratedSequences();
     }
-
+    
     ExecutableSequence eSeq = createNewUniqueSequence();
 
     if (eSeq == null) {
@@ -159,20 +159,42 @@ public class ForwardGenerator extends AbstractGenerator {
 		if (collector.generatesNewOutput()) 
 			componentManager.addFieldBased(eSeq.sequence);
 		
+		if (GenInputsAbstract.field_based_gen_filter_inputs) {
 		// Save sequence when:
 		// 	- collector.testsMethodFromRelevantClass(eSeq) 
 		//  - (collector.testsWithNewInput() || collector.generatesNewOutput())
-		if (!GenInputsAbstract.fbg_save_all_tests &&
-				(!collector.testsMethodFromRelevantClass(eSeq) || 
-				(!collector.testsWithNewInput() && 
-						!collector.generatesNewOutput())))
+			if (!GenInputsAbstract.fbg_save_all_tests &&
+					(!collector.testsMethodFromRelevantClass(eSeq) || 
+					(!collector.testsWithNewInput() && 
+							!collector.generatesNewOutput())))
+				// The sequence does not belong to relevant classes, or it does but does not generate new input nor output
+				return null;
+		}
+		
+    }
+    else if (GenInputsAbstract.field_based_filter) {
+		ExtensionsCollectorVisitor collector = (ExtensionsCollectorVisitor) executionVisitor;
+		
+		if (eSeq.sequence.hasActiveFlags()) {
+			componentManager.addGeneratedSequence(eSeq.sequence);
+		}
+
+		// FIXME: Single line sequences never generate new inputs! For example static class fields accesses.
+		// If we filter on generating sequences then we are maybe removing valid candidates.
+		if (!collector.testsMethodFromRelevantClass(eSeq) || !collector.testsWithNewInput()) {
 			// The sequence does not belong to relevant classes, or it does but does not generate new input nor output
 			return null;
-    }
+		}
+	}
+    // Normal randoop
     else {
 		if (eSeq.sequence.hasActiveFlags()) {
 			componentManager.addGeneratedSequence(eSeq.sequence);
 		}
+    }
+    
+    if (GenInputsAbstract.field_based_gen || GenInputsAbstract.field_based_filter) {
+		subsumed_sequences.addAll(subsumed_candidates);
     }
     
 	endTime = System.nanoTime();
@@ -405,8 +427,16 @@ public class ForwardGenerator extends AbstractGenerator {
 
     // Keep track of any input sequences that are used in this sequence.
     // Tests that contain only these sequences are probably redundant.
-    for (Sequence is : sequences.sequences) {
-      subsumed_sequences.add(is);
+    if (GenInputsAbstract.field_based_gen || GenInputsAbstract.field_based_filter) {
+    		subsumed_candidates = new LinkedHashSet<>();
+		for (Sequence is : sequences.sequences) {
+		  subsumed_candidates.add(is);
+		}
+    }
+	else {
+		for (Sequence is : sequences.sequences) {
+		  subsumed_sequences.add(is);
+		}
     }
 
     return new ExecutableSequence(newSequence);

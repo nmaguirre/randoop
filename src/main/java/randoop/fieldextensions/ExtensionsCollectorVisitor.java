@@ -12,6 +12,7 @@ import randoop.ExecutionOutcome;
 import randoop.ExecutionVisitor;
 import randoop.NormalExecution;
 import randoop.fieldextensions.OperationManager.OpState;
+import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
@@ -85,6 +86,7 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 	
 	@Override
 	public void visitBeforeStatement(ExecutableSequence sequence, int i) {
+		if (!GenInputsAbstract.field_based_gen_filter_inputs) return;
 		if (sequence.sequence.size() == 1 || i != sequence.sequence.size() -1) return;
 		
 		Statement stmt = sequence.sequence.getStatement(i);
@@ -149,6 +151,8 @@ public class ExtensionsCollectorVisitor implements ExecutionVisitor {
 
 	@Override
 	public void visitAfterStatement(ExecutableSequence sequence, int i) {
+		if (GenInputsAbstract.field_based_filter) return;
+		
 		if (i != sequence.sequence.size() -1) return;
 
 		ExecutionOutcome statementResult = sequence.getResult(i);	

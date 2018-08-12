@@ -181,7 +181,13 @@ public abstract class GenInputsAbstract extends CommandHandler {
   
   @Option("Generate tests using field based filtering")
   public static boolean field_based_gen = false;
-
+  
+  @Option("Generate tests using field based filtering")
+  public static boolean field_based_gen_filter_inputs = true;
+  
+  @Option("Don't output tests that do not pass the field based filter")
+  public static boolean field_based_filter = false;
+  
   @Option("Generate tests using field based filtering")
   public static boolean fbg_save_all_tests = false;
   

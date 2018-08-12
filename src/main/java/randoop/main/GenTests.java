@@ -384,6 +384,12 @@ public class GenTests extends GenInputsAbstract {
 					fbg_max_arr_objects, 
 					fbg_max_field_distance));
     }
+    else if (field_based_filter) {
+			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
+					fbg_max_objects, 
+					fbg_max_arr_objects, 
+					fbg_max_field_distance));
+    }
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.printf("Explorer = %s\n", explorer);

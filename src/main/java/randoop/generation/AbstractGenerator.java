@@ -60,6 +60,8 @@ public abstract class AbstractGenerator {
   /** Sequences that are used in other sequences (and are thus redundant) **/
   protected Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
 
+  protected Set<Sequence> subsumed_candidates = new LinkedHashSet<>();
+
   /**
    * The set of ALL sequences ever generated, including sequences that were
    * executed and then discarded.
