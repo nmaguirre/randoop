@@ -189,7 +189,10 @@ public abstract class AbstractGenerator {
   
   @Option("Hacky way of removing unused objects in vectors for data structure test generation")
   public static boolean vectorization_remove_unused = false;
-  
+
+  @Option("Hacky way of removing unused array objects in vectors for data structure test generation")
+  public static boolean vectorization_remove_unused_arrays = false;
+
   @Option("Save primitive values that are yielded as return values by the tests, and use them for the generation of new tests")
   public static boolean save_primitive_return_values = true;
   
