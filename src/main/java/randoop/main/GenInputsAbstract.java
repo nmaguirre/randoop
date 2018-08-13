@@ -179,17 +179,12 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Instance class generics with integers only")
   public static boolean instance_generics_integer = false;
   
-  @Option("Generate tests using field based filtering")
-  public static boolean field_based_gen = false;
+  public enum FieldBasedGen {
+	  GEN, FILTER, GENFILTER, DISABLED,  
+  }
   
   @Option("Generate tests using field based filtering")
-  public static boolean field_based_gen_filter_inputs = true;
-  
-  @Option("Don't output tests that do not pass the field based filter")
-  public static boolean field_based_filter = false;
-  
-  @Option("Generate tests using field based filtering")
-  public static boolean fbg_save_all_tests = false;
+  public static FieldBasedGen field_based_gen = FieldBasedGen.DISABLED;
   
   @Option("Extend tests with this number of observer operations after generation")
   public static int fbg_extend_with_observers = 0;

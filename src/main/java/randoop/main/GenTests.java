@@ -18,10 +18,12 @@ import randoop.ExecutionVisitor;
 import randoop.JunitFileWriter;
 import randoop.JunitFileWriterComputeExtensions;
 import randoop.MultiVisitor;
-import randoop.fieldextensions.ExtensionsCollectorVisitor;
+import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.ComponentManager;
+import randoop.generation.FBForwardGenerator;
 import randoop.generation.ForwardGenerator;
+import randoop.generation.ForwardGeneratorFactory;
 import randoop.generation.RandoopListenerManager;
 import randoop.generation.SeedSequences;
 import randoop.instrument.ExercisedClassVisitor;
@@ -159,16 +161,7 @@ public class GenTests extends GenInputsAbstract {
     // get names of classes under test
     Set<String> classnames = GenInputsAbstract.getClassnamesFromArgs();
     
-    // get the names of the clases to be tested using field based generation
-    Set<String> fbgClasses = null;
-    if (field_based_gen) {
-    		/*if (GenInputsAbstract.fbg_classlist == null)
-    			throw new Error("Flag --fbg-classlist must be set when --field-based-gen=true");*/
- 		if (GenInputsAbstract.fbg_classlist != null)
- 			fbgClasses = GenInputsAbstract.getClassnamesFBG();
-    }
-    
-    if (!field_based_gen) {
+    if (field_based_gen == FieldBasedGen.DISABLED) {
     		if (fbg_debug) 
    			throw new Error("Flag --field_based_gen=true must be set when --fbg_debug=true");
     		if (fbg_extend_with_observers > 0) 
@@ -280,19 +273,11 @@ public class GenTests extends GenInputsAbstract {
       observers.addAll(observerMap.getValues(keyType));
     }
 
-    
-    
-    
-
     /*
      * Create the generator for this session.
      */
-    AbstractGenerator explorer;
-    explorer =
-        new ForwardGenerator(
-            model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
-
-
+    AbstractGenerator explorer = ForwardGeneratorFactory.create(
+    		field_based_gen, model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
     /*
      * setup for check generation
@@ -368,28 +353,6 @@ public class GenTests extends GenInputsAbstract {
     }
 
     explorer.addExecutionVisitor(visitor);
-
-    // FIXME: the usage of ExtensionsCollectorVisitor removes all the other visitors
-    if (field_based_gen) {
-    		if (fbg_precise_observer_detection) 
-    			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
-    					fbg_max_objects, 
-					fbg_max_arr_objects, 
-					fbg_max_field_distance,
-					true,
-					fbg_observer_after_tests));
-		else
-			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
-					fbg_max_objects, 
-					fbg_max_arr_objects, 
-					fbg_max_field_distance));
-    }
-    else if (field_based_filter) {
-			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
-					fbg_max_objects, 
-					fbg_max_arr_objects, 
-					fbg_max_field_distance));
-    }
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.printf("Explorer = %s\n", explorer);

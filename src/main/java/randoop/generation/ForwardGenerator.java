@@ -12,7 +12,7 @@ import randoop.ExecutionVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
-import randoop.fieldextensions.ExtensionsCollectorVisitor;
+import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.Operation;
@@ -154,48 +154,8 @@ public class ForwardGenerator extends AbstractGenerator {
 
     processSequence(eSeq);
 
-    if (GenInputsAbstract.field_based_gen) {
-    		ExtensionsCollectorVisitor collector = (ExtensionsCollectorVisitor) executionVisitor;
-		if (collector.generatesNewOutput()) 
-			componentManager.addFieldBased(eSeq.sequence);
-		
-		if (GenInputsAbstract.field_based_gen_filter_inputs) {
-		// Save sequence when:
-		// 	- collector.testsMethodFromRelevantClass(eSeq) 
-		//  - (collector.testsWithNewInput() || collector.generatesNewOutput())
-			if (!GenInputsAbstract.fbg_save_all_tests &&
-					(!collector.testsMethodFromRelevantClass(eSeq) || 
-					(!collector.testsWithNewInput() && 
-							!collector.generatesNewOutput())))
-				// The sequence does not belong to relevant classes, or it does but does not generate new input nor output
-				return null;
-		}
-		
-    }
-    else if (GenInputsAbstract.field_based_filter) {
-		ExtensionsCollectorVisitor collector = (ExtensionsCollectorVisitor) executionVisitor;
-		
-		if (eSeq.sequence.hasActiveFlags()) {
-			componentManager.addGeneratedSequence(eSeq.sequence);
-		}
-
-		// FIXME: Single line sequences never generate new inputs! For example static class fields accesses.
-		// If we filter on generating sequences then we are maybe removing valid candidates.
-		if (!collector.testsMethodFromRelevantClass(eSeq) || !collector.testsWithNewInput()) {
-			// The sequence does not belong to relevant classes, or it does but does not generate new input nor output
-			return null;
-		}
-	}
-    // Normal randoop
-    else {
-		if (eSeq.sequence.hasActiveFlags()) {
-			componentManager.addGeneratedSequence(eSeq.sequence);
-		}
-    }
-    
-    if (GenInputsAbstract.field_based_gen || GenInputsAbstract.field_based_filter) {
-		subsumed_sequences.addAll(subsumed_candidates);
-    }
+    if (!saveSequence(eSeq))
+    		return null;
     
 	endTime = System.nanoTime();
 	gentime += endTime - startTime;
@@ -204,13 +164,19 @@ public class ForwardGenerator extends AbstractGenerator {
     return eSeq;
   }
 
+  protected boolean saveSequence(ExecutableSequence eSeq) {
+	  // Normal randoop
+	  if (eSeq.sequence.hasActiveFlags()) {
+		  componentManager.addGeneratedSequence(eSeq.sequence);
+	  }
+	  return true;
+  }
+
   @Override
   public Set<Sequence> getAllSequences() {
     return Collections.unmodifiableSet(this.allSequences);
   }
   
-
-
   /**
    * Determines what indices in the given sequence are active. An active index i
    * means that the i-th method call creates an interesting/useful value that
@@ -425,21 +391,15 @@ public class ForwardGenerator extends AbstractGenerator {
     // System.out.println("###" + statement.toStringVerbose() + "###" +
     // statement.getClass());
 
-    // Keep track of any input sequences that are used in this sequence.
-    // Tests that contain only these sequences are probably redundant.
-    if (GenInputsAbstract.field_based_gen || GenInputsAbstract.field_based_filter) {
-    		subsumed_candidates = new LinkedHashSet<>();
-		for (Sequence is : sequences.sequences) {
-		  subsumed_candidates.add(is);
-		}
-    }
-	else {
-		for (Sequence is : sequences.sequences) {
-		  subsumed_sequences.add(is);
-		}
-    }
+    subsumeSequences(sequences);
 
     return new ExecutableSequence(newSequence);
+  }
+
+  protected void subsumeSequences(InputsAndSuccessFlag sequences) {
+	  for (Sequence is : sequences.sequences) {
+		  subsumed_sequences.add(is);
+	  }
   }
 
   /**

@@ -4,9 +4,10 @@ import plume.Option;
 import plume.OptionGroup;
 import plume.Unpublicized;
 import randoop.*;
-import randoop.fieldextensions.ExtensionsCollectorVisitor;
+import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
 import randoop.fieldextensions.OperationManager.OpState;
 import randoop.main.GenInputsAbstract;
+import randoop.main.GenInputsAbstract.FieldBasedGen;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
@@ -60,7 +61,7 @@ public abstract class AbstractGenerator {
   /** Sequences that are used in other sequences (and are thus redundant) **/
   protected Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
 
-  protected Set<Sequence> subsumed_candidates = new LinkedHashSet<>();
+
 
   /**
    * The set of ALL sequences ever generated, including sequences that were
@@ -209,7 +210,7 @@ public abstract class AbstractGenerator {
     this.stopper = stopper;
     this.listenerMgr = listenerManager;
     
-    if (GenInputsAbstract.field_based_gen && 
+    if (GenInputsAbstract.field_based_gen == FieldBasedGen.GEN && 
     		GenInputsAbstract.fbg_extend_with_observers > 0 && 
     		GenInputsAbstract.fbg_observer_lines > 0)
     		this.maxsize = GenInputsAbstract.maxsize - GenInputsAbstract.fbg_observer_lines;
@@ -406,7 +407,7 @@ public abstract class AbstractGenerator {
 
        	long secondPhaseStartTime = System.currentTimeMillis();
 
-    	  	ExtensionsCollectorVisitor visitor = (ExtensionsCollectorVisitor) visitorRef;
+    	  	ExtensionsCollectorInOutVisitor visitor = (ExtensionsCollectorInOutVisitor) visitorRef;
     		ArrayList<TypedOperation> simpleObserverOps = new ArrayList<>();
     		ArrayList<TypedOperation> observerOps = new ArrayList<>();
     		for (TypedOperation op: operations) {
@@ -447,7 +448,7 @@ public abstract class AbstractGenerator {
       
 
       if (GenInputsAbstract.fbg_debug) {
-    	  	ExtensionsCollectorVisitor visitor = (ExtensionsCollectorVisitor) visitorRef;
+    	  	ExtensionsCollectorInOutVisitor visitor = (ExtensionsCollectorInOutVisitor) visitorRef;
     	  	for (TypedOperation op: operations) {
     		  System.out.println(op.toString() + 
 		  ", \t\n Operation State: " + visitor.getOperationState(op) +
