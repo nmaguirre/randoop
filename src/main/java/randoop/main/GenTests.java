@@ -164,7 +164,7 @@ public class GenTests extends GenInputsAbstract {
     if (field_based_gen == FieldBasedGen.DISABLED) {
     		if (fbg_debug) 
    			throw new Error("Flag --field_based_gen=true must be set when --fbg_debug=true");
-    		if (fbg_extend_with_observers > 0) 
+    		if (fbg_phase2_budget > 0) 
    			throw new Error("Flag --field_based_gen=true must be set when --fbg_extend_with_observers > 0");
     }
    
@@ -316,43 +316,47 @@ public class GenTests extends GenInputsAbstract {
 
     explorer.addTestPredicate(isOutputTest);
 
-    /*
-     * Setup visitors
-     */
-    // list of visitors for collecting information from test sequences
-    List<ExecutionVisitor> visitors = new ArrayList<>();
+    if (field_based_gen == FieldBasedGen.DISABLED) {
 
-    // instrumentation visitor
-    if (GenInputsAbstract.include_if_class_exercised != null) {
-      visitors.add(new ExercisedClassVisitor(operationModel.getExercisedClasses()));
-    }
-    
-    // Install any user-specified visitors.
-    if (!GenInputsAbstract.visitor.isEmpty()) {
-      for (String visitorClsName : GenInputsAbstract.visitor) {
-        try {
-          Class<ExecutionVisitor> cls = (Class<ExecutionVisitor>) Class.forName(visitorClsName);
-          ExecutionVisitor vis = cls.newInstance();
-          visitors.add(vis);
-        } catch (Exception e) {
-          System.out.println("Error while loading visitor class " + visitorClsName);
-          System.out.println("Exception message: " + e.getMessage());
-          System.out.println("Stack trace:");
-          e.printStackTrace(System.out);
-          System.out.println("Randoop will exit with code 1.");
-          System.exit(1);
-        }
-      }
-    }
+			/*
+			 * Setup visitors
+			 */
+			// list of visitors for collecting information from test sequences
+			List<ExecutionVisitor> visitors = new ArrayList<>();
 
-    ExecutionVisitor visitor;
-    if (visitors.isEmpty()) {
-      visitor = new DummyVisitor();
-    } else {
-      visitor = new MultiVisitor(visitors);
-    }
+			// instrumentation visitor
+			if (GenInputsAbstract.include_if_class_exercised != null) {
+				visitors.add(new ExercisedClassVisitor(operationModel.getExercisedClasses()));
+			}
 
-    explorer.addExecutionVisitor(visitor);
+			// Install any user-specified visitors.
+			if (!GenInputsAbstract.visitor.isEmpty()) {
+				for (String visitorClsName : GenInputsAbstract.visitor) {
+					try {
+						Class<ExecutionVisitor> cls = (Class<ExecutionVisitor>) Class.forName(visitorClsName);
+						ExecutionVisitor vis = cls.newInstance();
+						visitors.add(vis);
+					} catch (Exception e) {
+						System.out.println("Error while loading visitor class " + visitorClsName);
+						System.out.println("Exception message: " + e.getMessage());
+						System.out.println("Stack trace:");
+						e.printStackTrace(System.out);
+						System.out.println("Randoop will exit with code 1.");
+						System.exit(1);
+					}
+				}
+			}
+
+			ExecutionVisitor visitor;
+			if (visitors.isEmpty()) {
+				visitor = new DummyVisitor();
+			} else {
+				visitor = new MultiVisitor(visitors);
+			}
+
+			explorer.addExecutionVisitor(visitor);
+
+    }
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.printf("Explorer = %s\n", explorer);

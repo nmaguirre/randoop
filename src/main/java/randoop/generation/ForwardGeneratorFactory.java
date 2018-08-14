@@ -13,26 +13,26 @@ import randoop.operation.TypedOperation;
 public class ForwardGeneratorFactory {
 
 	public static AbstractGenerator create(FieldBasedGen field_based_gen, List<TypedOperation> model,
-			Set<TypedOperation> observers, int timelimit, int inputlimit, int outputlimit, ComponentManager componentMgr,
+			Set<TypedOperation> observers, long timelimit, int inputlimit, int outputlimit, ComponentManager componentMgr,
 			RandoopListenerManager listenerMgr) {
 		// TODO Auto-generated method stub
 		if (field_based_gen == FieldBasedGen.DISABLED)
 			return new ForwardGenerator(
-					model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
+					model, observers, timelimit, inputlimit, outputlimit, componentMgr, listenerMgr);
 		
 		FBForwardGenerator res = new FBForwardGenerator(
-				model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
+				model, observers, timelimit, inputlimit, outputlimit, componentMgr, listenerMgr);
 		switch (field_based_gen) {
 		case GEN: 
-			res.setGenerator(new FBOutputGenerator());
-			res.setFilter(new RandoopFilter());
+			res.setGenerator(new FBGeneratorApproach());
+			res.setFilter(new RandoopInputFilter());
 			break;
 		case FILTER: 
-			res.setGenerator(new RandoopGenerator());
+			res.setGenerator(new RandoopGeneratorApproach());
 			res.setFilter(new FBInputFilter());
 			break;
 		case GENFILTER:
-			res.setGenerator(new FBOutputGenerator());
+			res.setGenerator(new FBGeneratorApproach());
 			res.setFilter(new FBInputFilter());
 			break;
 		}
@@ -65,10 +65,18 @@ public class ForwardGeneratorFactory {
 						GenInputsAbstract.fbg_max_field_distance));	
 			break;
 		case GEN:
-			res.addExecutionVisitor(new ExtensionsCollectorOutVisitor(fbgClasses, 
-					GenInputsAbstract.fbg_max_objects, 
-					GenInputsAbstract.fbg_max_arr_objects, 
-					GenInputsAbstract.fbg_max_field_distance));	
+			if (GenInputsAbstract.fbg_precise_observer_detection) 
+				res.addExecutionVisitor(new ExtensionsCollectorOutVisitor(fbgClasses, 
+						GenInputsAbstract.fbg_max_objects, 
+						GenInputsAbstract.fbg_max_arr_objects, 
+						GenInputsAbstract.fbg_max_field_distance,
+						true,
+						GenInputsAbstract.fbg_observer_after_tests));
+			else
+				res.addExecutionVisitor(new ExtensionsCollectorOutVisitor(fbgClasses, 
+						GenInputsAbstract.fbg_max_objects, 
+						GenInputsAbstract.fbg_max_arr_objects, 
+						GenInputsAbstract.fbg_max_field_distance));	
 			break;
 		case FILTER:
 			res.addExecutionVisitor(new ExtensionsCollectorInVisitor(fbgClasses, 

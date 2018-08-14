@@ -186,8 +186,8 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Generate tests using field based filtering")
   public static FieldBasedGen field_based_gen = FieldBasedGen.DISABLED;
   
-  @Option("Extend tests with this number of observer operations after generation")
-  public static int fbg_extend_with_observers = 0;
+  @Option("Extend tests with observers only for this fraction of time from --timelimit")
+  public static double fbg_phase2_budget = 0;
   
   @Option("Percentage of lines reserved for observers only (from maxsize)")
   public static int fbg_observer_lines = 0;

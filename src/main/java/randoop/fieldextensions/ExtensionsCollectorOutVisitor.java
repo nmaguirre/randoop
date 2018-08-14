@@ -12,10 +12,16 @@ public class ExtensionsCollectorOutVisitor extends ExtensionsCollectorInOutVisit
 			int maxFieldDistance) {
 		super(classesUnderTest, maxObjects, maxArrayObjects, maxFieldDistance);
 	}
+	
+	public ExtensionsCollectorOutVisitor(Set<String> classesUnderTest, int maxObjects, int maxArrayObjects, 
+			int maxFieldDistance, boolean preciseObserversDetection, int maxExecsToObs)  {
+		super(classesUnderTest, maxObjects, maxArrayObjects, maxFieldDistance, preciseObserversDetection, maxExecsToObs);
+	}
+	
 
 	@Override
-	public void visitBeforeStatement(ExecutableSequence sequence, int i) {
-
+	protected boolean filterInputs() {
+		return false;
 	}
 	
 }

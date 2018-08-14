@@ -79,7 +79,7 @@ public abstract class AbstractGenerator {
    * Time limit for generation. If generation reaches the specified time limit
    * (in milliseconds), the generator stops generating sequences.
    */
-  public final long maxTimeMillis;
+  public long maxTimeMillis;
 
   /**
    * Sequence limit for generation. If generation reaches the specified sequence
@@ -211,7 +211,7 @@ public abstract class AbstractGenerator {
     this.listenerMgr = listenerManager;
     
     if (GenInputsAbstract.field_based_gen == FieldBasedGen.GEN && 
-    		GenInputsAbstract.fbg_extend_with_observers > 0 && 
+    		GenInputsAbstract.fbg_phase2_budget > 0 && 
     		GenInputsAbstract.fbg_observer_lines > 0)
     		this.maxsize = GenInputsAbstract.maxsize - GenInputsAbstract.fbg_observer_lines;
     else
@@ -283,7 +283,7 @@ public abstract class AbstractGenerator {
         || (numGeneratedSequences() >= maxGeneratedSequences)
         || (stopper != null && stopper.stop());
   }
-
+ 
   /**
    * Generate an individual test sequence
    *
@@ -338,8 +338,94 @@ public abstract class AbstractGenerator {
     if (listenerMgr != null) {
       listenerMgr.explorationStart();
     }
+    
+    long originalMaxTimeMillis = maxTimeMillis;
+    if (GenInputsAbstract.fbg_phase2_budget > 0) {
+    		assert GenInputsAbstract.fbg_phase2_budget < 1.0: "--fbg-phase2-budget must be > 1";
+    		maxTimeMillis = maxTimeMillis - (long) (maxTimeMillis * GenInputsAbstract.fbg_phase2_budget);
+    		setObserverSequenceStore(new ObsSeqStore());
+    }
 
-    while (!stop()) {
+    // First phase. Abstracted unmodified original randoop behavior
+    genTests();
+
+    List<TypedOperation> originalOps = operations;
+    ExecutionVisitor firstPhaseVisitor = executionVisitor;
+    // Second phase: Extend tests with observers
+    if (GenInputsAbstract.fbg_phase2_budget > 0) {
+	    System.out.println("\nSecond phase starting...");
+       	long secondPhaseStartTime = System.currentTimeMillis();
+ 
+       	// 1- Put non generator sequences in generators map 
+       	saveNonGeneratorsAsGenerators();
+       	
+       	// 2- If --precise_observer_detection use observers only during second phase; otherwise use all operations
+       	if (GenInputsAbstract.fbg_precise_observer_detection) {
+       		ExtensionsCollectorInOutVisitor visitor = (ExtensionsCollectorInOutVisitor) executionVisitor;
+       		List<TypedOperation> observerOps = new ArrayList<>();
+       		for (TypedOperation op: operations) {
+       			if (op.isConstructorCall()) continue;
+
+       			if (visitor.getOperationState(op) != OpState.MODIFIER 
+       					&& visitor.getOperationState(op) != OpState.NOT_EXECUTED) 
+       				observerOps.add(op);
+       		}
+       		operations = observerOps;
+       	}
+
+    		// 3- Set original max time limit
+    		maxTimeMillis = originalMaxTimeMillis;
+    		
+    		// 4- Set randoop typical behavior for the second phase
+    		setOriginalRandoopBehavior();
+    		
+    		// 5- Carry out second phase
+    		genTests();
+
+    		long secondPhaseTime = (System.currentTimeMillis() - secondPhaseStartTime) / 1000;
+    	    System.out.println("\nSecond phase execution time: " + secondPhaseTime  + " s");
+    }
+    
+    
+    if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
+      progressDisplay.display();
+      progressDisplay.shouldStop = true;
+    }
+
+    if (!GenInputsAbstract.noprogressdisplay) {
+      System.out.println();
+      System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
+      System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());
+      System.out.println();
+      System.out.println(
+          "Average method execution time (normal termination):      "
+              + String.format("%.3g", ReflectionExecutor.normalExecAvgMillis()));
+      System.out.println(
+          "Average method execution time (exceptional termination): "
+              + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
+      
+
+      if (GenInputsAbstract.fbg_debug) {
+    	  	ExtensionsCollectorInOutVisitor visitor = (ExtensionsCollectorInOutVisitor) firstPhaseVisitor;
+    	  	for (TypedOperation op: originalOps) {
+    		  System.out.println(op.toString() + 
+		  ", \t\n Operation State: " + visitor.getOperationState(op) +
+    		  ", \t\n Modifier executions: " + visitor.getNumberOfModifierExecutions(op) +
+    		  ", \t\n Executions: " + visitor.getNumberOfExecutions(op) +
+    		  ", \t\n Simple: " + op.isSimpleOp());
+    	  	}
+      }
+    }
+
+    // Notify listeners that exploration is ending.
+    if (listenerMgr != null) {
+      listenerMgr.explorationEnd();
+    }
+    
+  }
+
+private void genTests() {
+	while (!stop()) {
 
       // Notify listeners we are about to perform a generation step.
       if (listenerMgr != null) {
@@ -389,84 +475,10 @@ public abstract class AbstractGenerator {
         Log.logLine("allSequences.size()=" + numGeneratedSequences());
       }
     }
-
-    // This is not needed now, but might be helpful in the future
-    ExecutionVisitor visitorRef = executionVisitor;
-
-    // TODO: Second phase: Extend tests with observers
-    if (GenInputsAbstract.fbg_extend_with_observers > 0) {
-    /*
-    		for (ExecutableSequence eSeq: positiveRegressionSeqs) {
-    			if (eSeq.getLastStmtOperation().isModifier()) 
-    				modifierRegressionSeqs.add(eSeq);
-    			else
-    				observerRegressionSeqs.add(eSeq);
-    		}
-    		*/
-	    System.out.println("\nSecond phase starting...");
-
-       	long secondPhaseStartTime = System.currentTimeMillis();
-
-    	  	ExtensionsCollectorInOutVisitor visitor = (ExtensionsCollectorInOutVisitor) visitorRef;
-    		ArrayList<TypedOperation> simpleObserverOps = new ArrayList<>();
-    		ArrayList<TypedOperation> observerOps = new ArrayList<>();
-    		for (TypedOperation op: operations) {
-    			if (op.isConstructorCall()) continue;
-    			
-    			if (visitor.getOperationState(op) != OpState.MODIFIER && visitor.getOperationState(op) != OpState.NOT_EXECUTED) {
-    				if (op.isSimpleOp())
-    					simpleObserverOps.add(op);
-    				else
-    					observerOps.add(op);
-    			}
-    		}
-
-    		extendModifierTestsWithObservers(simpleObserverOps, observerOps);
-
-    		long secondPhaseTime = (System.currentTimeMillis() - secondPhaseStartTime) / 1000;
-    	    System.out.println("\nSecond phase execution time: " + secondPhaseTime  + " s");
-    }
-    
-    
-    
-    if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
-      progressDisplay.display();
-      progressDisplay.shouldStop = true;
-    }
-
-    if (!GenInputsAbstract.noprogressdisplay) {
-      System.out.println();
-      System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
-      System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());
-      System.out.println();
-      System.out.println(
-          "Average method execution time (normal termination):      "
-              + String.format("%.3g", ReflectionExecutor.normalExecAvgMillis()));
-      System.out.println(
-          "Average method execution time (exceptional termination): "
-              + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
-      
-
-      if (GenInputsAbstract.fbg_debug) {
-    	  	ExtensionsCollectorInOutVisitor visitor = (ExtensionsCollectorInOutVisitor) visitorRef;
-    	  	for (TypedOperation op: operations) {
-    		  System.out.println(op.toString() + 
-		  ", \t\n Operation State: " + visitor.getOperationState(op) +
-    		  ", \t\n Modifier executions: " + visitor.getNumberOfModifierExecutions(op) +
-    		  ", \t\n Executions: " + visitor.getNumberOfExecutions(op) +
-    		  ", \t\n Simple: " + op.isSimpleOp());
-    	  	}
-      }
-    }
-
-    // Notify listeners that exploration is ending.
-    if (listenerMgr != null) {
-      listenerMgr.explorationEnd();
-    }
-    
-  }
+}
   
  
+/*
 	public static <T> void randomPermutation(List<T> l) {
 		for (int i = 0; i < l.size(); i++) {	
 			int exchangeInd = i + Randomness.nextRandomInt(l.size()-i);
@@ -486,7 +498,6 @@ public abstract class AbstractGenerator {
 		  return Randomness.randomMember(l);
 	  }
 
-  
    private void extendModifierTestsWithObservers(List<TypedOperation> simpleObs, List<TypedOperation> obs) {
 		  	  // Generation first adds one of each observer operation to the end of the sequence
 	   List<ExecutableSequence> firstPhaseSeqs = new ArrayList<>() ;
@@ -526,10 +537,6 @@ public abstract class AbstractGenerator {
 		  		  int simpleObsInd = 0;
 		  		  int obsInd = 0;
 		  		  while (opsCount < GenInputsAbstract.fbg_extend_with_observers) {
-//		  		  for (TypedOperation operation: operationsPermutable) {
-		  			  /* if (operation.toString().contains("<get>") || operation.toString().contains("<set>")) {
-		  				  continue;
-		  			  } */
 		  			  
 		  			  TypedOperation operation = null;
 		  			  // Take up to GenInputsAbstract.fbg_extend_with_observers/2 simple observers
@@ -701,6 +708,7 @@ public abstract class AbstractGenerator {
    		setCurrentSequence(extSeq.sequence);
    		extSeq.executeNoReexecute(new DummyVisitor(), checkGenerator, currSeq, startIndex, endIndex);
 	}
+   */
 
   /**
    * Return all sequences generated by this object.
@@ -768,4 +776,20 @@ public abstract class AbstractGenerator {
   protected void setCurrentSequence(Sequence s) {
     currSeq = s;
   }
+
+	public void saveNonGeneratorsAsGenerators() {
+		assert false: this.getClass().getName() + " does not implement method saveObserversAsGenerators()"
+				+ " and does not implement fb second phase.";
+	}
+
+	public void setObserverSequenceStore(IObsSeqStore obsStore) {
+		assert false: this.getClass().getName() + " does not implement method setObserverSequenceStore()"
+				+ "and does not implement fb second phase.";
+	}
+
+	public void setOriginalRandoopBehavior() {
+		assert false: this.getClass().getName() + " does not implement method setOriginalRandoopBehavior()"
+				+ "and does not implement fb second phase.";
+	}
+
 }

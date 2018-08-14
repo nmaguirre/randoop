@@ -1,13 +1,13 @@
 package randoop.generation;
 
-import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
+import randoop.ExecutionVisitor;
 import randoop.sequence.ExecutableSequence;
 
-public class RandoopGenerator implements Generator {
+public class RandoopGeneratorApproach implements Generator {
 
 	@Override
 	public boolean saveGeneratorSequence(ComponentManager componentManager, ExecutableSequence eSeq,
-			ExtensionsCollectorInOutVisitor collector) {
+			ExecutionVisitor collector) {
 		  if (eSeq.sequence.hasActiveFlags()) {
 			  componentManager.addGeneratedSequence(eSeq.sequence);
 		  }

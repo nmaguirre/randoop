@@ -12,8 +12,6 @@ import randoop.ExecutionOutcome;
 import randoop.ExecutionVisitor;
 import randoop.NormalExecution;
 import randoop.fieldextensions.OperationManager.OpState;
-import randoop.main.GenInputsAbstract;
-import randoop.main.GenInputsAbstract.FieldBasedGen;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
@@ -87,6 +85,7 @@ public class ExtensionsCollectorInOutVisitor implements ExecutionVisitor {
 	
 	@Override
 	public void visitBeforeStatement(ExecutableSequence sequence, int i) {
+		if (!filterInputs() && !preciseObserversDetection) return;
 		if (sequence.sequence.size() == 1 || i != sequence.sequence.size() -1) return;
 		
 		Statement stmt = sequence.sequence.getStatement(i);
@@ -103,11 +102,13 @@ public class ExtensionsCollectorInOutVisitor implements ExecutionVisitor {
 		if (preciseObserversDetection && !opManager.modifierOrObserver(op))
 			prevExt = new IFieldExtensions [inputs.length];
 		for (int j = 0; j < inputs.length; j++) {
-			FieldExtensionsCollector collector = methodInputExt.getOrCreateCollectorForMethodParam(className, methodName, j);
-			// makes extensionsWereExtended default to false
-			collector.start();
-			canonicalizer.canonicalize(inputs[j], collector);
-			newInput |= collector.extensionsWereExtended();
+			if (filterInputs()) {
+				FieldExtensionsCollector collector = methodInputExt.getOrCreateCollectorForMethodParam(className, methodName, j);
+				// makes extensionsWereExtended default to false
+				collector.start();
+				canonicalizer.canonicalize(inputs[j], collector);
+				newInput |= collector.extensionsWereExtended();
+			}
 
 			if (preciseObserversDetection && !opManager.modifierOrObserver(op) && inputs[j] != null) {
 				FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
@@ -117,6 +118,10 @@ public class ExtensionsCollectorInOutVisitor implements ExecutionVisitor {
 		}
 	}
 	
+	protected boolean filterInputs() {
+		return true;
+	}
+
 	private Map<String, String> classNameCache = new LinkedHashMap<>();
 
 	private String getOperationClass(TypedOperation op) {
