@@ -92,9 +92,16 @@ public class ObjectContractUtils {
 		   //str = str.replaceAll("x" + i, vars[i].getName());
     		}
     		else {
-			str = str.replaceAll("\\+ x" + i + " \\+", "\\+ " + vars[i].getName() + " \\+");
-			str = str.replaceAll("x" + i + ".equals", vars[i].getName() + ".equals");
-			str = str.replaceAll("x" + i + " ==", vars[i].getName() + " ==");
+    			if (str.contains("x" + i + ".equals")) {
+				str = str.replaceAll("\\+ x" + i + " \\+", "\\+ " + vars[i].getName() + " \\+");
+				str = str.replaceAll("x" + i + ".equals", vars[i].getName() + ".equals");
+    			}
+    			else if (str.contains("x" + i + " =="))
+				str = str.replaceAll("x" + i + " ==", vars[i].getName() + " ==");
+    			else {
+    				String pattern = "\\bx" + i + "\\b";
+    				str = str.replaceAll(pattern, vars[i].getName());
+    			}
     		}
     }
     return str;
