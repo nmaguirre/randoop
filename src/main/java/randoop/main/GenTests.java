@@ -398,10 +398,13 @@ public class GenTests extends GenInputsAbstract {
         new ForwardGenerator(
             model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
-    if (VectorsWriter.isEnabled())
+    if (VectorsWriter.isEnabled()) {
     	explorer.initNewCanonicalizerForVectorization(classnames, AbstractGenerator.fbg_max_objects, 
     			AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_bfs_depth, /*AbstractGenerator.fbg_field_distance*/ 
     			Integer.MAX_VALUE, AbstractGenerator.vectorization_max_objects);
+    		if (AbstractGenerator.vectorization_max_array_objects == Integer.MAX_VALUE)
+    			AbstractGenerator.vectorization_max_array_objects = AbstractGenerator.vectorization_max_objects;
+    }
     else
     	explorer.initNewCanonicalizer(classnames, AbstractGenerator.fbg_max_objects, AbstractGenerator.fbg_max_array_objs, 
     			AbstractGenerator.fbg_bfs_depth, AbstractGenerator.fbg_field_distance);

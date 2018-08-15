@@ -190,8 +190,10 @@ public abstract class AbstractGenerator {
   @Option("Hacky way of removing unused objects in vectors for data structure test generation")
   public static boolean vectorization_remove_unused = false;
 
+  /*
   @Option("Hacky way of removing unused array objects in vectors for data structure test generation")
   public static boolean vectorization_remove_unused_arrays = false;
+  */
 
   @Option("Save primitive values that are yielded as return values by the tests, and use them for the generation of new tests")
   public static boolean save_primitive_return_values = true;
@@ -210,6 +212,9 @@ public abstract class AbstractGenerator {
   
   @Option("Maximum number of objects of each class in vectors")
   public static int vectorization_max_objects = 10;
+  
+  @Option("Maximum number of array objects of each class in vectors")
+  public static int vectorization_max_array_objects = Integer.MAX_VALUE;
   
   @Option("Ignore static fields in candidate vectors")
   public static boolean vectorization_ignore_static = false;

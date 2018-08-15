@@ -65,6 +65,7 @@ public class CandidateVectorGenerator {
 			else if (canonicalClass.isArray()) {
 				// for (int i = 0; i < heap.getMaxObjects(); i++) 
 				// Start enumerating objects from 1 to handle null=0 well
+				/*
 				if (AbstractGenerator.vectorization_remove_unused_arrays && canonicalClass.isArray()) {
 					addCandidateVectorArrayFields(heap, canonicalClass, 1, header);
 				}
@@ -72,6 +73,9 @@ public class CandidateVectorGenerator {
 					for (int i = 1; i <= heap.getMaxObjects(); i++) 
 						addCandidateVectorArrayFields(heap, canonicalClass, i, header);
 				}
+				*/
+				for (int i = 1; i <= AbstractGenerator.vectorization_max_array_objects; i++)
+					addCandidateVectorArrayFields(heap, canonicalClass, i, header);
 			}
 			else 
 				// for (int i = 0; i < heap.getMaxObjects(); i++) 
@@ -137,8 +141,12 @@ public class CandidateVectorGenerator {
 			
 			// When vectorization_remove_unused_arrays is set we always print one array element or the null array
 			// If there were more than one array randoop will fail because different vectors will have a different size
-			if (AbstractGenerator.vectorization_remove_unused_arrays && canonicalClass.isArray()) {
+			if (/*AbstractGenerator.vectorization_remove_unused_arrays &&*/ canonicalClass.isArray()) {
+				/*
 				if (i == 1)
+					addNullObjectToCandidateVector(canonicalClass, heap, res);
+					*/
+				for ( ; i <= AbstractGenerator.vectorization_max_array_objects; i++) 
 					addNullObjectToCandidateVector(canonicalClass, heap, res);
 			}
 			else {
