@@ -18,7 +18,6 @@ public class ExtensionsCollectorOutVisitor extends ExtensionsCollectorInOutVisit
 		super(classesUnderTest, maxObjects, maxArrayObjects, maxFieldDistance, preciseObserversDetection, maxExecsToObs);
 	}
 	
-
 	@Override
 	protected boolean filterInputs() {
 		return false;

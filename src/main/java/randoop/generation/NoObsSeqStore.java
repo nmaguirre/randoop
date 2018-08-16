@@ -4,7 +4,7 @@ import java.util.Set;
 
 import randoop.sequence.Sequence;
 
-public class DontStoreObsSeq implements IObsSeqStore {
+public class NoObsSeqStore implements IObsSeqStore {
 
 	public void storeObserverSequence(Sequence sequence) { }
 

@@ -22,7 +22,7 @@ public class FBForwardGenerator extends ForwardGenerator {
 	
 	private Generator gen;
 	private Filter filter;
-	private IObsSeqStore obsStore = new DontStoreObsSeq();
+	private IObsSeqStore obsStore = new NoObsSeqStore();
 	protected Set<Sequence> subsumed_candidates = new LinkedHashSet<>();
 	
 	public void setGenerator(Generator gen) {
@@ -44,13 +44,18 @@ public class FBForwardGenerator extends ForwardGenerator {
 		filter = new RandoopInputFilter();
 		addExecutionVisitor(new DummyVisitor());
 	}
+	
+	@Override
+	public void setFilterBehavior() {
+		ForwardGeneratorFactory.setFBBehavior(FieldBasedGen.FILTER, this);
+	}
 
 	@Override
 	protected boolean saveSequence(ExecutableSequence eSeq) {
 
 		boolean newGen = gen.saveGeneratorSequence(this.componentManager, eSeq, executionVisitor);
 		
-		boolean newInput = filter.filterSequence(eSeq, executionVisitor);
+		boolean newInput = !filter.filterSequence(eSeq, executionVisitor);
 
 		if (!newGen && !newInput) return false;
 

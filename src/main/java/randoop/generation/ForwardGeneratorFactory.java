@@ -22,28 +22,15 @@ public class ForwardGeneratorFactory {
 		
 		FBForwardGenerator res = new FBForwardGenerator(
 				model, observers, timelimit, inputlimit, outputlimit, componentMgr, listenerMgr);
-		switch (field_based_gen) {
-		case GEN: 
-			res.setGenerator(new FBGeneratorApproach());
-			res.setFilter(new RandoopInputFilter());
-			break;
-		case FILTER: 
-			res.setGenerator(new RandoopGeneratorApproach());
-			res.setFilter(new FBInputFilter());
-			break;
-		case GENFILTER:
-			res.setGenerator(new FBGeneratorApproach());
-			res.setFilter(new FBInputFilter());
-			break;
-		}
+
 		
 		// FIXME: Very ugly code to set up the execution visitor corresponding to the different approaches. Refactor.
-		setGeneratorVisitor(field_based_gen, res);
+		setFBBehavior(field_based_gen, res);
 
 		return res;
 	}
 
-	private static void setGeneratorVisitor(FieldBasedGen field_based_gen, FBForwardGenerator res) {
+	public static void setFBBehavior(FieldBasedGen field_based_gen, FBForwardGenerator res) {
 		// get the names of the clases to be tested using field based generation
 		Set<String> fbgClasses = null;
 		if (GenInputsAbstract.fbg_classlist != null)
@@ -51,6 +38,9 @@ public class ForwardGeneratorFactory {
 
 		switch (field_based_gen) {
 		case GENFILTER: 
+			res.setGenerator(new FBGeneratorApproach());
+			res.setFilter(new FBInputFilter());
+
 			if (GenInputsAbstract.fbg_precise_observer_detection) 
 				res.addExecutionVisitor(new ExtensionsCollectorInOutVisitor(fbgClasses, 
 						GenInputsAbstract.fbg_max_objects, 
@@ -65,6 +55,9 @@ public class ForwardGeneratorFactory {
 						GenInputsAbstract.fbg_max_field_distance));	
 			break;
 		case GEN:
+			res.setGenerator(new FBGeneratorApproach());
+			res.setFilter(new RandoopInputFilter());
+
 			if (GenInputsAbstract.fbg_precise_observer_detection) 
 				res.addExecutionVisitor(new ExtensionsCollectorOutVisitor(fbgClasses, 
 						GenInputsAbstract.fbg_max_objects, 
@@ -78,7 +71,10 @@ public class ForwardGeneratorFactory {
 						GenInputsAbstract.fbg_max_arr_objects, 
 						GenInputsAbstract.fbg_max_field_distance));	
 			break;
-		case FILTER:
+		case FILTER:			
+			res.setGenerator(new RandoopGeneratorApproach());
+			res.setFilter(new FBInputFilter());
+
 			res.addExecutionVisitor(new ExtensionsCollectorInVisitor(fbgClasses, 
 					GenInputsAbstract.fbg_max_objects, 
 					GenInputsAbstract.fbg_max_arr_objects, 

@@ -341,7 +341,9 @@ public abstract class AbstractGenerator {
     
     long originalMaxTimeMillis = maxTimeMillis;
     if (GenInputsAbstract.fbg_phase2_budget > 0) {
-    		assert GenInputsAbstract.fbg_phase2_budget < 1.0: "--fbg-phase2-budget must be > 1";
+    		assert GenInputsAbstract.fbg_phase2_budget < 1.0: "--fbg-phase2-budget must be < 1";
+    		assert GenInputsAbstract.field_based_gen != FieldBasedGen.FILTER: "--fbg-phase2-budget > 0 cannot be used"
+    				+ " in combination with --field-based-gen=FILTER";
     		maxTimeMillis = maxTimeMillis - (long) (maxTimeMillis * GenInputsAbstract.fbg_phase2_budget);
     		setObserverSequenceStore(new ObsSeqStore());
     }
@@ -376,8 +378,13 @@ public abstract class AbstractGenerator {
     		// 3- Set original max time limit
     		maxTimeMillis = originalMaxTimeMillis;
     		
-    		// 4- Set randoop typical behavior for the second phase
-    		setOriginalRandoopBehavior();
+    		// 4- Set forward generator behavior for the second phase
+    		if (GenInputsAbstract.field_based_gen == FieldBasedGen.GENFILTER)
+    			setFilterBehavior();
+    		else if (GenInputsAbstract.field_based_gen == FieldBasedGen.GEN)
+    			setOriginalRandoopBehavior();
+
+    		setObserverSequenceStore(new NoObsSeqStore());
     		
     		// 5- Carry out second phase
     		genTests();
@@ -789,6 +796,11 @@ private void genTests() {
 
 	public void setOriginalRandoopBehavior() {
 		assert false: this.getClass().getName() + " does not implement method setOriginalRandoopBehavior()"
+				+ "and does not implement fb second phase.";
+	}
+
+	public void setFilterBehavior() {
+		assert false: this.getClass().getName() + " does not implement method setFilterBehavior()"
 				+ "and does not implement fb second phase.";
 	}
 
