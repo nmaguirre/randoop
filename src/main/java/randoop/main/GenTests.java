@@ -18,10 +18,12 @@ import randoop.ExecutionVisitor;
 import randoop.JunitFileWriter;
 import randoop.JunitFileWriterComputeExtensions;
 import randoop.MultiVisitor;
-import randoop.fieldextensions.ExtensionsCollectorVisitor;
+import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.ComponentManager;
+import randoop.generation.FBForwardGenerator;
 import randoop.generation.ForwardGenerator;
+import randoop.generation.ForwardGeneratorFactory;
 import randoop.generation.RandoopListenerManager;
 import randoop.generation.SeedSequences;
 import randoop.instrument.ExercisedClassVisitor;
@@ -159,19 +161,10 @@ public class GenTests extends GenInputsAbstract {
     // get names of classes under test
     Set<String> classnames = GenInputsAbstract.getClassnamesFromArgs();
     
-    // get the names of the clases to be tested using field based generation
-    Set<String> fbgClasses = null;
-    if (field_based_gen) {
-    		/*if (GenInputsAbstract.fbg_classlist == null)
-    			throw new Error("Flag --fbg-classlist must be set when --field-based-gen=true");*/
- 		if (GenInputsAbstract.fbg_classlist != null)
- 			fbgClasses = GenInputsAbstract.getClassnamesFBG();
-    }
-    
-    if (!field_based_gen) {
+    if (field_based_gen == FieldBasedGen.DISABLED) {
     		if (fbg_debug) 
    			throw new Error("Flag --field_based_gen=true must be set when --fbg_debug=true");
-    		if (fbg_extend_with_observers > 0) 
+    		if (fbg_phase2_budget > 0) 
    			throw new Error("Flag --field_based_gen=true must be set when --fbg_extend_with_observers > 0");
     }
    
@@ -280,19 +273,11 @@ public class GenTests extends GenInputsAbstract {
       observers.addAll(observerMap.getValues(keyType));
     }
 
-    
-    
-    
-
     /*
      * Create the generator for this session.
      */
-    AbstractGenerator explorer;
-    explorer =
-        new ForwardGenerator(
-            model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
-
-
+    AbstractGenerator explorer = ForwardGeneratorFactory.create(
+    		field_based_gen, model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
     /*
      * setup for check generation
@@ -331,64 +316,46 @@ public class GenTests extends GenInputsAbstract {
 
     explorer.addTestPredicate(isOutputTest);
 
-    /*
-     * Setup visitors
-     */
-    // list of visitors for collecting information from test sequences
-    List<ExecutionVisitor> visitors = new ArrayList<>();
+    if (field_based_gen == FieldBasedGen.DISABLED) {
 
-    // instrumentation visitor
-    if (GenInputsAbstract.include_if_class_exercised != null) {
-      visitors.add(new ExercisedClassVisitor(operationModel.getExercisedClasses()));
-    }
-    
-    // Install any user-specified visitors.
-    if (!GenInputsAbstract.visitor.isEmpty()) {
-      for (String visitorClsName : GenInputsAbstract.visitor) {
-        try {
-          Class<ExecutionVisitor> cls = (Class<ExecutionVisitor>) Class.forName(visitorClsName);
-          ExecutionVisitor vis = cls.newInstance();
-          visitors.add(vis);
-        } catch (Exception e) {
-          System.out.println("Error while loading visitor class " + visitorClsName);
-          System.out.println("Exception message: " + e.getMessage());
-          System.out.println("Stack trace:");
-          e.printStackTrace(System.out);
-          System.out.println("Randoop will exit with code 1.");
-          System.exit(1);
-        }
-      }
-    }
+			/*
+			 * Setup visitors
+			 */
+			// list of visitors for collecting information from test sequences
+			List<ExecutionVisitor> visitors = new ArrayList<>();
 
-    ExecutionVisitor visitor;
-    if (visitors.isEmpty()) {
-      visitor = new DummyVisitor();
-    } else {
-      visitor = new MultiVisitor(visitors);
-    }
+			// instrumentation visitor
+			if (GenInputsAbstract.include_if_class_exercised != null) {
+				visitors.add(new ExercisedClassVisitor(operationModel.getExercisedClasses()));
+			}
 
-    explorer.addExecutionVisitor(visitor);
+			// Install any user-specified visitors.
+			if (!GenInputsAbstract.visitor.isEmpty()) {
+				for (String visitorClsName : GenInputsAbstract.visitor) {
+					try {
+						Class<ExecutionVisitor> cls = (Class<ExecutionVisitor>) Class.forName(visitorClsName);
+						ExecutionVisitor vis = cls.newInstance();
+						visitors.add(vis);
+					} catch (Exception e) {
+						System.out.println("Error while loading visitor class " + visitorClsName);
+						System.out.println("Exception message: " + e.getMessage());
+						System.out.println("Stack trace:");
+						e.printStackTrace(System.out);
+						System.out.println("Randoop will exit with code 1.");
+						System.exit(1);
+					}
+				}
+			}
 
-    // FIXME: the usage of ExtensionsCollectorVisitor removes all the other visitors
-    if (field_based_gen) {
-    		if (fbg_precise_observer_detection) 
-    			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
-    					fbg_max_objects, 
-					fbg_max_arr_objects, 
-					fbg_max_field_distance,
-					true,
-					fbg_observer_after_tests));
-		else
-			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
-					fbg_max_objects, 
-					fbg_max_arr_objects, 
-					fbg_max_field_distance));
-    }
-    else if (field_based_filter) {
-			explorer.addExecutionVisitor(new ExtensionsCollectorVisitor(fbgClasses, 
-					fbg_max_objects, 
-					fbg_max_arr_objects, 
-					fbg_max_field_distance));
+			ExecutionVisitor visitor;
+			if (visitors.isEmpty()) {
+				visitor = new DummyVisitor();
+			} else {
+				visitor = new MultiVisitor(visitors);
+			}
+
+			explorer.addExecutionVisitor(visitor);
+
     }
 
     if (!GenInputsAbstract.noprogressdisplay) {
