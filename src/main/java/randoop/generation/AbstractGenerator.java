@@ -5,21 +5,17 @@ import plume.OptionGroup;
 import plume.Unpublicized;
 import randoop.*;
 import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
+import randoop.fieldextensions.ObjectCountStore;
 import randoop.fieldextensions.OperationManager.OpState;
 import randoop.main.GenInputsAbstract;
 import randoop.main.GenInputsAbstract.FieldBasedGen;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
-import randoop.sequence.Variable;
 import randoop.test.TestCheckGenerator;
-import randoop.types.Type;
-import randoop.types.TypeTuple;
 import randoop.util.Log;
 import randoop.util.ProgressDisplay;
-import randoop.util.Randomness;
 import randoop.util.ReflectionExecutor;
-import randoop.util.SimpleList;
 import randoop.util.Timer;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
@@ -210,7 +206,7 @@ public abstract class AbstractGenerator {
     this.stopper = stopper;
     this.listenerMgr = listenerManager;
     
-    if (GenInputsAbstract.field_based_gen == FieldBasedGen.GEN && 
+    if ((GenInputsAbstract.field_based_gen == FieldBasedGen.GEN || GenInputsAbstract.field_based_gen == FieldBasedGen.GENFILTER) && 
     		GenInputsAbstract.fbg_phase2_budget > 0 && 
     		GenInputsAbstract.fbg_observer_lines > 0)
     		this.maxsize = GenInputsAbstract.maxsize - GenInputsAbstract.fbg_observer_lines;
@@ -308,6 +304,8 @@ public abstract class AbstractGenerator {
    */
   public abstract int numGeneratedSequences();
 
+  protected ObjectCountStore objCountSt;
+  
   /**
    * Creates and executes new sequences until stopping criteria is met.
    *
@@ -347,6 +345,9 @@ public abstract class AbstractGenerator {
     		maxTimeMillis = maxTimeMillis - (long) (maxTimeMillis * GenInputsAbstract.fbg_phase2_budget);
     		setObserverSequenceStore(new ObsSeqStore());
     }
+    
+    if (GenInputsAbstract.count_objects) 
+    		objCountSt = new ObjectCountStore();
 
     // First phase. Abstracted unmodified original randoop behavior
     genTests();
@@ -393,7 +394,16 @@ public abstract class AbstractGenerator {
     	    System.out.println("\nSecond phase execution time: " + secondPhaseTime  + " s");
     }
     
-    
+    if (GenInputsAbstract.count_objects) {
+    	/*
+    		for (ExecutableSequence eSeq: outRegressionSeqs) {
+    			if (eSeq.isNormalExecution())
+    				objCountSt.countObjects(eSeq);
+    		}
+    		*/
+    		System.out.println(objCountSt.countResultToString());
+    }
+
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();
       progressDisplay.shouldStop = true;

@@ -183,6 +183,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	  GEN, FILTER, GENFILTER, DISABLED,  
   }
   
+  @Option("Count number of different objects created by tests")
+  public static boolean count_objects = false;
+  
   @Option("Generate tests using field based filtering")
   public static FieldBasedGen field_based_gen = FieldBasedGen.DISABLED;
   

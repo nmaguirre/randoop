@@ -8,11 +8,9 @@ import java.util.Set;
 
 import randoop.BugInRandoopException;
 import randoop.DummyVisitor;
-import randoop.ExecutionVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
-import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.Operation;
@@ -119,6 +117,7 @@ public class ForwardGenerator extends AbstractGenerator {
     }
   }
 
+  
   @Override
   public ExecutableSequence step() {
 
@@ -151,11 +150,14 @@ public class ForwardGenerator extends AbstractGenerator {
 
     eSeq.exectime = endTime - startTime;
     startTime = endTime; // reset start time.
-
+    
     processSequence(eSeq);
 
     if (!saveSequence(eSeq))
     		return null;
+    
+    if (GenInputsAbstract.count_objects) 
+    		objCountSt.countObjects(eSeq);
     
 	endTime = System.nanoTime();
 	gentime += endTime - startTime;

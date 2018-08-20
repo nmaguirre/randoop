@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import randoop.DummyVisitor;
-import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
-import randoop.main.GenInputsAbstract;
 import randoop.main.GenInputsAbstract.FieldBasedGen;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
