@@ -19,6 +19,7 @@ public class ObjectCountStore {
 //	private int maxArrayObjects;
 //	private int maxFieldDistance;
 	private Map<String, Set<Object>> objs = new LinkedHashMap<>();
+	private int cantCount;
 
 //	public ObjectCountStore(int maxObjects, int maxArrayObjects, int maxFieldDistance) {
 //		this.maxObjects= maxObjects;
@@ -92,14 +93,18 @@ public class ObjectCountStore {
 	}
 	
 	private void countObject(Object o) {
-		if (o != null) {
-			String cls = o.getClass().getName();
-			Set<Object> clsObjs = objs.get(cls);
-			if (clsObjs == null) {
-				clsObjs = new LinkedHashSet<>();
-				objs.put(cls, clsObjs);
+		try {
+			if (o != null) {
+				String cls = o.getClass().getName();
+				Set<Object> clsObjs = objs.get(cls);
+				if (clsObjs == null) {
+					clsObjs = new LinkedHashSet<>();
+					objs.put(cls, clsObjs);
+				}
+				clsObjs.add(o);
 			}
-			clsObjs.add(o);
+		} catch (Exception e) {
+			cantCount++;
 		}
 	}
 
@@ -117,6 +122,9 @@ public class ObjectCountStore {
 		}
 		sb.append("Total objects count: ")
 			.append(sum)
+			.append("\n");
+		sb.append("Objects not counted: ")
+			.append(cantCount)
 			.append("\n");
 		return sb.toString();
 	}
