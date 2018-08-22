@@ -38,16 +38,9 @@ import randoop.util.SimpleList;
 /** Randoop's forward, component-based generator. */
 public class ForwardGenerator extends AbstractGenerator {
 
-  /**
-   * The set of ALL sequences ever generated, including sequences that were executed and then
-   * discarded.
-   */
-  private final Set<Sequence> allSequences;
 
   private final Set<TypedOperation> observers;
 
-  /** Sequences that are used in other sequences (and are thus redundant) */
-  private Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
 
   // For testing purposes only. If Globals.randooptestrun==false then the array
   // is never populated or queried. This set contains the same set of
@@ -126,6 +119,7 @@ public class ForwardGenerator extends AbstractGenerator {
     }
   }
 
+  
   @Override
   public ExecutableSequence step() {
 
@@ -134,7 +128,7 @@ public class ForwardGenerator extends AbstractGenerator {
     if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
       componentManager.clearGeneratedSequences();
     }
-
+    
     ExecutableSequence eSeq = createNewUniqueSequence();
 
     if (eSeq == null) {
@@ -158,25 +152,35 @@ public class ForwardGenerator extends AbstractGenerator {
 
     eSeq.exectime = endTime - startTime;
     startTime = endTime; // reset start time.
-
+    
     processSequence(eSeq);
 
-    if (eSeq.sequence.hasActiveFlags()) {
-      componentManager.addGeneratedSequence(eSeq.sequence);
-    }
-
-    endTime = System.nanoTime();
-    gentime += endTime - startTime;
-    eSeq.gentime = gentime;
+    if (!saveSequence(eSeq))
+    		return null;
+    
+    if (GenInputsAbstract.count_objects) 
+    		objCountSt.countObjects(eSeq);
+    
+	endTime = System.nanoTime();
+	gentime += endTime - startTime;
+	eSeq.gentime = gentime;
 
     return eSeq;
+  }
+
+  protected boolean saveSequence(ExecutableSequence eSeq) {
+	  // Normal randoop
+	  if (eSeq.sequence.hasActiveFlags()) {
+		  componentManager.addGeneratedSequence(eSeq.sequence);
+	  }
+	  return true;
   }
 
   @Override
   public Set<Sequence> getAllSequences() {
     return Collections.unmodifiableSet(this.allSequences);
   }
-
+  
   /**
    * Determines what indices in the given sequence are active. An active index i means that the i-th
    * method call creates an interesting/useful value that can be used as an input to a larger
@@ -388,7 +392,8 @@ public class ForwardGenerator extends AbstractGenerator {
     }
 
     // Discard if sequence is larger than size limit
-    if (newSequence.size() > GenInputsAbstract.maxsize) {
+    //if (newSequence.size() > GenInputsAbstract.maxsize) {
+    if (newSequence.size() > this.maxsize) {
       if (Log.isLoggingOn()) {
         Log.logLine(
             "Sequence discarded because size "
@@ -423,13 +428,15 @@ public class ForwardGenerator extends AbstractGenerator {
     // System.out.println("###" + statement.toStringVerbose() + "###" +
     // statement.getClass());
 
-    // Keep track of any input sequences that are used in this sequence.
-    // Tests that contain only these sequences are probably redundant.
-    for (Sequence is : sequences.sequences) {
-      subsumed_sequences.add(is);
-    }
+    subsumeSequences(sequences);
 
     return new ExecutableSequence(newSequence);
+  }
+
+  protected void subsumeSequences(InputsAndSuccessFlag sequences) {
+	  for (Sequence is : sequences.sequences) {
+		  subsumed_sequences.add(is);
+	  }
   }
 
   /**
@@ -636,7 +643,8 @@ public class ForwardGenerator extends AbstractGenerator {
       // case below
       // is by far the most common.
 
-      if (inputType.isArray()) {
+      if (GenInputsAbstract.collections_heuristic && 
+    		  inputType.isArray()) {
 
         // 1. If T=inputTypes[i] is an array type, ask the component manager for
         // all sequences
@@ -650,7 +658,8 @@ public class ForwardGenerator extends AbstractGenerator {
             HelperSequenceCreator.createArraySequence(componentManager, inputType);
         l = new ListOfLists<>(l1, l2);
 
-      } else if (inputType.isParameterized()
+      } else if (GenInputsAbstract.collections_heuristic &&
+    		  inputType.isParameterized()
           && ((InstantiatedType) inputType)
               .getGenericClassType()
               .isSubtypeOf(JDKTypes.COLLECTION_TYPE)) {

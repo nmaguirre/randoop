@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -289,7 +290,7 @@ public final class Sequence implements WeightedElement {
    *
    * @return the variables used in the last statement of this sequence
    */
-  List<Variable> getVariablesOfLastStatement() {
+  public List<Variable> getVariablesOfLastStatement() {
     return this.lastStatementVariables;
   }
 
@@ -300,8 +301,27 @@ public final class Sequence implements WeightedElement {
    *
    * @return the types of the variables in the last statement of this sequence
    */
-  List<Type> getTypesForLastStatement() {
+  public List<Type> getTypesForLastStatement() {
     return this.lastStatementTypes;
+  }
+  
+  private static boolean isNonreceiverType(Type type) {
+	    return type.isPrimitive()
+	        || type.isBoxedPrimitive()
+	        || type.isString()
+	        || type.getRuntimeClass().equals(Class.class);
+	  }
+  
+  public List<Integer> getLastStmtNonPrimitiveIndexes() {
+	  List<Integer> res = new LinkedList<>();
+	  int index = 0;
+	  for (Type type: getTypesForLastStatement()) {
+		  // If type is primitive
+		  if (!(isNonreceiverType(type) && !type.getRuntimeClass().equals(Class.class))) 
+			  res.add(index);
+		  index++;
+	  }
+	  return res;
   }
 
   /**
@@ -523,6 +543,40 @@ public final class Sequence implements WeightedElement {
       }
     }
   }
+  
+  
+  public ArrayList<Variable> getStatementVariables(int index) {
+	  ArrayList<Variable> statementVars = new ArrayList<>();
+
+	  Statement stmt = this.statements.get(index);
+	  // Process return value
+	  if (!stmt.getOutputType().isVoid()) 
+		  statementVars.add(new Variable(this, index));
+
+	  // Process input arguments.
+	  if (stmt.inputs.size() != stmt.getInputTypes().size()) {
+		  throw new RuntimeException(
+				  stmt.inputs
+				  + ", "
+				  + stmt.getInputTypes()
+				  + ", "
+				  + stmt.toString());
+	  }
+
+	  List<Variable> v = this.getInputs(index);
+	  if (v.size() != stmt.getInputTypes().size()) {
+		  throw new RuntimeException();
+	  }
+
+	  for (int i = 0; i < v.size(); i++) {
+		  Variable actualArgument = v.get(i);
+		  assert stmt.getInputTypes().get(i).isAssignableFrom(actualArgument.getType());
+		  statementVars.add(actualArgument);
+	  }
+	  
+	  return statementVars;
+  }
+  
 
   /** Representation invariant check. */
   private void checkRep() {
@@ -673,6 +727,29 @@ public final class Sequence implements WeightedElement {
     if (possibleIndices.isEmpty()) return null;
     return Randomness.randomMember(possibleIndices);
   }
+  
+  public Variable randomVariableForTypeLastStatementFB(Type type) {
+	    if (type == null) throw new IllegalArgumentException("type cannot be null.");
+	    
+	    if (getFBActiveFlags().isEmpty()) {
+	    		// FIXME: It can be a java.lang.Comparable
+	    		//assert type.isObject() || type.isPrimitive() || type.isBoxedPrimitive() || type.isString() /*
+			//			  type.isArray()*/: "Non primitive sequence for type " + type.toString() + " used, but not field based selection of inputs.";
+	    		return randomVariableForTypeLastStatement(type);
+	    }
+	    
+	    List<Variable> possibleIndices = new ArrayList<>(this.lastStatementVariables.size());
+	    for (Integer j: getFBActiveFlags()) {
+	    	  Variable i = lastStatementVariables.get(j);
+	    	  
+	      Statement s = statements.get(i.index);
+	      if (type.isAssignableFrom(s.getOutputType())) {
+	        possibleIndices.add(i);
+	      }
+	    }
+	    if (possibleIndices.isEmpty()) return null;
+	    return Randomness.randomMember(possibleIndices);
+	  }
 
   void checkIndex(int i) {
     if (i < 0 || i > size() - 1) throw new IllegalArgumentException();
@@ -1168,4 +1245,16 @@ public final class Sequence implements WeightedElement {
       return this.index;
     }
   }
+  
+  // PABLO: Active flags for the last sequence statement according to field based filtering
+  List<Integer> fbActiveFlags = new LinkedList<Integer>();
+
+  public void setFBActiveFlag(int j) {
+	  fbActiveFlags.add(j);
+  }
+  
+  public List<Integer> getFBActiveFlags() {
+	  return fbActiveFlags;
+  }
+
 }

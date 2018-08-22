@@ -140,6 +140,67 @@ public abstract class GenInputsAbstract extends CommandHandler {
    */
   @Option("File containing class names that tests must exercise")
   public static File include_if_class_exercised = null;
+  
+
+  @OptionGroup(value = "Field based generation/coverage options")
+  /*
+  @Option("Create extensions for each method, instead of a global set")
+  public static boolean extensions_by_method = true;
+  */
+  @Option("String replacement hack to avoid replacing parts of strings by dummy variables in "
+  	+ "regression assertions. Without this hack randoop might produce failing regression assertions")
+  public static boolean dummy_var_replacement_hack = false;
+  
+  @Option("Instrument tests to measure extensions coverage during execution")
+  public static boolean extensions_coverage = false;
+
+  @Option("Instance class generics with integers only")
+  public static boolean instance_generics_integer = false;
+  
+  public enum FieldBasedGen {
+	  GEN, FILTER, GENFILTER, DISABLED,  
+  }
+  
+  @Option("Count number of different objects created by tests")
+  public static boolean count_objects = false;
+  
+  @Option("Generate tests using field based filtering")
+  public static FieldBasedGen field_based_gen = FieldBasedGen.DISABLED;
+  
+  @Option("Extend tests with observers only for this fraction of time from --timelimit")
+  public static double fbg_phase2_budget = 0;
+  
+  @Option("Percentage of lines reserved for observers only (from maxsize)")
+  public static int fbg_observer_lines = 0;
+
+  @Option("Detect observers precisely using extensions")
+  public static boolean fbg_precise_observer_detection = false;
+  
+  @Option("Avoid reexecuting while extending sequences with observers")
+  public static boolean fbg_extend_no_reexecute = false; 
+
+  @Option("Consider an operation observer after its been tested this number of times without changing state")
+  public static int fbg_observer_after_tests = Integer.MAX_VALUE; // 20;
+
+  @Option("Generate debug information for field based generation")
+  public static boolean fbg_debug = false;
+  
+  @Option("File that lists classes to test using field based generation")
+  public static File fbg_classlist = null;
+  
+  @Option("Max objects to save in the field extensions")
+  public static int fbg_max_objects = Integer.MAX_VALUE;
+
+  @Option("Max array objects to be stored in the field extensions")
+  public static int fbg_max_arr_objects = Integer.MAX_VALUE;
+
+  @Option("Canonicalize classes with up to this field distance from the starting object")
+  public static int fbg_max_field_distance = Integer.MAX_VALUE;
+
+  @Option("Use randoop's collections and arrays generation heuristic")
+  public static boolean collections_heuristic = true;
+
+  
 
   /**
    * If false, Randoop halts and gives diagnostics about flaky tests -- tests that behave
@@ -354,6 +415,8 @@ public abstract class GenInputsAbstract extends CommandHandler {
    *
    * <p>Randoop never uses <code>null</code> for receiver values.
    */
+  @Option("Disable randoop contracts.")
+  public static boolean disable_contracts = false;
   ///////////////////////////////////////////////////////////////////
   @OptionGroup("Values used in tests")
   @Option("Use null as an input with the given frequency")
@@ -641,6 +704,12 @@ public abstract class GenInputsAbstract extends CommandHandler {
     Set<String> classnames = getStringSetFromFile(classlist, errMessage);
     classnames.addAll(testclass);
     return classnames;
+  }
+  
+  public static Set<String> getClassnamesFBG() {
+	    String errMessage = "ERROR while reading list of classes to test using field based generation";
+	    Set<String> classnames = getStringSetFromFile(fbg_classlist, errMessage);
+	    return classnames;
   }
 
   public static Set<String> getStringSetFromFile(File listFile, String errMessage) {

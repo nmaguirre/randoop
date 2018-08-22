@@ -16,6 +16,8 @@ import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.NotExecuted;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.TypedClassOperation;
+import randoop.operation.TypedOperation;
 import randoop.test.Check;
 import randoop.test.TestCheckGenerator;
 import randoop.test.TestChecks;
@@ -208,6 +210,184 @@ public class ExecutableSequence {
     }
     return b.toString();
   }
+  
+  
+  /**
+   * Return this sequence as code. Similar to {@link Sequence#toCodeString()}
+   * except includes the checks.
+   *
+   * If for a given statement there is a check of type
+   * {@link randoop.test.ExceptionCheck}, that check's pre-statement code is printed
+   * immediately before the statement, and its post-statement code is printed
+   * immediately after the statement.
+   *
+   * @return the sequence as a string
+   */
+  public String toCountExtensionsCodeString() {
+    StringBuilder b = new StringBuilder();
+    for (int i = 0; i < sequence.size(); i++) {
+
+      // Only print primitive declarations if the last/only statement
+      // of the sequence, because, otherwise, primitive values will be used as
+      // actual parameters: e.g. "foo(3)" instead of "int x = 3 ; foo(x)"
+      if (sequence.getStatement(i).getShortForm() != null && i < sequence.size() - 1) {
+        continue;
+      }
+      
+      StringBuilder oneStatement = new StringBuilder();
+      sequence.appendCode(oneStatement, i);
+
+      // If this isn't a statement that throws an exception
+      if (i != sequence.size()-1 || checks.getExceptionCheck() == null) {
+    	  // Extend extensions with each variable of the sequence
+		  List<Variable> stmtVars = sequence.getStatementVariables(i);
+		  for (Variable v: stmtVars) {
+			  oneStatement.append("randoop.fieldextensions.GlobalExtensions.extend(");
+			  
+		      String param = v.getName();
+		      Statement statementCreatingVar = v.getDeclaringStatement();
+		      if (statementCreatingVar.isPrimitiveInitialization()
+		          && !statementCreatingVar.isNullInitialization()) {
+		        String shortForm = statementCreatingVar.getShortForm();
+		        assert shortForm != null: "Null primitive variable created";
+		        if (shortForm != null) {
+		          param = shortForm;
+		        }
+		      }
+		      oneStatement.append(param);
+
+			  oneStatement.append(");").append(Globals.lineSep);
+		  }
+      }
+      
+      Check exObs = null;
+      if (i == sequence.size() - 1 && checks != null) {
+        // Print exception check first, if present.
+        exObs = checks.getExceptionCheck();
+        if (exObs != null) {
+          oneStatement.insert(0, exObs.toCodeStringPreStatement());
+          oneStatement.append(exObs.toCodeStringPostStatement());
+          oneStatement.append(Globals.lineSep);
+        }
+
+        // Print the rest of the checks.
+        for (Check d : checks.get().keySet()) {
+          oneStatement.insert(0, d.toCodeStringPreStatement());
+          oneStatement.append(d.toCodeStringPostStatement());
+          oneStatement.append(Globals.lineSep);
+        }
+      }
+
+
+      
+      b.append(oneStatement);
+    }
+    return b.toString();
+  }
+  
+  
+  
+  /**
+   * Return this sequence as code. Similar to {@link Sequence#toCodeString()}
+   * except includes the checks.
+   *
+   * If for a given statement there is a check of type
+   * {@link randoop.test.ExceptionCheck}, that check's pre-statement code is printed
+   * immediately before the statement, and its post-statement code is printed
+   * immediately after the statement.
+   *
+   * @return the sequence as a string
+   */
+  public String toCountExtensionsByMethodCodeString() {
+    StringBuilder b = new StringBuilder();
+    for (int i = 0; i < sequence.size(); i++) {
+
+      // Only print primitive declarations if the last/only statement
+      // of the sequence, because, otherwise, primitive values will be used as
+      // actual parameters: e.g. "foo(3)" instead of "int x = 3 ; foo(x)"
+      if (sequence.getStatement(i).getShortForm() != null && i < sequence.size() - 1) {
+        continue;
+      }
+      
+      StringBuilder oneStatement = new StringBuilder();
+
+  	  Statement stmt = this.sequence.statements.get(i);
+  	  TypedOperation op = stmt.getOperation();
+
+  	  if (op.isConstructorCall() || op.isMethodCall()) {
+  		  TypedClassOperation typOp = (TypedClassOperation) op;
+//		  System.out.println(op.toString());
+  		  if (typOp.drawnFromClass != null) {
+  			  // Extend extensions with each variable of the sequence
+  			  List<Variable> stmtVars = sequence.getStatementVariables(i);
+
+  			  int j = 0;
+  			  // Returns a value; ignore it
+  			  if (!stmt.getOutputType().isVoid()) 
+  				  j = 1;
+
+  			  int inputNumber = 0;
+  			  for (; j<stmtVars.size(); j++) {
+  				  Variable v = stmtVars.get(j);
+  				  oneStatement.append("randoop.fieldextensions.GlobalExtensions.extend(");
+  				  String param = v.getName();
+  				  Statement statementCreatingVar = v.getDeclaringStatement();
+  				  if (statementCreatingVar.isPrimitiveInitialization()
+  						  && !statementCreatingVar.isNullInitialization()) {
+  					  String shortForm = statementCreatingVar.getShortForm();
+  					  assert shortForm != null: "Null primitive variable created";
+  					  if (shortForm != null) {
+  						  param = shortForm;
+  					  }
+  				  }
+  				  oneStatement.append(param);
+  				  oneStatement.append(",\"");
+
+  				  String fromClass = typOp.drawnFromClass.getName();
+  				  int startGenerics = fromClass.indexOf("<");
+  				  if (startGenerics != -1)
+  					  fromClass = fromClass.substring(0, startGenerics);
+  				  oneStatement.append(fromClass);
+  				  oneStatement.append("\",\"");
+
+  				  //oneStatement.append(op.toParsableString());
+  				  oneStatement.append(op.toString());
+
+  				  oneStatement.append("\",");
+  				  oneStatement.append(inputNumber);
+  				  oneStatement.append(");").append(Globals.lineSep);
+  				  inputNumber++;
+  			  }
+  		  }
+  	  }
+		  
+      sequence.appendCode(oneStatement, i);
+      
+      Check exObs = null;
+      if (i == sequence.size() - 1 && checks != null) {
+        // Print exception check first, if present.
+        exObs = checks.getExceptionCheck();
+        if (exObs != null) {
+          oneStatement.insert(0, exObs.toCodeStringPreStatement());
+          oneStatement.append(exObs.toCodeStringPostStatement());
+          oneStatement.append(Globals.lineSep);
+        }
+
+        // Print the rest of the checks.
+        for (Check d : checks.get().keySet()) {
+          oneStatement.insert(0, d.toCodeStringPreStatement());
+          oneStatement.append(d.toCodeStringPostStatement());
+          oneStatement.append(Globals.lineSep);
+        }
+      }
+
+
+      
+      b.append(oneStatement);
+    }
+    return b.toString();
+  }
+
 
   /**
    * Return the code representation of the i'th statement.
@@ -323,6 +503,13 @@ public class ExecutableSequence {
     }
     return ros;
   }
+  
+  public Object[] getRuntimeInputs(int i) {
+      List<Variable> inputs = sequence.getInputs(i);
+      Object[] inputVariables = getRuntimeInputs(executionResults.theList, inputs);
+      return inputVariables;
+  }
+
 
   /**
    * Returns the values for the given variables in the {@link Execution} object. The variables are
@@ -629,4 +816,5 @@ public class ExecutableSequence {
   public boolean coversClass(Class<?> c) {
     return executionResults.getCoveredClasses().contains(c);
   }
+
 }

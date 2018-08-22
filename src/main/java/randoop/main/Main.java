@@ -21,6 +21,7 @@ public class Main {
 
   // The main method simply calls nonStaticMain.
   public static void main(String[] args) {
+	System.out.println("TZ" + System.getProperty("user.timezone"));
 
     Main main = new Main();
     main.nonStaticMain(args);
@@ -59,11 +60,15 @@ public class Main {
     boolean success = false;
     try {
 
+    	  long initTime = System.currentTimeMillis();
       success = handler.handle(args2);
 
       if (!success) {
         System.err.println("The command you issued returned a failing status flag.");
       }
+      
+      long endTime = (System.currentTimeMillis() - initTime) / 1000;
+      System.out.println("\nTotal execution time: " + endTime  + " s");
 
     } catch (RandoopTextuiException e) {
 

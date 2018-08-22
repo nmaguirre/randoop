@@ -7,7 +7,11 @@ import plume.Option;
 import plume.OptionGroup;
 import plume.Unpublicized;
 import randoop.*;
+import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
+import randoop.fieldextensions.ObjectCountStore;
+import randoop.fieldextensions.OperationManager.OpState;
 import randoop.main.GenInputsAbstract;
+import randoop.main.GenInputsAbstract.FieldBasedGen;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
@@ -18,6 +22,7 @@ import randoop.util.ReflectionExecutor;
 import randoop.util.Timer;
 import randoop.util.predicate.AlwaysFalse;
 import randoop.util.predicate.Predicate;
+import java.util.LinkedHashSet;
 
 /**
  * Algorithm template for implementing a test generator.
@@ -29,7 +34,7 @@ import randoop.util.predicate.Predicate;
  * @see ForwardGenerator
  */
 public abstract class AbstractGenerator {
-
+	
   @OptionGroup(value = "AbstractGenerator unpublicized options", unpublicized = true)
   @Unpublicized
   @Option("Dump each sequence to the log file")
@@ -48,6 +53,17 @@ public abstract class AbstractGenerator {
   @RandoopStat("Number of invalid sequences generated.")
   public int invalidSequenceCount = 0;
 
+  public int maxsize;
+  
+  /** Sequences that are used in other sequences (and are thus redundant) **/
+  protected Set<Sequence> subsumed_sequences = new LinkedHashSet<>();
+
+  /**
+   * The set of ALL sequences ever generated, including sequences that were
+   * executed and then discarded.
+   */
+  protected Set<Sequence> allSequences;
+  
   /**
    * The timer used to determine how much time has elapsed since the start of generator and whether
    * generation should stop.
@@ -58,7 +74,7 @@ public abstract class AbstractGenerator {
    * Time limit for generation. If generation reaches the specified time limit (in milliseconds),
    * the generator stops generating sequences.
    */
-  public final long maxTimeMillis;
+  public long maxTimeMillis;
 
   /**
    * Sequence limit for generation. If generation reaches the specified sequence limit, the
@@ -77,7 +93,7 @@ public abstract class AbstractGenerator {
    * generate sequences. In other words, statements specifies the universe of operations from which
    * sequences are generated.
    */
-  protected final List<TypedOperation> operations;
+  protected List<TypedOperation> operations;
 
   /** Container for execution visitors used during execution of sequences. */
   protected ExecutionVisitor executionVisitor;
@@ -152,7 +168,8 @@ public abstract class AbstractGenerator {
     this.maxGeneratedSequences = maxGeneratedSequences;
     this.maxOutputSequences = maxOutSequences;
     this.operations = operations;
-    this.executionVisitor = new DummyVisitor();
+	this.executionVisitor = new DummyVisitor();
+//    this.executionVisitor = executionVisitor;
     this.outputTest = new AlwaysFalse<>();
 
     if (componentManager == null) {
@@ -163,8 +180,15 @@ public abstract class AbstractGenerator {
 
     this.stopper = stopper;
     this.listenerMgr = listenerManager;
+    
+    if ((GenInputsAbstract.field_based_gen == FieldBasedGen.GEN || GenInputsAbstract.field_based_gen == FieldBasedGen.GENFILTER) && 
+    		GenInputsAbstract.fbg_phase2_budget > 0 && 
+    		GenInputsAbstract.fbg_observer_lines > 0)
+    		this.maxsize = GenInputsAbstract.maxsize - GenInputsAbstract.fbg_observer_lines;
+    else
+    		this.maxsize = GenInputsAbstract.maxsize;
   }
-
+  
   /**
    * Registers test predicate with this generator for use while filtering generated tests for
    * output.
@@ -226,7 +250,7 @@ public abstract class AbstractGenerator {
         || (numGeneratedSequences() >= maxGeneratedSequences)
         || (stopper != null && stopper.stop());
   }
-
+ 
   /**
    * Generate an individual test sequence
    *
@@ -259,6 +283,8 @@ public abstract class AbstractGenerator {
    */
   public abstract int numGeneratedSequences();
 
+  protected ObjectCountStore objCountSt;
+  
   /**
    * Creates and executes new sequences until stopping criteria is met.
    *
@@ -281,8 +307,113 @@ public abstract class AbstractGenerator {
     if (listenerMgr != null) {
       listenerMgr.explorationStart();
     }
+    
+    long originalMaxTimeMillis = maxTimeMillis;
+    if (GenInputsAbstract.fbg_phase2_budget > 0) {
+    		assert GenInputsAbstract.fbg_phase2_budget < 1.0: "--fbg-phase2-budget must be < 1";
+    		assert GenInputsAbstract.field_based_gen != FieldBasedGen.FILTER: "--fbg-phase2-budget > 0 cannot be used"
+    				+ " in combination with --field-based-gen=FILTER";
+    		maxTimeMillis = maxTimeMillis - (long) (maxTimeMillis * GenInputsAbstract.fbg_phase2_budget);
+    		setObserverSequenceStore(new ObsSeqStore());
+    }
+    
+    if (GenInputsAbstract.count_objects) 
+    		objCountSt = new ObjectCountStore();
 
-    while (!stop()) {
+    // First phase. Abstracted unmodified original randoop behavior
+    genTests();
+
+    List<TypedOperation> originalOps = operations;
+    ExecutionVisitor firstPhaseVisitor = executionVisitor;
+    // Second phase: Extend tests with observers
+    if (GenInputsAbstract.fbg_phase2_budget > 0) {
+	    System.out.println("\nSecond phase starting...");
+       	long secondPhaseStartTime = System.currentTimeMillis();
+ 
+       	// 1- Put non generator sequences in generators map 
+       	saveNonGeneratorsAsGenerators();
+       	
+       	// 2- If --precise_observer_detection use observers only during second phase; otherwise use all operations
+       	if (GenInputsAbstract.fbg_precise_observer_detection) {
+       		ExtensionsCollectorInOutVisitor visitor = (ExtensionsCollectorInOutVisitor) executionVisitor;
+       		List<TypedOperation> observerOps = new ArrayList<>();
+       		for (TypedOperation op: operations) {
+       			if (op.isConstructorCall()) continue;
+
+       			if (visitor.getOperationState(op) != OpState.MODIFIER 
+       					&& visitor.getOperationState(op) != OpState.NOT_EXECUTED) 
+       				observerOps.add(op);
+       		}
+       		operations = observerOps;
+       	}
+
+    		// 3- Set original max time limit
+    		maxTimeMillis = originalMaxTimeMillis;
+    		
+    		// 4- Set forward generator behavior for the second phase
+    		if (GenInputsAbstract.field_based_gen == FieldBasedGen.GENFILTER)
+    			setFilterBehavior();
+    		else if (GenInputsAbstract.field_based_gen == FieldBasedGen.GEN)
+    			setOriginalRandoopBehavior();
+
+    		setObserverSequenceStore(new NoObsSeqStore());
+    		
+    		// 5- Carry out second phase
+    		genTests();
+
+    		long secondPhaseTime = (System.currentTimeMillis() - secondPhaseStartTime) / 1000;
+    	    System.out.println("\nSecond phase execution time: " + secondPhaseTime  + " s");
+    }
+    
+    if (GenInputsAbstract.count_objects) {
+    	/*
+    		for (ExecutableSequence eSeq: outRegressionSeqs) {
+    			if (eSeq.isNormalExecution())
+    				objCountSt.countObjects(eSeq);
+    		}
+    		*/
+    		System.out.println(objCountSt.countResultToString());
+    }
+
+    if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
+      progressDisplay.display();
+      progressDisplay.shouldStop = true;
+    }
+
+    if (!GenInputsAbstract.noprogressdisplay) {
+      System.out.println();
+      System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
+      System.out.println("Exceptional method executions:" + ReflectionExecutor.excepExecs());
+      System.out.println();
+      System.out.println(
+          "Average method execution time (normal termination):      "
+              + String.format("%.3g", ReflectionExecutor.normalExecAvgMillis()));
+      System.out.println(
+          "Average method execution time (exceptional termination): "
+              + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
+      
+
+      if (GenInputsAbstract.fbg_debug) {
+    	  	ExtensionsCollectorInOutVisitor visitor = (ExtensionsCollectorInOutVisitor) firstPhaseVisitor;
+    	  	for (TypedOperation op: originalOps) {
+    		  System.out.println(op.toString() + 
+		  ", \t\n Operation State: " + visitor.getOperationState(op) +
+    		  ", \t\n Modifier executions: " + visitor.getNumberOfModifierExecutions(op) +
+    		  ", \t\n Executions: " + visitor.getNumberOfExecutions(op) +
+    		  ", \t\n Simple: " + op.isSimpleOp());
+    	  	}
+      }
+    }
+
+    // Notify listeners that exploration is ending.
+    if (listenerMgr != null) {
+      listenerMgr.explorationEnd();
+    }
+    
+  }
+
+private void genTests() {
+	while (!stop()) {
 
       // Notify listeners we are about to perform a generation step.
       if (listenerMgr != null) {
@@ -334,29 +465,6 @@ public abstract class AbstractGenerator {
         Log.logLine("allSequences.size()=" + numGeneratedSequences());
       }
     }
-
-    if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
-      progressDisplay.display();
-      progressDisplay.shouldStop = true;
-    }
-
-    if (!GenInputsAbstract.noprogressdisplay) {
-      System.out.println();
-      System.out.println("Normal method executions: " + ReflectionExecutor.normalExecs());
-      System.out.println("Exceptional method executions: " + ReflectionExecutor.excepExecs());
-      System.out.println();
-      System.out.println(
-          "Average method execution time (normal termination):      "
-              + String.format("%.3g", ReflectionExecutor.normalExecAvgMillis()));
-      System.out.println(
-          "Average method execution time (exceptional termination): "
-              + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
-    }
-
-    // Notify listeners that exploration is ending.
-    if (listenerMgr != null) {
-      listenerMgr.explorationEnd();
-    }
   }
 
   /**
@@ -385,6 +493,8 @@ public abstract class AbstractGenerator {
    */
   // TODO replace this with filtering during generation
   public List<ExecutableSequence> getRegressionSequences() {
+    System.out.printf("Generated tests: %d%n", numGeneratedSequences());
+    System.out.printf("Regression test count before subsumption: %d%n", outRegressionSeqs.size());
     List<ExecutableSequence> unique_seqs = new ArrayList<>();
     Set<Sequence> subsumed_seqs = this.getSubsumedSequences();
     for (ExecutableSequence es : outRegressionSeqs) {
@@ -422,4 +532,25 @@ public abstract class AbstractGenerator {
   protected void setCurrentSequence(Sequence s) {
     currSeq = s;
   }
+
+	public void saveNonGeneratorsAsGenerators() {
+		assert false: this.getClass().getName() + " does not implement method saveObserversAsGenerators()"
+				+ " and does not implement fb second phase.";
+	}
+
+	public void setObserverSequenceStore(IObsSeqStore obsStore) {
+		assert false: this.getClass().getName() + " does not implement method setObserverSequenceStore()"
+				+ "and does not implement fb second phase.";
+	}
+
+	public void setOriginalRandoopBehavior() {
+		assert false: this.getClass().getName() + " does not implement method setOriginalRandoopBehavior()"
+				+ "and does not implement fb second phase.";
+	}
+
+	public void setFilterBehavior() {
+		assert false: this.getClass().getName() + " does not implement method setFilterBehavior()"
+				+ "and does not implement fb second phase.";
+	}
+
 }

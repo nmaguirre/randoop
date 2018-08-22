@@ -25,6 +25,7 @@ import randoop.generation.AbstractGenerator;
 import randoop.generation.ComponentManager;
 import randoop.generation.ForwardGenerator;
 import randoop.generation.RandoopGenerationError;
+import randoop.generation.ForwardGeneratorFactory;
 import randoop.generation.RandoopListenerManager;
 import randoop.generation.SeedSequences;
 import randoop.instrument.ExercisedClassVisitor;
@@ -209,7 +210,14 @@ public class GenTests extends GenInputsAbstract {
      */
     // get names of classes under test
     Set<String> classnames = GenInputsAbstract.getClassnamesFromArgs();
-
+    
+    if (field_based_gen == FieldBasedGen.DISABLED) {
+    		if (fbg_debug) 
+   			throw new Error("Flag --field_based_gen=true must be set when --fbg_debug=true");
+    		if (fbg_phase2_budget > 0) 
+   			throw new Error("Flag --field_based_gen=true must be set when --fbg_extend_with_observers > 0");
+    }
+   
     // get names of classes that must be covered by output tests
     Set<String> coveredClassnames =
         GenInputsAbstract.getStringSetFromFile(
@@ -220,6 +228,7 @@ public class GenTests extends GenInputsAbstract {
         GenInputsAbstract.getStringSetFromFile(omit_field_list, "Error reading field file");
 
     VisibilityPredicate visibility;
+
     if (GenInputsAbstract.junit_package_name == null
         || GenInputsAbstract.only_test_public_members) {
       System.out.println("not using package " + GenInputsAbstract.junit_package_name);
@@ -337,6 +346,7 @@ public class GenTests extends GenInputsAbstract {
     /*
      * Create the generator for this session.
      */
+    /*
     AbstractGenerator explorer;
     explorer =
         new ForwardGenerator(
@@ -347,6 +357,9 @@ public class GenTests extends GenInputsAbstract {
             outputlimit,
             componentMgr,
             listenerMgr);
+            */
+    AbstractGenerator explorer = ForwardGeneratorFactory.create(
+    		field_based_gen, operations, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
 
     /*
      * setup for check generation
@@ -384,43 +397,47 @@ public class GenTests extends GenInputsAbstract {
 
     explorer.addTestPredicate(isOutputTest);
 
-    /*
-     * Setup visitors
-     */
-    // list of visitors for collecting information from test sequences
-    List<ExecutionVisitor> visitors = new ArrayList<>();
+    if (field_based_gen == FieldBasedGen.DISABLED) {
 
-    // instrumentation visitor
-    if (GenInputsAbstract.include_if_class_exercised != null) {
-      visitors.add(new ExercisedClassVisitor(operationModel.getExercisedClasses()));
+			/*
+			 * Setup visitors
+			 */
+			// list of visitors for collecting information from test sequences
+			List<ExecutionVisitor> visitors = new ArrayList<>();
+
+			// instrumentation visitor
+			if (GenInputsAbstract.include_if_class_exercised != null) {
+				visitors.add(new ExercisedClassVisitor(operationModel.getExercisedClasses()));
+			}
+
+			// Install any user-specified visitors.
+			if (!GenInputsAbstract.visitor.isEmpty()) {
+				for (String visitorClsName : GenInputsAbstract.visitor) {
+					try {
+						Class<ExecutionVisitor> cls = (Class<ExecutionVisitor>) Class.forName(visitorClsName);
+						ExecutionVisitor vis = cls.newInstance();
+						visitors.add(vis);
+					} catch (Exception e) {
+						System.out.println("Error while loading visitor class " + visitorClsName);
+						System.out.println("Exception message: " + e.getMessage());
+						System.out.println("Stack trace:");
+						e.printStackTrace(System.out);
+						System.out.println("Randoop will exit with code 1.");
+						System.exit(1);
+					}
+				}
+			}
+
+			ExecutionVisitor visitor;
+			if (visitors.isEmpty()) {
+				visitor = new DummyVisitor();
+			} else {
+				visitor = new MultiVisitor(visitors);
+			}
+
+			explorer.addExecutionVisitor(visitor);
+
     }
-
-    // Install any user-specified visitors.
-    if (!GenInputsAbstract.visitor.isEmpty()) {
-      for (String visitorClsName : GenInputsAbstract.visitor) {
-        try {
-          Class<ExecutionVisitor> cls = (Class<ExecutionVisitor>) Class.forName(visitorClsName);
-          ExecutionVisitor vis = cls.newInstance();
-          visitors.add(vis);
-        } catch (Exception e) {
-          System.out.println("Error while loading visitor class " + visitorClsName);
-          System.out.println("Exception message: " + e.getMessage());
-          System.out.println("Stack trace:");
-          e.printStackTrace(System.out);
-          System.out.println("Randoop will exit with code 1.");
-          System.exit(1);
-        }
-      }
-    }
-
-    ExecutionVisitor visitor;
-    if (visitors.isEmpty()) {
-      visitor = new DummyVisitor();
-    } else {
-      visitor = new MultiVisitor(visitors);
-    }
-
-    explorer.addExecutionVisitor(visitor);
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.printf("Explorer = %s\n", explorer);
@@ -715,7 +732,6 @@ public class GenTests extends GenInputsAbstract {
           CollectionsExt.formSublists(new ArrayList<>(seqList), testsperfile);
 
       String methodNamePrefix = "test";
-
       JavaFileWriter jfw = new JavaFileWriter(output_dir);
 
       String classNameFormat = junitClassname + "%d";
