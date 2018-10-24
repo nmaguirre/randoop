@@ -62,4 +62,11 @@ public class MultiVisitor implements ExecutionVisitor {
       visitor.visitAfterSequence(sequence);
     }
   }
+
+  @Override
+  public void doOnTermination() {
+	  for (ExecutionVisitor visitor : visitors) {
+		  visitor.doOnTermination();
+	  }
+  }
 }

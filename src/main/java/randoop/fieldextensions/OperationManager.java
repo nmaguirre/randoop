@@ -38,6 +38,8 @@ public class OperationManager {
 	private void countExecution(String opName) {
 		if (numExecs.get(opName) == null) 
 			numExecs.put(opName, 0);
+		if (modExecs.get(opName) == null) 
+			modExecs.put(opName, 0);
 
 		int currExecs = numExecs.get(opName) + 1;
 		numExecs.put(opName, currExecs);
@@ -99,6 +101,17 @@ public class OperationManager {
 		String opName = op.toString();
 		OpState opState = opStates.get(opName);
 		return opState == OpState.MODIFIER;
+	}
+	
+	public String toString() {
+		String res = "";
+	  	for (String op: opStates.keySet()) {
+		  res += op + " is " + opStates.get(op) + 
+				  ", modifier executions: " + modExecs.get(op) +
+				  ", total executions: " + numExecs.get(op);
+		  res += "\n";
+	  	}
+	  	return res;
 	}
 	
 }

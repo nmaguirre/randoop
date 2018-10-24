@@ -1,5 +1,6 @@
 package randoop.fieldextensions;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +11,7 @@ import extensions.FieldExtensionsCollector;
 import extensions.IFieldExtensions;
 import randoop.ExecutionOutcome;
 import randoop.ExecutionVisitor;
+import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.fieldextensions.OperationManager.OpState;
 import randoop.main.GenInputsAbstract;
@@ -182,6 +184,21 @@ public class MethodClassifierVisitor implements ExecutionVisitor {
 		// Only consider classes marked as important to be tested by the user
 		// This is akin to try to cover a few classes that one wants to test
 		return classesUnderTest.contains(className);
+	}
+
+	@Override
+	public void doOnTermination() {
+		if (GenInputsAbstract.method_classification == null) 
+			throw new IllegalStateException("Set --method-classification to a valid file before using " + MethodClassifierVisitor.class.getName());
+
+		try {
+			GenInputsAbstract.method_classification.write(opManager.toString());
+			GenInputsAbstract.method_classification.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
 	}
 	
 	/*

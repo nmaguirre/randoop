@@ -81,4 +81,10 @@ public class ExercisedClassVisitor implements ExecutionVisitor {
   public void initialize(ExecutableSequence executableSequence) {
     // No initialization
   }
+
+  @Override
+  public void doOnTermination() {
+	  // TODO Auto-generated method stub
+  }
+
 }

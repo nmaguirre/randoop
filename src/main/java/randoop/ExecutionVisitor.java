@@ -51,4 +51,7 @@ public interface ExecutionVisitor {
    *          the visited code sequence
    */
   void visitAfterSequence(ExecutableSequence executableSequence);
+  
+  void doOnTermination();
+  
 }

@@ -358,6 +358,8 @@ public abstract class AbstractGenerator {
         Log.logLine("allSequences.size()=" + numGeneratedSequences());
       }
     }
+    
+    executionVisitor.doOnTermination();
 
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();

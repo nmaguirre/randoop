@@ -80,6 +80,10 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	  return classnames;
   }
   
+  @Option("<filename> Name of a file to which to log the results of method classification")
+  public static FileWriter method_classification = null;
+  
+  
   @Option("Use randoop's collections and arrays generation heuristic")
   public static boolean collections_heuristic = false;
   

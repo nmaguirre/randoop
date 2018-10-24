@@ -24,4 +24,9 @@ public final class DummyVisitor implements ExecutionVisitor {
   public void visitAfterSequence(ExecutableSequence executableSequence) {
     // do nothing
   }
+
+  @Override
+  public void doOnTermination() {
+	  // TODO Auto-generated method stub
+  }
 }
