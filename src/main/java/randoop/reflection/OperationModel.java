@@ -22,6 +22,7 @@ import randoop.contract.EqualsTransitive;
 import randoop.contract.ObjectContract;
 import randoop.generation.ComponentManager;
 import randoop.main.ClassNameErrorHandler;
+import randoop.main.GenInputsAbstract;
 import randoop.operation.MethodCall;
 import randoop.operation.OperationParseException;
 import randoop.operation.OperationParser;
@@ -96,18 +97,19 @@ public class OperationModel {
     classLiteralMap = new MultiMap<>();
     annotatedTestValues = new LinkedHashSet<>();
     contracts = new ContractSet();
-    contracts.add(EqualsReflexive.getInstance());
-    contracts.add(EqualsSymmetric.getInstance());
-    contracts.add(EqualsHashcode.getInstance());
-    contracts.add(EqualsToNullRetFalse.getInstance());
-    contracts.add(EqualsReturnsNormally.getInstance());
-    contracts.add(EqualsTransitive.getInstance());
-    contracts.add(CompareToReflexive.getInstance());
-    contracts.add(CompareToAntiSymmetric.getInstance());
-    contracts.add(CompareToEquals.getInstance());
-    contracts.add(CompareToSubs.getInstance());
-    contracts.add(CompareToTransitive.getInstance());
-
+    if (!GenInputsAbstract.disable_contracts) {
+    	contracts.add(EqualsReflexive.getInstance());
+    	contracts.add(EqualsSymmetric.getInstance());
+    	contracts.add(EqualsHashcode.getInstance());
+    	contracts.add(EqualsToNullRetFalse.getInstance());
+    	contracts.add(EqualsReturnsNormally.getInstance());
+    	contracts.add(EqualsTransitive.getInstance());
+    	contracts.add(CompareToReflexive.getInstance());
+    	contracts.add(CompareToAntiSymmetric.getInstance());
+    	contracts.add(CompareToEquals.getInstance());
+    	contracts.add(CompareToSubs.getInstance());
+    	contracts.add(CompareToTransitive.getInstance());
+    }
     exercisedClasses = new LinkedHashSet<>();
     operations = new TreeSet<>();
   }
@@ -720,6 +722,9 @@ public class OperationModel {
    * @param operation the operation to instantiate and add to this model
    */
   private void addOperation(TypedOperation operation) {
+	  
+	ClassOrInterfaceType opType = ((TypedClassOperation) operation).drawnFromClass;
+
     operation = instantiateOperationTypes(operation);
 
     // Note: capture conversion needs all type variables to be instantiated first
@@ -729,6 +734,9 @@ public class OperationModel {
     if (operation == null) {
       return;
     }
+    
+    // PABLO: Don't let the drawnFromClass lose its value after capture 
+    ((TypedClassOperation) operation).drawnFromClass = opType;
 
     operations.add(operation);
   }

@@ -282,7 +282,7 @@ public class ForwardGenerator extends AbstractGenerator {
         if (runtimeValue instanceof Float && Float.isNaN((float) runtimeValue)) {
           runtimeValue = Float.NaN; // canonicalize NaN value
         }
-        if (!looksLikeObjToString && !tooLongString && runtimePrimitivesSeen.add(runtimeValue)) {
+        if (GenInputsAbstract.save_new_primitives && !looksLikeObjToString && !tooLongString && runtimePrimitivesSeen.add(runtimeValue)) {
           // Have not seen this value before; add it to the component set.
           componentManager.addGeneratedSequence(Sequence.createSequenceForPrimitive(runtimeValue));
         }
@@ -603,7 +603,9 @@ public class ForwardGenerator extends AbstractGenerator {
       // case below
       // is by far the most common.
 
-      if (inputType.isArray()) {
+      //if (inputType.isArray()) {
+      if (GenInputsAbstract.collections_heuristic && 
+    		  inputType.isArray()) {
 
         // 1. If T=inputTypes[i] is an array type, ask the component manager for
         // all sequences
@@ -617,7 +619,9 @@ public class ForwardGenerator extends AbstractGenerator {
             HelperSequenceCreator.createArraySequence(componentManager, inputType);
         l = new ListOfLists<>(l1, l2);
 
-      } else if (inputType.isParameterized()
+        //} else if (inputType.isParameterized()
+      } else if (GenInputsAbstract.collections_heuristic &&
+    		  inputType.isParameterized()
           && ((InstantiatedType) inputType)
               .getGenericClassType()
               .isSubtypeOf(JDKTypes.COLLECTION_TYPE)) {

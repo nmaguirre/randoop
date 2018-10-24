@@ -62,6 +62,34 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("File that lists classes under test")
   public static File classlist = null;
 
+  @Option("File that lists classes under test")
+  public static File fbg_classlist = null;
+  
+  @Option("Max objects to save in the field extensions")
+  public static int fbg_max_objects = Integer.MAX_VALUE;
+
+  @Option("Max array objects to be stored in the field extensions")
+  public static int fbg_max_arr_objects = Integer.MAX_VALUE;
+
+  @Option("Canonicalize classes with up to this field distance from the starting object")
+  public static int fbg_max_field_distance = Integer.MAX_VALUE;
+  
+  public static Set<String> getClassnamesFBG() {
+	  String errMessage = "ERROR while reading list of classes to test using field based generation";
+	  Set<String> classnames = getStringSetFromFile(fbg_classlist, errMessage);
+	  return classnames;
+  }
+  
+  @Option("Use randoop's collections and arrays generation heuristic")
+  public static boolean collections_heuristic = false;
+  
+  @Option("Disable randoop contracts.")
+  public static boolean disable_contracts = true;
+  
+  @Option("Whether to save new primitive values that appear during the execution of test sequences.")
+  public static boolean save_new_primitives = true;
+ 
+  
   // A relative URL like <a href="#specifying-methods"> works when this
   // Javadoc is pasted into the manual, but not in Javadoc proper.
   /**

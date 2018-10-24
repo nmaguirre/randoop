@@ -86,6 +86,9 @@ public class OperationExtractor extends DefaultClassVisitor {
         }
       }
       operations.add(operation);
+      
+      // PABLO: The method knows from which class was obtained by randoop
+      operation.drawnFromClass = classType;
     }
   }
 

@@ -24,6 +24,8 @@ public class TypedClassOperation extends TypedOperation {
    */
   private final ClassOrInterfaceType declaringType;
 
+  public ClassOrInterfaceType drawnFromClass;
+  
   /**
    * Creates a {@link TypedClassOperation} for a given {@link CallableOperation} indicating the
    * signature of the operation.
