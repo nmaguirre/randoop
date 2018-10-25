@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import randoop.main.GenInputsAbstract;
 import randoop.sequence.Sequence;
 import randoop.types.JavaTypes;
 import randoop.types.Type;
@@ -68,6 +69,8 @@ public final class SeedSequences {
    */
   public static Set<Sequence> defaultSeeds() {
     List<Object> seeds = new ArrayList<>(primitiveSeeds);
+	if (GenInputsAbstract.no_initial_primitives)
+		seeds = new ArrayList<>();
     return SeedSequences.objectsToSeeds(seeds);
   }
 

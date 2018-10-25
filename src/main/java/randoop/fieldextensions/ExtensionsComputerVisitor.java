@@ -16,64 +16,27 @@ import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Statement;
 
 
-public class MethodClassifierVisitor implements ExecutionVisitor {
+public class ExtensionsComputerVisitor implements ExecutionVisitor {
 	
 	private BFHeapCanonicalizer canonicalizer;
-	// private ExtensionsStore outputExt;
-	private OperationManager opManager;
-	private IFieldExtensions [] prevExt;
+	private ExtensionsStore outputExt;
 	private int maxObjects;
 	private int maxArrayObjects;
 	private int maxFieldDistance;
 	
 	// classesUnderTest = null to consider all classes as relevant
-	public MethodClassifierVisitor() {
+	public ExtensionsComputerVisitor() {
 		this.maxObjects = GenInputsAbstract.fbg_max_objects;
 		this.maxArrayObjects = GenInputsAbstract.fbg_max_arr_objects;
 		this.maxFieldDistance = GenInputsAbstract.fbg_max_field_distance;
 		canonicalizer = new BFHeapCanonicalizer();
 		canonicalizer.setMaxArrayObjs(maxArrayObjects);
 		canonicalizer.setMaxFieldDistance(maxFieldDistance);
-		//outputExt = new ExtensionsStore(maxObjects);
-		opManager = new OperationManager();
+		outputExt = new ExtensionsStore(maxObjects);
 	}
-	
-	/*
-	public OpState getOperationState(TypedOperation op) {
-		return opManager.getOperationState(op);
-	}
-	
-	public int getNumberOfExecutions(TypedOperation op) {
-		return opManager.getNumberOfExecutions(op);
-	}
-	
-	public int getNumberOfModifierExecutions(TypedOperation op) {
-		return opManager.getNumberOfModifierExecutions(op);
-	}
-	*/
 	
 	@Override
-	public void visitBeforeStatement(ExecutableSequence sequence, int i) {
-		if (sequence.sequence.size() == 1 || i != sequence.sequence.size() -1) return;
-		
-		Statement stmt = sequence.sequence.getStatement(i);
-		TypedOperation op = stmt.getOperation();
-		// FIXME: var v = class.field are not method calls
-		//assert op.isConstructorCall() || op.isMethodCall(): op.toParsableString() + "is not a constructor or method call";
-		String className = Utils.getOperationClass(op);
-		// We only want to see if methods of classes under test are exercised with new objects
-		// For the remaining classes we drop any other sequence that is not a generator
-		if (!Utils.classUnderTest(className) ||
-				opManager.modifier(op)) return;
-
-		Object[] inputs = sequence.getRuntimeInputs(i);
-		prevExt = new IFieldExtensions [inputs.length];
-		for (int j = 0; j < inputs.length; j++) {
-			FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
-			canonicalizer.canonicalize(inputs[j], currExtCollector);
-			prevExt[j] = currExtCollector.getExtensions();
-		}
-	}
+	public void visitBeforeStatement(ExecutableSequence sequence, int i) { }
 
 	@Override
 	public void visitAfterStatement(ExecutableSequence sequence, int i) {
@@ -83,56 +46,38 @@ public class MethodClassifierVisitor implements ExecutionVisitor {
 		TypedOperation op = sequence.sequence.getStatement(i).getOperation();
 		String className = Utils.getOperationClass(op);
 		
-		if (!Utils.classUnderTest(className) ||
-				opManager.modifier(op)) return;
+		if (!Utils.classUnderTest(className)) return;
 		
 		if (statementResult instanceof NormalExecution) {
-			opManager.executed(op);
 			// Check whether the result value generates new objects
 			Statement stmt = sequence.sequence.getStatement(i);
 			if (!stmt.getOutputType().isVoid()) {
 				Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
-				if (retVal != null && !Utils.isPrimitive(retVal)) 
-					/*
+				if (retVal != null && !Utils.isPrimitive(retVal)) {
 					FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(retVal.getClass().getName());
 					// makes extensionsWereExtended default to false
 					collector.start();
 					canonicalizer.canonicalize(retVal, collector);
-					if (collector.extensionsWereExtended()) {
-						newOutput = true;
-						sequence.sequence.setFBActiveFlag(varIndex);
-						opState = OpState.MODIFIER;
-					}
-					*/
-					opManager.setModifier(op);
+				}
 			}
 			
 			Object[] objsAfterExec = sequence.getRuntimeInputs(i);
 			// Check whether the objects referenced by parameters are modified by the execution
 			for (int j = 0; j < objsAfterExec.length; j++) {
 				Object curr = objsAfterExec[j];
-				FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
-				canonicalizer.canonicalize(curr, currExtCollector);
-				if (!prevExt[j].equals(currExtCollector.getExtensions()))
-					opManager.setModifier(op);
-				
-				/*
-				if (curr == null || isPrimitive(curr)) { varIndex++; continue; }
+				if (curr == null || Utils.isPrimitive(curr)) continue;
 				
 				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(curr.getClass().getName());
 				// makes extensionsWereExtended default to false
 				collector.start();
 				canonicalizer.canonicalize(curr, collector);
-				if (collector.extensionsWereExtended()) {
-				}
-				*/
 			}
 		}
 	}
 
 	@Override
 	public void initialize(ExecutableSequence executableSequence) {
-		prevExt = null;
+
 	}
 
 	@Override
@@ -143,12 +88,12 @@ public class MethodClassifierVisitor implements ExecutionVisitor {
 
 	@Override
 	public void doOnTermination() {
-		if (GenInputsAbstract.method_classification_res == null) 
-			throw new IllegalStateException("Set --method-classification to a valid file before using " + MethodClassifierVisitor.class.getName());
-
 		try {
-			FileWriter writer = new FileWriter(GenInputsAbstract.method_classification_res);
-			writer.write(opManager.toString());
+			FileWriter writer = new FileWriter(GenInputsAbstract.extensions_computation_res);
+			if (GenInputsAbstract.save_full_extensions)
+				writer.write(outputExt.toString());
+			else
+				writer.write(outputExt.getStatistics());
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();

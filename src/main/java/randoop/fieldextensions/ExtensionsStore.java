@@ -143,6 +143,30 @@ public class ExtensionsStore {
 	}
 	
 	
+	public String getStatistics() {
+		int totalExtSize = 0;
+		String res = "";
+		for (String cls: getClasses()) {
+			int sum = 0;
+			Map<String, Map<Integer, FieldExtensionsCollector>> col = getOrCreateCollectorForClass(cls);
+			for (String method: col.keySet()) {
+				Map<Integer, FieldExtensionsCollector> mcol = col.get(method);
+				int msum = 0;
+				for (Integer i: mcol.keySet()) {
+					IFieldExtensions methodExt = mcol.get(i).getExtensions();
+					msum += methodExt.size();
+				}
+				res += "  > Class: " + cls + ", Method: " + method + ", Extensions size " + msum + "\n";
+				sum += msum;
+			}
+			
+			res += cls + " extensions size sum: "+ sum + "\n";
+			totalExtSize += sum;
+		}
+		res += "Total extensions size sum: "+ totalExtSize + "\n";
+		return res;
+	}
+	
 	/*
 	- extensionsSizeForClass(c)
 	- domainsSizeForClass(c)
