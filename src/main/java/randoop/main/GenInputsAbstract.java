@@ -75,6 +75,12 @@ public abstract class GenInputsAbstract extends CommandHandler {
 
 	@Option("<filename> Name of a file to which to log the results of extensions computation")
 	public static String extensions_computation_res = "extensions-res.txt";
+	
+	@Option("<filename> Name of a file to which to log the information about the parsed operations")
+	public static String operations_list_res = "operations-list.txt";
+
+	@Option("List the parsed operations an terminate")
+	public static boolean list_operations = false;
 
 	@Option("Whether to log all the information contained in the extensions or just their size")
 	public static boolean save_full_extensions = false;
@@ -83,7 +89,7 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	public static boolean collections_heuristic = false;
 
 	@Option("Disable randoop contracts.")
-	public static boolean disable_contracts = true;
+	public static boolean disable_contracts = false;
 
 	@Option("Whether to save new primitive values that appear during the execution of test sequences.")
 	public static boolean save_new_primitives = true;

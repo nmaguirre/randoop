@@ -1,6 +1,8 @@
 package randoop.main;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -211,6 +213,21 @@ public class GenTests extends GenInputsAbstract {
     }
 
     List<TypedOperation> model = operationModel.getConcreteOperations();
+    
+    if (GenInputsAbstract.list_operations) {
+    	try {
+    		FileWriter writer = new FileWriter(GenInputsAbstract.operations_list_res);
+    		for (TypedOperation op: model)
+    			writer.write(op.toString() + "\n");
+    		writer.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    		System.exit(1);
+    	}
+
+    	System.out.println("Wrote parsed operations to file: " + GenInputsAbstract.operations_list_res);
+    	System.exit(1);
+    }
 
     if (model.isEmpty()) {
       Log.out.println("There are no methods to test. Exiting.");
