@@ -220,6 +220,8 @@ public abstract class TypedOperation implements Operation {
    */
   public abstract String toParsableString();
 
+  public abstract String toJavaString();
+  
   /**
    * Constructs a {@link TypedOperation} for a constructor object.
    *
@@ -500,4 +502,6 @@ public abstract class TypedOperation implements Operation {
   public boolean isUncheckedCast() {
     return operation.isUncheckedCast();
   }
+  
+  
 }

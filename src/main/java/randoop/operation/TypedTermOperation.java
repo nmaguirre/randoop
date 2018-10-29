@@ -52,4 +52,8 @@ class TypedTermOperation extends TypedOperation {
   public String toParsableString() {
     return this.getOperation().toParsableString(null, getInputTypes(), getOutputType());
   }
+  
+  public String toJavaString() {
+	  throw new Error("toJavaString should be only called on operations or constructors with declaring classes");
+  }
 }

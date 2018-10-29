@@ -28,7 +28,7 @@ public class OperationManager {
 	}
 	
 	public void executed(TypedOperation op) {
-		String opName = op.toString();
+		String opName = op.toJavaString();
 		if (opStates.get(opName) == null) 
 			opStates.put(opName, OpState.EXECUTED);
 		
@@ -49,7 +49,7 @@ public class OperationManager {
 	}
 
 	public void setModifier(TypedOperation op) {
-		String opName = op.toString();
+		String opName = op.toJavaString();
 		// Do not set an operation to modifier state the first time it is executed and generates new values 
 		// (i.e. because it initializes variables only the first time)
 		// If the operation never generates new values afterwards its not a real modifier
@@ -71,34 +71,34 @@ public class OperationManager {
 	}
 
 	public OpState getOperationState(TypedOperation op) {
-		String opName = op.toString();
+		String opName = op.toJavaString();
 		if (opStates.get(opName) == null) 
 			return OpState.NOT_EXECUTED;
 		return opStates.get(opName);
 	}
 	
 	public int getNumberOfExecutions(TypedOperation op) {
-		String opName = op.toString();
+		String opName = op.toJavaString();
 		if (numExecs.get(opName) == null) 
 			return 0;
 		return numExecs.get(opName);
 	}
 	
 	public int getNumberOfModifierExecutions(TypedOperation op) {
-		String opName = op.toString();
+		String opName = op.toJavaString();
 		if (modExecs.get(opName) == null) 
 			return 0;
 		return modExecs.get(opName);
 	}
 	
 	public boolean modifierOrObserver(TypedOperation op) {
-		String opName = op.toString();
+		String opName = op.toJavaString();
 		OpState opState = opStates.get(opName);
 		return opState == OpState.MODIFIER || opState == OpState.OBSERVER;
 	}
 	
 	public boolean modifier(TypedOperation op) {
-		String opName = op.toString();
+		String opName = op.toJavaString();
 		OpState opState = opStates.get(opName);
 		return opState == OpState.MODIFIER;
 	}
@@ -106,7 +106,7 @@ public class OperationManager {
 	public String toString() {
 		String res = "";
 	  	for (String op: opStates.keySet()) {
-		  res += op + " is " + opStates.get(op) + 
+		  res += op + ": " + opStates.get(op) + 
 				  ", modifier executions: " + modExecs.get(op) +
 				  ", total executions: " + numExecs.get(op);
 		  res += "\n";

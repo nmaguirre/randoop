@@ -218,7 +218,7 @@ public class GenTests extends GenInputsAbstract {
     	try {
     		FileWriter writer = new FileWriter(GenInputsAbstract.operations_list_res);
     		for (TypedOperation op: model)
-    			writer.write(op.toString() + "\n");
+    			writer.write(op.toJavaString() + "\n");
     		writer.close();
     	} catch (IOException e) {
     		e.printStackTrace();

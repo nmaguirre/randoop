@@ -306,4 +306,9 @@ public final class MethodCall extends CallableOperation {
   public boolean satisfies(ReflectionPredicate predicate) {
     return predicate.test(method);
   }
+  
+  public String toJavaString() {
+	return method.toString();
+  }
+  
 }

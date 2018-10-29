@@ -326,4 +326,8 @@ public final class ConstructorCall extends CallableOperation {
   public boolean satisfies(ReflectionPredicate predicate) {
     return predicate.test(constructor);
   }
+  
+  public String toJavaString() {
+	return constructor.toString();
+  }
 }

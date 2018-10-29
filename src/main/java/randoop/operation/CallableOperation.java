@@ -126,4 +126,8 @@ public abstract class CallableOperation implements Operation {
    */
   public abstract String toParsableString(
       Type declaringType, TypeTuple inputTypes, Type outputType);
+
+  public String toJavaString() {
+	  throw new Error("toJavaString should be only called with operations or constructors");
+  }
 }

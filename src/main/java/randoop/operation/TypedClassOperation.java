@@ -114,6 +114,13 @@ public class TypedClassOperation extends TypedOperation {
   public String toParsableString() {
     return this.getOperation().toParsableString(declaringType, getInputTypes(), getOutputType());
   }
+  
+  @Override
+  public String toJavaString() {
+    return this.getOperation().toJavaString();
+  }
+
+  
 
   @Override
   public String toString() {
