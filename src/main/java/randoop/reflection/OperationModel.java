@@ -523,15 +523,30 @@ public class OperationModel {
       List<TypeVariable> parameters, Substitution<ReferenceType> substitution) {
     List<ReferenceType> selectedTypes = new ArrayList<>();
     for (TypeVariable typeArgument : parameters) {
-      List<ReferenceType> candidates = selectCandidates(typeArgument);
-      if (candidates.isEmpty()) {
-        if (Log.isLoggingOn()) {
-          Log.logLine("No candidate types for " + typeArgument);
-        }
-        return null;
-      }
-      selectedTypes.add(Randomness.randomMember(candidates));
+    	List<ReferenceType> candidates = selectCandidates(typeArgument);
+    	if (candidates.isEmpty()) {
+    		if (Log.isLoggingOn()) {
+    			Log.logLine("No candidate types for " + typeArgument);
+    		}
+    		return null;
+    	}
+
+    	//selectedTypes.add(Randomness.randomMember(candidates));
+    	if (GenInputsAbstract.instance_generics_integer) {
+    		for (int k = 0; k < candidates.size(); k++) {
+    			ReferenceType t = candidates.get(k);
+    			if (t.isBoxedPrimitive() && t.toString().equals("java.lang.Integer")) {
+    				selectedTypes.add(t);
+    				break;
+    			}
+    		}
+    		if (selectedTypes.isEmpty())
+    			throw new Error("Could not instance generic type parameter with java.lang.Integer");
+    	}
+    	else
+    		selectedTypes.add(Randomness.randomMember(candidates));
     }
+
     return substitution.extend(Substitution.forArgs(parameters, selectedTypes));
   }
 

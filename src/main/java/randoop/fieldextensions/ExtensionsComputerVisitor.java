@@ -90,10 +90,7 @@ public class ExtensionsComputerVisitor implements ExecutionVisitor {
 	public void doOnTermination() {
 		try {
 			FileWriter writer = new FileWriter(GenInputsAbstract.extensions_computation_res);
-			if (GenInputsAbstract.save_full_extensions)
-				writer.write(outputExt.toString());
-			else
-				writer.write(outputExt.getStatistics());
+			writer.write(outputExt.getStatistics(GenInputsAbstract.save_full_extensions));
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -97,6 +97,8 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	@Option("No initial primitive seeds")
 	public static boolean no_initial_primitives = false;
 
+	@Option("Instance generic parameters with integers only")
+	public static boolean instance_generics_integer = false;
 
 	// A relative URL like <a href="#specifying-methods"> works when this
 	// Javadoc is pasted into the manual, but not in Javadoc proper.

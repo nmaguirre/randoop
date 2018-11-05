@@ -144,6 +144,10 @@ public class ExtensionsStore {
 	
 	
 	public String getStatistics() {
+		return getStatistics(false);
+	}
+	
+	public String getStatistics(boolean fullExtensions) {
 		int totalExtSize = 0;
 		String res = "";
 		for (String cls: getClasses()) {
@@ -151,12 +155,16 @@ public class ExtensionsStore {
 			Map<String, Map<Integer, FieldExtensionsCollector>> col = getOrCreateCollectorForClass(cls);
 			for (String method: col.keySet()) {
 				Map<Integer, FieldExtensionsCollector> mcol = col.get(method);
+				res += "  > Class: " + cls + ", Method: " + method;
+				
 				int msum = 0;
 				for (Integer i: mcol.keySet()) {
 					IFieldExtensions methodExt = mcol.get(i).getExtensions();
+					if (fullExtensions)
+						res += "\n    > Extensions for parameter " + i + ": " + methodExt.toString();
 					msum += methodExt.size();
 				}
-				res += "  > Class: " + cls + ", Method: " + method + ", Extensions size " + msum + "\n";
+				res += "  > Extensions size: " + msum + "\n";
 				sum += msum;
 			}
 			

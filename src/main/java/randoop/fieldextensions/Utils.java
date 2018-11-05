@@ -22,7 +22,8 @@ public class Utils {
 		if (op.toParsableString().equals("java.lang.Object.<init>()"))
 			return "java.lang.Object";
 
-		assert typOp.drawnFromClass != null: op.toParsableString() + "is not associated to any input class";
+		assert typOp.drawnFromClass != null: 
+			op.toParsableString() + "is not associated to any input class";
 		
 		String className = typOp.drawnFromClass.getName();
 		String classNameNoGenerics = classNameCache.get(className);
