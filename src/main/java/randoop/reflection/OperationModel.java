@@ -153,7 +153,8 @@ public class OperationModel {
     model.instantiateGenericClassTypes();
     model.addOperations(model.concreteClassTypes, visibility, reflectionPredicate);
     model.addOperations(methodSignatures);
-    model.addObjectConstructor();
+    if (GenInputsAbstract.use_object_constructor)
+    	model.addObjectConstructor();
 
     return model;
   }

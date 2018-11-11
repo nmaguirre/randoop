@@ -100,6 +100,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	@Option("Instance generic parameters with integers only")
 	public static boolean instance_generics_integer = false;
 
+	@Option("Use object constructor for test generation")
+	public static boolean use_object_constructor = true;
+
 	// A relative URL like <a href="#specifying-methods"> works when this
 	// Javadoc is pasted into the manual, but not in Javadoc proper.
 	/**
