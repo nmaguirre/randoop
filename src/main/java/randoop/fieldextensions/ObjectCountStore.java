@@ -1,5 +1,7 @@
 package randoop.fieldextensions;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -7,6 +9,7 @@ import java.util.Set;
 
 import randoop.ExecutionOutcome;
 import randoop.NormalExecution;
+import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Statement;
@@ -20,6 +23,7 @@ public class ObjectCountStore {
 //	private int maxFieldDistance;
 	private Map<String, Set<Object>> objs = new LinkedHashMap<>();
 	private int cantCount;
+	private Map<String, Integer> objsSize = new LinkedHashMap<>();
 
 //	public ObjectCountStore(int maxObjects, int maxArrayObjects, int maxFieldDistance) {
 //		this.maxObjects= maxObjects;
@@ -90,7 +94,32 @@ public class ObjectCountStore {
 			Object curr = objsAfterExec[j];
 			countObject(curr);
 		}
+		
+		if (GenInputsAbstract.measure_objects)
+			measureObjects(sequence);
+		
 	}
+	
+	
+	private void measureObjects(ExecutableSequence sequence) {
+		//if (!sequence.isNormalExecution()) return;
+
+		int lastStmtInd = sequence.sequence.size() -1;
+		Statement stmt = sequence.sequence.getStatement(lastStmtInd);
+		if (!stmt.getOutputType().isVoid()) {
+			ExecutionOutcome statementResult = sequence.getResult(lastStmtInd);
+			Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
+			measureObject(retVal);
+		}
+		
+		Object[] objsAfterExec = sequence.getRuntimeInputs(lastStmtInd);
+		// Count objects referenced by parameters 
+		for (int j = 0; j < objsAfterExec.length; j++) {
+			Object curr = objsAfterExec[j];
+			measureObject(curr);
+		}
+	}
+	
 	
 	private void countObject(Object o) {
 		try {
@@ -107,6 +136,27 @@ public class ObjectCountStore {
 			cantCount++;
 		}
 	}
+	
+	
+	private void measureObject(Object o) {
+		try {
+			if (o != null) {
+				String cls = o.getClass().getName();
+				Method m = o.getClass().getMethod("size", null);
+				m.setAccessible(true);
+				Integer size = (Integer) m.invoke(o);
+				
+				Integer maxSize = objsSize.get(cls);
+				if (maxSize == null) 
+					objsSize.put(cls, size);
+				else
+					objsSize.put(cls, Math.max(maxSize, size));
+			}
+		} catch (Exception e) {
+
+		}
+	}
+	
 
 	public String countResultToString() {
 		StringBuilder sb = new StringBuilder();
@@ -126,6 +176,17 @@ public class ObjectCountStore {
 		sb.append("Objects not counted: ")
 			.append(cantCount)
 			.append("\n");
+		
+		if (GenInputsAbstract.measure_objects) {
+			for (String cls: objsSize.keySet()) {
+				sb.append("Max object size for class ")
+					.append(cls)
+					.append(": ")
+					.append(objsSize.get(cls))
+					.append("\n");
+			}
+		}
+		
 		return sb.toString();
 	}
 	
