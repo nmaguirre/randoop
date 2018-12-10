@@ -57,6 +57,11 @@ public abstract class GenInputsAbstract extends CommandHandler {
 
 	@Option("Max objects to save in the field extensions")
 	public static int fbg_max_objects = Integer.MAX_VALUE;
+	
+//	@Option("Drop tests whose objects exceed size limits")
+//	public static boolean drop_tests_exceeding_size = false;
+	@Option("Max objects to make canonicalization stop and drop current test")
+	public static int max_stopping_objects = 0;
 
 	@Option("Max array objects to be stored in the field extensions")
 	public static int fbg_max_arr_objects = Integer.MAX_VALUE;
@@ -64,6 +69,18 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	@Option("Canonicalize classes with up to this field distance from the starting object")
 	public static int fbg_max_field_distance = Integer.MAX_VALUE;
 
+	@Option("Canonicalize objects with up to this depth")
+	public static int fbg_max_bf_depth = Integer.MAX_VALUE;
+	
+	@Option("Minimum number of modifier executions to classify a method as modifier")
+	public static int min_execs_to_modifier = 1;
+	
+	@Option("Drop tests that do not extend the global field extensions")
+	public static boolean field_based_gen = false;
+
+	@Option("Number of times a single operation is permitted in a single test")
+	public static int single_method_bound = 0;
+	
 	public static Set<String> getClassnamesFBG() {
 		String errMessage = "ERROR while reading list of classes to test using field based generation";
 		Set<String> classnames = getStringSetFromFile(fbg_classlist, errMessage);

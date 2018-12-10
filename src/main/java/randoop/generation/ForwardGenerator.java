@@ -11,9 +11,11 @@ import randoop.DummyVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
+import randoop.fieldextensions.VisitorException;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.Operation;
+import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Sequence;
@@ -149,7 +151,14 @@ public class ForwardGenerator extends AbstractGenerator {
     long gentime = endTime - startTime;
     startTime = endTime; // reset start time.
 
-    eSeq.execute(executionVisitor, checkGenerator);
+    // FIXME: Ugly hack to allow extensions computer visitor to tell randoop it should not store a test
+    try {
+    	eSeq.execute(executionVisitor, checkGenerator);
+    } 
+    catch (VisitorException e) {
+    	setCurrentSequence(null);
+    	return null;
+    }
 
     endTime = System.nanoTime();
 
@@ -336,6 +345,19 @@ public class ForwardGenerator extends AbstractGenerator {
     }
 
     Sequence newSequence = concatSeq.extend(operation, inputs);
+    
+    if (GenInputsAbstract.single_method_bound > 0) {
+    	String opName = operation.toJavaString();
+    	int opCount = 0;
+    	for (int i = 0; i < newSequence.size(); i++) {
+    		if (newSequence.getStatement(i).getOperation() instanceof TypedClassOperation && 
+    				newSequence.getStatement(i).getOperation().toJavaString().equals(opName)) 
+    			opCount++;
+   		}
+    	
+    	if (opCount > GenInputsAbstract.single_method_bound)
+    		return null;
+    }
 
     // With .5 probability, do a primitive value heuristic.
     if (GenInputsAbstract.repeat_heuristic && Randomness.nextRandomInt(10) == 0) {

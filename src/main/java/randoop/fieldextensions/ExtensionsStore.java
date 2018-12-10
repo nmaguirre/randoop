@@ -161,7 +161,7 @@ public class ExtensionsStore {
 				for (Integer i: mcol.keySet()) {
 					IFieldExtensions methodExt = mcol.get(i).getExtensions();
 					if (fullExtensions)
-						res += "\n    > Extensions for parameter " + i + ": " + methodExt.toString();
+						res += "\n    > Extensions for parameter " + i + ": " + methodExt.toSortedString();
 					msum += methodExt.size();
 				}
 				res += "  > Extensions size: " + msum + "\n";

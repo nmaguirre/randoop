@@ -16,26 +16,27 @@ import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Statement;
 
 
-public class MethodClassifierVisitor implements ExecutionVisitor {
+public class MethodClassifierVisitorGlobalExt implements ExecutionVisitor {
 	
 	private BFHeapCanonicalizer canonicalizer;
-	// private ExtensionsStore outputExt;
-	private IOperationManager opManager;
+	private ExtensionsStore outputExt;
+	private OperationManagerGlobalExt opManager;
 	private IFieldExtensions [] prevExt;
 	private int maxObjects;
 	private int maxArrayObjects;
 	private int maxFieldDistance;
 	
 	// classesUnderTest = null to consider all classes as relevant
-	public MethodClassifierVisitor() {
+	public MethodClassifierVisitorGlobalExt() {
 		this.maxObjects = GenInputsAbstract.fbg_max_objects;
 		this.maxArrayObjects = GenInputsAbstract.fbg_max_arr_objects;
 		this.maxFieldDistance = GenInputsAbstract.fbg_max_field_distance;
 		canonicalizer = new BFHeapCanonicalizer();
 		canonicalizer.setMaxArrayObjs(maxArrayObjects);
 		canonicalizer.setMaxFieldDistance(maxFieldDistance);
-		//outputExt = new ExtensionsStore(maxObjects);
-		opManager = new OperationManager();
+		outputExt = new ExtensionsStore(maxObjects);
+		opManager = new OperationManagerGlobalExt();
+		opManager.setMinExecutionsToModifier(GenInputsAbstract.min_execs_to_modifier);
 	}
 	
 	/*
@@ -54,6 +55,7 @@ public class MethodClassifierVisitor implements ExecutionVisitor {
 	
 	@Override
 	public void visitBeforeStatement(ExecutableSequence sequence, int i) {
+		/*
 		if (sequence.sequence.size() == 1 || i != sequence.sequence.size() -1) return;
 		
 		Statement stmt = sequence.sequence.getStatement(i);
@@ -63,8 +65,7 @@ public class MethodClassifierVisitor implements ExecutionVisitor {
 		String className = Utils.getOperationClass(op);
 		// We only want to see if methods of classes under test are exercised with new objects
 		// For the remaining classes we drop any other sequence that is not a generator
-		if (!Utils.classUnderTest(className) ||
-				opManager.modifier(op)) return;
+		if (!Utils.classUnderTest(className)) return;
 
 		Object[] inputs = sequence.getRuntimeInputs(i);
 		prevExt = new IFieldExtensions [inputs.length];
@@ -73,6 +74,7 @@ public class MethodClassifierVisitor implements ExecutionVisitor {
 			canonicalizer.canonicalize(inputs[j], currExtCollector);
 			prevExt[j] = currExtCollector.getExtensions();
 		}
+		*/
 	}
 
 	@Override
@@ -83,50 +85,53 @@ public class MethodClassifierVisitor implements ExecutionVisitor {
 		TypedOperation op = sequence.sequence.getStatement(i).getOperation();
 		String className = Utils.getOperationClass(op);
 		
-		if (!Utils.classUnderTest(className) ||
-				opManager.modifier(op)) return;
+		if (!Utils.classUnderTest(className)) return;
 		
+		boolean extended = false;
 		if (statementResult instanceof NormalExecution) {
 			opManager.executed(op);
 			// Check whether the result value generates new objects
 			Statement stmt = sequence.sequence.getStatement(i);
 			if (!stmt.getOutputType().isVoid()) {
 				Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
-				if (retVal != null && !Utils.isPrimitive(retVal)) 
-					/*
+				if (retVal != null && !Utils.isPrimitive(retVal)) {
 					FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(retVal.getClass().getName());
 					// makes extensionsWereExtended default to false
 					collector.start();
 					canonicalizer.canonicalize(retVal, collector);
-					if (collector.extensionsWereExtended()) {
-						newOutput = true;
-						sequence.sequence.setFBActiveFlag(varIndex);
-						opState = OpState.MODIFIER;
-					}
-					*/
-					opManager.setModifier(op);
+					extended |= collector.extensionsWereExtended();
+				}
 			}
 			
-			Object[] objsAfterExec = sequence.getRuntimeInputs(i);
-			// Check whether the objects referenced by parameters are modified by the execution
-			for (int j = 0; j < objsAfterExec.length; j++) {
-				Object curr = objsAfterExec[j];
-				FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
-				canonicalizer.canonicalize(curr, currExtCollector);
-				if (!prevExt[j].equals(currExtCollector.getExtensions()))
-					opManager.setModifier(op);
-				
+			if (!extended) {
+				Object[] objsAfterExec = sequence.getRuntimeInputs(i);
+				// Check whether the objects referenced by parameters are modified by the execution
+				for (int j = 0; j < objsAfterExec.length; j++) {
+					Object curr = objsAfterExec[j];
+					if (curr == null || Utils.isPrimitive(curr)) continue;
+					FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(curr.getClass().getName());
+					// makes extensionsWereExtended default to false
+					collector.start();
+					canonicalizer.canonicalize(curr, collector);
+					extended |= collector.extensionsWereExtended();
+				}
 				/*
-				if (curr == null || isPrimitive(curr)) { varIndex++; continue; }
-				
-				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(curr.getClass().getName());
-				// makes extensionsWereExtended default to false
-				collector.start();
-				canonicalizer.canonicalize(curr, collector);
-				if (collector.extensionsWereExtended()) {
+				Object[] objsAfterExec = sequence.getRuntimeInputs(i);
+				// Check whether the objects referenced by parameters are modified by the execution
+				for (int j = 0; j < objsAfterExec.length; j++) {
+					Object curr = objsAfterExec[j];
+					FieldExtensionsCollector currExtCollector = new BoundedFieldExtensionsCollector(maxObjects);
+					canonicalizer.canonicalize(curr, currExtCollector);
+					if (!prevExt[j].equals(currExtCollector.getExtensions())) {
+						extended = true;
+						break;
+					}
 				}
 				*/
 			}
+			
+			if (extended)
+				opManager.setModifier(op);
 		}
 	}
 
@@ -144,7 +149,7 @@ public class MethodClassifierVisitor implements ExecutionVisitor {
 	@Override
 	public void doOnTermination() {
 		if (GenInputsAbstract.method_classification_res == null) 
-			throw new IllegalStateException("Set --method-classification to a valid file before using " + MethodClassifierVisitor.class.getName());
+			throw new IllegalStateException("Set --method-classification to a valid file before using " + MethodClassifierVisitorGlobalExt.class.getName());
 
 		try {
 			FileWriter writer = new FileWriter(GenInputsAbstract.method_classification_res);
