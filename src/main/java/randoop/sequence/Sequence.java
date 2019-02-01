@@ -1223,7 +1223,7 @@ public final class Sequence implements WeightedElement {
   }
   
   // PABLO: Active flags for the last sequence statement according to field based filtering
-  List<Integer> fbActiveFlags = new LinkedList<Integer>();
+  List<Integer> fbActiveFlags = new ArrayList<Integer>();
 
   public void setFBActiveFlag(int j) {
 	  fbActiveFlags.add(j);

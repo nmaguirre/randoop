@@ -6,6 +6,7 @@ import plume.Unpublicized;
 import randoop.*;
 import randoop.fieldextensions.ExtensionsCollectorInOutVisitor;
 import randoop.fieldextensions.ObjectCountStore;
+import randoop.fieldextensions.ObjectSerializer;
 import randoop.fieldextensions.OperationManager.OpState;
 import randoop.main.GenInputsAbstract;
 import randoop.main.GenInputsAbstract.FieldBasedGen;
@@ -305,6 +306,7 @@ public abstract class AbstractGenerator {
   public abstract int numGeneratedSequences();
 
   protected ObjectCountStore objCountSt;
+  protected ObjectSerializer serializer;
   
   /**
    * Creates and executes new sequences until stopping criteria is met.
@@ -347,7 +349,9 @@ public abstract class AbstractGenerator {
     }
     
     if (GenInputsAbstract.count_objects) 
-    		objCountSt = new ObjectCountStore();
+   		objCountSt = new ObjectCountStore();
+    if (GenInputsAbstract.serialize_objects)
+    	serializer = new ObjectSerializer(GenInputsAbstract.serialize_class, GenInputsAbstract.serial_file);
 
     // First phase. Abstracted unmodified original randoop behavior
     genTests();
@@ -358,7 +362,7 @@ public abstract class AbstractGenerator {
     if (GenInputsAbstract.fbg_phase2_budget > 0) {
 	    System.out.println("\nSecond phase starting...");
        	long secondPhaseStartTime = System.currentTimeMillis();
- 
+  
        	// 1- Put non generator sequences in generators map 
        	saveNonGeneratorsAsGenerators();
        	
@@ -403,6 +407,9 @@ public abstract class AbstractGenerator {
     		*/
     		System.out.println(objCountSt.countResultToString());
     }
+
+    if (GenInputsAbstract.serialize_objects)
+    	serializer.close();
 
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();

@@ -157,7 +157,10 @@ public class ForwardGenerator extends AbstractGenerator {
     		return null;
     
     if (GenInputsAbstract.count_objects) 
-    		objCountSt.countObjects(eSeq);
+    	objCountSt.countObjects(eSeq);
+    
+    if (GenInputsAbstract.serialize_objects)
+    	serializer.serializeObjects(eSeq);
     
 	endTime = System.nanoTime();
 	gentime += endTime - startTime;

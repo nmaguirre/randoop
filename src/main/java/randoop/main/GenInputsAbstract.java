@@ -183,6 +183,15 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	  GEN, FILTER, GENFILTER, DISABLED,  
   }
   
+  @Option("Write the objects created by tests to a serial file")
+  public static boolean serialize_objects = false;
+  
+  @Option("Serialize objects from this class")
+  public static String serialize_class = null;
+  
+  @Option("Serialize objects to this file")
+  public static String serial_file = "objects.ser";
+  
   @Option("Count number of different objects created by tests")
   public static boolean count_objects = false;
   
