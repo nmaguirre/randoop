@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import canonicalizer.BFHeapCanonicalizer;
+import extensions.BoundedFieldExtensionsCollector;
 import extensions.FieldExtensionsCollector;
 import randoop.ExecutionOutcome;
 import randoop.ExecutionVisitor;
@@ -65,6 +66,10 @@ public class ExtensionsComputerVisitor implements ExecutionVisitor {
 						FieldExtensionsCollector col = new FieldExtensionsCollector();
 						if (!canonicalizer.canonicalize(retVal, col))
 							throw new VisitorException();
+						
+						// Check if the number of primitives in global extensions are exceeded 
+						if (boundedExtensionsFull(retVal))
+							throw new VisitorException();
 					}
 				}
 
@@ -76,6 +81,10 @@ public class ExtensionsComputerVisitor implements ExecutionVisitor {
 
 					FieldExtensionsCollector col = new FieldExtensionsCollector();
 					if (!canonicalizer.canonicalize(curr, col))
+						throw new VisitorException();
+					
+					// Check if the number of primitives in global extensions are exceeded 
+					if (boundedExtensionsFull(curr))
 						throw new VisitorException();
 				}
 			}
@@ -111,6 +120,19 @@ public class ExtensionsComputerVisitor implements ExecutionVisitor {
 				throw new VisitorException();
 				
 		}
+	}
+	
+	private boolean boundedExtensionsFull(Object retVal) {
+		if (GenInputsAbstract.max_stopping_primitives > 0) {
+			// Check if the number of primitives in global extensions are exceeded 
+			FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(retVal.getClass().getName());
+			FieldExtensionsCollector boundedCol = new BoundedFieldExtensionsCollector(GenInputsAbstract.max_stopping_primitives, true);
+			boundedCol.getExtensions().addAll(collector.getExtensions());
+			assert !boundedCol.extensionsLimitExceeded(): "Previous extensions should never exceed bounds";
+			canonicalizer.canonicalize(retVal, boundedCol);
+			return boundedCol.extensionsLimitExceeded();
+		}
+		return false;
 	}
 
 	@Override

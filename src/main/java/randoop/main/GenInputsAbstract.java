@@ -63,6 +63,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	@Option("Max objects to make canonicalization stop and drop current test")
 	public static int max_stopping_objects = 0;
 
+	@Option("Max primitive values in field extensions to make canonicalization stop and drop current test")
+	public static int max_stopping_primitives = 0;
+
 	@Option("Max array objects to be stored in the field extensions")
 	public static int fbg_max_arr_objects = Integer.MAX_VALUE;
 
