@@ -130,11 +130,12 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   
   
   public void gen() {
-	  ComponentManager prevMan = new ComponentManagerBE();
-	  prevMan.gralSeeds = componentManager.gralSeeds;
+	  ComponentManager prevMan = new ComponentManager();
+	  // componentManager has only primitive sequences, we copy them to the current manager
+	  prevMan.copyAllSequences(componentManager);
 	  for (int iteration = 0; iteration < bedepth; iteration++) {
-		  ComponentManager currMan = new ComponentManagerBE(); 
-		  currMan.gralSeeds = componentManager.gralSeeds;
+		  ComponentManager currMan = new ComponentManager(); 
+		  currMan.copyAllSequences(componentManager);
 
 		  if (stop()) {
 			  System.out.println("DEBUG: Stopping criteria reached");
@@ -262,10 +263,35 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  ExecutableSequence eSeq = new ExecutableSequence(newSequence);
 
 				  // Execute new sequence
-				  execute(eSeq);
+				  setCurrentSequence(eSeq.sequence);
+
+				  // long endTime = System.nanoTime();
+				  // long gentime = endTime - startTime;
+				  //				     startTime = endTime; // reset start time.
+				  long startTime = System.nanoTime(); // reset start time.
+
+				  eSeq.execute(executionVisitor, checkGenerator);
+
+				  long endTime = System.nanoTime();
+
+				  eSeq.exectime = endTime - startTime;
+				  startTime = endTime; // reset start time.
+
+				  processSequence(eSeq);
+
+				  /*
+				     if (eSeq.sequence.hasActiveFlags()) {
+				         componentManager.addGeneratedSequence(eSeq.sequence);
+				     }
+				   */
+
+				  //endTime = System.nanoTime();
+				  //gentime += endTime - startTime;
+				  // eSeq.gentime = gentime;
+				  eSeq.gentime = 0;
 
 				  // TODO: Save the sequence for further extension?
-				  if (eSeq.isNormalExecution())
+				  if (eSeq.sequence.hasActiveFlags()) 
 					  currMan.addGeneratedSequence(eSeq.sequence);
 
 				  // Notify listeners we just completed generation step.
@@ -301,41 +327,9 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   
 
   
-
-  public void execute(ExecutableSequence eSeq) {
-
-  //  long startTime = System.nanoTime();
-
-    setCurrentSequence(eSeq.sequence);
-
-   // long endTime = System.nanoTime();
-   // long gentime = endTime - startTime;
-//    startTime = endTime; // reset start time.
-    long startTime = System.nanoTime(); // reset start time.
-
-    eSeq.execute(executionVisitor, checkGenerator);
-    
-    long endTime = System.nanoTime();
-
-    eSeq.exectime = endTime - startTime;
-    startTime = endTime; // reset start time.
- 
-    processSequence(eSeq);
-
-    /*
-    if (eSeq.sequence.hasActiveFlags()) {
-        componentManager.addGeneratedSequence(eSeq.sequence);
-    }
-    */
-
-    //endTime = System.nanoTime();
-    //gentime += endTime - startTime;
-    // eSeq.gentime = gentime;
-    eSeq.gentime = 0;
-  }
-  
   
   private void processSequence(ExecutableSequence seq) {
+
 	    if (seq.hasNonExecutedStatements()) {
 	      if (Log.isLoggingOn()) {
 	        Log.logLine(
@@ -377,7 +371,70 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 	      seq.sequence.clearAllActiveFlags();
 	      return;
 	    }
-  }
+
+	    // Clear the active flags of some statements
+	    for (int i = 0; i < seq.sequence.size(); i++) {
+
+	      // If there is no return value, clear its active flag
+	      // Cast succeeds because of isNormalExecution clause earlier in this
+	      // method.
+	      NormalExecution e = (NormalExecution) seq.getResult(i);
+	      Object runtimeValue = e.getRuntimeValue();
+	      if (runtimeValue == null) {
+	        if (Log.isLoggingOn()) {
+	          Log.logLine("Making index " + i + " inactive (value is null)");
+	        }
+	        seq.sequence.clearActiveFlag(i);
+	        continue;
+	      }
+
+	      // If it is a call to an observer method, clear the active flag of
+	      // its receiver. (This method doesn't side effect the receiver, so
+	      // Randoop should use the other shorter sequence that produces the
+	      // receiver.)
+	      Sequence stmts = seq.sequence;
+	      Statement stmt = stmts.statements.get(i);
+	      if (stmt.isMethodCall() && observers.contains(stmt.getOperation())) {
+	        List<Integer> inputVars = stmts.getInputsAsAbsoluteIndices(i);
+	        int receiver = inputVars.get(0);
+	        seq.sequence.clearActiveFlag(receiver);
+	      }
+
+	      // If its runtime value is a primitive value, clear its active flag,
+	      // and if the value is new, add a sequence corresponding to that value.
+	      Class<?> objectClass = runtimeValue.getClass();
+	      if (NonreceiverTerm.isNonreceiverType(objectClass) && !objectClass.equals(Class.class)) {
+	        if (Log.isLoggingOn()) {
+	          Log.logLine("Making index " + i + " inactive (value is a primitive)");
+	        }
+	        seq.sequence.clearActiveFlag(i);
+
+	        boolean looksLikeObjToString =
+	            (runtimeValue instanceof String)
+	                && Value.looksLikeObjectToString((String) runtimeValue);
+	        boolean tooLongString =
+	            (runtimeValue instanceof String) && !Value.stringLengthOK((String) runtimeValue);
+	        if (runtimeValue instanceof Double && Double.isNaN((double) runtimeValue)) {
+	          runtimeValue = Double.NaN; // canonicalize NaN value
+	        }
+	        if (runtimeValue instanceof Float && Float.isNaN((float) runtimeValue)) {
+	          runtimeValue = Float.NaN; // canonicalize NaN value
+	        }
+	        // FIXME: Don't save newly discovered primitive values for now
+	        /*
+	        if (!looksLikeObjToString && !tooLongString && runtimePrimitivesSeen.add(runtimeValue)) {
+	          // Have not seen this value before; add it to the component set.
+	          componentManager.addGeneratedSequence(Sequence.createSequenceForPrimitive(runtimeValue));
+	        }
+	        */
+	      } else {
+	        if (Log.isLoggingOn()) {
+	          Log.logLine("Making index " + i + " active.");
+	        }
+	      }
+	    }
+	  }
+
 
   @Override
   public Set<Sequence> getAllSequences() {

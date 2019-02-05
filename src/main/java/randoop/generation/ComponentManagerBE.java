@@ -40,6 +40,8 @@ import randoop.util.SimpleList;
  * clearGeneratedSequences() method, which removes only general, non-seed
  * components from the collection.
  */
+
+@Deprecated
 public class ComponentManagerBE extends ComponentManager {
 
   /**

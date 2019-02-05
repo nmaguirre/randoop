@@ -49,6 +49,11 @@ public class ComponentManager {
   // and seed sequences.
   protected SequenceCollection gralComponents;
 
+  public void copyAllSequences(ComponentManager other) {
+	  for (Sequence s: other.gralComponents.getAllSequences())
+		  addGeneratedSequence(s);
+  }
+  
   /**
    * The subset of the sequences that were given pre-generation to the component
    * manager (via its constructor).
@@ -56,7 +61,7 @@ public class ComponentManager {
   // Seeds are all contained in gralComponents. This list
   // is kept to restore seeds if the user calls
   // clearGeneratedSequences().
-  public Collection<Sequence> gralSeeds;
+  protected Collection<Sequence> gralSeeds;
 
   /**
    * A set of additional components representing literals that should only be

@@ -49,6 +49,8 @@ import randoop.util.SimpleList;
  * subtypes in set of sequences, and returns the range of <code>S</code> in the
  * sequence map.
  */
+
+@Deprecated
 public class SequenceCollectionBE extends SequenceCollection {
 
 
