@@ -325,6 +325,17 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Maximum number of tests to ouput; contrast to --inputlimit")
   public static int outputlimit = 100000000;
 
+  
+  @Option("Maximum number of iterations for the bounded exhuastive generator")
+  public static int be_depth = 3;
+  
+  @Option("Instance generic type parameters only with Integer class")
+  public static boolean instance_generics_integer = false; 
+  
+  @Option("Disable default Randoop contracts")
+  public static boolean disable_contracts = false;
+  
+  
   /**
    * Maximum number of test method candidates generated. Test generation stops
    * when either the time limit (--timelimit) is reached, OR the number of

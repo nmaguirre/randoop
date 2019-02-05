@@ -47,7 +47,7 @@ public class ComponentManager {
    */
   // Is never null. Contains both general components
   // and seed sequences.
-  private SequenceCollection gralComponents;
+  protected SequenceCollection gralComponents;
 
   /**
    * The subset of the sequences that were given pre-generation to the component
@@ -56,7 +56,7 @@ public class ComponentManager {
   // Seeds are all contained in gralComponents. This list
   // is kept to restore seeds if the user calls
   // clearGeneratedSequences().
-  private final Collection<Sequence> gralSeeds;
+  public Collection<Sequence> gralSeeds;
 
   /**
    * A set of additional components representing literals that should only be

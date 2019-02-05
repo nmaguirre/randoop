@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -1127,4 +1128,19 @@ public final class Sequence implements WeightedElement {
 
     return new Sequence().extend(TypedOperation.createPrimitiveInitialization(type, value));
   }
+
+  private Map<Type, List<Variable>> activeTypesAndVars = new LinkedHashMap<>();
+  public void addVariableForType(Type type, Variable argument) {
+	  List<Variable> vars = activeTypesAndVars.get(type);
+	  if (vars == null) {
+		  vars = new LinkedList<>();
+		  activeTypesAndVars.put(type, vars);
+	  }
+	  vars.add(argument);
+  }
+  
+  public List<Variable> getActiveVarsForType(Type type) {
+	  return activeTypesAndVars.get(type);
+  }
+
 }

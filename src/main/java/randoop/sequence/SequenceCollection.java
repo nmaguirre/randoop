@@ -54,11 +54,11 @@ public class SequenceCollection {
   // We make it a list to make it easier to pick out an element at random.
   private Map<Type, ArrayListSimpleList<Sequence>> sequenceMap = new LinkedHashMap<>();
 
-  private SubTypeSet typeSet = new SubTypeSet(false);
+  protected SubTypeSet typeSet = new SubTypeSet(false);
 
   private int sequenceCount = 0;
 
-  private void checkRep() {
+  protected void checkRep() {
     if (!GenInputsAbstract.debug_checks) return;
     if (sequenceMap.size() != typeSet.size()) {
       String b =
@@ -172,7 +172,7 @@ public class SequenceCollection {
    * @param sequence  the sequence
    * @param type  the {@link Type}
    */
-  private void updateCompatibleMap(Sequence sequence, Type type) {
+  protected void updateCompatibleMap(Sequence sequence, Type type) {
     ArrayListSimpleList<Sequence> set = this.sequenceMap.get(type);
     if (set == null) {
       set = new ArrayListSimpleList<>();

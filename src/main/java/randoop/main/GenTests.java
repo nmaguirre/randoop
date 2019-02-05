@@ -18,8 +18,10 @@ import randoop.ExecutionVisitor;
 import randoop.JunitFileWriter;
 import randoop.MultiVisitor;
 import randoop.generation.AbstractGenerator;
+import randoop.generation.AbstractGeneratorBE;
 import randoop.generation.ComponentManager;
 import randoop.generation.ForwardGenerator;
+import randoop.generation.ForwardGeneratorBE;
 import randoop.generation.RandoopListenerManager;
 import randoop.generation.SeedSequences;
 import randoop.instrument.ExercisedClassVisitor;
@@ -226,7 +228,7 @@ public class GenTests extends GenInputsAbstract {
      * - Add any values for TestValue annotated static fields in operationModel
      */
     Set<Sequence> components = new LinkedHashSet<>();
-    components.addAll(SeedSequences.defaultSeeds());
+    // components.addAll(SeedSequences.defaultSeeds());
     components.addAll(operationModel.getAnnotatedTestValues());
 
     ComponentManager componentMgr = new ComponentManager(components);
@@ -255,10 +257,10 @@ public class GenTests extends GenInputsAbstract {
     /*
      * Create the generator for this session.
      */
-    AbstractGenerator explorer;
+    AbstractGeneratorBE explorer;
     explorer =
-        new ForwardGenerator(
-            model, observers, timelimit * 1000, inputlimit, outputlimit, componentMgr, listenerMgr);
+        new ForwardGeneratorBE(
+            model, observers, timelimit * 1000, inputlimit, outputlimit, be_depth, componentMgr, listenerMgr);
 
     /*
      * setup for check generation

@@ -103,7 +103,7 @@ public abstract class AbstractGenerator {
   /**
    * Updates the progress display message printed to the console.
    */
-  private ProgressDisplay progressDisplay;
+  protected ProgressDisplay progressDisplay;
 
   /**
    * This field is set by Randoop to point to the sequence currently being
