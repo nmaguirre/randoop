@@ -123,7 +123,13 @@ public class ForwardGenerator extends AbstractGenerator {
       Object runtimeValue = e.getRuntimeValue();
       runtimePrimitivesSeen.add(runtimeValue);
     }
+
+	// PABLO: Hack to restore the primitive values read from a file after clear
+    primitives = componentManager.getAllPrimitiveSequences();
   }
+  
+  // PABLO: Hack to restore the primitive values read from a file after clear
+  private Set<Sequence> primitives;
 
   @Override
   public ExecutableSequence step() {
@@ -131,7 +137,16 @@ public class ForwardGenerator extends AbstractGenerator {
     long startTime = System.nanoTime();
 
     if (componentManager.numGeneratedSequences() % GenInputsAbstract.clear == 0) {
-      componentManager.clearGeneratedSequences();
+    	componentManager.clearGeneratedSequences();
+
+    	// PABLO: Hack to restore the primitive values read from a file after clear
+    	for (Sequence s: primitives)
+    		componentManager.addGeneratedSequence(s);
+
+    	// PABLO: Hack to make clear work
+    	this.allSequences.clear();
+    	this.subsumed_sequences.clear();
+    	System.out.println("\n>>>> Cleared generated sequences");
     }
 
     ExecutableSequence eSeq = createNewUniqueSequence();
@@ -369,7 +384,10 @@ public class ForwardGenerator extends AbstractGenerator {
     // If parameterless statement, subsequence inputs
     // will all be redundant, so just remove it from list of statements.
     // XXX does this make sense? especially in presence of side-effects
-    if (operation.getInputTypes().isEmpty()) {
+
+  	// PABLO: Hack to make clear work
+    if (GenInputsAbstract.clear == 100000000 &&
+    		operation.getInputTypes().isEmpty()) {
       operations.remove(operation);
     }
 
