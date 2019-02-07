@@ -43,7 +43,7 @@ public class BoundedExtensionsComputerVisitor implements ExecutionVisitor {
 		canonicalizer.setMaxBFDepth(maxBFDepth);
 		canonicalizer.setMaxObjects(GenInputsAbstract.max_stopping_objects);
 		canonicalizer.setStopOnError();
-		outputExt = new ExtensionsStore(maxObjects, true);
+		outputExt = new ExtensionsStore(GenInputsAbstract.max_stopping_primitives, true);
 	}
 	
 	@Override
