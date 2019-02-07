@@ -91,7 +91,8 @@ public class BoundedExtensionsComputerVisitor implements ExecutionVisitor {
 				collector.start();
 				collector.setTestMode();
 				for (Object o: objsByType.get(cls)) {
-					canonicalizer.canonicalize(o, collector);
+					if (!canonicalizer.canonicalize(o, collector))
+						throw new VisitorException();
 				}
 				collector.testCommitAllPairs();
 				if (collector.testExtensionsLimitExceeded())
