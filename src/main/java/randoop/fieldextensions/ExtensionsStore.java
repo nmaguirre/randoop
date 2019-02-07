@@ -14,9 +14,15 @@ import extensions.IFieldExtensions;
 public class ExtensionsStore {
 
 	private int maxObjects;
+	private boolean strict;
 
 	public ExtensionsStore(int maxObjects) {
+		this(maxObjects, false);
+	}
+
+	public ExtensionsStore(int maxObjects, boolean strict) {
 		this.maxObjects = maxObjects;
+		this.strict = strict;
 	}
 	
 	// Classname -> (Method -> (#Parameter -> Collector))
@@ -53,7 +59,7 @@ public class ExtensionsStore {
 		Map<Integer, FieldExtensionsCollector> p = getOrCreateCollectorForMethod(cls, method);
 		FieldExtensionsCollector c = p.get(numParam);
 		if (c == null) {
-			c = new BoundedFieldExtensionsCollector(maxObjects);
+			c = new BoundedFieldExtensionsCollector(maxObjects, strict);
 			p.put(numParam, c);
 		}
 		return c;
