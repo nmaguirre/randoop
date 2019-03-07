@@ -27,7 +27,8 @@ public class ProgressDisplay extends Thread {
 
   private static int progresswidth = 170;
 
-  private static int exit_if_no_new_sequences_after_mseconds = 10000;
+//  private static int exit_if_no_new_sequences_after_mseconds = 10000;
+  private static int exit_if_no_new_sequences_after_mseconds = 3600000;
 
   public enum Mode {
     SINGLE_LINE_OVERWRITE,
