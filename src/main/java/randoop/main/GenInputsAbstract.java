@@ -63,16 +63,19 @@ public abstract class GenInputsAbstract extends CommandHandler {
   public static File classlist = null;
   
   @Option("Max objects to make canonicalization stop and drop current test")
-  public static int max_stopping_objects = 3;
+  public static int max_extensions_objects = 3;
 
   @Option("Max primitive values in field extensions to make canonicalization stop and drop current test")
-  public static int max_stopping_primitives = 3;
+  public static int max_extensions_primitives = 3;
+  
+  @Option("Apply field exhaustive filtering during BE generation")
+  public static boolean field_exhaustive_filtering = false;
 	
   @Option("<filename> Name of a file to which to log the results of extensions computation")
-  public static String extensions_computation_res = null;
+  public static String output_computed_extensions = null;
   
   @Option("Whether to log all the information contained in the extensions or just their size")
-  public static boolean save_full_extensions = false;
+  public static boolean output_full_extensions = false;
   
 
   // A relative URL like <a href="#specifying-methods"> works when this
@@ -339,8 +342,8 @@ public abstract class GenInputsAbstract extends CommandHandler {
   public static int outputlimit = 100000000;
 
   
-  @Option("Maximum number of iterations for the bounded exhuastive generator")
-  public static int be_depth = 3;
+  @Option("Maximum number of methods in BE generated sequences")
+  public static int max_sequence_length = 3;
   
   @Option("Instance generic type parameters only with Integer class")
   public static boolean instance_generics_integer = false; 

@@ -1,5 +1,6 @@
 package randoop.generation;
 
+import randoop.fieldextensions.BoundedExtensionsComputer;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.Sequence;
@@ -20,6 +21,8 @@ import java.util.List;
  * @see ForwardGenerator
  */
 public abstract class AbstractGeneratorBE extends AbstractGenerator {
+	
+	protected BoundedExtensionsComputer extensionsComputer;
 	
 	public AbstractGeneratorBE(
 			List<TypedOperation> operations,
@@ -65,13 +68,15 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
       listenerMgr.explorationStart();
     }
 
-
     gen(); 
-    
     
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();
       progressDisplay.shouldStop = true;
+    }
+    
+    if (GenInputsAbstract.field_exhaustive_filtering && GenInputsAbstract.output_computed_extensions != null) {
+    	extensionsComputer.writeFieldExtensions(GenInputsAbstract.output_computed_extensions, GenInputsAbstract.output_full_extensions);
     }
 
     if (!GenInputsAbstract.noprogressdisplay) {

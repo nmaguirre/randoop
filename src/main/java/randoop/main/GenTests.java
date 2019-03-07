@@ -260,7 +260,7 @@ public class GenTests extends GenInputsAbstract {
     AbstractGeneratorBE explorer;
     explorer =
         new ForwardGeneratorBE(
-            model, observers, timelimit * 1000, inputlimit, outputlimit, be_depth, componentMgr, listenerMgr);
+            model, observers, timelimit * 1000, inputlimit, outputlimit, max_sequence_length, componentMgr, listenerMgr);
 
     /*
      * setup for check generation

@@ -146,6 +146,11 @@ public class ComponentManager {
   public void addGeneratedSequence(Sequence sequence) {
     gralComponents.add(sequence);
   }
+  
+  
+  public void addGeneratedSequence(Sequence sequence, Set<Integer> indexes) {
+	gralComponents.add(sequence, indexes);
+  }
 
   /**
    * Removes any components sequences added so far, except for seed sequences,

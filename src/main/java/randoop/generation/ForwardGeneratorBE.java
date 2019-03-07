@@ -12,6 +12,7 @@ import randoop.DummyVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
+import randoop.fieldextensions.BoundedExtensionsComputer;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.Operation;
@@ -64,6 +65,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
 
   private int bedepth;
+  
+
 
   public ForwardGeneratorBE(
       List<TypedOperation> operations,
@@ -109,6 +112,11 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     this.allSequences = new LinkedHashSet<>();
 
     initializeRuntimePrimitivesSeen();
+    
+    if (GenInputsAbstract.field_exhaustive_filtering) {
+    	extensionsComputer = new BoundedExtensionsComputer(GenInputsAbstract.max_extensions_objects, GenInputsAbstract.max_extensions_primitives);
+    }
+    
   }
 
   /**
@@ -261,10 +269,6 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  // TODO: Is this useful in BE?
 				  this.allSequences.add(newSequence);
 				  
-				  for (Sequence is : sequences.sequences) {
-					  subsumed_sequences.add(is);
-			      }
-				  
 				  ExecutableSequence eSeq = new ExecutableSequence(newSequence);
 
 				  // Execute new sequence
@@ -289,9 +293,24 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  // eSeq.gentime = gentime;
 				  eSeq.gentime = 0;
 
-				  // TODO: Save the sequence for further extension?
-				  if (eSeq.sequence.hasActiveFlags()) 
-					  currMan.addGeneratedSequence(eSeq.sequence);
+
+				  if (GenInputsAbstract.field_exhaustive_filtering) {
+					  if (eSeq.isNormalExecution()) {
+						  Set<Integer> activeIndexes = extensionsComputer.newFieldValuesInitialized(eSeq);
+						  if (activeIndexes == null || activeIndexes.size() == 0)
+							  continue;
+						  
+						  currMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
+					  }
+				  }
+				  else {
+					  if (eSeq.sequence.hasActiveFlags()) 
+						  currMan.addGeneratedSequence(eSeq.sequence);
+				  }
+				  
+				  for (Sequence is : sequences.sequences) {
+					  subsumed_sequences.add(is);
+			      }
 
 				  // Notify listeners we just completed generation step.
 				  if (listenerMgr != null) {

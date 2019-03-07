@@ -165,6 +165,27 @@ public class SequenceCollection {
     }
     checkRep();
   }
+  
+  
+  public void add(Sequence sequence, Set<Integer> indexes) {
+	    List<Type> formalTypes = sequence.getTypesForLastStatement();
+	    List<Variable> arguments = sequence.getVariablesOfLastStatement();
+	    assert formalTypes.size() == arguments.size();
+	    for (int i: indexes) {
+	      Variable argument = arguments.get(i);
+	      assert formalTypes.get(i).isAssignableFrom(argument.getType())
+	          : formalTypes.get(i).getName()
+	              + " should be assignable from "
+	              + argument.getType().getName();
+//	      if (sequence.isActive(argument.getDeclIndex())) {
+	        Type type = formalTypes.get(i);
+	        typeSet.add(type);
+	        updateCompatibleMap(sequence, type);
+//	      }
+	    }
+	    checkRep();
+	  }
+  
 
   /**
    * Add an entry from the given type to the sequence to the map.
