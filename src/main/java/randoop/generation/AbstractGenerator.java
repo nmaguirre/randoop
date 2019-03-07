@@ -363,7 +363,7 @@ public abstract class AbstractGenerator {
       progressDisplay.display();
       progressDisplay.shouldStop = true;
     }
-
+    
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.println();
       System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());

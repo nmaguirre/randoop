@@ -169,9 +169,19 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 			  for (int i = 0; i < inputTypes.size(); i++) {
 				  //Type inputType = inputTypes.get(i);
 				  
-				  // TODO: Pablo: no primitive values can be obtained here, never
-				  // We always get null values from the list instead of primitives
-				  SimpleList<Sequence> l = prevMan.getSequencesForType(operation, i);
+			      boolean isReceiver = (i == 0 && (operation.isMessage()) && (!operation.isStatic()));
+				  
+			      // FIXME: Very slow, change to improve performance
+				  List<Sequence> l = prevMan.getSequencesForType(operation, i).toJDKList();
+				  
+				  if (!GenInputsAbstract.forbid_null) {
+					  // Receiver for a method can't be null
+					  if (!isReceiver && !inputTypes.get(i).isPrimitive()) {
+						  TypedOperation st = TypedOperation.createNullOrZeroInitializationForType(inputTypes.get(i));
+						  l.add(new Sequence().extend(st, new ArrayList<Variable>()));
+					  }
+				  }
+				  
 				  cp.setIthComponent(i, l);
 			  }
 			  
@@ -185,17 +195,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 
 				  for (int i = 0; i < inputTypes.size(); i++) {
 					  Type inputType = inputTypes.get(i);
-					  /*
-				  SimpleList<Sequence> l = componentManager.getSequencesForType(operation, i);
-				  if (Log.isLoggingOn()) {
-					  Log.logLine("Will query component set for objects of type" + inputType);
-					  Log.logLine("components: " + l.size());
-				  }
 
-					   */
-					  // Sequence chosenSeq = Randomness.randomMember(l);
-
-					  // TODO: Pablo: See how to deal with null!!!
 					  Sequence chosenSeq = currParams.get(i); 
 					  Variable randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);
 					  if (randomVariable == null) {
@@ -260,6 +260,11 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 
 				  // TODO: Is this useful in BE?
 				  this.allSequences.add(newSequence);
+				  
+				  for (Sequence is : sequences.sequences) {
+					  subsumed_sequences.add(is);
+			      }
+				  
 				  ExecutableSequence eSeq = new ExecutableSequence(newSequence);
 
 				  // Execute new sequence
@@ -278,12 +283,6 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  startTime = endTime; // reset start time.
 
 				  processSequence(eSeq);
-
-				  /*
-				     if (eSeq.sequence.hasActiveFlags()) {
-				         componentManager.addGeneratedSequence(eSeq.sequence);
-				     }
-				   */
 
 				  //endTime = System.nanoTime();
 				  //gentime += endTime - startTime;

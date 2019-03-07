@@ -61,6 +61,19 @@ public abstract class GenInputsAbstract extends CommandHandler {
    */
   @Option("File that lists classes under test")
   public static File classlist = null;
+  
+  @Option("Max objects to make canonicalization stop and drop current test")
+  public static int max_stopping_objects = 3;
+
+  @Option("Max primitive values in field extensions to make canonicalization stop and drop current test")
+  public static int max_stopping_primitives = 3;
+	
+  @Option("<filename> Name of a file to which to log the results of extensions computation")
+  public static String extensions_computation_res = null;
+  
+  @Option("Whether to log all the information contained in the extensions or just their size")
+  public static boolean save_full_extensions = false;
+  
 
   // A relative URL like <a href="#specifying-methods"> works when this
   // Javadoc is pasted into the manual, but not in Javadoc proper.
@@ -393,7 +406,7 @@ public abstract class GenInputsAbstract extends CommandHandler {
    * </p>
    */
   @Option("Never use null as input to methods or constructors")
-  public static boolean forbid_null = false;
+  public static boolean forbid_null = true;
 
   /**
    * A file containing literal values to be used as inputs to methods under
