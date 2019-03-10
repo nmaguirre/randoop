@@ -13,13 +13,15 @@ import canonicalizer.BFHeapCanonicalizer;
 import extensions.FieldExtensionsCollector;
 import randoop.ExecutionOutcome;
 import randoop.NormalExecution;
+import randoop.generation.ComponentManager;
+import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Statement;
 import utils.Tuple;
 
 
-public class BoundedExtensionsComputer {
+public class BoundedExtensionsComputer implements ISequenceManager {
 	
 	private BFHeapCanonicalizer canonicalizer;
 	private ExtensionsStore outputExt;
@@ -49,7 +51,7 @@ public class BoundedExtensionsComputer {
 
 	// Returns the indices where the objects that initialize new field values are, null if 
 	// some object exceeds given bounds or the execution of the sequence fails 
-	public Set<Integer> newFieldValuesInitialized(ExecutableSequence sequence) {
+	private Set<Integer> newFieldValuesInitialized(ExecutableSequence sequence) {
 		Set<Integer> indices = new LinkedHashSet<>();
 		int i = sequence.sequence.size() -1;
 
@@ -123,6 +125,7 @@ public class BoundedExtensionsComputer {
 		return indices;
 	}
 	
+	@Override
 	public void writeFieldExtensions(String filename, boolean fullExt) {
 		try {
 			FileWriter writer = new FileWriter(filename);
@@ -132,6 +135,17 @@ public class BoundedExtensionsComputer {
 			e.printStackTrace();
 			System.exit(1);
 		}
+	}
+
+
+	@Override
+	public boolean addGeneratedSequenceToManager(ExecutableSequence eSeq, ComponentManager currMan) {
+		Set<Integer> activeIndexes = newFieldValuesInitialized(eSeq);
+		if (activeIndexes == null || activeIndexes.size() == 0)
+			return false;
+
+		currMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
+		return true;
 	}
 
 }

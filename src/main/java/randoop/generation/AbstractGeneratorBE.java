@@ -1,6 +1,7 @@
 package randoop.generation;
 
-import randoop.fieldextensions.BoundedExtensionsComputer;
+import randoop.fieldextensions.IBuildersManager;
+import randoop.fieldextensions.ISequenceManager;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.Sequence;
@@ -22,7 +23,9 @@ import java.util.List;
  */
 public abstract class AbstractGeneratorBE extends AbstractGenerator {
 	
-	protected BoundedExtensionsComputer extensionsComputer;
+	protected ISequenceManager opManager;
+	
+	protected IBuildersManager buildersManager;
 	
 	public AbstractGeneratorBE(
 			List<TypedOperation> operations,
@@ -75,9 +78,11 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
       progressDisplay.shouldStop = true;
     }
     
-    if (GenInputsAbstract.field_exhaustive_filtering && GenInputsAbstract.output_computed_extensions != null) {
-    	extensionsComputer.writeFieldExtensions(GenInputsAbstract.output_computed_extensions, GenInputsAbstract.output_full_extensions);
-    }
+    if (GenInputsAbstract.output_computed_extensions != null)
+    	opManager.writeFieldExtensions(GenInputsAbstract.output_computed_extensions, GenInputsAbstract.output_full_extensions);
+   	
+    if (GenInputsAbstract.output_computed_builders != null)
+    	buildersManager.writeBuilders(GenInputsAbstract.output_computed_builders);
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.println();

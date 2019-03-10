@@ -3,6 +3,8 @@ package randoop.generation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,7 +14,10 @@ import randoop.DummyVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
+import randoop.fieldextensions.AllOperationsHandler;
 import randoop.fieldextensions.BoundedExtensionsComputer;
+import randoop.fieldextensions.BuildersOnlyHandler;
+import randoop.fieldextensions.OriginalRandoopManager;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
 import randoop.operation.Operation;
@@ -64,7 +69,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   // been generated, to add the value to the components.
   private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
 
-  private int bedepth;
+  private int maxSeqLength;
   
 
 
@@ -74,7 +79,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
       long timeMillis,
       int maxGenSequences,
       int maxOutSequences,
-      int beiterations, 
+      int maxSeqLength, 
       ComponentManager componentManager,
       RandoopListenerManager listenerManager) {
     this(
@@ -86,7 +91,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
         componentManager,
         null,
         listenerManager);
-    this.bedepth = beiterations;
+    this.maxSeqLength = maxSeqLength;
   }
 
   public ForwardGeneratorBE(
@@ -114,7 +119,17 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     initializeRuntimePrimitivesSeen();
     
     if (GenInputsAbstract.field_exhaustive_filtering) {
-    	extensionsComputer = new BoundedExtensionsComputer(GenInputsAbstract.max_extensions_objects, GenInputsAbstract.max_extensions_primitives);
+    	opManager = new BoundedExtensionsComputer(GenInputsAbstract.max_extensions_objects, GenInputsAbstract.max_extensions_primitives);
+    }
+    else {
+    	opManager = new OriginalRandoopManager();
+    }
+    
+    if (GenInputsAbstract.builders_at_length < Integer.MAX_VALUE) {
+    	buildersManager = new BuildersOnlyHandler(operations, GenInputsAbstract.builders_at_length);
+    }
+    else {
+    	buildersManager = new AllOperationsHandler(operations);
     }
     
   }
@@ -141,7 +156,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 	  ComponentManager prevMan = new ComponentManager();
 	  // componentManager has only primitive sequences, we copy them to the current manager
 	  prevMan.copyAllSequences(componentManager);
-	  for (int iteration = 0; iteration < bedepth; iteration++) {
+	  for (int seqLength = 1; seqLength <= maxSeqLength; seqLength++) {
 		  ComponentManager currMan = new ComponentManager(); 
 		  currMan.copyAllSequences(componentManager);
 
@@ -160,8 +175,9 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 		  if (Log.isLoggingOn()) {
 			  Log.logLine("-------------------------------------------");
 		  }
-
-		  for (TypedOperation operation: this.operations) {
+		  
+		  for (int opIndex = 0; opIndex < operations.size(); opIndex++) {
+			  TypedOperation operation = operations.get(opIndex);
 			  if (Log.isLoggingOn()) {
 				  Log.logLine("Selected operation: " + operation.toString());
 			  }
@@ -293,7 +309,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  // eSeq.gentime = gentime;
 				  eSeq.gentime = 0;
 
-
+				  /*
 				  if (GenInputsAbstract.field_exhaustive_filtering) {
 					  if (eSeq.isNormalExecution()) {
 						  Set<Integer> activeIndexes = extensionsComputer.newFieldValuesInitialized(eSeq);
@@ -301,11 +317,26 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 							  continue;
 						  
 						  currMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
+						  
+						  String opName = operation.toString();
+						  if (!buildersNames.contains(opName)) {
+							  builders.add(operation);
+							  buildersNames.add(opName);
+						  }
 					  }
 				  }
 				  else {
 					  if (eSeq.sequence.hasActiveFlags()) 
 						  currMan.addGeneratedSequence(eSeq.sequence);
+				  }
+				  */
+				  
+				  if (eSeq.sequence.hasActiveFlags()) {
+					  if (!opManager.addGeneratedSequenceToManager(eSeq, currMan))
+						  // Sequence is does not create a new object 
+						  continue;
+
+					  buildersManager.addOperation(operation, seqLength);
 				  }
 				  
 				  for (Sequence is : sequences.sequences) {
@@ -338,6 +369,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 
 		  } // End loop for all operations 
 
+		  operations = buildersManager.getBuilders(seqLength);
 		  // Previous component manager is 
 		  prevMan = currMan;
 	  } // End of all iterations

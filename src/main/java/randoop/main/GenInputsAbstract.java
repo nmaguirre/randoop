@@ -70,13 +70,19 @@ public abstract class GenInputsAbstract extends CommandHandler {
   
   @Option("Apply field exhaustive filtering during BE generation")
   public static boolean field_exhaustive_filtering = false;
+  
+  @Option("Use builders only starting at this sequence length")
+  public static int builders_at_length = Integer.MAX_VALUE;
 	
   @Option("<filename> Name of a file to which to log the results of extensions computation")
   public static String output_computed_extensions = null;
   
   @Option("Whether to log all the information contained in the extensions or just their size")
   public static boolean output_full_extensions = false;
-  
+
+  @Option("<filename> Name of a file to which to log the results of builders computation")
+  public static String output_computed_builders = null;
+
 
   // A relative URL like <a href="#specifying-methods"> works when this
   // Javadoc is pasted into the manual, but not in Javadoc proper.
