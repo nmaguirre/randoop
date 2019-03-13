@@ -1,12 +1,19 @@
 package randoop.fieldextensions;
 
+import java.util.List;
+
 import randoop.generation.ComponentManager;
+import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 
 public interface ISequenceManager {
 
-	void writeFieldExtensions(String filename, boolean fullExt);
+	void writeResults(String filename, boolean fullres);
 
-	boolean addGeneratedSequenceToManager(ExecutableSequence eSeq, ComponentManager currMan);
+	boolean addGeneratedSequenceToManager(TypedOperation operation, ExecutableSequence eSeq, ComponentManager currMan, int seqLength);
+
+	void writeBuilders(String filename);
+
+	List<TypedOperation> getBuilders(int seqLength);
 
 }

@@ -68,12 +68,21 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Max primitive values in field extensions to make canonicalization stop and drop current test")
   public static int max_extensions_primitives = 3;
   
+  public enum Filtering {
+	 NO,
+	 FE,
+	 BE
+  }
+  
   @Option("Apply field exhaustive filtering during BE generation")
-  public static boolean field_exhaustive_filtering = false;
+  public static Filtering filtering = Filtering.NO;
   
   @Option("Use builders only starting at this sequence length")
   public static int builders_at_length = Integer.MAX_VALUE;
 	
+  @Option("Do not prune sequences using already determined builders")
+  public static boolean always_use_builders = false;
+  
   @Option("<filename> Name of a file to which to log the results of extensions computation")
   public static String output_computed_extensions = null;
   

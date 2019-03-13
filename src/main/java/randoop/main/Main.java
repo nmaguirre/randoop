@@ -22,13 +22,9 @@ public class Main {
 
   // The main method simply calls nonStaticMain.
   public static void main(String[] args) {
-	  long startTime = System.currentTimeMillis();
 
 	  Main main = new Main();
 	  main.nonStaticMain(args);
-
-	  long elapsedTime = (System.currentTimeMillis() - startTime)/1000;  	
-	  System.out.println("\nBounded exhaustive generation time: " + elapsedTime + "s");
 
 	  System.exit(0);
   }

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import canonicalizer.BFHeapCanonicalizer;
 import extensions.FieldExtensionsCollector;
+import extensions.IFieldExtensions;
 import randoop.ExecutionOutcome;
 import randoop.NormalExecution;
 import randoop.generation.ComponentManager;
@@ -21,38 +22,18 @@ import randoop.sequence.Statement;
 import utils.Tuple;
 
 
-public class BoundedExtensionsComputer implements ISequenceManager {
+public class ObjectHashComputer extends BoundedExtensionsComputer {
 	
-	protected BFHeapCanonicalizer canonicalizer;
-	protected ExtensionsStore outputExt;
-	protected int maxObjects;
-	protected int maxArrayObjects;
-	protected int maxFieldDistance;
-	protected int maxBFDepth;
-	protected IBuildersManager buildersManager;
+	private Map<String, Set<Integer>> hashes = new LinkedHashMap<>();
 	
 	// classesUnderTest = null to consider all classes as relevant
-	public BoundedExtensionsComputer(int maxStoppingObjs, int maxStoppingPrims, IBuildersManager buildersManager) {
-		if (maxStoppingObjs <= 0 || maxStoppingPrims <= 0)
-			throw new Error("BoundedExtensionsComputerVisitor must be used with max_stopping_objects > 0 and max_stopping_primitives > 0");
-		
-		this.buildersManager = buildersManager;
-		this.maxObjects = Integer.MAX_VALUE; 
-		this.maxArrayObjects = Integer.MAX_VALUE;
-		this.maxFieldDistance = Integer.MAX_VALUE;
-		this.maxBFDepth = Integer.MAX_VALUE;
-		canonicalizer = new BFHeapCanonicalizer();
-		canonicalizer.setMaxArrayObjs(maxArrayObjects);
-		canonicalizer.setMaxFieldDistance(maxFieldDistance);
-		canonicalizer.setMaxBFDepth(maxBFDepth);
-		canonicalizer.setMaxObjects(maxStoppingObjs);
-		canonicalizer.setStopOnError();
-		outputExt = new ExtensionsStore(maxStoppingPrims, true);
+	public ObjectHashComputer(int maxStoppingObjs, int maxStoppingPrims, IBuildersManager buildersManager) {
+		super(maxStoppingObjs, maxStoppingPrims, buildersManager);
 	}
-	
 
 	// Returns the indices where the objects that initialize new field values are, null if 
 	// some object exceeds given bounds or the execution of the sequence fails 
+	@Override
 	protected Set<Integer> newFieldValuesInitialized(ExecutableSequence sequence) {
 		Set<Integer> indices = new LinkedHashSet<>();
 		int i = sequence.sequence.size() -1;
@@ -111,11 +92,15 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(cls);
 				if (collector.testExtensionsWereExtended()) {
 					collector.commitSuccessfulTestsPairs();
-					// FIXME: We currently do not keep track of the exact object that has extended the extensions
-					// but return all indices of the objects for the class for which we saw new field values
-					for (Tuple<Object, Integer> t: objsByType.get(cls)) {
+				}
+				// FIXME: We currently do not keep track of the exact object that has extended the extensions
+				// but return all indices of the objects for the class for which we saw new field values
+				for (Tuple<Object, Integer> t: objsByType.get(cls)) {
+					FieldExtensionsCollector col = new FieldExtensionsCollector();
+					canonicalizer.canonicalize(t.getFirst(), col); 
+					int hash = col.getExtensions().hashCode();
+					if (addHash(cls, hash))
 						indices.add(t.getSecond());
-					}
 				}
 			}	
 		}
@@ -127,11 +112,27 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 		return indices;
 	}
 	
+	public boolean addHash(String key, Integer hash) {
+		Set<Integer> keyHashes = hashes.get(key);
+		if (keyHashes == null) {
+			keyHashes = new LinkedHashSet<>();
+			hashes.put(key, keyHashes);
+		}
+		
+		return keyHashes.add(hash);
+	}
+	
 	@Override
-	public void writeResults(String filename, boolean fullExt) {
+	public void writeResults(String filename, boolean fullres) {
 		try {
 			FileWriter writer = new FileWriter(filename);
-			writer.write(outputExt.getStatistics(fullExt));
+			writer.write(outputExt.getStatistics(fullres));
+			int totalObjs = 0;
+			for (String cls: hashes.keySet()) {
+				writer.write(cls + " objects: " + hashes.get(cls).size() + "\n");
+				totalObjs += hashes.get(cls).size();
+			}
+			writer.write("Total objects sum: "+ totalObjs + "\n");
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -140,36 +141,5 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 	}
 
 
-	@Override
-	public boolean addGeneratedSequenceToManager(TypedOperation operation, ExecutableSequence eSeq, ComponentManager currMan, int seqLength) {
-		Set<Integer> activeIndexes = newFieldValuesInitialized(eSeq);
-
-		if (activeIndexes == null) return false;
-
-		if (activeIndexes.size() == 0) { 
-			if (buildersManager.alwaysBuilders() && buildersManager.isBuilder(operation)) {
-				activeIndexes = buildersManager.getIndexes(operation);
-			}
-			else
-				return false;
-		}
-
-		buildersManager.addBuilder(operation, seqLength, activeIndexes);
-		
-		currMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
-		return true;
-	}
-
-
-	@Override
-	public void writeBuilders(String filename) {
-		buildersManager.writeBuilders(filename);
-	}
-
-
-	@Override
-	public List<TypedOperation> getBuilders(int seqLength) {
-		return buildersManager.getBuilders(seqLength);
-	}
 
 }

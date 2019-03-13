@@ -25,7 +25,6 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
 	
 	protected ISequenceManager opManager;
 	
-	protected IBuildersManager buildersManager;
 	
 	public AbstractGeneratorBE(
 			List<TypedOperation> operations,
@@ -71,18 +70,28 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
       listenerMgr.explorationStart();
     }
 
+    long startTime = System.currentTimeMillis();
+
     gen(); 
-    
+
+    if (!GenInputsAbstract.noprogressdisplay) {
+    	System.out.println();
+		long elapsedTime = (System.currentTimeMillis() - startTime);  	
+		System.out.println();
+		System.out.println("Bounded exhaustive generation time: " + elapsedTime + "ms");
+    }
+
+
     if (!GenInputsAbstract.noprogressdisplay && progressDisplay != null) {
       progressDisplay.display();
       progressDisplay.shouldStop = true;
     }
     
     if (GenInputsAbstract.output_computed_extensions != null)
-    	opManager.writeFieldExtensions(GenInputsAbstract.output_computed_extensions, GenInputsAbstract.output_full_extensions);
+    	opManager.writeResults(GenInputsAbstract.output_computed_extensions, GenInputsAbstract.output_full_extensions);
    	
     if (GenInputsAbstract.output_computed_builders != null)
-    	buildersManager.writeBuilders(GenInputsAbstract.output_computed_builders);
+    	opManager.writeBuilders(GenInputsAbstract.output_computed_builders);
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.println();
