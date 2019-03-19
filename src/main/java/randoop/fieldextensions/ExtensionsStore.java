@@ -180,6 +180,19 @@ public class ExtensionsStore {
 		res += "Total extensions size sum: "+ totalExtSize + "\n";
 		return res;
 	}
+
+	public void addAllExtensions(ExtensionsStore other) {
+		for (String cls: other.getClasses()) {
+			Map<String, Map<Integer, FieldExtensionsCollector>> col = other.getOrCreateCollectorForClass(cls);
+			for (String method: col.keySet()) {
+				Map<Integer, FieldExtensionsCollector> mcol = col.get(method);
+				for (Integer i: mcol.keySet()) {
+					FieldExtensionsCollector thisCol = this.getOrCreateCollectorForMethodParam(cls, method, i);
+					thisCol.getExtensions().addAll(mcol.get(i).getExtensions());
+				}
+			}
+		}
+	}
 	
 	/*
 	- extensionsSizeForClass(c)

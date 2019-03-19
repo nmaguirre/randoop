@@ -2,7 +2,9 @@ package randoop.generation;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import randoop.operation.TypedClassOperation;
@@ -190,10 +192,20 @@ public class ComponentManager {
    * @param i  the input value index of statement
    * @return the sequences that create values of the given type
    */
+  
+  Map<String, SimpleList<Sequence>> cache = new HashMap<>();
+  
   @SuppressWarnings("unchecked")
   SimpleList<Sequence> getSequencesForType(TypedOperation operation, int i) {
 
     Type neededType = operation.getInputTypes().get(i);
+    
+    /*
+    // Cache
+    String typeName = neededType.getName();
+    if (cache.containsKey(typeName)) return cache.get(typeName);
+    */
+
 
     SimpleList<Sequence> ret = gralComponents.getSequencesForType(neededType, false);
     if (operation instanceof TypedClassOperation) {
@@ -220,6 +232,9 @@ public class ComponentManager {
         }
       }
     }
+    
+    // Cache
+    //cache.put(typeName, ret);
     return ret;
   }
 

@@ -170,8 +170,11 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 	  // componentManager has only primitive sequences, we copy them to the current manager
 	  prevMan.copyAllSequences(componentManager);
 	  for (int seqLength = 1; seqLength <= maxSeqLength; seqLength++) {
+		  int newSeqs = 0;
+		  int builders = 0;
+		  int execSeqs = 0;
 		  ComponentManager currMan = new ComponentManager(); 
-		  currMan.copyAllSequences(componentManager);
+		  //currMan.copyAllSequences(prevMan);
 
 		  if (stop()) {
 			  System.out.println("DEBUG: Stopping criteria reached");
@@ -208,15 +211,18 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  
 			      boolean isReceiver = (i == 0 && (operation.isMessage()) && (!operation.isStatic()));
 				  
-			      // FIXME: Very slow, change to improve performance
-				  List<Sequence> l = prevMan.getSequencesForType(operation, i).toJDKList();
+				  SimpleList<Sequence> l = prevMan.getSequencesForType(operation, i);
 				  
 				  if (!GenInputsAbstract.forbid_null) {
+					  /*
+					  // FIXME: Very slow, change to improve performance
+					  List<Sequence> l = prevMan.getSequencesForType(operation, i).toJDKList();
 					  // Receiver for a method can't be null
 					  if (!isReceiver && !inputTypes.get(i).isPrimitive()) {
 						  TypedOperation st = TypedOperation.createNullOrZeroInitializationForType(inputTypes.get(i));
 						  l.add(new Sequence().extend(st, new ArrayList<Variable>()));
 					  }
+					  */
 				  }
 				  
 				  cp.setIthComponent(i, l);
@@ -234,8 +240,21 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 					  Type inputType = inputTypes.get(i);
 
 					  Sequence chosenSeq = currParams.get(i); 
-					  Variable randomVariable = chosenSeq.randomVariableForTypeLastStatement(inputType);
+					  
+					  
+					  // TODO: We are not generating all feasible sequences here, just choosing a variable randomly
+					  Variable randomVariable = chosenSeq.variableForTypeLastStatement(inputType);
+					  
+//					  for (Variable randomVariable: chosenSeq.getBuilderVariables()) {
+					  
+					  
 					  if (randomVariable == null) {
+						  System.out.println(operation.toParsableString());
+						  System.out.println(chosenSeq.toParsableString());
+						  System.out.println(currParams.toString());
+						  System.out.println(chosenSeq.getBuilderIndexes().toString());
+						  
+						  
 						  throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
 
 					  }
@@ -277,6 +296,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  if (this.allSequences.contains(newSequence)) 
 					  continue;
 				  
+				  // To prune sequences generated twice 
+				  this.allSequences.add(newSequence);
 
 				  // If parameterless statement, subsequence inputs
 				  // will all be redundant, so just remove it from list of statements.
@@ -287,16 +308,16 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  }
 				   */
 
+				  /*
 				  randoopConsistencyTests(newSequence);
 				  randoopConsistencyTest2(newSequence);
+				  */
 
 				  if (Log.isLoggingOn()) {
 					  Log.logLine(
 							  String.format("Successfully created new unique sequence:%n%s%n", newSequence.toString()));
 				  }
 
-				  // TODO: Is this useful in BE?
-				  this.allSequences.add(newSequence);
 				  
 				  ExecutableSequence eSeq = new ExecutableSequence(newSequence);
 
@@ -343,16 +364,22 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 						  currMan.addGeneratedSequence(eSeq.sequence);
 				  }
 				  */
+
 				  
+				  execSeqs++;
 				  if (eSeq.sequence.hasActiveFlags()) {
 					  if (!opManager.addGeneratedSequenceToManager(operation, eSeq, currMan, seqLength)) {
+//					  if (!opManager.addGeneratedSequenceToManager(operation, eSeq, prevMan, seqLength)) {
 						  // Sequence does not create a new object, or its last statement is a builder and
 						  // builders are always enabled
 						  //if (!GenInputsAbstract.always_use_builders || !buildersManager.isBuilder(operation))
 						  continue;
 					  }
+					  builders++;
 				  }
+				  newSeqs++;
 				  
+
 				  for (Sequence is : sequences.sequences) {
 					  subsumed_sequences.add(is);
 			      }
@@ -383,9 +410,16 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 
 		  } // End loop for all operations 
 
+		  if (!GenInputsAbstract.noprogressdisplay) 
+			  System.out.println("\n>>> Iteration: " + seqLength + 
+					  ", Exec: " + execSeqs + 
+					  ", New: " + newSeqs +
+					  ", Builders: " + builders +
+					  ", Error: " + (newSeqs - builders));
+
 		  operations = opManager.getBuilders(seqLength);
 		  // Previous component manager is 
-		  prevMan = currMan;
+		  prevMan.copyAllSequences(currMan);
 	  } // End of all iterations
   }
   

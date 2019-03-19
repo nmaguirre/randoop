@@ -76,9 +76,9 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
 
     if (!GenInputsAbstract.noprogressdisplay) {
     	System.out.println();
-		long elapsedTime = (System.currentTimeMillis() - startTime);  	
-		System.out.println();
-		System.out.println("Bounded exhaustive generation time: " + elapsedTime + "ms");
+    	long elapsedTime = (System.currentTimeMillis() - startTime);  	
+    	System.out.println();
+    	System.out.println("Bounded exhaustive generation time: " + elapsedTime + "ms");
     }
 
 

@@ -25,11 +25,14 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 	
 	protected BFHeapCanonicalizer canonicalizer;
 	protected ExtensionsStore outputExt;
+	//protected ExtensionsStore currExt;
 	protected int maxObjects;
 	protected int maxArrayObjects;
 	protected int maxFieldDistance;
 	protected int maxBFDepth;
 	protected IBuildersManager buildersManager;
+	private int maxStoppingPrims;
+	private int maxStoppingObjs;
 	
 	// classesUnderTest = null to consider all classes as relevant
 	public BoundedExtensionsComputer(int maxStoppingObjs, int maxStoppingPrims, IBuildersManager buildersManager) {
@@ -48,6 +51,9 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 		canonicalizer.setMaxObjects(maxStoppingObjs);
 		canonicalizer.setStopOnError();
 		outputExt = new ExtensionsStore(maxStoppingPrims, true);
+		//currExt = new ExtensionsStore(maxStoppingPrims, true);
+		this.maxStoppingPrims = maxStoppingPrims;
+		this.maxStoppingObjs = maxStoppingObjs;
 	}
 	
 
@@ -95,6 +101,7 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 			
 			for (String cls: objsByType.keySet()) {
 				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(cls);
+//				FieldExtensionsCollector collector = currExt.getOrCreateCollectorForMethodParam(cls);
 				collector.start();
 				collector.setTestMode();
 				for (Tuple<Object, Integer> t: objsByType.get(cls)) {
@@ -109,6 +116,7 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 			// Test does not exceed the limits
 			for (String cls: objsByType.keySet()) {
 				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(cls);
+//				FieldExtensionsCollector collector = currExt.getOrCreateCollectorForMethodParam(cls);
 				if (collector.testExtensionsWereExtended()) {
 					collector.commitSuccessfulTestsPairs();
 					// FIXME: We currently do not keep track of the exact object that has extended the extensions
@@ -139,9 +147,19 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 		}
 	}
 
+	
+//	private int maxSeqLength = 0;
 
 	@Override
 	public boolean addGeneratedSequenceToManager(TypedOperation operation, ExecutableSequence eSeq, ComponentManager currMan, int seqLength) {
+		/*
+		if (seqLength > maxSeqLength) {
+			maxSeqLength = seqLength;
+			outputExt.addAllExtensions(currExt);
+			currExt = new ExtensionsStore(maxStoppingPrims, true);
+		}
+		*/
+		
 		Set<Integer> activeIndexes = newFieldValuesInitialized(eSeq);
 
 		if (activeIndexes == null) return false;

@@ -181,6 +181,9 @@ public class SequenceCollection {
 	        Type type = formalTypes.get(i);
 	        typeSet.add(type);
 	        updateCompatibleMap(sequence, type);
+	        
+	        
+	        sequence.addBuilderIndex(i, argument);
 //	      }
 	    }
 	    checkRep();

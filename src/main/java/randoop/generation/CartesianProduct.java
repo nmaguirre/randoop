@@ -5,10 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import randoop.util.SimpleList;
+
 
 public class CartesianProduct<T> {
 
-	private Map<Integer, List<T>> seqs = new LinkedHashMap<>();
+	private Map<Integer, SimpleList<T>> seqs = new LinkedHashMap<>();
 	private Map<Integer, Integer> curr;
 	private int nComps;
 	private boolean hasNext;
@@ -59,7 +61,7 @@ public class CartesianProduct<T> {
 		return res;
 	}
 
-	public void setIthComponent(int i, List<T> l) {
+	public void setIthComponent(int i, SimpleList<T> l) {
 		seqs.put(i, l);
 	}
 	

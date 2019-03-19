@@ -3,10 +3,13 @@ package randoop.sequence;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import randoop.Globals;
@@ -1129,6 +1132,7 @@ public final class Sequence implements WeightedElement {
     return new Sequence().extend(TypedOperation.createPrimitiveInitialization(type, value));
   }
 
+  /*
   private Map<Type, List<Variable>> activeTypesAndVars = new LinkedHashMap<>();
   public void addVariableForType(Type type, Variable argument) {
 	  List<Variable> vars = activeTypesAndVars.get(type);
@@ -1142,5 +1146,44 @@ public final class Sequence implements WeightedElement {
   public List<Variable> getActiveVarsForType(Type type) {
 	  return activeTypesAndVars.get(type);
   }
+  */
+
+  private Map<Integer, Variable> builderIndexes = new LinkedHashMap<>();
+  public void addBuilderIndex(int i, Variable var) {
+	  builderIndexes.put(i, var);
+  }
+
+  public Set<Integer> getBuilderIndexes() {
+	  return builderIndexes.keySet();
+  }
+  
+   public Collection<Variable> getBuilderVariables() {
+	  return builderIndexes.values();
+  }
+  
+  public Variable variableForTypeLastStatement(Type type) {
+	    if (type == null) throw new IllegalArgumentException("type cannot be null.");
+	    List<Variable> possibleIndices = new ArrayList<>(this.lastStatementVariables.size());
+
+	    	// Pruning by Pablo 
+	    /*
+	    if (type.isReferenceType() && !type.isBoxedPrimitive() && !type.isObject()) { 
+	    	for (Integer i: builderIndexes.keySet())
+	    		possibleIndices.add(builderIndexes.get(i));
+	    
+	    	return possibleIndices.get(0);
+	    }
+	    */
+
+	    for (Variable i : this.lastStatementVariables) {
+	      Statement s = statements.get(i.index);
+	      if (type.isAssignableFrom(s.getOutputType())) {
+	        possibleIndices.add(i);
+	      }
+	    }
+	    if (possibleIndices.isEmpty()) return null;
+	    //return Randomness.randomMember(possibleIndices);
+	    return possibleIndices.get(0);
+	  }
 
 }

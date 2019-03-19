@@ -9,7 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.antlr.runtime.TokenSource;
+
 import canonicalizer.BFHeapCanonicalizer;
+import extensions.BoundedFieldExtensionsCollector;
 import extensions.FieldExtensionsCollector;
 import extensions.IFieldExtensions;
 import randoop.ExecutionOutcome;
@@ -97,8 +100,10 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 				// but return all indices of the objects for the class for which we saw new field values
 				for (Tuple<Object, Integer> t: objsByType.get(cls)) {
 					FieldExtensionsCollector col = new FieldExtensionsCollector();
-					canonicalizer.canonicalize(t.getFirst(), col); 
-					int hash = col.getExtensions().hashCode();
+					if (!canonicalizer.canonicalize(t.getFirst(), col))
+						return null;
+					//int hash = col.getExtensions().toString().hashCode();
+					int hash = col.getExtensions().toString().hashCode();
 					if (addHash(cls, hash))
 						indices.add(t.getSecond());
 				}
