@@ -638,4 +638,13 @@ public class ExecutableSequence {
   public boolean coversClass(Class<?> c) {
     return executionResults.getCoveredClasses().contains(c);
   }
+
+  public void clean() {
+	  // reset execution result values
+	  hasNullInput = false;
+	  executionResults.theList.clear();
+	  for (int i = 0; i < sequence.size(); i++) {
+		  executionResults.theList.add(NotExecuted.create());
+	  }
+  }
 }

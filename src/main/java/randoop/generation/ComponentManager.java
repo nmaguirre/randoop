@@ -200,8 +200,8 @@ public class ComponentManager {
 
     Type neededType = operation.getInputTypes().get(i);
     
-    /*
     // Cache
+    /*
     String typeName = neededType.getName();
     if (cache.containsKey(typeName)) return cache.get(typeName);
     */

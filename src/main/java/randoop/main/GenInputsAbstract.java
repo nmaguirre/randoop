@@ -74,6 +74,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	 BE
   }
   
+  @Option("Do not canonicalize fields that match regular expression <string>")
+  public static Pattern omitfields = null;
+  
   @Option("Apply field exhaustive filtering during BE generation")
   public static Filtering filtering = Filtering.NO;
   
@@ -85,6 +88,12 @@ public abstract class GenInputsAbstract extends CommandHandler {
   
   @Option("<filename> Name of a file to which to log the results of extensions computation")
   public static String output_computed_extensions = null;
+  
+  @Option("<filename> Name of a file to which to log generated objects")
+  public static String output_objects = null;
+
+  @Option("<filename> Name of a file to which to log sequences that generate objects")
+  public static String output_object_seqs = null;
   
   @Option("Whether to log all the information contained in the extensions or just their size")
   public static boolean output_full_extensions = false;

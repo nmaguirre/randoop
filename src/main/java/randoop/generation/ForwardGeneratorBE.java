@@ -72,6 +72,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   private Set<Object> runtimePrimitivesSeen = new LinkedHashSet<>();
 
   private int maxSeqLength;
+  private Set<String> strSeqs = new LinkedHashSet<>();
   
 
 
@@ -132,12 +133,16 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     case FE:
     	opManager = new BoundedExtensionsComputer(GenInputsAbstract.max_extensions_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
-    			buildersManager);
+    			buildersManager,
+    			GenInputsAbstract.omitfields);
     	break;
     case BE:
     	opManager = new ObjectHashComputer(GenInputsAbstract.max_extensions_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
-    			buildersManager);
+    			buildersManager,
+    			GenInputsAbstract.omitfields,
+    			GenInputsAbstract.output_objects,
+    			GenInputsAbstract.output_object_seqs);
     	break; 
     case NO:
     	opManager = new OriginalRandoopManager(buildersManager);
@@ -174,12 +179,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 		  int builders = 0;
 		  int execSeqs = 0;
 		  ComponentManager currMan = new ComponentManager(); 
-		  //currMan.copyAllSequences(prevMan);
+		  currMan.copyAllSequences(componentManager);
 
-		  if (stop()) {
-			  System.out.println("DEBUG: Stopping criteria reached");
-			  break;
-		  }
 
 		  // Notify listeners we are about to perform a generation step.
 		  if (listenerMgr != null) {
@@ -193,6 +194,12 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 		  }
 		  
 		  for (int opIndex = 0; opIndex < operations.size(); opIndex++) {
+
+			  if (stop()) {
+				  System.out.println("DEBUG: Stopping criteria reached");
+				  break;
+			  }
+
 			  TypedOperation operation = operations.get(opIndex);
 			  if (Log.isLoggingOn()) {
 				  Log.logLine("Selected operation: " + operation.toString());
@@ -293,11 +300,22 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  
 				  // Avoid repetition of, for example, single constructors.
 				  // TODO: Check if this does not break anything.
+				  
+				  /*
+				  String seqStr = newSequence.toCodeString();
+				  if (this.strSeqs.contains(seqStr))
+					  continue;
+				  
+				  this.strSeqs.add(seqStr);
+				  */
+				  
+				 /* 
 				  if (this.allSequences.contains(newSequence)) 
 					  continue;
 				  
 				  // To prune sequences generated twice 
 				  this.allSequences.add(newSequence);
+				  */
 
 				  // If parameterless statement, subsequence inputs
 				  // will all be redundant, so just remove it from list of statements.
@@ -365,6 +383,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  }
 				  */
 
+				  num_sequences_generated++;
 				  
 				  execSeqs++;
 				  if (eSeq.sequence.hasActiveFlags()) {
@@ -373,6 +392,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 						  // Sequence does not create a new object, or its last statement is a builder and
 						  // builders are always enabled
 						  //if (!GenInputsAbstract.always_use_builders || !buildersManager.isBuilder(operation))
+						  eSeq.clean();
 						  continue;
 					  }
 					  builders++;
@@ -380,16 +400,16 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  newSeqs++;
 				  
 
+				  /*
 				  for (Sequence is : sequences.sequences) {
 					  subsumed_sequences.add(is);
 			      }
+			      */
 
 				  // Notify listeners we just completed generation step.
 				  if (listenerMgr != null) {
 					  listenerMgr.generationStepPost(eSeq);
 				  }
-
-				  num_sequences_generated++;
 
 				  if (eSeq.hasFailure()) {
 					  num_failing_sequences++;
@@ -405,6 +425,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 						  }
 					  }
 				  }
+				  
+				  eSeq.clean();
 
 			  } // End loop for current operation
 
@@ -419,7 +441,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 
 		  operations = opManager.getBuilders(seqLength);
 		  // Previous component manager is 
-		  prevMan.copyAllSequences(currMan);
+		  //prevMan.copyAllSequences(currMan);
+		  prevMan = currMan;
 	  } // End of all iterations
   }
   

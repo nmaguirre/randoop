@@ -8,13 +8,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import canonicalizer.BFHeapCanonicalizer;
 import extensions.FieldExtensionsCollector;
 import randoop.ExecutionOutcome;
 import randoop.NormalExecution;
 import randoop.generation.ComponentManager;
-import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Statement;
@@ -34,8 +34,10 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 	private int maxStoppingPrims;
 	private int maxStoppingObjs;
 	
+	
 	// classesUnderTest = null to consider all classes as relevant
-	public BoundedExtensionsComputer(int maxStoppingObjs, int maxStoppingPrims, IBuildersManager buildersManager) {
+	public BoundedExtensionsComputer(int maxStoppingObjs, int maxStoppingPrims, 
+			IBuildersManager buildersManager, Pattern omitfields) {
 		if (maxStoppingObjs <= 0 || maxStoppingPrims <= 0)
 			throw new Error("BoundedExtensionsComputerVisitor must be used with max_stopping_objects > 0 and max_stopping_primitives > 0");
 		
@@ -50,6 +52,7 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 		canonicalizer.setMaxBFDepth(maxBFDepth);
 		canonicalizer.setMaxObjects(maxStoppingObjs);
 		canonicalizer.setStopOnError();
+		canonicalizer.setIgnoredFields(omitfields);
 		outputExt = new ExtensionsStore(maxStoppingPrims, true);
 		//currExt = new ExtensionsStore(maxStoppingPrims, true);
 		this.maxStoppingPrims = maxStoppingPrims;

@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.antlr.runtime.TokenSource;
 
@@ -29,9 +30,24 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 	
 	private Map<String, Set<Integer>> hashes = new LinkedHashMap<>();
 	
+	FileWriter objWriter;
+	FileWriter seqWriter;
+	
 	// classesUnderTest = null to consider all classes as relevant
-	public ObjectHashComputer(int maxStoppingObjs, int maxStoppingPrims, IBuildersManager buildersManager) {
-		super(maxStoppingObjs, maxStoppingPrims, buildersManager);
+	public ObjectHashComputer(int maxStoppingObjs, int maxStoppingPrims, 
+			IBuildersManager buildersManager, Pattern omitfields, 
+			String outputObjs, String outputObjSeqs) {
+		super(maxStoppingObjs, maxStoppingPrims, buildersManager, omitfields);
+		
+		try {
+			if (outputObjs != null)
+				objWriter = new FileWriter(outputObjs);
+			if (outputObjSeqs != null)
+				seqWriter = new FileWriter(outputObjSeqs);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	// Returns the indices where the objects that initialize new field values are, null if 
@@ -104,8 +120,27 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 						return null;
 					//int hash = col.getExtensions().toString().hashCode();
 					int hash = col.getExtensions().toString().hashCode();
-					if (addHash(cls, hash))
+					if (addHash(cls, hash)) {
 						indices.add(t.getSecond());
+						
+						if (objWriter != null)  {
+							try {
+								String objStr = t.getFirst().toString();
+								objWriter.write(objStr + "\n");
+
+								if (seqWriter != null) {
+									seqWriter.write("---\n");
+									seqWriter.write(objStr + "\n");
+									seqWriter.write("index: " + t.getSecond() + "\n");
+									seqWriter.write(sequence.toString() + "\n");
+									seqWriter.write("---\n");
+								}
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
 				}
 			}	
 		}
@@ -139,6 +174,12 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 			}
 			writer.write("Total objects sum: "+ totalObjs + "\n");
 			writer.close();
+			
+			if (objWriter != null)  
+				objWriter.close();
+			
+			if (seqWriter != null)  
+				seqWriter.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
