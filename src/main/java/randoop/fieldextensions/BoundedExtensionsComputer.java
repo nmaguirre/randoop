@@ -33,10 +33,11 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 	protected IBuildersManager buildersManager;
 	private int maxStoppingPrims;
 	private int maxStoppingObjs;
+	private int maxStoppingArr;
 	
 	
 	// classesUnderTest = null to consider all classes as relevant
-	public BoundedExtensionsComputer(int maxStoppingObjs, int maxStoppingPrims, 
+	public BoundedExtensionsComputer(int maxStoppingObjs, int maxStoppingPrims, int maxStoppingArr,
 			IBuildersManager buildersManager, Pattern omitfields) {
 		if (maxStoppingObjs <= 0 || maxStoppingPrims <= 0)
 			throw new Error("BoundedExtensionsComputerVisitor must be used with max_stopping_objects > 0 and max_stopping_primitives > 0");
@@ -47,10 +48,10 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 		this.maxFieldDistance = Integer.MAX_VALUE;
 		this.maxBFDepth = Integer.MAX_VALUE;
 		canonicalizer = new BFHeapCanonicalizer();
-		canonicalizer.setMaxArrayObjs(maxArrayObjects);
 		canonicalizer.setMaxFieldDistance(maxFieldDistance);
 		canonicalizer.setMaxBFDepth(maxBFDepth);
 		canonicalizer.setMaxObjects(maxStoppingObjs);
+		canonicalizer.setMaxArrayObjs(maxStoppingArr);
 		canonicalizer.setStopOnError();
 		canonicalizer.setIgnoredFields(omitfields);
 		outputExt = new ExtensionsStore(maxStoppingPrims, true);

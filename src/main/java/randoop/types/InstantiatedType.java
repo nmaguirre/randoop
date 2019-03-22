@@ -269,6 +269,7 @@ public class InstantiatedType extends ParameterizedType {
     return instantiatedType.isAbstract();
   }
 
+  
   @Override
   public boolean isAssignableFrom(Type otherType) {
     if (super.isAssignableFrom(otherType)) {

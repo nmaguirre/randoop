@@ -131,14 +131,16 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     
     switch (GenInputsAbstract.filtering) {
     case FE:
-    	opManager = new BoundedExtensionsComputer(GenInputsAbstract.max_extensions_objects, 
+    	opManager = new BoundedExtensionsComputer(GenInputsAbstract.max_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
+    			GenInputsAbstract.max_array_objects, 
     			buildersManager,
     			GenInputsAbstract.omitfields);
     	break;
     case BE:
-    	opManager = new ObjectHashComputer(GenInputsAbstract.max_extensions_objects, 
+    	opManager = new ObjectHashComputer(GenInputsAbstract.max_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
+    			GenInputsAbstract.max_array_objects, 
     			buildersManager,
     			GenInputsAbstract.omitfields,
     			GenInputsAbstract.output_objects,

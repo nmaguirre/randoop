@@ -10,16 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.antlr.runtime.TokenSource;
 
-import canonicalizer.BFHeapCanonicalizer;
-import extensions.BoundedFieldExtensionsCollector;
 import extensions.FieldExtensionsCollector;
-import extensions.IFieldExtensions;
 import randoop.ExecutionOutcome;
 import randoop.NormalExecution;
-import randoop.generation.ComponentManager;
-import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Statement;
@@ -34,10 +28,10 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 	FileWriter seqWriter;
 	
 	// classesUnderTest = null to consider all classes as relevant
-	public ObjectHashComputer(int maxStoppingObjs, int maxStoppingPrims, 
+	public ObjectHashComputer(int maxStoppingObjs, int maxStoppingPrims, int maxStoppingArr,
 			IBuildersManager buildersManager, Pattern omitfields, 
 			String outputObjs, String outputObjSeqs) {
-		super(maxStoppingObjs, maxStoppingPrims, buildersManager, omitfields);
+		super(maxStoppingObjs, maxStoppingPrims, maxStoppingArr, buildersManager, omitfields);
 		
 		try {
 			if (outputObjs != null)
@@ -93,6 +87,7 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 				index++;
 			}	
 			
+			/*
 			for (String cls: objsByType.keySet()) {
 				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(cls);
 				collector.start();
@@ -105,6 +100,7 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 				if (collector.testExtensionsLimitExceeded())
 					return null;
 			}
+			*/
 			
 			// Test does not exceed the limits
 			for (String cls: objsByType.keySet()) {

@@ -217,11 +217,21 @@ public class SequenceCollection {
    * @return list of sequence objects that are of type 'type' and abide by the
    *         constraints defined by nullOk
    */
+  
+  Map<String, SimpleList<Sequence>> cache = new LinkedHashMap<>();
   public SimpleList<Sequence> getSequencesForType(Type type, boolean exactMatch) {
 
     if (type == null) {
       throw new IllegalArgumentException("type cannot be null.");
     }
+    
+    // Cache
+    /*
+    String tName = type.getName();
+    if (cache.get(tName) != null) {
+    	return cache.get(tName);
+    }
+    */
 
     if (Log.isLoggingOn()) {
       Log.logLine("getSequencesForType: entering method, type=" + type.toString());
@@ -249,6 +259,9 @@ public class SequenceCollection {
     if (Log.isLoggingOn()) {
       Log.logLine("getSequencesForType: returning " + selector.size() + " sequences.");
     }
+    
+    // Cache
+    //cache.put(tName, selector);
     return selector;
   }
 

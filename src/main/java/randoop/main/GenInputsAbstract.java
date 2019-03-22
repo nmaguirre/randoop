@@ -63,11 +63,14 @@ public abstract class GenInputsAbstract extends CommandHandler {
   public static File classlist = null;
   
   @Option("Max objects to make canonicalization stop and drop current test")
-  public static int max_extensions_objects = 3;
+  public static int max_objects = 3;
 
   @Option("Max primitive values in field extensions to make canonicalization stop and drop current test")
   public static int max_extensions_primitives = 3;
   
+  @Option("Max values in array objects to make canonicalization stop and drop current test")
+  public static int max_array_objects = 3;
+
   public enum Filtering {
 	 NO,
 	 FE,
