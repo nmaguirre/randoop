@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import extensions.FieldExtensionsCollector;
 import randoop.ExecutionOutcome;
 import randoop.NormalExecution;
+import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
 import randoop.sequence.Statement;
@@ -128,7 +129,10 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 									seqWriter.write("---\n");
 									seqWriter.write(objStr + "\n");
 									seqWriter.write("index: " + t.getSecond() + "\n");
-									seqWriter.write(sequence.toString() + "\n");
+									seqWriter.write(sequence.toCodeString() + "\n");
+									if (GenInputsAbstract.output_full_extensions) {
+										seqWriter.write(col.getExtensions().toSortedString() + "\n");
+									}
 									seqWriter.write("---\n");
 								}
 							} catch (IOException e) {

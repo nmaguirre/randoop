@@ -173,6 +173,7 @@ public class ExecutableSequence {
    */
   public String toCodeString() {
     StringBuilder b = new StringBuilder();
+    int statements = 0;
     for (int i = 0; i < sequence.size(); i++) {
 
       // Only print primitive declarations if the last/only statement
@@ -202,7 +203,10 @@ public class ExecutableSequence {
         }
       }
       b.append(oneStatement);
+      statements++;
     }
+    b.append("statements: " + statements);
+    
     return b.toString();
   }
 
