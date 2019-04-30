@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +17,9 @@ import randoop.ExecutionVisitor;
 import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.NotExecuted;
+import randoop.SubTypeSet;
 import randoop.main.GenInputsAbstract;
+import randoop.operation.NonreceiverTerm;
 import randoop.test.Check;
 import randoop.test.TestCheckGenerator;
 import randoop.test.TestChecks;
@@ -651,4 +654,26 @@ public class ExecutableSequence {
 		  executionResults.theList.add(NotExecuted.create());
 	  }
   }
+
+public boolean isPrimitive(Object obj) {
+	   Class<?> cls = obj.getClass();
+	   return NonreceiverTerm.isNonreceiverType(cls); 
+}
+
+public List<Object> getLastStmtRuntimeObjects() {
+	   int i = sequence.size()-1;
+	   List<Variable> inputs = sequence.getInputs(i);
+	   List<Object> res = new LinkedList<>();
+
+	   Statement stmt = sequence.getStatement(i);
+	   if (!stmt.getOutputType().isVoid()) 
+		   res.add(((NormalExecution)getResult(i)).getRuntimeValue());
+
+	   for (Object o: getRuntimeInputs(executionResults.theList, inputs)) {
+		   res.add(o);
+	   }
+	   
+	   return res;
+}
+
 }

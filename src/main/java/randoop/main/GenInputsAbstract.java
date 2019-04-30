@@ -163,6 +163,10 @@ public abstract class GenInputsAbstract extends CommandHandler {
    */
   @Option("Do not call methods that match regular expression <string>")
   public static Pattern omitmethods = null;
+  
+  
+  @Option("Do not mutate fields that match regular expression <string>")
+  public static Pattern vectorization_dont_mutate_fields = null;
 
   /**
    * File that contains fully-qualified field names to be excluded
@@ -656,6 +660,26 @@ public abstract class GenInputsAbstract extends CommandHandler {
    */
   @Option("<filename> Name of a file to which to log lots of information")
   public static FileWriter log = null;
+  
+  
+  @Option("<filename> Name of a file to which to save the generated vectors")
+  public static FileWriter vectors_file = null;
+
+  @Option("<filename> Name of a file to which to save the generated negative vectors")
+  public static FileWriter negative_vectors_file = null;
+  
+  @Option("<filename> Name of a file to which to save the bad negative vectors")
+  public static FileWriter bad_negative_vectors_file = null;
+
+  @Option("<filename> Name of a file to which to log lots of information about heap canonicalization")
+  public static FileWriter canonicalizer_log = null;
+  
+   @Option("Don't use randoop's default primitive values during generation")
+  public static boolean no_default_primitives = false;
+   
+   @Option("Reset static fields after the execution of each generated test")
+  public static boolean reset_static_fields = false;
+  
 
   ///////////////////////////////////////////////////////////////////
   // Options used when testing Randoop.

@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import randoop.BugInRandoopException;
@@ -41,6 +43,18 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
+import randoop.util.heapcanonicalization.CanonicalClass;
+import randoop.util.heapcanonicalization.CanonicalField;
+import randoop.util.heapcanonicalization.CanonicalHeap;
+import randoop.util.heapcanonicalization.CanonicalStore;
+import randoop.util.heapcanonicalization.CanonicalizationResult;
+import randoop.util.heapcanonicalization.CanonicalizerLog;
+import randoop.util.heapcanonicalization.HeapCanonicalizer;
+import randoop.util.heapcanonicalization.candidatevectors.BugInCandidateVectorsCanonicalization;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
+import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsFieldExtensions;
+import randoop.util.heapcanonicalization.candidatevectors.VectorsWriter;
 
 /**
  * Randoop's forward, component-based generator.
@@ -151,6 +165,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     	break;
     }
 
+    if (VectorsWriter.isEnabled()) 
+    	initNewCanonicalizerForVectorization(GenInputsAbstract.getClassnamesFromArgs(), AbstractGenerator.vectorization_max_objects);
     
   }
 
@@ -401,7 +417,19 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  }
 				  newSeqs++;
 				  
-
+				  
+				  if (VectorsWriter.isEnabled()) {
+					  if (eSeq.isNormalExecution()) { 
+						  if (CanonicalizerLog.isLoggingOn()) {
+							  CanonicalizerLog.logLine("**********");
+							  CanonicalizerLog.logLine("Canonicalizing runtime objects in the last statement of sequence:\n" + eSeq.toCodeString());
+							  CanonicalizerLog.logLine("**********");
+						  }	
+						  makeCanonicalVectorsForLastStatement(eSeq);
+					  }
+				  }
+				  
+				  
 				  /*
 				  for (Sequence is : sequences.sequences) {
 					  subsumed_sequences.add(is);
@@ -447,8 +475,6 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 		  prevMan = currMan;
 	  } // End of all iterations
   }
-  
-
   
   
   private void processSequence(ExecutableSequence seq) {
@@ -634,4 +660,137 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 	  throw new Error(this.getClass().getName() + " cannot be used by Randoop's AbstractGenerator");
   }
 
+  
+  
+  
+  // VECTORIZATION
+  
+	public static CanonicalStore store; 
+	public static HeapCanonicalizer vectorCanonicalizer;
+	public static CandidateVectorGenerator candVectGenerator;
+	public static CandidateVectorsFieldExtensions candVectExtensions;
+	
+	public void initNewCanonicalizerForVectorization(Collection<String> classNames, int vectMaxObjects) {
+
+		//vectorization_hard_array_limits = true;
+	    store = new CanonicalStore(classNames, Integer.MAX_VALUE);
+
+		vectorCanonicalizer = new HeapCanonicalizer(store, vectMaxObjects, vectMaxObjects);
+		// Initialize the candidate vector generator with the canonical classes that were mined from the code,
+		// before the generation starts.
+		if (vectorization_remove_unused) {                                                                                                                                                                           
+			if (classNames.size() != 1)                                                                                                                                                                          
+				throw new BugInCandidateVectorsCanonicalization("Only the --testclass option can be used for generation when --vectorization-remove-unused=true.");                                                                       
+			for (String s: classNames)                                                                                                                                                                           
+				candVectGenerator = new CandidateVectorGenerator(store, s, vectorization_no_primitives);                                                                                                   
+		}                                                                                                                                                                                                        
+		else                                                                                                                                                                                                     
+			candVectGenerator = new CandidateVectorGenerator(store, vectorization_no_primitives); 
+
+		CanonicalHeap heap = new CanonicalHeap(store, vectMaxObjects);
+		CandidateVector<String> header = candVectGenerator.makeCandidateVectorsHeader(heap);
+		candVectExtensions = new CandidateVectorsFieldExtensions(header);
+		VectorsWriter.logLine(header.toString());
+	}
+
+  
+  protected void makeCanonicalVectorsForLastStatement(ExecutableSequence eSeq) {
+	  makeCanonicalVectorsForLastStatement(eSeq, false);
+  }
+  
+  // Use the new canonizer to generate a candidate vector for all the objects of the given classes in the last method of the sequence
+  // Pre: (!mutateStructures => CandidateVectorsWriterLog.isEnabled()) && (mutateStructures => NegativeCandidateVectorsWriterLog.isEnabled())
+  protected void makeCanonicalVectorsForLastStatement(ExecutableSequence eSeq, boolean mutateStructures) {
+	  // FIXME?: We canonicalize every object, no only those that extend the global extensions
+	  /*
+		List<Integer> activeVars = eSeq.sequence.getActiveVars(eSeq.sequence.size() -1);
+		if (activeVars != null)
+			assert field_based_gen == FieldBasedGenType.EXTENSIONS: 
+					"Active vars are only computed when running field based generation.";
+	   */
+
+	  List<Object> formerMutatedObjs = new LinkedList<>();
+	  int maxIndex = eSeq.getLastStmtRuntimeObjects().size();
+	  for (int index = 0; index < maxIndex; index++) {
+		  Object obj = eSeq.getLastStmtRuntimeObjects().get(index);
+
+		  if (obj == null || eSeq.isPrimitive(obj))
+			  continue;
+		  /*
+			if (activeVars != null && !activeVars.contains(index)) 
+				continue;
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("INFO: Active variable index: " + index);
+		   */
+
+		  CanonicalClass rootClass = store.getCanonicalClass(obj.getClass());
+		  // FIXME: Should check the compile time type of o instead of its runtime type to 
+		  // avoid generating null objects of other types? 
+		  if (store.isMainClass(rootClass)) {
+			  // HACK for not canonicalizing antlr.CommonTree when we are not at the heap root 
+			  // (parent is different from null)
+			  boolean nonroot = false;
+			  if (rootClass.getName().endsWith("antlr.CommonTree")) {
+				  for (CanonicalField f: rootClass.getCanonicalFields()) {
+					  try {
+						  if (f.getName().equals("parent") && f.getField().get(obj) != null) {
+							  nonroot = true;
+							  if (CanonicalizerLog.isLoggingOn()) 
+								  CanonicalizerLog.logLine("CANONICALIZER WARNING: Ignoring current object because it's not a heap root");
+							  break;
+						  }
+					  } catch (IllegalArgumentException | IllegalAccessException e) {
+						  throw new BugInCandidateVectorsCanonicalization("Cannot find existing field " + f.getName());
+					  }
+				  }
+			  }
+			  if (nonroot == true)
+				  continue;
+
+			  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(obj);
+			  if (res.getKey() == CanonicalizationResult.OK) {
+				  CanonicalHeap objHeap = res.getValue();
+
+				  if (!mutateStructures) {
+					  CandidateVector<Object> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
+					  if (CanonicalizerLog.isLoggingOn()) {
+						  CanonicalizerLog.logLine("----------");
+						  CanonicalizerLog.logLine("New vector:");
+						  CanonicalizerLog.logLine(candidateVector.toString());
+						  CanonicalizerLog.logLine("----------");
+					  }
+					  candVectExtensions.addToExtensions(candidateVector);
+					  VectorsWriter.logLine(candidateVector.toString());
+				  }
+				  else {
+					  /*if (!vectorization_mutate_all_objects)
+						  mutateRandomFieldAndGenNegativeVector(obj, objHeap, formerMutatedObjs);
+					  else
+					  */
+
+					  // mutateAFieldOfEachObjectAndGenNegativeVector(eSeq, index, objHeap);
+				  }
+			  }
+			  else { // res.getKey() != CanonicalizationResult.OK
+				  if (CanonicalizerLog.isLoggingOn()) {
+					  CanonicalizerLog.logLine("----------");
+					  CanonicalizerLog.logLine("Not canonicalizing an object with more than " + 
+							  vectorization_max_objects + " objects of the same type");
+					  CanonicalizerLog.logLine("Error message: " + res.getKey());
+					  CanonicalizerLog.logLine("----------");
+				  }
+			  }
+		  }
+		  index++;
+	  }
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }
