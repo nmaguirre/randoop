@@ -28,6 +28,7 @@ public class CanonicalStore {
 		mainClasses.addAll(classNames);
 		List<String> sortedNames = new LinkedList<>(classNames);
 		sortedNames.add(DummyHeapRoot.class.getName());
+		sortedNames.add(DummySymbolicObject.class.getName());
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
 			getUpdateOrCreateCanonicalClass(name, 0);
@@ -58,7 +59,7 @@ public class CanonicalStore {
 	
 	public CanonicalClass getCanonicalClass(String name) {
 		CanonicalClass cls = classes.get(name);
-		assert cls != null : "Called for "+ name + " but this method should be called for existing canonical classes only. ";
+		//assert cls != null : "Called for "+ name + " but this method should be called for existing canonical classes only. ";
 		return cls;
 	}
 	

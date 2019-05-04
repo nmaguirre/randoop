@@ -402,6 +402,94 @@ public class CanonicalHeap {
 			CanonicalizerLog.logLine("Randomly picked a value for the field: " + rdmValue.stringRepresentation());	
 		return rdmValue;
 	}
+
+	public boolean makeRandomFieldSymbolic(CanonicalClass cls,
+			int toMutateInd, int retries) {
+		int retriesLeft = retries;
+		boolean succeeded = false;
+		if (CanonicalizerLog.isLoggingOn()) {
+			CanonicalizerLog.logLine("----------");
+			CanonicalizerLog.logLine("Starting a mutation attempt:");
+			CanonicalizerLog.logLine("Heap contents:\n" + toString());
+		}
+		
+		while (!succeeded && retriesLeft > 0) {
+
+			CanonicalObject toMutate = objects.get(cls).get(toMutateInd);
+			if (CanonicalizerLog.isLoggingOn()) 
+				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
+			if (!makeRandomObjectFieldSymbolic(toMutate) ) {
+				retriesLeft--;
+				continue;
+			}
+
+			succeeded = true;
+		}
+
+		if (!succeeded)
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Retries limit exceeded. No mutation performed.");
+
+		return succeeded; 
+	}
+	
+	
+	private boolean makeRandomObjectFieldSymbolic(CanonicalObject toMutate) {
+		// 3- Pick the field to be mutated.
+		CanonicalField rdmFld =	pickRandomFieldToMakeSymbolic(toMutate);
+		if (rdmFld == null) {
+			return false;
+		}
+
+		CanonicalObject rdmValue = getCanonicalObject(new DummySymbolicObject()).getValue();
+
+		// 5- set toMutate.rdmFld = rdmValue
+		rdmFld.setValue(toMutate, rdmValue);
+		if (CanonicalizerLog.isLoggingOn())
+			CanonicalizerLog.logLine("Mutation successful. Field " + rdmFld.stringRepresentation(toMutate) + " of object " + 
+					toMutate.stringRepresentation() + " set to " + rdmValue.stringRepresentation());
+		
+		return true;
+	}
+	
+	
+	private CanonicalField pickRandomFieldToMakeSymbolic(CanonicalObject toMutate) {
+		List<CanonicalField> candidateFields = new ArrayList<>();
+		Entry<CanonicalizationResult, List<CanonicalField>> objFieldsRes = toMutate.getCanonicalFields();
+		assert objFieldsRes.getKey() == CanonicalizationResult.OK: "Getting fields of object " + toMutate + " failed";
+		Pattern dontMutate = GenInputsAbstract.vectorization_dont_mutate_fields;
+
+		for (CanonicalField fld: objFieldsRes.getValue() /*rdmClass.getCanonicalFields()*/) {
+			if (dontMutate != null && dontMutate.matcher(fld.getName()).find()) {
+				if (CanonicalizerLog.isLoggingOn()) {
+					CanonicalizerLog.logLine("Field " + fld.getName() + " matches "
+							+ "--vectorization-dont-mutate-fields regular expression, don't mutate it");
+				}
+				continue;
+			}
+			
+			CanonicalClass fType = fld.getCanonicalType();
+			if (!fld.isStatic() &&
+					!fld.isFinal() && 
+					!fType.isObject() && 
+					// We allow for mutation of non reference fields when mutating within extensions
+					((!fType.isPrimitive() && store.isClassFromCode(fType)))
+					)
+				candidateFields.add(fld);
+		}	
+		
+		if (candidateFields.isEmpty()) {
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("No fields available to mutate. Retrying...");
+			return null;
+		}
+		int rdmFldInd = Randomness.nextRandomInt(candidateFields.size());
+		CanonicalField rdmFld = candidateFields.get(rdmFldInd);			
+		if (CanonicalizerLog.isLoggingOn())
+			CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
+		
+		return rdmFld;
+	}
 	
 	
 }

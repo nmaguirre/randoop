@@ -18,10 +18,10 @@ import randoop.util.heapcanonicalization.DummyHeapRoot;
 
 public class CandidateVectorGenerator {
 	
-	private static int NULL_INT_REPRESENTATION = AbstractGenerator.cand_vect_null_rep; //Integer.MIN_VALUE;
-	private final Set<String> classesFromCode = new LinkedHashSet<>();
-	private final Set<String> singletonClasses = new HashSet<>();
-	private final boolean noPrimitiveFields;
+	protected static int NULL_INT_REPRESENTATION = AbstractGenerator.cand_vect_null_rep; //Integer.MIN_VALUE;
+	protected final Set<String> classesFromCode = new LinkedHashSet<>();
+	protected final Set<String> singletonClasses = new HashSet<>();
+	protected final boolean noPrimitiveFields;
 	
 	public CandidateVectorGenerator(CanonicalStore store, String rootClass) {
 		this(store, rootClass, false);
@@ -54,7 +54,7 @@ public class CandidateVectorGenerator {
 			maxArrays = AbstractGenerator.vectorization_max_array_objects;
 	}
 	
-	private Integer maxArrays = null;
+	protected Integer maxArrays = null;
 	
 	// TODO: Test setting maxArrays in Facu's case
 	public void setMaxArrayObjects(int maxArrays) {
@@ -109,6 +109,7 @@ public class CandidateVectorGenerator {
 	private boolean ignoreCanonicalClassInCandidateVectors(CanonicalClass clazz) {
 		return 
 				clazz.getName().endsWith("Element") ||
+				clazz.getName().endsWith("DummySymbolicObject") ||
 				/*clazz.getName().equals("singlylist.Element") ||
 				clazz.getName().equals("doublylist.Element") ||*/
 				clazz.isPrimitive() || clazz.isAbstract() || clazz.isInterface() || clazz.isObject();
@@ -175,7 +176,7 @@ public class CandidateVectorGenerator {
 	private void addNullObjectToCandidateVector(CanonicalClass canonicalClass, CanonicalHeap heap, CandidateVector<Object> v) {
 		if (canonicalClass.isArray())
 			for (int i = 0; i < heap.getMaxObjects(); i++)
-				v.addComponent(NULL_INT_REPRESENTATION);
+				v.addComponent(-2);//NULL_INT_REPRESENTATION);
 		else {
 			for (CanonicalField fld: canonicalClass.getCanonicalFields()) {
 				if (AbstractGenerator.vectorization_ignore_static && fld.isStatic())
@@ -183,12 +184,12 @@ public class CandidateVectorGenerator {
 				
 				if (!fld.getName().equals("serialVersionUID")) 
 					if (!noPrimitiveFields || (/*!fld.isObjectType() &&*/ !fld.isPrimitiveType()))
-						v.addComponent(NULL_INT_REPRESENTATION);
+						v.addComponent(-2);//NULL_INT_REPRESENTATION);
 			}
 		}
 	}
 
-	private void addToCandidateVector(CanonicalObject obj, CanonicalHeap heap, CandidateVector<Object> v) {
+	protected void addToCandidateVector(CanonicalObject obj, CanonicalHeap heap, CandidateVector<Object> v) {
 		Object comp;
 		Map.Entry<CanonicalizationResult, List<CanonicalField>> getFieldsRes = obj.getCanonicalFields();
 		assert getFieldsRes.getKey() == CanonicalizationResult.OK : 

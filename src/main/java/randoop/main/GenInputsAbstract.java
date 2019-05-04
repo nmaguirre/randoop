@@ -665,6 +665,9 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("<filename> Name of a file to which to save the generated vectors")
   public static FileWriter vectors_file = null;
 
+  @Option("<filename> Name of a file to which to save the generated symbolic vectors")
+  public static FileWriter symbolic_vectors_file = null;
+
   @Option("<filename> Name of a file to which to save the generated negative vectors")
   public static FileWriter negative_vectors_file = null;
   

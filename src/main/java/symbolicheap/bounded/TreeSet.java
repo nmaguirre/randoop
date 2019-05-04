@@ -1,9 +1,11 @@
-package casestudies.symbolicheap.bounded;
+package symbolicheap.bounded;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import randoop.CheckRep;
 
 
 public class TreeSet {
@@ -23,7 +25,15 @@ public class TreeSet {
   }
 
   */
-  public TreeSet() {
+	
+// public TreeSet() {
+//	 
+// }
+	
+
+  public TreeSet(int aKey) {
+      init_TreeSet(this, aKey, null);
+      assert repOK_Concrete(this);
   }
 
  // public static final TreeSet SYMBOLICTREESET = new TreeSet(); // field added to execute the
@@ -236,6 +246,51 @@ public class TreeSet {
   // ----------------------------- contains-end-----------------------------------//
 
   // ------------------------------add-roops-begin-------------------------------------//
+//  public TreeSet add(int aKey) {
+//    TreeSet t = this;
+//
+//    /*
+//    if (t == null) {
+//      init_TreeSet(this, aKey, null);
+//
+//      return this;
+//    }
+//    */
+//
+//    boolean boolean_true = true;
+//    while (boolean_true) {
+//
+//      if (aKey == t.key) {
+//
+//        return this;
+//      } else if (aKey < t.key) {
+//
+//        if (t.left != null) {
+//
+//          t = t.left;
+//        } else {
+//
+//          t.left = new TreeSet(aKey);
+//          init_TreeSet(t.left, aKey, t);
+//
+//          return fixAfterInsertion(t.left, this);
+//        }
+//      } else { // cmp > 0
+//
+//        if (t.right != null) {
+//
+//          t = t.right;
+//        } else {
+//
+//          t.right = new TreeSet(aKey);
+//          init_TreeSet(t.right, aKey, t);
+//          return fixAfterInsertion(t.right, this);
+//        }
+//      }
+//    }
+//
+//    return this;
+//  }
 
   public TreeSet add(int aKey, TreeSet root) {
     TreeSet t = root;
@@ -243,6 +298,7 @@ public class TreeSet {
     if (t == null) {
       init_TreeSet(root, aKey, null);
 
+      assert repOK_Concrete(root);
       return root;
     }
 
@@ -251,6 +307,7 @@ public class TreeSet {
 
       if (aKey == t.key) {
 
+    	assert repOK_Concrete(root);
         return root;
       } else if (aKey < t.key) {
 
@@ -259,11 +316,12 @@ public class TreeSet {
           t = t.left;
         } else {
 
-          t.left = new TreeSet();
+          t.left = new TreeSet(aKey);
           init_TreeSet(t.left, aKey, t);
 
           root = fixAfterInsertion(t.left, root);
 
+          assert repOK_Concrete(root);
           return root;
         }
       } else { // cmp > 0
@@ -273,26 +331,23 @@ public class TreeSet {
           t = t.right;
         } else {
 
-          t.right = new TreeSet();
+          t.right = new TreeSet(aKey);
           init_TreeSet(t.right, aKey, t);
           root = fixAfterInsertion(t.right, root);
 
+          assert repOK_Concrete(root);
           return root;
         }
       }
     }
 
-    /*
-    if (root != null && root.left != null && root.left.left != null && root.left.left.left != null
-        && root.left.left.left.left != null && root.left.left.left.left.left != null) {
-      throw new RuntimeException("Bingo");
-    }
-    */
+    assert repOK_Concrete(root);
+
     return root;
   }
 
   private void init_TreeSet(TreeSet entry, int new_key, TreeSet new_parent) {
-    entry.color = RED;
+    entry.color = RED; //BLACK;//
     entry.left = null;
     entry.right = null;
     entry.key = new_key;
