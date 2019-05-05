@@ -1,5 +1,7 @@
 package randoop.generation;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,6 +59,8 @@ import randoop.util.heapcanonicalization.candidatevectors.BugInCandidateVectorsC
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVector;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorGenerator;
 import randoop.util.heapcanonicalization.candidatevectors.CandidateVectorsFieldExtensions;
+import randoop.util.heapcanonicalization.candidatevectors.NegativeSymbolicVectorsWriter;
+import randoop.util.heapcanonicalization.candidatevectors.NegativeVectorsWriter;
 import randoop.util.heapcanonicalization.candidatevectors.SymbolicCandidateVectorGenerator;
 import randoop.util.heapcanonicalization.candidatevectors.SymbolicVectorsWriter;
 import randoop.util.heapcanonicalization.candidatevectors.VectorsWriter;
@@ -734,11 +738,16 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  candVectExtensions.addToExtensions(candidateVector);
 				  VectorsWriter.logLine(candidateVector.toString());
 				  
-				  if (SymbolicVectorsWriter.isEnabled()) 
-					  generateSymbolicStructures(eSeq, index, objHeap);
+				  if (SymbolicVectorsWriter.isEnabled()) {
+					  Set<String> vectors = generateSymbolicStructures(eSeq, index, objHeap);
+					  for (String vector: vectors)
+						  SymbolicVectorsWriter.logLine(vector);
+				  }
 			  }
 			  else {
-				  //mutateAFieldOfEachObjectAndGenNegativeVector(eSeq, index, objHeap);
+				  Set<String> vectors = mutateAFieldOfEachObjectAndGenNegativeVector(eSeq, index, objHeap);
+				  for (String vector: vectors)
+					  NegativeSymbolicVectorsWriter.logLine(vector);
 			  }
 		  }
 		  else { // res.getKey() != CanonicalizationResult.OK
@@ -755,10 +764,9 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   }
   
   
-  private void generateSymbolicStructures(ExecutableSequence eSeq, int index, CanonicalHeap objHeap) {
-	  Map<CanonicalClass, Integer> objsPerClass = objHeap.objectsPerClass();
-
-	  for (CanonicalClass cls: objsPerClass.keySet()) {
+  private Set<String> generateSymbolicStructures(ExecutableSequence eSeq, int index, CanonicalHeap objHeap) {
+	  Set<String> result = new HashSet<>();
+	  for (CanonicalClass cls: objHeap.objectsPerClass().keySet()) {
 		  if (cls.getName().equals(DummyHeapRoot.class.getName()) || cls.getName().equals(DummySymbolicObject.class.getName()))
 			  continue;
 
@@ -769,44 +777,140 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 
 //		  for (int toMutateInd = 0; toMutateInd < objsPerClass.get(cls); toMutateInd++) {
 			  for (int ind = 0; ind < 10; ind++) {
-				  int toMutateInd = Randomness.nextRandomInt(objsPerClass.get(cls));
+				  int toMutateInd = Randomness.nextRandomInt(objHeap.objectsPerClass().get(cls));
 
-				  int objRetries = 30;
-				  int positiveRetries = 20;
-				  boolean succeed = false;
-
-				  Entry<CanonicalizationResult, CanonicalHeap> res = null;
-				  while (!succeed && positiveRetries > 0) {
-					  // Canonicalize and mutate the current object
-					  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
-					  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
-					  CanonicalHeap toMutateHeap = res.getValue();			  
-					  // Mutate to make structure symbolic
-					  if (!toMutateHeap.makeRandomFieldSymbolic(cls, toMutateInd, objRetries)) {
-						  //if (!toMutateHeap.mutateObjectFieldOutsideExtensions(globalExtensions, cls, toMutateInd, objRetries)) {
-						  // Object could not be mutated outside the extensions
-						  if (CanonicalizerLog.isLoggingOn()) 
-							  CanonicalizerLog.logLine("> Mutation of the current object failed");
-						  positiveRetries--;
-						  continue;
-					  }
-
-					  succeed = true;
-					  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
-					  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
-					  SymbolicVectorsWriter.logLine(candidateVector.toString());
-					  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
-					  objsPerClass = res.getValue().objectsPerClass();
-				  }
+				  Entry<CanonicalizationResult, CanonicalHeap> res = makeRandomFieldSymbolic(cls, mutObj, toMutateInd);
+				  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+				  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+				  result.add(candidateVector.toString());
+				  objHeap = res.getValue();
 			  }
-
 		  }
-
 	  }
+	  return result;
+  }
+  
+
+  private Entry<CanonicalizationResult, CanonicalHeap> makeRandomFieldSymbolic(CanonicalClass cls, Object mutObj, int toMutateInd) {
+	  int objRetries = 30;
+	  int positiveRetries = 20;
+	  boolean succeed = false;
+
+	  Entry<CanonicalizationResult, CanonicalHeap> res = null;
+	  while (!succeed && positiveRetries > 0) {
+		  // Canonicalize and mutate the current object
+		  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+		  CanonicalHeap toMutateHeap = res.getValue();			  
+		  // Mutate to make structure symbolic
+		  if (!toMutateHeap.makeRandomFieldSymbolic(cls, toMutateInd, objRetries)) {
+			  //if (!toMutateHeap.mutateObjectFieldOutsideExtensions(globalExtensions, cls, toMutateInd, objRetries)) {
+			  // Object could not be mutated outside the extensions
+			  if (CanonicalizerLog.isLoggingOn()) 
+				  CanonicalizerLog.logLine("> Mutation of the current object failed");
+			  positiveRetries--;
+			  continue;
+		  }
+		  succeed = true;
+	  }
+	  return res;
+  }
+  
+  
+  // Mutate the object at position 'index' in the last statement of sequence 'eSeq'. One field of each object reachable  
+  // from the root is mutated selected randomly and mutated at most once. 
+  private Set<String> mutateAFieldOfEachObjectAndGenNegativeVector(ExecutableSequence eSeq, int index, CanonicalHeap objHeap) {
+	  Set<String> result = new HashSet<>();
+	  Map<CanonicalClass, Integer> objsPerClass = objHeap.objectsPerClass();
+	  Object mutObj = null;
+	  CanonicalHeap toMutateHeap = null;
+	  for (CanonicalClass cls: objsPerClass.keySet()) {
+		  if (cls.getName().equals(DummyHeapRoot.class.getName()))
+			  continue;
+
+		  for (int toMutateInd = 0; toMutateInd < objsPerClass.get(cls); toMutateInd++) {
+			  int objRetries = 30;
+			  int positiveRetries = 20;
+			  boolean succeed = false;
+			  Entry<CanonicalizationResult, CanonicalHeap> res = null;
+			  while (!succeed && positiveRetries > 0) {
+				  // Rebuild object before mutation
+				  eSeq.execute(executionVisitor, checkGenerator);
+				  mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
+				  // Canonicalize and mutate the current object
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+				  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+				  toMutateHeap = res.getValue();			  
+				  if (!toMutateHeap.mutateRandomObjectField(cls, toMutateInd, objRetries)
+						  || isPositive(mutObj)) {
+					  // Object could not be mutated outside the extensions
+					  if (CanonicalizerLog.isLoggingOn()) 
+						  CanonicalizerLog.logLine("> Mutation of the current object failed");
+					  positiveRetries--;
+					  continue;
+				  }
+				  succeed = true;
+			  }
+			  if (succeed) {
+				  saveNegativeVector(res.getValue());
+				  //Make negative symbolic vectors if neeeded
+				  generateNegativeSymbolicStructures(mutObj, toMutateHeap, result);
+			  }
+		  }
+	  }
+	  return result;
+  }
+  
+  
+  private void generateNegativeSymbolicStructures(Object mutObj, CanonicalHeap objHeap, Set<String> generated) {
+	  for (CanonicalClass cls: objHeap.objectsPerClass().keySet()) {
+		  if (cls.getName().equals(DummyHeapRoot.class.getName()) || cls.getName().equals(DummySymbolicObject.class.getName()))
+			  continue;
+
+		  // for (int toMutateInd = 0; toMutateInd < objsPerClass.get(cls); toMutateInd++) {
+		  for (int ind = 0; ind < 10; ind++) {
+			  int toMutateInd = Randomness.nextRandomInt(objHeap.objectsPerClass().get(cls));
+
+			  Entry<CanonicalizationResult, CanonicalHeap> res = makeRandomFieldSymbolic(cls, mutObj, toMutateInd);
+			  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+			  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+			  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+			  generated.add(candidateVector.toString());
+			  objHeap = res.getValue();
+		  }
+	  }
+  }
+
+
+  private boolean isPositive(Object obj) {
+	  Boolean res = false;
+	  Method m;
+	  try {
+		  m = obj.getClass().getMethod("repOK");
+		  res = ((Boolean) m.invoke(obj));
+	  } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		  System.out.println("ERROR: problem occurred while trying to invoke repOKNeg method to classify negatives");
+		  e.printStackTrace();
+		  System.exit(0);
+	  }
+	  return res;
+  }
+
+  
+  private String saveNegativeVector(CanonicalHeap objHeap) {	  
+	  CandidateVector<Object> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
+	  if (CanonicalizerLog.isLoggingOn()) {
+		  CanonicalizerLog.logLine("----------");
+		  CanonicalizerLog.logLine("New mutated vector:");
+		  CanonicalizerLog.logLine(candidateVector.toString());
+		  CanonicalizerLog.logLine("----------");
+	  }
+	  String res = candidateVector.toString();
+	  NegativeVectorsWriter.logLine(res);
+	  
+	  return res;
   } 
-  
-  
-  
-  
+
   
 }

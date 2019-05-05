@@ -127,11 +127,6 @@ public class CanonicalHeap {
 			CanonicalizerLog.logLine("Heap contents:\n" + toString());
 		}
 		
-		boolean mutateWithinExtensions = false;
-		if (AbstractGenerator.vectorization_mutate_within_extensions && 
-				Randomness.weighedCoinFlip(AbstractGenerator.vectorization_mutate_within_extensions_percentage)) 		
-			mutateWithinExtensions = true;
-		
 		while (!succeeded && retriesLeft > 0) {
 			// 1- Pick a class whose objects are mutation candidates.
 			List<CanonicalClass> candidateClasses = new ArrayList<>(); 
@@ -163,7 +158,7 @@ public class CanonicalHeap {
 				CanonicalizerLog.logLine("Mutating object:" + toMutate.stringRepresentation());
 			
 			// 3- Mutate some randomly selected field of the object
-			if (!mutateRandomObjectField(mutateWithinExtensions, toMutate, extensions)) {
+			if (!mutateRandomObjectField(toMutate)) {
 				retriesLeft--;
 				continue;
 			}
@@ -178,51 +173,41 @@ public class CanonicalHeap {
 		return succeeded; 
 	}
 	
-	private boolean mutateRandomObjectField(boolean mutateWithinExtensions, CanonicalObject toMutate, FieldExtensions extensions) {
+	
+	public CanonicalObject mutatedObject;
+	public CanonicalObject mutatedValue;
+	public CanonicalField mutatedField;
+	
+	private boolean mutateRandomObjectField(CanonicalObject toMutate) {
 		// 3- Pick the field to be mutated.
-		CanonicalField rdmFld =	pickRandomFieldToMutate(mutateWithinExtensions, toMutate);
+		CanonicalField rdmFld =	pickRandomFieldToMutate(toMutate);
 		if (rdmFld == null) {
 			return false;
 		}
 
 		// 4- Pick the value the selected field will be set to.
-		Set<String> objsInExtensions = getObjectsInExtensions(extensions, toMutate, rdmFld);
-		List<CanonicalObject> allValues = getAvailableValuesToSetField(rdmFld, objsInExtensions);
+		List<CanonicalObject> allValues = getReferenceObjectsFromHeap(rdmFld);
 		// Not all values in allValues can be used to set the field
-		CanonicalObject rdmValue = selectValueToSetField(mutateWithinExtensions, toMutate, rdmFld,
-				allValues, objsInExtensions);
+		CanonicalObject rdmValue = selectValueToSetField(toMutate, rdmFld, allValues);
 		if (rdmValue == null) {
 			return false;
 		}
 
 		// 5- set toMutate.rdmFld = rdmValue
 		rdmFld.setValue(toMutate, rdmValue);
+		mutatedObject = toMutate;
+		mutatedField = rdmFld;
+		mutatedValue = rdmValue;
 		if (CanonicalizerLog.isLoggingOn())
 			CanonicalizerLog.logLine("Mutation successful. Field " + rdmFld.stringRepresentation(toMutate) + " of object " + 
 					toMutate.stringRepresentation() + " set to " + rdmValue.stringRepresentation());
 		
-		if (mutateWithinExtensions)
-			AbstractGenerator.vectorization_mutated_within_extensions = true;
-		
 		return true;
 	}
 
-	private List<CanonicalObject> getAvailableValuesToSetField(CanonicalField rdmFld, Set<String> objsInExtensions) {
+	private List<CanonicalObject> getReferenceObjectsFromHeap(CanonicalField rdmFld) {
 		List<CanonicalObject> allValues = new LinkedList<>();
-		if (rdmFld.isPrimitiveType()) {
-			// Primitive fields are always mutated within extensions.
-			createPrimitiveValuesFromExtensions(rdmFld, objsInExtensions, allValues);
-		}
-		else {
-			getReferenceObjectsFromHeap(rdmFld, allValues, rdmFld.getCanonicalType());
-		}
-		if (CanonicalizerLog.isLoggingOn())
-			CanonicalizerLog.logLine("Available objects to set the field:" + allValues);
-		return allValues;
-	}
-
-	private void getReferenceObjectsFromHeap(CanonicalField rdmFld, List<CanonicalObject> allValues,
-			CanonicalClass fldType) {
+		CanonicalClass fldType = rdmFld.getCanonicalType();
 		if (objects.get(fldType) != null)
 			allValues.addAll(objects.get(fldType));
 		for (CanonicalClass descFldType: rdmFld.getCanonicalType().getDescendants()) {
@@ -230,52 +215,10 @@ public class CanonicalHeap {
 				allValues.addAll(objects.get(descFldType));
 		}
 		allValues.add(new CanonicalObject(null, null, -1, this));
+		return allValues;
 	}
 
-	private void createPrimitiveValuesFromExtensions(CanonicalField rdmFld, Set<String> objsInExtensions,
-			List<CanonicalObject> allValues) {
-		for (String primStr: objsInExtensions) {
-			Object res = null;
-			try {
-				res = Integer.parseInt(primStr);
-			}
-			catch (NumberFormatException e) {
-				/*try {
-					res = Double.parseDouble(primStr);
-				} 
-				catch (NumberFormatException e1) { */
-				try {
-					res = Float.parseFloat(primStr);
-				}	
-				catch (NumberFormatException e2) {	
-					try {
-						res = Long.parseLong(primStr);
-					}	
-					catch (NumberFormatException e3) {	
-						// res is boolean, string or char.
-						if ("true".equalsIgnoreCase(primStr) || "false".equalsIgnoreCase(primStr))
-							res = Boolean.parseBoolean(primStr);
-						else
-							res = primStr;
-					}
-				}
-				//}
-			}
-			allValues.add(new CanonicalObject(res, rdmFld.getCanonicalType(), -1, null));
-		}
-	}
-
-	private Set<String> getObjectsInExtensions(FieldExtensions extensions, CanonicalObject toMutate,
-			CanonicalField rdmFld) {
-		Set<String> objsInExtensions = extensions.getValuesFor(rdmFld.stringRepresentation(toMutate), toMutate.stringRepresentation());
-		if (CanonicalizerLog.isLoggingOn())
-			CanonicalizerLog.logLine("Objects in extensions:" + objsInExtensions);
-		if (objsInExtensions == null)
-			objsInExtensions = new HashSet<>();
-		return objsInExtensions;
-	}
-
-	private CanonicalField pickRandomFieldToMutate(boolean mutateWithinExtensions, CanonicalObject toMutate) {
+	private CanonicalField pickRandomFieldToMutate(CanonicalObject toMutate) {
 		List<CanonicalField> candidateFields = new ArrayList<>();
 		Entry<CanonicalizationResult, List<CanonicalField>> objFieldsRes = toMutate.getCanonicalFields();
 		assert objFieldsRes.getKey() == CanonicalizationResult.OK: "Getting fields of object " + toMutate + " failed";
@@ -295,7 +238,7 @@ public class CanonicalHeap {
 					!fld.isFinal() && 
 					!fType.isObject() && 
 					// We allow for mutation of non reference fields when mutating within extensions
-					(mutateWithinExtensions || (!fType.isPrimitive() && store.isClassFromCode(fType)))
+					((!fType.isPrimitive() && store.isClassFromCode(fType)))
 					)
 				candidateFields.add(fld);
 		}	
@@ -330,8 +273,7 @@ public class CanonicalHeap {
 		return res;
 	}
 
-	public boolean mutateObjectFieldOutsideExtensions(FieldExtensions extensions, CanonicalClass cls,
-			int toMutateInd, int retries) {
+	public boolean mutateRandomObjectField(CanonicalClass cls, int toMutateInd, int retries) {
 		int retriesLeft = retries;
 		boolean succeeded = false;
 		if (CanonicalizerLog.isLoggingOn()) {
@@ -340,17 +282,11 @@ public class CanonicalHeap {
 			CanonicalizerLog.logLine("Heap contents:\n" + toString());
 		}
 		
-		boolean mutateWithinExtensions = false;
-		if (AbstractGenerator.vectorization_mutate_within_extensions && 
-				Randomness.weighedCoinFlip(AbstractGenerator.vectorization_mutate_within_extensions_percentage)) 		
-			mutateWithinExtensions = true;
-		
 		while (!succeeded && retriesLeft > 0) {
-
 			CanonicalObject toMutate = objects.get(cls).get(toMutateInd);
 			if (CanonicalizerLog.isLoggingOn()) 
 				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
-			if (!mutateRandomObjectField(mutateWithinExtensions, toMutate, extensions)) {
+			if (!mutateRandomObjectField(toMutate)) {
 				retriesLeft--;
 				continue;
 			}
@@ -365,35 +301,9 @@ public class CanonicalHeap {
 		return succeeded; 
 	}
 
-	private CanonicalObject selectValueToSetField(boolean mutateWithinExtensions, CanonicalObject toMutate,
-			CanonicalField rdmFld, List<CanonicalObject> allValues, Set<String> objsInExtensions) {
-		List<CanonicalObject> candidateValues = new ArrayList<>();
-		
-		if (!mutateWithinExtensions) {
-			for (CanonicalObject candidate: allValues) {
-				if (!objsInExtensions.contains(candidate.stringRepresentation()))
-					candidateValues.add(candidate);
-			}
-			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Mutating object outside extensions\nObjects outside extensions:" + candidateValues);
-		}
-		else {
-			Object currFldVal = rdmFld.getValue(toMutate);
-			for (CanonicalObject candidate: allValues) {
-				String candStr = candidate.stringRepresentation();
-				if ((!rdmFld.isPrimitiveType() || !candidate.getObject().equals(currFldVal)) &&
-					(rdmFld.isPrimitiveType() || candidate.getObject() != currFldVal) &&
-						objsInExtensions.contains(candStr))
-					candidateValues.add(candidate);
-			}
-			
-			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Mutating object within extensions.\nObjects within extensions:" + candidateValues);
-		}
-		
+	private CanonicalObject selectValueToSetField(CanonicalObject toMutate, CanonicalField rdmFld, List<CanonicalObject> allValues) { 
+		List<CanonicalObject> candidateValues = allValues;
 		if (candidateValues.isEmpty()) {
-			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("No objects ouside extensions. Retrying...");
 			return null;
 		}
 		int rdmValInd = Randomness.nextRandomInt(candidateValues.size());
@@ -442,6 +352,11 @@ public class CanonicalHeap {
 		}
 
 		CanonicalObject rdmValue = getCanonicalObject(new DummySymbolicObject()).getValue();
+		// Do not allow to mutate the mutated object field in the generation of negative symbolic instances
+		if (mutatedObject != null && 
+			toMutate.getObject() == mutatedObject.getObject() &&
+			rdmFld.getName().equals(mutatedField.getName()))
+			return false;
 
 		// 5- set toMutate.rdmFld = rdmValue
 		rdmFld.setValue(toMutate, rdmValue);

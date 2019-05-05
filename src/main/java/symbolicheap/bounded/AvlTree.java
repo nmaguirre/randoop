@@ -266,6 +266,11 @@ public class AvlTree {
 
   // ~~~~~~~~~ Begin repOK_Concrete ~~~~~~~~~~
 
+  
+  private boolean repOK() {
+	  return repOK_Concrete(this);
+  }
+  
   private boolean repOK_Concrete(AvlTree root) {
     return repOK_Structure(root); // && repOK_Ordered(root);
   }
