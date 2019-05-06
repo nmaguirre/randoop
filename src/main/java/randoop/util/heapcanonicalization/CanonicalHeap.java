@@ -272,8 +272,13 @@ public class CanonicalHeap {
 			res.put(cls, objects.get(cls).size());
 		return res;
 	}
+	
+	public CanonicalObject getCanonicalObject(CanonicalClass cls, int toMutateInd) {
+		return objects.get(cls).get(toMutateInd);
+	}
+	
 
-	public boolean mutateRandomObjectField(CanonicalClass cls, int toMutateInd, int retries) {
+	public boolean mutateRandomObjectField(CanonicalObject toMutate, int retries) {
 		int retriesLeft = retries;
 		boolean succeeded = false;
 		if (CanonicalizerLog.isLoggingOn()) {
@@ -283,7 +288,6 @@ public class CanonicalHeap {
 		}
 		
 		while (!succeeded && retriesLeft > 0) {
-			CanonicalObject toMutate = objects.get(cls).get(toMutateInd);
 			if (CanonicalizerLog.isLoggingOn()) 
 				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
 			if (!mutateRandomObjectField(toMutate)) {
@@ -313,8 +317,7 @@ public class CanonicalHeap {
 		return rdmValue;
 	}
 
-	public boolean makeRandomFieldSymbolic(CanonicalClass cls,
-			int toMutateInd, int retries) {
+	public boolean makeRandomFieldSymbolic(CanonicalObject toMutate, int retries, CanonicalObject mutatedObject, CanonicalField mutatedField) {
 		int retriesLeft = retries;
 		boolean succeeded = false;
 		if (CanonicalizerLog.isLoggingOn()) {
@@ -324,15 +327,12 @@ public class CanonicalHeap {
 		}
 		
 		while (!succeeded && retriesLeft > 0) {
-
-			CanonicalObject toMutate = objects.get(cls).get(toMutateInd);
 			if (CanonicalizerLog.isLoggingOn()) 
 				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
-			if (!makeRandomObjectFieldSymbolic(toMutate) ) {
+			if (!makeRandomObjectFieldSymbolic(toMutate, mutatedObject, mutatedField)) {
 				retriesLeft--;
 				continue;
 			}
-
 			succeeded = true;
 		}
 
@@ -344,19 +344,24 @@ public class CanonicalHeap {
 	}
 	
 	
-	private boolean makeRandomObjectFieldSymbolic(CanonicalObject toMutate) {
+	private boolean makeRandomObjectFieldSymbolic(CanonicalObject toMutate, CanonicalObject mutatedObject, CanonicalField mutatedField) {
 		// 3- Pick the field to be mutated.
 		CanonicalField rdmFld =	pickRandomFieldToMakeSymbolic(toMutate);
 		if (rdmFld == null) {
 			return false;
 		}
 
-		CanonicalObject rdmValue = getCanonicalObject(new DummySymbolicObject()).getValue();
+		CanonicalObject rdmValue = getCanonicalObject(DummySymbolicAVL.getObject()).getValue();
+		
 		// Do not allow to mutate the mutated object field in the generation of negative symbolic instances
-		if (mutatedObject != null && 
-			toMutate.getObject() == mutatedObject.getObject() &&
-			rdmFld.getName().equals(mutatedField.getName()))
-			return false;
+		if (mutatedObject != null) {
+			if (toMutate.getObject() == mutatedObject.getObject() &&
+					rdmFld.getName().equals(mutatedField.getName()))
+				return false;
+			
+			if (rdmFld.getValue(toMutate) instanceof DummySymbolicAVL)
+				return false;
+		}
 
 		// 5- set toMutate.rdmFld = rdmValue
 		rdmFld.setValue(toMutate, rdmValue);

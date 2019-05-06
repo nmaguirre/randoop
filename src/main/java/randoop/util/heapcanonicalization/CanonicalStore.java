@@ -28,7 +28,7 @@ public class CanonicalStore {
 		mainClasses.addAll(classNames);
 		List<String> sortedNames = new LinkedList<>(classNames);
 		sortedNames.add(DummyHeapRoot.class.getName());
-		sortedNames.add(DummySymbolicObject.class.getName());
+		sortedNames.add(DummySymbolicAVL.class.getName());
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
 			getUpdateOrCreateCanonicalClass(name, 0);

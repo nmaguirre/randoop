@@ -28,6 +28,12 @@ public class CanonicalClass {
 	private final CanonicalStore store;
 	private int fieldDistance;
 
+	
+	public Class getConcreteClass() {
+		return clazz;
+	}
+	
+	
 	public CanonicalClass(String name, CanonicalStore store, int fieldDistance, int maxFieldDistance) {
 		this.store = store;
 		ID = globalID++;
