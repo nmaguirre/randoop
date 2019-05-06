@@ -15,6 +15,7 @@ import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.DummyHeapRoot;
+import randoop.util.heapcanonicalization.IDummySymbolic;
 
 public class CandidateVectorGenerator {
 	
@@ -109,10 +110,11 @@ public class CandidateVectorGenerator {
 	private boolean ignoreCanonicalClassInCandidateVectors(CanonicalClass clazz) {
 		return 
 				clazz.getName().endsWith("Element") ||
-				clazz.getName().endsWith("DummySymbolicObject") ||
 				/*clazz.getName().equals("singlylist.Element") ||
 				clazz.getName().equals("doublylist.Element") ||*/
-				clazz.isPrimitive() || clazz.isAbstract() || clazz.isInterface() || clazz.isObject();
+				clazz.isPrimitive() || clazz.isAbstract() || clazz.isInterface() || clazz.isObject() ||
+				IDummySymbolic.class.isAssignableFrom(clazz.getConcreteClass());
+
 				//|| !classesFromCode.contains(clazz.getName());
 	}
 	
