@@ -120,6 +120,9 @@ public class CandidateVectorGenerator {
 	
 	private void addCandidateVectorFields(CanonicalHeap heap, CanonicalClass clazz, int objNum, CandidateVector<String> header) {
 		for (CanonicalField fld: clazz.getCanonicalFields()) {
+			if (ignoreField(fld))
+				continue;
+
 			if (AbstractGenerator.vectorization_ignore_static && fld.isStatic())
 				continue;
 			
@@ -181,6 +184,9 @@ public class CandidateVectorGenerator {
 				v.addComponent(-2);//NULL_INT_REPRESENTATION);
 		else {
 			for (CanonicalField fld: canonicalClass.getCanonicalFields()) {
+				if (ignoreField(fld))
+					continue;
+
 				if (AbstractGenerator.vectorization_ignore_static && fld.isStatic())
 					continue;
 				
@@ -189,6 +195,13 @@ public class CandidateVectorGenerator {
 						v.addComponent(-2);//NULL_INT_REPRESENTATION);
 			}
 		}
+	}
+	
+	protected boolean ignoreField(CanonicalField fld) {
+		if (fld.getName().startsWith("_"))
+			return true;
+		
+		return false;
 	}
 
 	protected void addToCandidateVector(CanonicalObject obj, CanonicalHeap heap, CandidateVector<Object> v) {
@@ -199,6 +212,9 @@ public class CandidateVectorGenerator {
 		
 		int fieldNumber = 0;
 		for (CanonicalField fld: getFieldsRes.getValue()) {
+			if (ignoreField(fld))
+				continue;
+			
 			if (AbstractGenerator.vectorization_ignore_static && fld.isStatic())
 				continue;
 			if (fld.getName().equals("serialVersionUID"))

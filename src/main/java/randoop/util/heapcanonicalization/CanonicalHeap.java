@@ -1,5 +1,6 @@
 package randoop.util.heapcanonicalization;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractMap;
@@ -74,7 +75,7 @@ public class CanonicalHeap {
 		return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, newCanonicalObject(obj, clazz));
 	}
 	
-	private CanonicalObject findExistingCanonicalObject(Object obj, CanonicalClass clazz) {
+	public CanonicalObject findExistingCanonicalObject(Object obj, CanonicalClass clazz) {
 		List<CanonicalObject> clazzObjs = objects.get(clazz);
 		// Some classes are found out at runtime, for example, when they are the return type of a method.
 		if (clazzObjs == null) {
@@ -138,8 +139,8 @@ public class CanonicalHeap {
 			assert !candidateClasses.isEmpty(): "There cannot be no non-primitive classes";
 			int rdmClassInd = Randomness.nextRandomInt(candidateClasses.size());
 			CanonicalClass rdmClass = candidateClasses.get(rdmClassInd);
-			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Randomly picked a class: " + rdmClass.getName());
+//			if (CanonicalizerLog.isLoggingOn())
+//				CanonicalizerLog.logLine("Randomly picked a class: " + rdmClass.getName());
 
 			// 2- Pick an object of the selected class.
 			List<CanonicalObject> objs = objects.get(rdmClass);
@@ -154,9 +155,9 @@ public class CanonicalHeap {
 			}
 			int rdmObjInd = Randomness.nextRandomInt(objs.size());
 			CanonicalObject toMutate = objs.get(rdmObjInd);
-			if (CanonicalizerLog.isLoggingOn())
-				CanonicalizerLog.logLine("Mutating object:" + toMutate.stringRepresentation());
-			
+//			if (CanonicalizerLog.isLoggingOn())
+//				CanonicalizerLog.logLine("Mutating object:" + toMutate.stringRepresentation());
+//			
 			// 3- Mutate some randomly selected field of the object
 			if (!mutateRandomObjectField(toMutate)) {
 				retriesLeft--;
@@ -186,15 +187,22 @@ public class CanonicalHeap {
 		}
 
 		// 4- Pick the value the selected field will be set to.
-		List<CanonicalObject> allValues = getReferenceObjectsFromHeap(rdmFld);
+		Object fldValue = rdmFld.getValue(toMutate);
+		List<CanonicalObject> allValues = getReferenceObjectsFromHeap(rdmFld, fldValue);
 		// Not all values in allValues can be used to set the field
 		CanonicalObject rdmValue = selectValueToSetField(toMutate, rdmFld, allValues);
 		if (rdmValue == null) {
 			return false;
 		}
 
+		// Mutating to exactly the same structure
+		//if (rdmFld.getValue(toMutate) == rdmValue.getObject())
+		//	return false;
+		assert rdmFld.getValue(toMutate) != rdmValue.getObject();
+		
 		// 5- set toMutate.rdmFld = rdmValue
 		rdmFld.setValue(toMutate, rdmValue);
+		
 		mutatedObject = toMutate;
 		mutatedField = rdmFld;
 		mutatedValue = rdmValue;
@@ -205,16 +213,28 @@ public class CanonicalHeap {
 		return true;
 	}
 
-	private List<CanonicalObject> getReferenceObjectsFromHeap(CanonicalField rdmFld) {
+	private List<CanonicalObject> getReferenceObjectsFromHeap(CanonicalField rdmFld, Object ignoreObject) {
 		List<CanonicalObject> allValues = new LinkedList<>();
 		CanonicalClass fldType = rdmFld.getCanonicalType();
-		if (objects.get(fldType) != null)
-			allValues.addAll(objects.get(fldType));
-		for (CanonicalClass descFldType: rdmFld.getCanonicalType().getDescendants()) {
-			if (objects.get(descFldType) != null)
-				allValues.addAll(objects.get(descFldType));
+		if (objects.get(fldType) != null) {
+			// allValues.addAll(objects.get(fldType));
+			for (CanonicalObject obj: objects.get(fldType)) {
+				if (obj.getObject() != ignoreObject)
+					allValues.add(obj);
+			}
 		}
-		allValues.add(new CanonicalObject(null, null, -1, this));
+		for (CanonicalClass descFldType: rdmFld.getCanonicalType().getDescendants()) {
+			if (objects.get(descFldType) != null) {
+				//allValues.addAll(objects.get(descFldType));
+				for (CanonicalObject obj: objects.get(descFldType)) {
+					if (obj.getObject() != ignoreObject)
+						allValues.add(obj);
+				}
+			}
+		}
+		
+		if (ignoreObject != null)
+			allValues.add(new CanonicalObject(null, null, -1, this));
 		return allValues;
 	}
 
@@ -250,8 +270,8 @@ public class CanonicalHeap {
 		}
 		int rdmFldInd = Randomness.nextRandomInt(candidateFields.size());
 		CanonicalField rdmFld = candidateFields.get(rdmFldInd);			
-		if (CanonicalizerLog.isLoggingOn())
-			CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
+//		if (CanonicalizerLog.isLoggingOn())
+//			CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
 		
 		return rdmFld;
 	}
@@ -288,8 +308,8 @@ public class CanonicalHeap {
 		}
 		
 		while (!succeeded && retriesLeft > 0) {
-			if (CanonicalizerLog.isLoggingOn()) 
-				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
+//			if (CanonicalizerLog.isLoggingOn()) 
+//				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
 			if (!mutateRandomObjectField(toMutate)) {
 				retriesLeft--;
 				continue;
@@ -312,8 +332,8 @@ public class CanonicalHeap {
 		}
 		int rdmValInd = Randomness.nextRandomInt(candidateValues.size());
 		CanonicalObject rdmValue = candidateValues.get(rdmValInd);
-		if (CanonicalizerLog.isLoggingOn())
-			CanonicalizerLog.logLine("Randomly picked a value for the field: " + rdmValue.stringRepresentation());	
+//		if (CanonicalizerLog.isLoggingOn())
+//			CanonicalizerLog.logLine("Randomly picked a value for the field: " + rdmValue.stringRepresentation());	
 		return rdmValue;
 	}
 
@@ -327,8 +347,8 @@ public class CanonicalHeap {
 		}
 		
 		while (!succeeded && retriesLeft > 0) {
-			if (CanonicalizerLog.isLoggingOn()) 
-				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
+//			if (CanonicalizerLog.isLoggingOn()) 
+//				CanonicalizerLog.logLine("Mutating object: " + toMutate.stringRepresentation());
 			if (!makeRandomObjectFieldSymbolic(toMutate, mutatedObject, mutatedField)) {
 				retriesLeft--;
 				continue;
@@ -361,6 +381,9 @@ public class CanonicalHeap {
 			
 			if (rdmFld.getValue(toMutate) instanceof DummySymbolicAVL)
 				return false;
+			
+			if (readAccessedField(toMutate.getObject(), "_accessed_" + rdmFld.getName()))
+				return false;
 		}
 
 		// 5- set toMutate.rdmFld = rdmValue
@@ -371,6 +394,23 @@ public class CanonicalHeap {
 		
 		return true;
 	}
+	
+	
+	private boolean readAccessedField(Object o, String f) {
+		Field fld;
+		boolean res = false;
+		try {
+			fld = o.getClass().getDeclaredField(f);
+			fld.setAccessible(true);
+			res = (boolean) fld.get(o);
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(1);
+		}
+		return res;
+	}
+	
 	
 	
 	private CanonicalField pickRandomFieldToMakeSymbolic(CanonicalObject toMutate) {
@@ -405,8 +445,8 @@ public class CanonicalHeap {
 		}
 		int rdmFldInd = Randomness.nextRandomInt(candidateFields.size());
 		CanonicalField rdmFld = candidateFields.get(rdmFldInd);			
-		if (CanonicalizerLog.isLoggingOn())
-			CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
+//		if (CanonicalizerLog.isLoggingOn())
+//			CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
 		
 		return rdmFld;
 	}

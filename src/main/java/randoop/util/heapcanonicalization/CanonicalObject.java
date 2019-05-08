@@ -108,7 +108,7 @@ public class CanonicalObject {
 		if (isNull())
 			return "[type=null,index=" + index + "]";
 		else if (isPrimitive())
-			return "[type=" + clazz.getName() + ",value=" + getObject().toString() + ",hash=" + getObject().hashCode() + "]";
+			return "[type=" + clazz.getName() + ",value=" + getObject().toString() + "]";//,hash=" + getObject().hashCode() + "]";
 		else
 			return "[type=" + clazz.getName() + ",index=" + index + "]";
 	}

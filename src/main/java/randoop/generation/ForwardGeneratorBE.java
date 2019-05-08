@@ -12,6 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.tmatesoft.svn.core.wc.admin.ISVNHistoryHandler;
+
 import java.util.Set;
 
 import randoop.BugInRandoopException;
@@ -198,7 +201,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     }
   }
   
-  
+  Set<String> posVectors = new HashSet<>();
+  Set<String> negVectors = new HashSet<>();
   Set<String> posSymbVectors = new HashSet<>();
   Set<String> negSymbVectors = new HashSet<>();
   
@@ -442,7 +446,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 						  
 
 						  
-						  makeCanonicalVectorsForLastStatement(eSeq, posSymbVectors, negSymbVectors);
+						  makeCanonicalVectorsForLastStatement(eSeq);
 						  
 
 					  }
@@ -495,6 +499,16 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 	  } // End of all iterations
   
   
+  	  if (VectorsWriter.isEnabled()) {
+		  for (String vector: posVectors)
+			  VectorsWriter.logLine(vector);
+	  }
+
+	  if (NegativeVectorsWriter.isEnabled()) {
+		  for (String vector: negVectors)
+			  NegativeVectorsWriter.logLine(vector);
+	  }
+	  
 	  if (SymbolicVectorsWriter.isEnabled()) {
 		  for (String vector: posSymbVectors)
 			  SymbolicVectorsWriter.logLine(vector);
@@ -737,7 +751,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   
   // Use the new canonizer to generate a candidate vector for all the objects of the given classes in the last method of the sequence
   // Pre: (!mutateStructures => CandidateVectorsWriterLog.isEnabled()) && (mutateStructures => NegativeCandidateVectorsWriterLog.isEnabled())
-  protected void makeCanonicalVectorsForLastStatement(ExecutableSequence eSeq, Set<String> posVectors, Set<String> negVectors) {
+  protected void makeCanonicalVectorsForLastStatement(ExecutableSequence eSeq) {
 	  // FIXME?: We canonicalize every object, no only those that extend the global extensions
 	  int maxIndex = eSeq.getLastStmtRuntimeObjects().size();
 	  for (int index = 0; index < maxIndex; index++) {
@@ -752,25 +766,26 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 			  CanonicalHeap objHeap = res.getValue();
 
 			  // Generate positive symbolic vectors
-			  CandidateVector<Object> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
+			  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(objHeap);
 			  if (CanonicalizerLog.isLoggingOn()) {
 				  CanonicalizerLog.logLine("----------");
 				  CanonicalizerLog.logLine("New vector:");
 				  CanonicalizerLog.logLine(candidateVector.toString());
 				  CanonicalizerLog.logLine("----------");
 			  }
-			  candVectExtensions.addToExtensions(candidateVector);
-			  VectorsWriter.logLine(candidateVector.toString());
+			  //candVectExtensions.addToExtensions(candidateVector);
+			  posVectors.add(candidateVector.toString());
 
 			  if (SymbolicVectorsWriter.isEnabled()) {
-				  generateSymbolicStructures(eSeq, index, objHeap, posVectors);
+				  generateSymbolicStructures(eSeq, index, objHeap);
 				  //for (String vector: vectors)
 				  //SymbolicVectorsWriter.logLine(vector);
 			  }
 			  
 			  // Generate negative symbolic vectors
 			  if (NegativeSymbolicVectorsWriter.isEnabled()) {
-				  mutateAFieldOfEachObjectAndGenNegativeVector(eSeq, index, negVectors);
+				  for (int i = 0; i < 5; i++)
+					  mutateAFieldOfEachObjectAndGenNegativeVector(eSeq, index);
 				  //for (String vector: vectors)
 				  //NegativeSymbolicVectorsWriter.logLine(vector);
 			  }
@@ -789,7 +804,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   }
   
   
-  private void generateSymbolicStructures(ExecutableSequence eSeq, int index, CanonicalHeap objHeap, Set<String> posVectors) {
+  private void generateSymbolicStructures(ExecutableSequence eSeq, int index, CanonicalHeap objHeap) {
 	  for (CanonicalClass cls: objHeap.objectsPerClass().keySet()) {
 		  if (cls.getName().equals(DummyHeapRoot.class.getName()) ||
 				  IDummySymbolic.class.isAssignableFrom(cls.getConcreteClass()))
@@ -801,6 +816,11 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 			  // Rebuild object before mutation
 			  eSeq.execute(executionVisitor, checkGenerator);
 			  Object mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
+			  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+			  //CandidateVector<Object> cv = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+			  objHeap = res.getValue();
+			  assert isPositive(mutObj);
+			  
 			  // for (int toMutateInd = 0; toMutateInd < objsPerClass.get(cls); toMutateInd++) {
 			  for (int ind = 0; ind < 10; ind++) {
 				  int toMutateInd = Randomness.nextRandomInt(objHeap.objectsPerClass().get(cls));
@@ -809,9 +829,11 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  if (!makeRandomFieldSymbolic(mutObj, canMutObj, objHeap, null, null))
 					  continue;
 				  // assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
-				  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
 				  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
-				  posVectors.add(candidateVector.toString());
+				  posSymbVectors.add(candidateVector.toString());
+				  boolean isPositive = isSymbolicPositive(mutObj);
+				  assert isPositive : "Negative vector generated after symbolic abstraction: " + candidateVector.toString();
 				  objHeap = res.getValue();
 			  }
 		  }
@@ -844,9 +866,10 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   
   // Mutate the object at position 'index' in the last statement of sequence 'eSeq'. One field of each object reachable  
   // from the root is mutated selected randomly and mutated at most once. 
-  private void mutateAFieldOfEachObjectAndGenNegativeVector(ExecutableSequence eSeq, int index, Set<String> result) {
+  private void mutateAFieldOfEachObjectAndGenNegativeVector(ExecutableSequence eSeq, int index) {
 	  eSeq.execute(executionVisitor, checkGenerator);
 	  Object mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
+	  assert isPositive(mutObj);
 	  // Canonicalize and mutate the current object
 	  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
 	  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
@@ -868,6 +891,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  eSeq.execute(executionVisitor, checkGenerator);
 				  mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
 				  // Canonicalize and mutate the current object
+				  if (CanonicalizerLog.isLoggingOn())
+					  CanonicalizerLog.logLine(">>> Object before mutation");
 				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
 				  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
 				  toMutateHeap = res.getValue();	
@@ -883,17 +908,21 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  succeed = true;
 			  }
 			  if (succeed) {
+				  if (CanonicalizerLog.isLoggingOn())
+					  CanonicalizerLog.logLine(">>> Object after mutation");
+				  assert !isPositive(mutObj);
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+				  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
 				  saveNegativeVector(res.getValue());
-				  //Make negative symbolic vectors if neeeded
-				  if (NegativeSymbolicVectorsWriter.isEnabled()) 
-					  generateNegativeSymbolicStructures(mutObj, toMutateHeap, result, toMutateHeap.mutatedObject, toMutateHeap.mutatedField);
+				  if (NegativeSymbolicVectorsWriter.isEnabled())
+					  generateNegativeSymbolicStructures(mutObj, res.getValue(), toMutateHeap.mutatedObject, toMutateHeap.mutatedField, toMutateHeap.mutatedValue);
 			  }
 		  }
 	  }
   }
   
   
-  private void generateNegativeSymbolicStructures(Object mutObj, CanonicalHeap mutHeap, Set<String> generated, CanonicalObject mutatedObject, CanonicalField mutatedField) {
+  private void generateNegativeSymbolicStructures(Object mutObj, CanonicalHeap mutHeap, CanonicalObject mutatedObject, CanonicalField mutatedField, CanonicalObject mutatedValue) {
 	  for (CanonicalClass cls: mutHeap.objectsPerClass().keySet()) {
 		  if (cls.getName().equals(DummyHeapRoot.class.getName()) ||
 				  IDummySymbolic.class.isAssignableFrom(cls.getConcreteClass()))
@@ -901,19 +930,88 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 
 		  //assert cls.getName().equals("symbolicheap.bounded.AvlTree") : "Not an AVL: " + cls.getName();
 		  assert !cls.getName().contains("DummySymbolic");
+		  Entry<CanonicalizationResult, CanonicalHeap> res = null;
 		  // for (int toMutateInd = 0; toMutateInd < objsPerClass.get(cls); toMutateInd++) {
 		  for (int ind = 0; ind < 10; ind++) {
 			  int toMutateInd = Randomness.nextRandomInt(mutHeap.objectsPerClass().get(cls));
 			  CanonicalObject canMutObj = mutHeap.getCanonicalObject(cls, toMutateInd);
+			  
+			  executeResetAccess(mutObj);
+			  executeInstrRepOK(mutObj);
+			  if (CanonicalizerLog.isLoggingOn()) {
+				  CanonicalizerLog.logLine(">>> Object after access verification");
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+			  }
+			  
 			  if (!makeRandomFieldSymbolic(mutObj, canMutObj, mutHeap, mutatedObject, mutatedField))
 			  //assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
 				  continue;
-			  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
-			  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
-			  generated.add(candidateVector.toString());
+			  if (CanonicalizerLog.isLoggingOn())
+				  CanonicalizerLog.logLine(">>> Object after symbolic abstraction");
+			  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
 			  mutHeap = res.getValue();
+			  
+			  //CandidateVector<Object> cv = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+			  
+			  // Check reachability of mutObj in mutHeap
+			  /*
+			  if (mutHeap.findExistingCanonicalObject(mutatedObject.getObject(), mutatedObject.getCanonicalClass()) == null)
+				  return;
+				  */
+			  
+			  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+			  negSymbVectors.add(candidateVector.toString());
+			  
+			  boolean isPositive = isSymbolicPositive(mutObj);
+			  assert !isPositive : "Positive vector generated after mutation: " + candidateVector.toString();
 		  }
 	  }
+  }
+  
+  
+  private String executeToString(Object obj) {
+	  Method m;
+	  String res = null;
+	  try {
+		  m = obj.getClass().getDeclaredMethod("treeToString");
+		  m.setAccessible(true);
+		  res = (String) m.invoke(obj);
+	  } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		  System.out.println("ERROR: problem occurred while trying to invoke repOK method to classify negatives");
+		  e.printStackTrace();
+		  System.exit(0);
+	  }
+	  return res;
+  }
+  
+  
+  private void executeResetAccess(Object obj) {
+	  Method m;
+	  try {
+		  m = obj.getClass().getDeclaredMethod("resetAccess");
+		  m.setAccessible(true);
+		  m.invoke(obj);
+	  } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		  System.out.println("ERROR: problem occurred while trying to invoke repOK method to classify negatives");
+		  e.printStackTrace();
+		  System.exit(0);
+	  }
+  }
+  
+  
+  private boolean executeInstrRepOK(Object obj) {
+	  Boolean res = false;
+	  Method m;
+	  try {
+		  m = obj.getClass().getDeclaredMethod("repOK_Instr");
+		  m.setAccessible(true);
+		  res = ((Boolean) m.invoke(obj));
+	  } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		  System.out.println("ERROR: problem occurred while trying to invoke repOK method to classify negatives");
+		  e.printStackTrace();
+		  System.exit(0);
+	  }
+	  return res;
   }
 
 
@@ -933,8 +1031,25 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   }
 
   
+  private boolean isSymbolicPositive(Object obj) {
+	  Boolean res = false;
+	  Method m;
+	  try {
+		  m = obj.getClass().getDeclaredMethod("hybridRepOK");
+		  m.setAccessible(true);
+		  res = ((Boolean) m.invoke(obj));
+	  } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		  System.out.println("ERROR: problem occurred while trying to invoke repOK method to classify negatives");
+		  e.printStackTrace();
+		  System.exit(0);
+	  }
+	  return res;
+  }
+
+
+  
   private String saveNegativeVector(CanonicalHeap objHeap) {	  
-	  CandidateVector<Object> candidateVector = candVectGenerator.makeCandidateVectorFrom(objHeap);
+	  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(objHeap);
 	  if (CanonicalizerLog.isLoggingOn()) {
 		  CanonicalizerLog.logLine("----------");
 		  CanonicalizerLog.logLine("New mutated vector:");
@@ -942,7 +1057,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 		  CanonicalizerLog.logLine("----------");
 	  }
 	  String res = candidateVector.toString();
-	  NegativeVectorsWriter.logLine(res);
+	  negVectors.add(res);
+	  //NegativeVectorsWriter.logLine(res);
 	  
 	  return res;
   } 

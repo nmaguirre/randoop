@@ -5,19 +5,111 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import randoop.util.heapcanonicalization.DummySymbolicAVL;
+
 
 public class AvlTree {
 
 
-  // Private members
 
+	private boolean hybridRepOK() {
+		if (this instanceof DummySymbolicAVL)
+			return true;
+
+		Set<AvlTree> visited = new HashSet<AvlTree>();
+		List<AvlTree> worklist = new ArrayList<AvlTree>();
+
+		visited.add(this);
+		worklist.add(this);
+
+		while (!worklist.isEmpty()) {
+			AvlTree node = worklist.remove(0);
+
+			AvlTree left = node.left;
+			if (left != null && !(left instanceof DummySymbolicAVL)) {
+				if (!visited.add(left))
+					return false;
+
+				worklist.add(left);
+			}
+
+			AvlTree right = node.right;
+			if (right != null && !(right instanceof DummySymbolicAVL)) {
+				if (!visited.add(right))
+					return false;
+
+				worklist.add(right);
+			}
+
+			if (/*(left == null) && 
+					(right == null) && */
+					!(left instanceof DummySymbolicAVL) && 
+					!(right instanceof DummySymbolicAVL)) {
+				int lh = (left == null) ? 0 : left.height;
+				int rh = (right == null) ? 0 : right.height;
+				int diff = lh - rh;
+				if (diff < -1 || diff > 1) {
+					return false; // unbalanced!
+				}
+				int maxh = (lh > rh) ? lh : rh;
+				// BUG!
+//		        if (height != 1 + maxh) {
+				if (node.height != 1 + maxh) {
+					return false; // wrong value in height field!
+				}
+			}
+		}
+		//return visited.size() <= LIMIT;
+		return true;
+	}
+
+	
+	
+	private void resetAccess() {
+		Set<AvlTree> visited = new HashSet<AvlTree>();
+		List<AvlTree> worklist = new ArrayList<AvlTree>();
+
+		visited.add(this);
+		worklist.add(this);
+		this._accessed = false;
+		this._accessed_left = false;
+		this._accessed_right = false;
+
+		while (!worklist.isEmpty()) {
+			AvlTree node = worklist.remove(0);
+			this._accessed = false;
+			this._accessed_left = false;
+			this._accessed_right = false;
+
+			AvlTree left = node.left;
+			if (left != null) {
+				if (visited.add(left))
+					worklist.add(left);
+			}
+
+			AvlTree right = node.right;
+			if (right != null) {
+				if (visited.add(right))
+					worklist.add(right);
+			}
+		}
+	}
+	
+
+  // Private members
   private int element;
   private int height;
   private AvlTree left;
   private AvlTree right;
+  
+  
+  // Instrumentation
+  private boolean _accessed = false;
+  private boolean _accessed_left = false;
+  private boolean _accessed_right = false;
 
+  
   // Constructors
-
   public AvlTree(int element) {
     this.element = element;
     this.height = 1;
@@ -34,10 +126,12 @@ public class AvlTree {
   // Projectors
 
   private AvlTree left() {
+	  _accessed_left = true;
     return left;
   }
 
   private AvlTree right() {
+	  _accessed_right = true;
     return right;
   }
 
@@ -263,7 +357,86 @@ public class AvlTree {
   // --------------------------------------dfsTraverse-end-------------------------------------//
 
   // ========= CONCRETE INVARIANT ====================
+  private boolean repOK_Instr() {
+	  return repOK_Concrete_Instr(this);
+  }
+  
+  private boolean repOK_Concrete_Instr(AvlTree root) {
+	    return repOK_Structure_Instr(root); // && repOK_Ordered(root);
+  }
+  
+  
+  private boolean repOK_Structure_Instr(AvlTree root) {
+	    Set<AvlTree> visited = new HashSet<AvlTree>();
+	    List<AvlTree> worklist = new ArrayList<AvlTree>();
 
+	    if (root != null) {
+	    	if (root instanceof DummySymbolicAVL)
+	    		return true;
+	    	
+	      visited.add(root);
+	      worklist.add(root);
+	      root._accessed = true;
+	    }
+
+	    while (!worklist.isEmpty()) {
+
+	      AvlTree node = worklist.remove(0);
+	      node._accessed = true;
+
+	      if (!repOK_Structure_CheckHeight_Instr(node))
+	        return false; // Unbalanced or wrong height value!
+
+	      AvlTree left = node.left();
+	      if (left != null && !(left instanceof DummySymbolicAVL)) {
+	    	  left._accessed = true;
+	        if (!visited.add(left))
+	          return false; // Not acyclic!
+
+	        worklist.add(left);
+	      }
+
+	      AvlTree right = node.right();
+	      if (right != null && !(right instanceof DummySymbolicAVL)) {
+	    	  right._accessed = true;
+	        if (!visited.add(right))
+	          return false; // Not acyclic!
+
+	        worklist.add(right);
+	      }
+
+	    }
+	    return visited.size() <= LIMIT;
+	  }
+
+	  // Return true if node.height is consistent and within [-1, 1].
+	  // Assume node != null.
+	  //
+	  private boolean repOK_Structure_CheckHeight_Instr(AvlTree node) {
+	    int lh, rh;
+
+	    if (node.left() == null)
+	      lh = 0;
+	    else
+	      lh = node.left().height;
+
+	    if (node.right() == null)
+	      rh = 0;
+	    else
+	      rh = node.right().height;
+
+	    int difference = lh - rh;
+	    if (difference < -1 || difference > 1) {
+	      return false; // Not balanced!
+	    }
+	    int max = AvlTree.max(lh, rh);
+	    if (node.height != 1 + max)
+	      return false; // Wrong value in height field!
+
+	    return true;
+	  } 
+  
+  
   // ~~~~~~~~~ Begin repOK_Concrete ~~~~~~~~~~
 
   
@@ -517,5 +690,27 @@ public class AvlTree {
   // }
   //
   //
+  
+  
+  private String treeToString() {
+      String res = "{ E" + element + " H" + height + " AN" + _accessed + " AL" + _accessed_left + " AR" + _accessed_right + " ";
+      if (left == null)
+          res += "null";
+      else if (left instanceof DummySymbolicAVL)
+    	  res += "SYM";
+      else
+          res += left.toString();
+      res += " ";
+      if (right == null)
+          res += "null";
+      else if (right instanceof DummySymbolicAVL)
+    	  res += "SYM";
+      else
+          res += right.toString();
+      res += " }";
+      return res;
+  }
+  
+  
 
 } // ~~~~~~~~~~~~~~~~~ End of class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

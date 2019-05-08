@@ -17,6 +17,7 @@ import randoop.util.heapcanonicalization.CanonicalStore;
 import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.DummyHeapRoot;
+import randoop.util.heapcanonicalization.IDummySymbolic;
 
 public class SymbolicCandidateVectorGenerator extends CandidateVectorGenerator {
 	
@@ -49,6 +50,9 @@ public class SymbolicCandidateVectorGenerator extends CandidateVectorGenerator {
 		
 		int fieldNumber = 0;
 		for (CanonicalField fld: getFieldsRes.getValue()) {
+			if (ignoreField(fld))
+				continue;
+
 			if (AbstractGenerator.vectorization_ignore_static && fld.isStatic())
 				continue;
 			if (fld.getName().equals("serialVersionUID"))
@@ -64,7 +68,10 @@ public class SymbolicCandidateVectorGenerator extends CandidateVectorGenerator {
 			CanonicalObject canValue = canRes.getValue();
 			if (canValue.isNull()) 
 				comp = NULL_INT_REPRESENTATION;
-			else if (canValue.isPrimitive() || canValue.getCanonicalClass().getName().equals("randoop.util.heapcanonicalization.DummySymbolicObject"))
+			else if (canValue.isPrimitive()) 
+					//canValue.getCanonicalClass().getName().equals("randoop.util.heapcanonicalization.DummySymbolicObject"))
+				comp = -1;
+			else if (IDummySymbolic.class.isAssignableFrom(canValue.getCanonicalClass().getConcreteClass()))
 				comp = -1;
 			else 
 				// comp = canValue.getIndex();
