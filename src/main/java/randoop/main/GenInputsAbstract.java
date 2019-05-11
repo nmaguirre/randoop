@@ -71,6 +71,15 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Max values in array objects to make canonicalization stop and drop current test")
   public static int max_array_objects = 3;
 
+  @Option("")
+  public static int neg_strs_rep = 20;
+  
+  @Option("")
+  public static int symneg_strs_rep = 20;
+
+  @Option("")
+  public static int pos_strs_rep = 20;
+
   public enum Filtering {
 	 NO,
 	 FE,

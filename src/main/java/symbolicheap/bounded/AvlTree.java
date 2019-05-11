@@ -10,6 +10,39 @@ import randoop.util.heapcanonicalization.DummySymbolicAVL;
 
 public class AvlTree {
 
+	
+	private boolean structuralHybridRepOK() {
+		if (this instanceof DummySymbolicAVL)
+			return true;
+
+		Set<AvlTree> visited = new HashSet<AvlTree>();
+		List<AvlTree> worklist = new ArrayList<AvlTree>();
+
+		visited.add(this);
+		worklist.add(this);
+
+		while (!worklist.isEmpty()) {
+			AvlTree node = worklist.remove(0);
+
+			AvlTree left = node.left;
+			if (left != null && !(left instanceof DummySymbolicAVL)) {
+				if (!visited.add(left))
+					return false;
+
+				worklist.add(left);
+			}
+
+			AvlTree right = node.right;
+			if (right != null && !(right instanceof DummySymbolicAVL)) {
+				if (!visited.add(right))
+					return false;
+
+				worklist.add(right);
+			}
+		}
+		//return visited.size() <= LIMIT;
+		return true;
+	}
 
 
 	private boolean hybridRepOK() {
@@ -62,9 +95,9 @@ public class AvlTree {
 		//return visited.size() <= LIMIT;
 		return true;
 	}
-
 	
 	
+	/*
 	private void resetAccess() {
 		Set<AvlTree> visited = new HashSet<AvlTree>();
 		List<AvlTree> worklist = new ArrayList<AvlTree>();
@@ -94,6 +127,7 @@ public class AvlTree {
 			}
 		}
 	}
+	*/
 	
 
   // Private members
@@ -103,10 +137,12 @@ public class AvlTree {
   private AvlTree right;
   
   
+  /*
   // Instrumentation
   private boolean _accessed = false;
   private boolean _accessed_left = false;
   private boolean _accessed_right = false;
+  */
 
   
   // Constructors
@@ -126,12 +162,12 @@ public class AvlTree {
   // Projectors
 
   private AvlTree left() {
-	  _accessed_left = true;
+//	  _accessed_left = true;
     return left;
   }
 
   private AvlTree right() {
-	  _accessed_right = true;
+//	  _accessed_right = true;
     return right;
   }
 
@@ -357,6 +393,7 @@ public class AvlTree {
   // --------------------------------------dfsTraverse-end-------------------------------------//
 
   // ========= CONCRETE INVARIANT ====================
+  /*
   private boolean repOK_Instr() {
 	  return repOK_Concrete_Instr(this);
   }
@@ -365,7 +402,9 @@ public class AvlTree {
 	    return repOK_Structure_Instr(root); // && repOK_Ordered(root);
   }
   
+  */
   
+  /*
   private boolean repOK_Structure_Instr(AvlTree root) {
 	    Set<AvlTree> visited = new HashSet<AvlTree>();
 	    List<AvlTree> worklist = new ArrayList<AvlTree>();
@@ -435,6 +474,7 @@ public class AvlTree {
 
 	    return true;
 	  } 
+	  */
   
   
   // ~~~~~~~~~ Begin repOK_Concrete ~~~~~~~~~~
@@ -445,7 +485,7 @@ public class AvlTree {
   }
   
   private boolean repOK_Concrete(AvlTree root) {
-    return repOK_Structure(root); // && repOK_Ordered(root);
+    return repOK_Structure(root) && repOK_Ordered(root);
   }
 
   private boolean repOK_Structure(AvlTree root) {
@@ -594,7 +634,12 @@ public class AvlTree {
     dumpTree(root.left, level + 1);
   }
 
-  public AvlTree remove(int x, AvlTree t) {
+  public AvlTree remove(int x) {
+	 return remove(x, this);
+  }
+  
+  
+  private AvlTree remove(int x, AvlTree t) {
     if (t == null)
       return t; // Item not found; do nothing
 
@@ -692,6 +737,7 @@ public class AvlTree {
   //
   
   
+  /*
   private String treeToString() {
       String res = "{ E" + element + " H" + height + " AN" + _accessed + " AL" + _accessed_left + " AR" + _accessed_right + " ";
       if (left == null)
@@ -710,6 +756,7 @@ public class AvlTree {
       res += " }";
       return res;
   }
+  */
   
   
 

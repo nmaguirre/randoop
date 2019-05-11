@@ -213,6 +213,10 @@ public class GenTests extends GenInputsAbstract {
     }
 
     List<TypedOperation> model = operationModel.getConcreteOperations();
+    model.remove(0);
+    for (TypedOperation op: model)
+    	System.out.println(op.toString());
+    
 
     if (model.isEmpty()) {
       Log.out.println("There are no methods to test. Exiting.");

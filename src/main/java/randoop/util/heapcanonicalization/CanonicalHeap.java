@@ -371,7 +371,13 @@ public class CanonicalHeap {
 			return false;
 		}
 
-		CanonicalObject rdmValue = getCanonicalObject(DummySymbolicAVL.getObject()).getValue();
+		CanonicalObject rdmValue = null;
+		if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.AvlTree"))
+			rdmValue = getCanonicalObject(DummySymbolicAVL.getObject()).getValue();
+		else if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet"))
+			rdmValue = getCanonicalObject(DummySymbolicTSet.getObject()).getValue();
+		else
+			assert false : "Unsupported class";
 		
 		// Do not allow to mutate the mutated object field in the generation of negative symbolic instances
 		if (mutatedObject != null) {
@@ -379,11 +385,13 @@ public class CanonicalHeap {
 					rdmFld.getName().equals(mutatedField.getName()))
 				return false;
 			
-			if (rdmFld.getValue(toMutate) instanceof DummySymbolicAVL)
+			if ((rdmFld.getValue(toMutate) instanceof DummySymbolicAVL) || 
+				(rdmFld.getValue(toMutate) instanceof DummySymbolicTSet))
 				return false;
-			
+			/*
 			if (readAccessedField(toMutate.getObject(), "_accessed_" + rdmFld.getName()))
 				return false;
+				*/
 		}
 
 		// 5- set toMutate.rdmFld = rdmValue

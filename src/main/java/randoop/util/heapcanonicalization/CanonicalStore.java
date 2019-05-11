@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import randoop.main.GenInputsAbstract;
+
 public class CanonicalStore {
 
 	private final Map<String, CanonicalClass> classes = new LinkedHashMap<>();
@@ -28,7 +30,13 @@ public class CanonicalStore {
 		mainClasses.addAll(classNames);
 		List<String> sortedNames = new LinkedList<>(classNames);
 		sortedNames.add(DummyHeapRoot.class.getName());
-		sortedNames.add(DummySymbolicAVL.class.getName());
+		if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.AvlTree"))
+			sortedNames.add(DummySymbolicAVL.class.getName());
+		else if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet"))
+			sortedNames.add(DummySymbolicTSet.class.getName());
+		else
+			assert false : "Unsupported class";
+		
 		Collections.sort(sortedNames);
 		for (String name: sortedNames) 
 			getUpdateOrCreateCanonicalClass(name, 0);

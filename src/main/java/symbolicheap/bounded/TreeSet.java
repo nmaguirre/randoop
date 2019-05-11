@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import randoop.CheckRep;
+import randoop.util.heapcanonicalization.DummySymbolicTSet;
 
 
 public class TreeSet {
@@ -33,7 +33,7 @@ public class TreeSet {
 
   public TreeSet(int aKey) {
       init_TreeSet(this, aKey, null);
-      assert repOK_Concrete(this);
+      //assert repOK_Concrete(this);
   }
 
  // public static final TreeSet SYMBOLICTREESET = new TreeSet(); // field added to execute the
@@ -49,29 +49,30 @@ public class TreeSet {
   private static void genNegativeVectors() {
   }
   private static int MAX_SCOPE = 9;
+  */
 
 
-  public boolean hybridRepOK() {
+  private boolean structuralHybridRepOK() {
     Set<TreeSet> visited = new HashSet<TreeSet>();
     List<TreeSet> worklist = new ArrayList<TreeSet>();
-    if (this != SYMBOLICTREESET) {
+    if (!(this instanceof DummySymbolicTSet)) {
       visited.add(this);
 
       worklist.add(this);
 
-      if (this.parent != SYMBOLICTREESET && this.parent != null)
+      if (this.parent != null && !(parent instanceof DummySymbolicTSet))
         return false;
 
       while (!worklist.isEmpty()) {
         TreeSet node = worklist.remove(0);
 
         TreeSet left = node.left;
-        if (left != null && left != SYMBOLICTREESET) {
+        if (left != null && !(left instanceof DummySymbolicTSet)) {
           if (!visited.add(left)) {
             return false;
           }
 
-          if (left.parent != SYMBOLICTREESET && left.parent != node) {
+          if (!(left.parent instanceof DummySymbolicTSet) && left.parent != node) {
             return false;
           }
           worklist.add(left);
@@ -79,12 +80,12 @@ public class TreeSet {
         }
 
         TreeSet right = node.right;
-        if (right != null && right != SYMBOLICTREESET) {
+        if (right != null && !(right instanceof DummySymbolicTSet)) {
           if (!visited.add(right)) {
             return false;
           }
 
-          if (right.parent != SYMBOLICTREESET && right.parent != node) {
+          if (!(right.parent instanceof DummySymbolicTSet) && right.parent != node) {
             return false;
           }
           worklist.add(right);
@@ -97,8 +98,8 @@ public class TreeSet {
     }
   }
 
-  public boolean hybridRepOK_colors(TreeSet root) {
-    if (root != SYMBOLICTREESET && root.color != SYMBOLICINT) {
+  private boolean hybridRepOK_colors(TreeSet root) {
+    if (!(this instanceof DummySymbolicTSet)) {
       if (root.color() != BLACK)
         return false;
       List<TreeSet> worklist = new ArrayList<TreeSet>();
@@ -115,10 +116,10 @@ public class TreeSet {
             return false;
           }
         }
-        if (cl != null && cl != SYMBOLICTREESET) {
+        if (cl != null && !(cl instanceof DummySymbolicTSet)) {
           worklist.add(cl);
         }
-        if (cr != null && cr != SYMBOLICTREESET) {
+        if (cr != null && !(cr instanceof DummySymbolicTSet)) {
           worklist.add(cr);
         }
       }
@@ -148,9 +149,9 @@ public class TreeSet {
           }
         } else {
           // System.out.println("->4");
-          if (e.left != SYMBOLICTREESET)
+          if (!(e.left instanceof DummySymbolicTSet))
             worklist2.add(new Pair<TreeSet, Integer>(e.left(), n));
-          if (e.right != SYMBOLICTREESET)
+          if (!(e.right instanceof DummySymbolicTSet))
             worklist2.add(new Pair<TreeSet, Integer>(e.right(), n));
         }
       }
@@ -158,7 +159,6 @@ public class TreeSet {
     } else
       return true;
   }
-  */
 
   private class Pair<T, U> {
     private T a;
@@ -291,14 +291,21 @@ public class TreeSet {
 //
 //    return this;
 //  }
+  
+  
+  
+ public TreeSet add(int aKey) {
+	 return add(aKey, this);
+	 //return this;
+ }
+  
 
-  public TreeSet add(int aKey, TreeSet root) {
+ private TreeSet add(int aKey, TreeSet root) {
     TreeSet t = root;
 
     if (t == null) {
       init_TreeSet(root, aKey, null);
-
-      assert repOK_Concrete(root);
+      //assert repOK_Concrete(root);
       return root;
     }
 
@@ -306,8 +313,7 @@ public class TreeSet {
     while (boolean_true) {
 
       if (aKey == t.key) {
-
-    	assert repOK_Concrete(root);
+    	//assert repOK_Concrete(root);
         return root;
       } else if (aKey < t.key) {
 
@@ -321,7 +327,7 @@ public class TreeSet {
 
           root = fixAfterInsertion(t.left, root);
 
-          assert repOK_Concrete(root);
+          //assert repOK_Concrete(root);
           return root;
         }
       } else { // cmp > 0
@@ -334,20 +340,19 @@ public class TreeSet {
           t.right = new TreeSet(aKey);
           init_TreeSet(t.right, aKey, t);
           root = fixAfterInsertion(t.right, root);
-
-          assert repOK_Concrete(root);
+          //assert repOK_Concrete(root);
           return root;
         }
       }
     }
 
-    assert repOK_Concrete(root);
-
+    //assert repOK_Concrete(root);
     return root;
   }
+ 
 
   private void init_TreeSet(TreeSet entry, int new_key, TreeSet new_parent) {
-    entry.color = RED; //BLACK;//
+    entry.color = BLACK;//RED; //
     entry.left = null;
     entry.right = null;
     entry.key = new_key;
@@ -488,13 +493,13 @@ public class TreeSet {
           if (x == leftOf(parentOf(x))) {
 
             x = parentOf(x);
-            rotateRight_add(x, root);
+            root = rotateRight_add(x, root);
           } else {
           }
           setColor(parentOf(x), BLACK);
           setColor(parentOf(parentOf(x)), RED);
           if (parentOf(parentOf(x)) != null) {
-            rotateLeft_add(parentOf(parentOf(x)), root);
+            root = rotateLeft_add(parentOf(parentOf(x)), root);
           } else {
           }
 
@@ -509,9 +514,17 @@ public class TreeSet {
 
   // --------------------------------------remove-begin-------------------------------------//
 
-  public TreeSet remove(final int myKey) {
+  
+  /*
+  public TreeSet remove(int aKey) {
+	  remove(aKey, this);
+	  return this;
+  }
+  */
+  
+  private TreeSet remove(final int myKey, TreeSet root) {
     TreeSet p = this.getEntry(myKey);
-    TreeSet root = this;
+    //TreeSet root = this;
 
     if (p != null)
       root = this.deleteEntry(p, root);
@@ -801,6 +814,10 @@ public class TreeSet {
 
   // ------------------------- repOK_Concrete begin -----------------------------------//
 
+  private boolean repOK() {
+	  return repOK_Concrete(this);
+  }
+  
   private boolean repOK_Concrete(TreeSet root) {
     return repOK_Structure(root) && repOK_Colors(root)/* && repOK_KeysAndValues(root) */;
   }
@@ -1061,7 +1078,7 @@ public class TreeSet {
   // ------------------------- repOK_Concrete-Post end -----------------------------------//
 
   // marked in tables as bfsTraverse
-  private static int LIMIT = 11;
+  private static int LIMIT = 30;
 
   /*
    * public static void main(String[] arcs) { TreeSet X = new TreeSet(LIMIT, BLACK); X = (TreeSet)
