@@ -960,8 +960,9 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 		  }
 	  }
   }
+
   
-  
+  /*
   private void generateNegativeSymbolicStructures(Object mutObj, CanonicalHeap mutHeap, CanonicalObject mutatedObject, CanonicalField mutatedField, CanonicalObject mutatedValue) {
 	  for (CanonicalClass cls: mutHeap.objectsPerClass().keySet()) {
 		  if (cls.getName().equals(DummyHeapRoot.class.getName()) ||
@@ -983,10 +984,13 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  CanonicalizerLog.logLine(">>> Object after access verification");
 			  }
 			  
-			  if (!makeRandomFieldSymbolic(mutObj, canMutObj, mutHeap, mutatedObject, mutatedField)
-					  || isSymbolicPositive(mutObj))
+			  if (!makeRandomFieldSymbolic(mutObj, canMutObj, mutHeap, mutatedObject, mutatedField)) {
 			  //assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
 				  continue;
+			  }
+			  
+			  if (isSymbolicPositive(mutObj)) return;
+			  
 			  if (CanonicalizerLog.isLoggingOn())
 				  CanonicalizerLog.logLine(">>> Object after symbolic abstraction");
 			  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
@@ -1006,6 +1010,66 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 		  }
 	  }
   }
+  */
+  
+  private void generateNegativeSymbolicStructures(Object mutObj, CanonicalHeap mutHeap, CanonicalObject mutatedObject, CanonicalField mutatedField, CanonicalObject mutatedValue) {
+	  for (CanonicalClass cls: mutHeap.objectsPerClass().keySet()) {
+		  if (cls.getName().equals(DummyHeapRoot.class.getName()) ||
+				  IDummySymbolic.class.isAssignableFrom(cls.getConcreteClass()))
+			  continue;
+
+		  //assert cls.getName().equals("symbolicheap.bounded.AvlTree") : "Not an AVL: " + cls.getName();
+		  assert !cls.getName().contains("DummySymbolic");
+		  Entry<CanonicalizationResult, CanonicalHeap> res = null;
+		  // for (int toMutateInd = 0; toMutateInd < objsPerClass.get(cls); toMutateInd++) {
+		  for (int ind = 0; ind < GenInputsAbstract.symneg_strs_rep; ind++) {
+		  int toMutateInd = mutHeap.objectsPerClass().get(cls) - 1;
+		  while (toMutateInd > 0) {
+
+			  //int toMutateInd = Randomness.nextRandomInt(mutHeap.objectsPerClass().get(cls));
+			  CanonicalObject canMutObj = mutHeap.getCanonicalObject(cls, toMutateInd);
+			  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+
+			  //executeResetAccess(mutObj);
+			  //executeInstrRepOK(mutObj);
+			  if (CanonicalizerLog.isLoggingOn()) {
+				  CanonicalizerLog.logLine(">>> Object after access verification");
+			  }
+
+			  if (makeRandomFieldSymbolic(mutObj, canMutObj, mutHeap, mutatedObject, mutatedField)) {
+				  if (isSymbolicPositive(mutObj))
+					  return;
+
+				  //assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+				  //continue;
+				  if (CanonicalizerLog.isLoggingOn())
+					  CanonicalizerLog.logLine(">>> Object after symbolic abstraction");
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+				  mutHeap = res.getValue();
+
+				  //CandidateVector<Object> cv = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+
+				  // Check reachability of mutObj in mutHeap
+				  if (mutHeap.findExistingCanonicalObject(mutatedObject.getObject(), mutatedObject.getCanonicalClass()) == null)
+					  return;
+
+				  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+				  negSymbVectors.add(candidateVector.toString());
+
+				  //boolean isPositive = isSymbolicPositive(mutObj);
+				  assert !isSymbolicPositive(mutObj) : "Positive vector generated after mutation: " + candidateVector.toString();
+			  }
+
+			  if (toMutateInd > mutHeap.objectsPerClass().get(cls) - 1)
+				  toMutateInd = mutHeap.objectsPerClass().get(cls) - 1;
+			  else
+				  toMutateInd--;
+		  }
+
+	  }
+	  }
+  }
+  
   
   
   private String executeToString(Object obj) {

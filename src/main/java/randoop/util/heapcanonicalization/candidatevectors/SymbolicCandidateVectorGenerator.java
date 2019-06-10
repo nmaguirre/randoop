@@ -68,9 +68,13 @@ public class SymbolicCandidateVectorGenerator extends CandidateVectorGenerator {
 			CanonicalObject canValue = canRes.getValue();
 			if (canValue.isNull()) 
 				comp = NULL_INT_REPRESENTATION;
-			else if (canValue.isPrimitive()) 
+			else if (canValue.isPrimitive()) {
 					//canValue.getCanonicalClass().getName().equals("randoop.util.heapcanonicalization.DummySymbolicObject"))
-				comp = -1;
+				if (fld.getName().equals("color"))
+					comp = canValue.getObject().hashCode();
+				else
+					comp = -1;
+			}
 			else if (IDummySymbolic.class.isAssignableFrom(canValue.getCanonicalClass().getConcreteClass()))
 				comp = -1;
 			else 

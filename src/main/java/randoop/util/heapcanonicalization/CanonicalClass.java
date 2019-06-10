@@ -124,7 +124,7 @@ public class CanonicalClass {
 		}
 		
 		List<Field> sortedFields = Arrays.asList(clazz.getDeclaredFields());
-		Collections.sort(sortedFields, new FieldComparatorByName());
+		// Collections.sort(sortedFields, new FieldComparatorByName());
 		for (Field fld: sortedFields) {
 			Class<?> fldType = fld.getType();
 			// If this is an inner class, ignore the this$0 field pointing to its enclosing class.

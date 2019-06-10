@@ -296,7 +296,6 @@ public class TreeSet {
   
  public TreeSet add(int aKey) {
 	 return add(aKey, this);
-	 //return this;
  }
   
 
@@ -305,7 +304,6 @@ public class TreeSet {
 
     if (t == null) {
       init_TreeSet(root, aKey, null);
-      //assert repOK_Concrete(root);
       return root;
     }
 
@@ -313,7 +311,6 @@ public class TreeSet {
     while (boolean_true) {
 
       if (aKey == t.key) {
-    	//assert repOK_Concrete(root);
         return root;
       } else if (aKey < t.key) {
 
@@ -326,8 +323,6 @@ public class TreeSet {
           init_TreeSet(t.left, aKey, t);
 
           root = fixAfterInsertion(t.left, root);
-
-          //assert repOK_Concrete(root);
           return root;
         }
       } else { // cmp > 0
@@ -340,13 +335,11 @@ public class TreeSet {
           t.right = new TreeSet(aKey);
           init_TreeSet(t.right, aKey, t);
           root = fixAfterInsertion(t.right, root);
-          //assert repOK_Concrete(root);
           return root;
         }
       }
     }
 
-    //assert repOK_Concrete(root);
     return root;
   }
  
@@ -515,12 +508,9 @@ public class TreeSet {
   // --------------------------------------remove-begin-------------------------------------//
 
   
-  /*
   public TreeSet remove(int aKey) {
-	  remove(aKey, this);
-	  return this;
+	  return remove(aKey, this);
   }
-  */
   
   private TreeSet remove(final int myKey, TreeSet root) {
     TreeSet p = this.getEntry(myKey);
@@ -607,7 +597,7 @@ public class TreeSet {
       // Fix replacement
       if (p.color == BLACK) {
 
-        fixAfterDeletion(replacement, root);
+        root = fixAfterDeletion(replacement, root);
       }
     } else if (p.parent == null) { // return if we are the only node.
 
@@ -615,7 +605,7 @@ public class TreeSet {
     } else { // No children. Use self as phantom replacement and unlink.
       if (p.color == BLACK) {
 
-        fixAfterDeletion(p, root);
+        root = fixAfterDeletion(p, root);
       }
 
       if (p.parent != null) {
@@ -656,7 +646,7 @@ public class TreeSet {
     }
   }
 
-  private void fixAfterDeletion(TreeSet entry, TreeSet root) {
+  private TreeSet fixAfterDeletion(TreeSet entry, TreeSet root) {
     TreeSet x = entry;
 
     while (x != root && colorOf(x) == BLACK) {
@@ -724,6 +714,7 @@ public class TreeSet {
     }
 
     setColor(x, BLACK);
+    return root;
 
   }
 
