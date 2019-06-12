@@ -15,8 +15,6 @@ public interface IBuildersManager {
 
 	void addBuilder(TypedOperation operation, int seqLength, Set<Integer> indexes);
 
-	boolean alwaysBuilders();
-
 	Set<Integer> getIndexes(TypedOperation builder);
 
 }

@@ -86,9 +86,6 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("Use builders only starting at this sequence length")
   public static int builders_at_length = Integer.MAX_VALUE;
 	
-  @Option("Do not prune sequences using already determined builders")
-  public static boolean always_use_builders = false;
-  
   @Option("<filename> Name of a file to which to log the results of extensions computation")
   public static String output_computed_extensions = null;
   

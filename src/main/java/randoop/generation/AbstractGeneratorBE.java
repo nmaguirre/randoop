@@ -24,6 +24,7 @@ import java.util.List;
 public abstract class AbstractGeneratorBE extends AbstractGenerator {
 	
 	protected ISequenceManager opManager;
+	protected IBuildersManager buildersManager;
 	
 	
 	public AbstractGeneratorBE(
@@ -91,7 +92,7 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
     	opManager.writeResults(GenInputsAbstract.output_computed_extensions, GenInputsAbstract.output_full_extensions);
    	
     if (GenInputsAbstract.output_computed_builders != null)
-    	opManager.writeBuilders(GenInputsAbstract.output_computed_builders);
+    	buildersManager.writeBuilders(GenInputsAbstract.output_computed_builders);
 
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.println();

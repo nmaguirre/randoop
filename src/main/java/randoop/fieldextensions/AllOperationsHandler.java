@@ -29,10 +29,6 @@ public class AllOperationsHandler implements IBuildersManager {
 	@Override
 	public void addBuilder(TypedOperation operation, int seqLength, Set<Integer> indexes) { }
 
-	@Override
-	public boolean alwaysBuilders() {
-		return false;
-	}
 
 	@Override
 	public Set<Integer> getIndexes(TypedOperation builder) {

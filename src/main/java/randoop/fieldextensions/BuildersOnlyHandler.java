@@ -18,12 +18,10 @@ public class BuildersOnlyHandler implements IBuildersManager {
 	private List<TypedOperation> builders = new ArrayList<>();
 	private Map<String, Set<Integer>> buildersIndexes = new HashMap<>();
 	private Set<String> buildersNames = new HashSet<>();
-	private boolean alwaysBuilders;
 
-	public BuildersOnlyHandler(boolean alwaysBuilders, List<TypedOperation> operations, int buildersSeqLength) {
+	public BuildersOnlyHandler(List<TypedOperation> operations, int buildersSeqLength) {
 		this.operations = operations;
 		this.buildersSeqLength = buildersSeqLength;
-		this.alwaysBuilders = alwaysBuilders;
 	}
 
 	@Override
@@ -73,9 +71,6 @@ public class BuildersOnlyHandler implements IBuildersManager {
 		return buildersNames.contains(operation.toString());
 	}
 
-	@Override
-	public boolean alwaysBuilders() {
-		return alwaysBuilders;
-	}
+
 
 }

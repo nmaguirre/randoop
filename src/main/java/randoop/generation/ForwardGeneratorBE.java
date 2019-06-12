@@ -41,6 +41,7 @@ import randoop.util.Log;
 import randoop.util.MultiMap;
 import randoop.util.Randomness;
 import randoop.util.SimpleList;
+import utils.Tuple;
 
 /**
  * Randoop's forward, component-based generator.
@@ -121,9 +122,8 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 
     initializeRuntimePrimitivesSeen();
     
-	IBuildersManager buildersManager;
-    if (GenInputsAbstract.always_use_builders || GenInputsAbstract.builders_at_length < Integer.MAX_VALUE) {
-    	buildersManager = new BuildersOnlyHandler(GenInputsAbstract.always_use_builders, operations, GenInputsAbstract.builders_at_length);
+    if (GenInputsAbstract.builders_at_length < Integer.MAX_VALUE) {
+    	buildersManager = new BuildersOnlyHandler(operations, GenInputsAbstract.builders_at_length);
     }
     else {
     	buildersManager = new AllOperationsHandler(operations);
@@ -134,20 +134,18 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     	opManager = new BoundedExtensionsComputer(GenInputsAbstract.max_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
     			GenInputsAbstract.max_array_objects, 
-    			buildersManager,
     			GenInputsAbstract.omitfields);
     	break;
     case BE:
     	opManager = new ObjectHashComputer(GenInputsAbstract.max_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
     			GenInputsAbstract.max_array_objects, 
-    			buildersManager,
     			GenInputsAbstract.omitfields,
     			GenInputsAbstract.output_objects,
     			GenInputsAbstract.output_object_seqs);
     	break; 
     case NO:
-    	opManager = new OriginalRandoopManager(buildersManager);
+    	opManager = new OriginalRandoopManager();
     	break;
     }
 
@@ -363,40 +361,17 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 				  // eSeq.gentime = gentime;
 				  eSeq.gentime = 0;
 
-				  /*
-				  if (GenInputsAbstract.field_exhaustive_filtering) {
-					  if (eSeq.isNormalExecution()) {
-						  Set<Integer> activeIndexes = extensionsComputer.newFieldValuesInitialized(eSeq);
-						  if (activeIndexes == null || activeIndexes.size() == 0)
-							  continue;
-						  
-						  currMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
-						  
-						  String opName = operation.toString();
-						  if (!buildersNames.contains(opName)) {
-							  builders.add(operation);
-							  buildersNames.add(opName);
-						  }
-					  }
-				  }
-				  else {
-					  if (eSeq.sequence.hasActiveFlags()) 
-						  currMan.addGeneratedSequence(eSeq.sequence);
-				  }
-				  */
-
 				  num_sequences_generated++;
 				  
 				  execSeqs++;
 				  if (eSeq.sequence.hasActiveFlags()) {
-					  if (!opManager.addGeneratedSequenceToManager(operation, eSeq, currMan, seqLength)) {
-//					  if (!opManager.addGeneratedSequenceToManager(operation, eSeq, prevMan, seqLength)) {
-						  // Sequence does not create a new object, or its last statement is a builder and
-						  // builders are always enabled
-						  //if (!GenInputsAbstract.always_use_builders || !buildersManager.isBuilder(operation))
+					  Tuple<Boolean, Set<Integer>> res = opManager.addGeneratedSequenceToManager(operation, eSeq, currMan, seqLength);
+					  if (!res.getFirst()) {
 						  eSeq.clean();
 						  continue;
 					  }
+					  buildersManager.addBuilder(operation, seqLength, res.getSecond());
+					  
 					  builders++;
 				  }
 				  newSeqs++;
@@ -441,7 +416,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 					  ", Builders: " + builders +
 					  ", Error: " + (newSeqs - builders));
 
-		  operations = opManager.getBuilders(seqLength);
+		  operations = buildersManager.getBuilders(seqLength);
 		  // Previous component manager is 
 		  //prevMan.copyAllSequences(currMan);
 		  prevMan = currMan;

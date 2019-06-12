@@ -1,19 +1,16 @@
 package randoop.fieldextensions;
 
-import java.util.List;
+import java.util.Set;
 
 import randoop.generation.ComponentManager;
 import randoop.operation.TypedOperation;
 import randoop.sequence.ExecutableSequence;
+import utils.Tuple;
 
 public interface ISequenceManager {
 
 	void writeResults(String filename, boolean fullres);
 
-	boolean addGeneratedSequenceToManager(TypedOperation operation, ExecutableSequence eSeq, ComponentManager currMan, int seqLength);
-
-	void writeBuilders(String filename);
-
-	List<TypedOperation> getBuilders(int seqLength);
+	Tuple<Boolean, Set<Integer>> addGeneratedSequenceToManager(TypedOperation operation, ExecutableSequence eSeq, ComponentManager currMan, int seqLength);
 
 }

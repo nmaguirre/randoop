@@ -2,6 +2,7 @@ package randoop.fieldextensions;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -30,7 +31,6 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 	protected int maxArrayObjects;
 	protected int maxFieldDistance;
 	protected int maxBFDepth;
-	protected IBuildersManager buildersManager;
 	private int maxStoppingPrims;
 	private int maxStoppingObjs;
 	private int maxStoppingArr;
@@ -38,11 +38,10 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 	
 	// classesUnderTest = null to consider all classes as relevant
 	public BoundedExtensionsComputer(int maxStoppingObjs, int maxStoppingPrims, int maxStoppingArr,
-			IBuildersManager buildersManager, Pattern omitfields) {
+			Pattern omitfields) {
 		if (maxStoppingObjs <= 0 || maxStoppingPrims <= 0)
 			throw new Error("BoundedExtensionsComputerVisitor must be used with max_stopping_objects > 0 and max_stopping_primitives > 0");
 		
-		this.buildersManager = buildersManager;
 		this.maxObjects = Integer.MAX_VALUE; 
 		this.maxArrayObjects = Integer.MAX_VALUE;
 		this.maxFieldDistance = Integer.MAX_VALUE;
@@ -152,46 +151,18 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 	}
 
 	
-//	private int maxSeqLength = 0;
-
 	@Override
-	public boolean addGeneratedSequenceToManager(TypedOperation operation, ExecutableSequence eSeq, ComponentManager currMan, int seqLength) {
-		/*
-		if (seqLength > maxSeqLength) {
-			maxSeqLength = seqLength;
-			outputExt.addAllExtensions(currExt);
-			currExt = new ExtensionsStore(maxStoppingPrims, true);
-		}
-		*/
+	public Tuple<Boolean, Set<Integer>> addGeneratedSequenceToManager(TypedOperation operation, ExecutableSequence eSeq, ComponentManager currMan, int seqLength) {
 		
 		Set<Integer> activeIndexes = newFieldValuesInitialized(eSeq);
 
-		if (activeIndexes == null) return false;
+		if (activeIndexes == null ||
+				activeIndexes.size() == 0) 
+			return new Tuple<Boolean, Set<Integer>>(false, new HashSet<Integer>());
 
-		if (activeIndexes.size() == 0) { 
-			if (buildersManager.alwaysBuilders() && buildersManager.isBuilder(operation)) {
-				activeIndexes = buildersManager.getIndexes(operation);
-			}
-			else
-				return false;
-		}
-
-		buildersManager.addBuilder(operation, seqLength, activeIndexes);
-		
 		currMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
-		return true;
+		return new Tuple<Boolean, Set<Integer>>(true, activeIndexes);
 	}
 
-
-	@Override
-	public void writeBuilders(String filename) {
-		buildersManager.writeBuilders(filename);
-	}
-
-
-	@Override
-	public List<TypedOperation> getBuilders(int seqLength) {
-		return buildersManager.getBuilders(seqLength);
-	}
 
 }

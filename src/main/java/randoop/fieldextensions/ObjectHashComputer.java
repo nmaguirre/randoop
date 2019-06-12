@@ -30,9 +30,8 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 	
 	// classesUnderTest = null to consider all classes as relevant
 	public ObjectHashComputer(int maxStoppingObjs, int maxStoppingPrims, int maxStoppingArr,
-			IBuildersManager buildersManager, Pattern omitfields, 
-			String outputObjs, String outputObjSeqs) {
-		super(maxStoppingObjs, maxStoppingPrims, maxStoppingArr, buildersManager, omitfields);
+			Pattern omitfields, String outputObjs, String outputObjSeqs) {
+		super(maxStoppingObjs, maxStoppingPrims, maxStoppingArr, omitfields);
 		
 		try {
 			if (outputObjs != null)
