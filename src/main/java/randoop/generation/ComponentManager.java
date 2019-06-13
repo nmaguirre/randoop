@@ -149,9 +149,11 @@ public class ComponentManager {
     gralComponents.add(sequence);
   }
   
-  
   public void addGeneratedSequence(Sequence sequence, Set<Integer> indexes) {
-	gralComponents.add(sequence, indexes);
+	if (indexes == null)
+		addGeneratedSequence(sequence);
+	else 
+		gralComponents.add(sequence, indexes);
   }
 
   /**

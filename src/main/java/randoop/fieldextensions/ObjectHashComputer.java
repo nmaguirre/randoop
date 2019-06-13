@@ -145,7 +145,7 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 		}
 		else {
 			// Abnormal execution
-			return null;
+			throw new Error("Computing active indices for an invalid sequence");
 		}
 
 		return indices;

@@ -651,4 +651,33 @@ public class ExecutableSequence {
 		  executionResults.theList.add(NotExecuted.create());
 	  }
   }
+
+  private Set<Integer> activeIndexes = null;
+
+  public void setActiveIndexes(Set<Integer> activeIndexes) {
+	  this.activeIndexes = activeIndexes;
+  }
+
+  public Set<Integer> getActiveIndexes() { 
+	  return activeIndexes;
+  }
+
+  public List<Object> getLastStmtObjects() {
+	  List<Object> res = new ArrayList<>();
+	  int last = sequence.size() -1;
+	  Statement stmt = sequence.getStatement(last);
+	  if (!stmt.getOutputType().isVoid()) {
+		  ExecutionOutcome statementResult = getResult(last);	
+		  Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
+		  res.add(retVal);
+	  }
+	  Object[] objsAfterExec = getRuntimeInputs(last);
+	  for (int j = 0; j < objsAfterExec.length; j++) {
+		  Object curr = objsAfterExec[j];
+		  res.add(curr);
+	  }
+	  return res;
+  }
+  
+
 }

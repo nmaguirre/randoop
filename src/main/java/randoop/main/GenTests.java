@@ -20,10 +20,13 @@ import randoop.MultiVisitor;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.AbstractGeneratorBE;
 import randoop.generation.ComponentManager;
+import randoop.generation.DefaultListenerManagerFactory;
 import randoop.generation.ForwardGenerator;
 import randoop.generation.ForwardGeneratorBE;
 import randoop.generation.RandoopListenerManager;
+import randoop.generation.RandoopListenerManagerFactory;
 import randoop.generation.SeedSequences;
+import randoop.generation.SerializerListenerManagerFactory;
 import randoop.instrument.ExercisedClassVisitor;
 import randoop.operation.Operation;
 import randoop.operation.OperationParseException;
@@ -235,7 +238,14 @@ public class GenTests extends GenInputsAbstract {
     operationModel.addClassLiterals(
         componentMgr, GenInputsAbstract.literals_file, GenInputsAbstract.literals_level);
 
-    RandoopListenerManager listenerMgr = new RandoopListenerManager();
+    //RandoopListenerManager listenerMgr = new RandoopListenerManager();
+    RandoopListenerManagerFactory listenerMgr = null;
+    if (GenInputsAbstract.serialize_class == null)
+    	listenerMgr = new DefaultListenerManagerFactory();
+    else
+    	listenerMgr = new SerializerListenerManagerFactory(GenInputsAbstract.serialize_class,
+    			GenInputsAbstract.inputs_serial_file, 
+    			GenInputsAbstract.asserts_serial_file);
 
     Set<String> observerSignatures =
         GenInputsAbstract.getStringSetFromFile(

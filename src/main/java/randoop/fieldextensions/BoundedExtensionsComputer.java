@@ -22,7 +22,7 @@ import randoop.sequence.Statement;
 import utils.Tuple;
 
 
-public class BoundedExtensionsComputer implements ISequenceManager {
+public class BoundedExtensionsComputer implements IRedundancyStrategy {
 	
 	protected BFHeapCanonicalizer canonicalizer;
 	protected ExtensionsStore outputExt;
@@ -132,7 +132,7 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 		}
 		else {
 			// Abnormal execution
-			return null;
+			throw new Error("Computing active indices for an invalid sequence");
 		}
 
 		return indices;
@@ -152,16 +152,15 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 
 	
 	@Override
-	public Tuple<Boolean, Set<Integer>> addGeneratedSequenceToManager(TypedOperation operation, ExecutableSequence eSeq, ComponentManager currMan, int seqLength) {
+	public boolean checkIsNew(TypedOperation operation, ExecutableSequence eSeq) {
 		
 		Set<Integer> activeIndexes = newFieldValuesInitialized(eSeq);
+		eSeq.setActiveIndexes(activeIndexes);
 
-		if (activeIndexes == null ||
-				activeIndexes.size() == 0) 
-			return new Tuple<Boolean, Set<Integer>>(false, new HashSet<Integer>());
+		if (activeIndexes == null || activeIndexes.size() == 0) 
+			return false;
 
-		currMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
-		return new Tuple<Boolean, Set<Integer>>(true, activeIndexes);
+		return true;
 	}
 
 

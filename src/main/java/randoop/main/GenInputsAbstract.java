@@ -77,8 +77,20 @@ public abstract class GenInputsAbstract extends CommandHandler {
 	 BE
   }
   
+  @Option("Serialize objects from this class")
+  public static String serialize_class = null;
+  
+  @Option("File for serializing generated inputs")
+  public static String inputs_serial_file = "input_objects.ser";
+  
+  @Option("File for serializing the results of assert methods (for inputs in inputs_serial_file)")
+  public static String asserts_serial_file = "assert_objects.ser";
+  
   @Option("Do not canonicalize fields that match regular expression <string>")
   public static Pattern omitfields = null;
+  
+  @Option("Use methods that match this regular expression to create assertions for tests")
+  public static Pattern assert_methods = null; 
   
   @Option("Apply field exhaustive filtering during BE generation")
   public static Filtering filtering = Filtering.NO;

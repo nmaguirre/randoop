@@ -1,7 +1,7 @@
 package randoop.generation;
 
 import randoop.fieldextensions.IBuildersManager;
-import randoop.fieldextensions.ISequenceManager;
+import randoop.fieldextensions.IRedundancyStrategy;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.TypedOperation;
 import randoop.sequence.Sequence;
@@ -23,7 +23,7 @@ import java.util.List;
  */
 public abstract class AbstractGeneratorBE extends AbstractGenerator {
 	
-	protected ISequenceManager opManager;
+	protected IRedundancyStrategy redundancyStrat;
 	protected IBuildersManager buildersManager;
 	
 	
@@ -34,9 +34,10 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
 			int maxOutSequences,
 			ComponentManager componentManager,
 			IStopper stopper,
-			RandoopListenerManager listenerManager) {
+			RandoopListenerManagerFactory listenerManagerFact) {
 
-		super(operations,timeMillis, maxGeneratedSequences, maxOutSequences, componentManager, stopper, listenerManager);
+		super(operations,timeMillis, maxGeneratedSequences, maxOutSequences, componentManager, stopper, 
+				listenerManagerFact.getGenerationManager());
 		assert operations != null;
 	}
 
@@ -66,10 +67,7 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
       }
     }
 
-    // Notify listeners that exploration is starting.
-    if (listenerMgr != null) {
-      listenerMgr.explorationStart();
-    }
+
 
     long startTime = System.currentTimeMillis();
 
@@ -88,12 +86,6 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
       progressDisplay.shouldStop = true;
     }
     
-    if (GenInputsAbstract.output_computed_extensions != null)
-    	opManager.writeResults(GenInputsAbstract.output_computed_extensions, GenInputsAbstract.output_full_extensions);
-   	
-    if (GenInputsAbstract.output_computed_builders != null)
-    	buildersManager.writeBuilders(GenInputsAbstract.output_computed_builders);
-
     if (!GenInputsAbstract.noprogressdisplay) {
       System.out.println();
       System.out.println("Normal method executions:" + ReflectionExecutor.normalExecs());
@@ -107,10 +99,6 @@ public abstract class AbstractGeneratorBE extends AbstractGenerator {
               + String.format("%.3g", ReflectionExecutor.excepExecAvgMillis()));
     }
 
-    // Notify listeners that exploration is ending.
-    if (listenerMgr != null) {
-      listenerMgr.explorationEnd();
-    }
   }
 
  protected abstract void gen();

@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import randoop.BugInRandoopException;
 import randoop.DummyVisitor;
@@ -75,7 +76,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   private int maxSeqLength;
   private Set<String> strSeqs = new LinkedHashSet<>();
   
-
+  private RandoopListenerManagerFactory listenerManagerFact;
 
   public ForwardGeneratorBE(
       List<TypedOperation> operations,
@@ -85,7 +86,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
       int maxOutSequences,
       int maxSeqLength, 
       ComponentManager componentManager,
-      RandoopListenerManager listenerManager) {
+      RandoopListenerManagerFactory listenerManagerFact) {
     this(
         operations,
         observers,
@@ -94,8 +95,9 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
         maxOutSequences,
         componentManager,
         null,
-        listenerManager);
+        listenerManagerFact);
     this.maxSeqLength = maxSeqLength;
+    this.listenerManagerFact = listenerManagerFact;
   }
 
   public ForwardGeneratorBE(
@@ -106,7 +108,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
       int maxOutSequences,
       ComponentManager componentManager,
       IStopper stopper,
-      RandoopListenerManager listenerManager) {
+      RandoopListenerManagerFactory listenerManagerFact) {
 
     super(
         operations,
@@ -115,7 +117,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
         maxOutSequences,
         componentManager,
         stopper,
-        listenerManager);
+        listenerManagerFact);
 
     this.observers = observers;
     this.allSequences = new LinkedHashSet<>();
@@ -131,13 +133,13 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     
     switch (GenInputsAbstract.filtering) {
     case FE:
-    	opManager = new BoundedExtensionsComputer(GenInputsAbstract.max_objects, 
+    	redundancyStrat = new BoundedExtensionsComputer(GenInputsAbstract.max_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
     			GenInputsAbstract.max_array_objects, 
     			GenInputsAbstract.omitfields);
     	break;
     case BE:
-    	opManager = new ObjectHashComputer(GenInputsAbstract.max_objects, 
+    	redundancyStrat = new ObjectHashComputer(GenInputsAbstract.max_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
     			GenInputsAbstract.max_array_objects, 
     			GenInputsAbstract.omitfields,
@@ -145,7 +147,7 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     			GenInputsAbstract.output_object_seqs);
     	break; 
     case NO:
-    	opManager = new OriginalRandoopManager();
+    	redundancyStrat = new OriginalRandoopManager();
     	break;
     }
 
@@ -171,21 +173,23 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
   
   
   public void gen() {
+	  listenerMgr = listenerManagerFact.getGenerationManager();
+	  
+	  // Notify listeners that exploration is starting.
+	  if (listenerMgr != null) {
+		  listenerMgr.explorationStart();
+	  }
+
 	  ComponentManager prevMan = new ComponentManager();
 	  // componentManager has only primitive sequences, we copy them to the current manager
 	  prevMan.copyAllSequences(componentManager);
-	  for (int seqLength = 1; seqLength <= maxSeqLength; seqLength++) {
-		  int newSeqs = 0;
-		  int builders = 0;
-		  int execSeqs = 0;
+	  ComponentManager allSeqMan = new ComponentManager(); 
+	  allSeqMan.copyAllSequences(componentManager);
+
+	  int itNum = 1;
+	  for (; itNum <= maxSeqLength; itNum++) {
 		  ComponentManager currMan = new ComponentManager(); 
 		  currMan.copyAllSequences(componentManager);
-
-
-		  // Notify listeners we are about to perform a generation step.
-		  if (listenerMgr != null) {
-			  listenerMgr.generationStepPre();
-		  }
 
 		  num_steps++;
 
@@ -193,235 +197,292 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 			  Log.logLine("-------------------------------------------");
 		  }
 		  
-		  for (int opIndex = 0; opIndex < operations.size(); opIndex++) {
+		  BEIteration(prevMan, currMan, allSeqMan, operations, itNum);
 
-			  if (stop()) {
-				  System.out.println("DEBUG: Stopping criteria reached");
-				  break;
-			  }
-
-			  TypedOperation operation = operations.get(opIndex);
-			  if (Log.isLoggingOn()) {
-				  Log.logLine("Selected operation: " + operation.toString());
-			  }
-			  
-			  if (operation.toString().equals("java.lang.Object.<init> : () -> java.lang.Object"))
-				  // TODO: Think about how to deal with the operation that builds a single Object
-				  continue;
-
-			  // jhp: add flags here
-			  //InputsAndSuccessFlag sequences = selectInputs(operation);
-			  TypeTuple inputTypes = operation.getInputTypes();
-			  CartesianProduct<Sequence> cp = new CartesianProduct<>(inputTypes.size());
-			  for (int i = 0; i < inputTypes.size(); i++) {
-				  //Type inputType = inputTypes.get(i);
-				  
-			      boolean isReceiver = (i == 0 && (operation.isMessage()) && (!operation.isStatic()));
-				  
-				  SimpleList<Sequence> l = prevMan.getSequencesForType(operation, i);
-				  
-				  if (!GenInputsAbstract.forbid_null) {
-					  /*
-					  // FIXME: Very slow, change to improve performance
-					  List<Sequence> l = prevMan.getSequencesForType(operation, i).toJDKList();
-					  // Receiver for a method can't be null
-					  if (!isReceiver && !inputTypes.get(i).isPrimitive()) {
-						  TypedOperation st = TypedOperation.createNullOrZeroInitializationForType(inputTypes.get(i));
-						  l.add(new Sequence().extend(st, new ArrayList<Variable>()));
-					  }
-					  */
-				  }
-				  
-				  cp.setIthComponent(i, l);
-			  }
-			  
-			  // For each sequence in the cartesian product of feasible inputs
-			  while (cp.hasNext()) {
-				  List<Sequence> currParams = cp.next();
-
-				  List<Sequence> seqs = new ArrayList<>();
-				  int totStatements = 0;
-				  List<Integer> variables = new ArrayList<>();
-
-				  for (int i = 0; i < inputTypes.size(); i++) {
-					  Type inputType = inputTypes.get(i);
-
-					  Sequence chosenSeq = currParams.get(i); 
-					  
-					  
-					  // TODO: We are not generating all feasible sequences here, just choosing a variable randomly
-					  Variable randomVariable = chosenSeq.variableForTypeLastStatement(inputType);
-					  
-//					  for (Variable randomVariable: chosenSeq.getBuilderVariables()) {
-					  
-					  
-					  if (randomVariable == null) {
-						  System.out.println(operation.toParsableString());
-						  System.out.println(chosenSeq.toParsableString());
-						  System.out.println(currParams.toString());
-						  System.out.println(chosenSeq.getBuilderIndexes().toString());
-						  
-						  
-						  throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
-
-					  }
-					  if (i == 0
-							  && operation.isMessage()
-							  && !(operation.isStatic())
-							  && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
-									  || randomVariable.getType().isPrimitive())) {
-
-						  throw new Error("we were unlucky and selected a null or primitive value as the receiver for a method call");
-						  // return new InputsAndSuccessFlag(false, null, null);
-					  }
-
-					  variables.add(totStatements + randomVariable.index);
-					  seqs.add(chosenSeq);
-					  totStatements += chosenSeq.size();
-				  }
-
-				  InputsAndSuccessFlag sequences = new InputsAndSuccessFlag(true, seqs, variables);
-
-				  if (!sequences.success) {
-					  if (Log.isLoggingOn()) Log.logLine("Failed to find inputs for statement.");
-					  throw new Error("Failed to find inputs for statement.");
-				  }
-
-				  Sequence concatSeq = Sequence.concatenate(sequences.sequences);
-
-				  // Figure out input variables.
-				  List<Variable> inputs = new ArrayList<>();
-				  for (Integer oneinput : sequences.indices) {
-					  Variable v = concatSeq.getVariable(oneinput);
-					  inputs.add(v);
-				  }
-
-				  Sequence newSequence = concatSeq.extend(operation, inputs);
-				  
-				  // Avoid repetition of, for example, single constructors.
-				  // TODO: Check if this does not break anything.
-				  
-				  /*
-				  String seqStr = newSequence.toCodeString();
-				  if (this.strSeqs.contains(seqStr))
-					  continue;
-				  
-				  this.strSeqs.add(seqStr);
-				  */
-				  
-				 /* 
-				  if (this.allSequences.contains(newSequence)) 
-					  continue;
-				  
-				  // To prune sequences generated twice 
-				  this.allSequences.add(newSequence);
-				  */
-
-				  // If parameterless statement, subsequence inputs
-				  // will all be redundant, so just remove it from list of statements.
-				  // XXX does this make sense? especially in presence of side-effects
-				  /*
-				  if (operation.getInputTypes().isEmpty()) {
-					operations.remove(operation);
-				  }
-				   */
-
-				  /*
-				  randoopConsistencyTests(newSequence);
-				  randoopConsistencyTest2(newSequence);
-				  */
-
-				  if (Log.isLoggingOn()) {
-					  Log.logLine(
-							  String.format("Successfully created new unique sequence:%n%s%n", newSequence.toString()));
-				  }
-
-				  
-				  ExecutableSequence eSeq = new ExecutableSequence(newSequence);
-
-				  // Execute new sequence
-				  setCurrentSequence(eSeq.sequence);
-
-				  // long endTime = System.nanoTime();
-				  // long gentime = endTime - startTime;
-				  //				     startTime = endTime; // reset start time.
-				  long startTime = System.nanoTime(); // reset start time.
-
-				  eSeq.execute(executionVisitor, checkGenerator);
-
-				  long endTime = System.nanoTime();
-
-				  eSeq.exectime = endTime - startTime;
-				  startTime = endTime; // reset start time.
-
-				  processSequence(eSeq);
-
-				  //endTime = System.nanoTime();
-				  //gentime += endTime - startTime;
-				  // eSeq.gentime = gentime;
-				  eSeq.gentime = 0;
-
-				  num_sequences_generated++;
-				  
-				  execSeqs++;
-				  if (eSeq.sequence.hasActiveFlags()) {
-					  Tuple<Boolean, Set<Integer>> res = opManager.addGeneratedSequenceToManager(operation, eSeq, currMan, seqLength);
-					  if (!res.getFirst()) {
-						  eSeq.clean();
-						  continue;
-					  }
-					  buildersManager.addBuilder(operation, seqLength, res.getSecond());
-					  
-					  builders++;
-				  }
-				  newSeqs++;
-				  
-
-				  /*
-				  for (Sequence is : sequences.sequences) {
-					  subsumed_sequences.add(is);
-			      }
-			      */
-
-				  // Notify listeners we just completed generation step.
-				  if (listenerMgr != null) {
-					  listenerMgr.generationStepPost(eSeq);
-				  }
-
-				  if (eSeq.hasFailure()) {
-					  num_failing_sequences++;
-				  }
-
-				  // Save sequence as regression test if needed
-				  if (outputTest.test(eSeq)) {
-					  if (!eSeq.hasInvalidBehavior()) {
-						  if (eSeq.hasFailure()) {
-							  outErrorSeqs.add(eSeq);
-						  } else {
-							  outRegressionSeqs.add(eSeq);
-						  }
-					  }
-				  }
-				  
-				  eSeq.clean();
-
-			  } // End loop for current operation
-
-		  } // End loop for all operations 
-
-		  if (!GenInputsAbstract.noprogressdisplay) 
-			  System.out.println("\n>>> Iteration: " + seqLength + 
-					  ", Exec: " + execSeqs + 
-					  ", New: " + newSeqs +
-					  ", Builders: " + builders +
-					  ", Error: " + (newSeqs - builders));
-
-		  operations = buildersManager.getBuilders(seqLength);
+		  operations = buildersManager.getBuilders(itNum);
 		  // Previous component manager is 
 		  //prevMan.copyAllSequences(currMan);
 		  prevMan = currMan;
 	  } // End of all iterations
+	  
+	  if (GenInputsAbstract.output_computed_extensions != null)
+		  redundancyStrat.writeResults(GenInputsAbstract.output_computed_extensions, GenInputsAbstract.output_full_extensions);
+	  if (GenInputsAbstract.output_computed_builders != null)
+		  buildersManager.writeBuilders(GenInputsAbstract.output_computed_builders);
+	  
+	  // Notify listeners that exploration is ending.
+	  if (listenerMgr != null) {
+		  listenerMgr.explorationEnd();
+	  }
+	  
+	  
+	  if (GenInputsAbstract.assert_methods != null) {
+		  Pattern assertMethodsExpr = GenInputsAbstract.assert_methods;
+		  List<TypedOperation> assertMethods = new ArrayList<>();
+		  for (TypedOperation op: operations) {
+			  if (assertMethodsExpr.matcher(op.getName()).find())
+				  assertMethods.add(op);
+		  }
+
+		  // if (ignoredFields != null && ignoredFields.matcher(field.getName()).find()) 
+
+		  // New listener manager
+		  listenerMgr = listenerManagerFact.getGenerationManager(); 
+
+		  // Notify listeners that exploration is starting.
+		  if (listenerMgr != null) {
+			  listenerMgr.explorationStart();
+		  }
+
+		  // Make an additional BE iteration for a given list of methods
+		  ComponentManager currMan = new ComponentManager(); 
+		  currMan.copyAllSequences(componentManager);
+		  // Get operations from new user parameter; for specs the single method we want to compute its post 
+		  BEIteration(allSeqMan, currMan, null, assertMethods, itNum);
+
+		  // Notify listeners that exploration is ending.
+		  if (listenerMgr != null) {
+			  listenerMgr.explorationEnd();
+		  }
+	  }
+	  
   }
+
+
+private void BEIteration(ComponentManager prevMan, ComponentManager currMan, ComponentManager allSeqMan, List<TypedOperation> op, int seqLength)
+		throws Error {
+	int exceptionSeqs = 0;
+	  int builders = 0;
+	  int execSeqs = 0;
+	  for (int opIndex = 0; opIndex < op.size(); opIndex++) {
+
+		  if (stop()) {
+			  System.out.println("DEBUG: Stopping criteria reached");
+			  break;
+		  }
+		  
+		  // Notify listeners we are about to perform a generation step.
+		  if (listenerMgr != null) {
+			  listenerMgr.generationStepPre();
+		  }
+
+		  TypedOperation operation = op.get(opIndex);
+		  if (Log.isLoggingOn()) {
+			  Log.logLine("Selected operation: " + operation.toString());
+		  }
+		  
+		  if (operation.toString().equals("java.lang.Object.<init> : () -> java.lang.Object"))
+			  // TODO: Think about how to deal with the operation that builds a single Object
+			  continue;
+
+		  // jhp: add flags here
+		  //InputsAndSuccessFlag sequences = selectInputs(operation);
+		  TypeTuple inputTypes = operation.getInputTypes();
+		  CartesianProduct<Sequence> cp = new CartesianProduct<>(inputTypes.size());
+		  for (int i = 0; i < inputTypes.size(); i++) {
+			  //Type inputType = inputTypes.get(i);
+			  
+		      boolean isReceiver = (i == 0 && (operation.isMessage()) && (!operation.isStatic()));
+			  
+			  SimpleList<Sequence> l = prevMan.getSequencesForType(operation, i);
+			  
+			  if (!GenInputsAbstract.forbid_null) {
+				  /*
+				  // FIXME: Very slow, change to improve performance
+				  List<Sequence> l = prevMan.getSequencesForType(operation, i).toJDKList();
+				  // Receiver for a method can't be null
+				  if (!isReceiver && !inputTypes.get(i).isPrimitive()) {
+					  TypedOperation st = TypedOperation.createNullOrZeroInitializationForType(inputTypes.get(i));
+					  l.add(new Sequence().extend(st, new ArrayList<Variable>()));
+				  }
+				  */
+			  }
+			  
+			  cp.setIthComponent(i, l);
+		  }
+		  
+		  // For each sequence in the cartesian product of feasible inputs
+		  while (cp.hasNext()) {
+			  List<Sequence> currParams = cp.next();
+
+			  List<Sequence> seqs = new ArrayList<>();
+			  int totStatements = 0;
+			  List<Integer> variables = new ArrayList<>();
+
+			  for (int i = 0; i < inputTypes.size(); i++) {
+				  Type inputType = inputTypes.get(i);
+
+				  Sequence chosenSeq = currParams.get(i); 
+				  
+				  
+				  // TODO: We are not generating all feasible sequences here, just choosing a variable randomly
+				  Variable randomVariable = chosenSeq.variableForTypeLastStatement(inputType);
+				  
+//					  for (Variable randomVariable: chosenSeq.getBuilderVariables()) {
+				  
+				  
+				  if (randomVariable == null) {
+					  System.out.println(operation.toParsableString());
+					  System.out.println(chosenSeq.toParsableString());
+					  System.out.println(currParams.toString());
+					  System.out.println(chosenSeq.getBuilderIndexes().toString());
+					  
+					  
+					  throw new BugInRandoopException("type: " + inputType + ", sequence: " + chosenSeq);
+
+				  }
+				  if (i == 0
+						  && operation.isMessage()
+						  && !(operation.isStatic())
+						  && (chosenSeq.getCreatingStatement(randomVariable).isPrimitiveInitialization()
+								  || randomVariable.getType().isPrimitive())) {
+
+					  throw new Error("we were unlucky and selected a null or primitive value as the receiver for a method call");
+					  // return new InputsAndSuccessFlag(false, null, null);
+				  }
+
+				  variables.add(totStatements + randomVariable.index);
+				  seqs.add(chosenSeq);
+				  totStatements += chosenSeq.size();
+			  }
+
+			  InputsAndSuccessFlag sequences = new InputsAndSuccessFlag(true, seqs, variables);
+
+			  if (!sequences.success) {
+				  if (Log.isLoggingOn()) Log.logLine("Failed to find inputs for statement.");
+				  throw new Error("Failed to find inputs for statement.");
+			  }
+
+			  Sequence concatSeq = Sequence.concatenate(sequences.sequences);
+
+			  // Figure out input variables.
+			  List<Variable> inputs = new ArrayList<>();
+			  for (Integer oneinput : sequences.indices) {
+				  Variable v = concatSeq.getVariable(oneinput);
+				  inputs.add(v);
+			  }
+
+			  Sequence newSequence = concatSeq.extend(operation, inputs);
+			  
+			  // Avoid repetition of, for example, single constructors.
+			  // TODO: Check if this does not break anything.
+			  
+			  /*
+			  String seqStr = newSequence.toCodeString();
+			  if (this.strSeqs.contains(seqStr))
+				  continue;
+			  
+			  this.strSeqs.add(seqStr);
+			  */
+			  
+			 /* 
+			  if (this.allSequences.contains(newSequence)) 
+				  continue;
+			  
+			  // To prune sequences generated twice 
+			  this.allSequences.add(newSequence);
+			  */
+
+			  // If parameterless statement, subsequence inputs
+			  // will all be redundant, so just remove it from list of statements.
+			  // XXX does this make sense? especially in presence of side-effects
+			  /*
+			  if (operation.getInputTypes().isEmpty()) {
+				operations.remove(operation);
+			  }
+			   */
+
+			  /*
+			  randoopConsistencyTests(newSequence);
+			  randoopConsistencyTest2(newSequence);
+			  */
+
+			  if (Log.isLoggingOn()) {
+				  Log.logLine(
+						  String.format("Successfully created new unique sequence:%n%s%n", newSequence.toString()));
+			  }
+
+			  
+			  ExecutableSequence eSeq = new ExecutableSequence(newSequence);
+
+			  // Execute new sequence
+			  setCurrentSequence(eSeq.sequence);
+
+			  // long endTime = System.nanoTime();
+			  // long gentime = endTime - startTime;
+			  //				     startTime = endTime; // reset start time.
+			  long startTime = System.nanoTime(); // reset start time.
+
+			  eSeq.execute(executionVisitor, checkGenerator);
+
+			  long endTime = System.nanoTime();
+
+			  eSeq.exectime = endTime - startTime;
+			  startTime = endTime; // reset start time.
+
+			  processSequence(eSeq);
+
+			  //endTime = System.nanoTime();
+			  //gentime += endTime - startTime;
+			  // eSeq.gentime = gentime;
+			  eSeq.gentime = 0;
+
+			  num_sequences_generated++;
+			  
+			  execSeqs++;
+			  if (eSeq.sequence.hasActiveFlags()) {
+				  // TODO: Decouple opManager from currMan
+				  if (!redundancyStrat.checkIsNew(operation, eSeq)) {
+					  eSeq.clean();
+					  continue;
+				  }
+				  Set<Integer> activeIndexes = eSeq.getActiveIndexes();
+				  currMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
+				  if (allSeqMan != null)
+					  allSeqMan.addGeneratedSequence(eSeq.sequence, activeIndexes);
+				  buildersManager.addBuilder(operation, seqLength, activeIndexes);
+				  
+				  builders++;
+			  }
+			  else 
+				  exceptionSeqs++;
+			  /*
+			  for (Sequence is : sequences.sequences) {
+				  subsumed_sequences.add(is);
+		      }
+		      */
+
+			  if (eSeq.hasFailure()) {
+				  num_failing_sequences++;
+			  }
+
+			  // Save sequence as regression test if needed
+			  if (outputTest.test(eSeq)) {
+				  if (!eSeq.hasInvalidBehavior()) {
+					  if (eSeq.hasFailure()) {
+						  outErrorSeqs.add(eSeq);
+					  } else {
+						  outRegressionSeqs.add(eSeq);
+					  }
+				  }
+			  }
+
+			  // Notify listeners we just completed generation step.
+			  if (listenerMgr != null) {
+				  listenerMgr.generationStepPost(eSeq);
+			  }
+			  eSeq.clean();
+			  
+		  } // End loop for current operation
+
+	  } // End loop for all operations 
+
+	  if (!GenInputsAbstract.noprogressdisplay) 
+		  System.out.println("\n>>> Iteration: " + seqLength + 
+				  ", Exec: " + execSeqs + 
+				  ", Builders: " + builders +
+				  ", Excep: " + exceptionSeqs);
+}
   
 
   
