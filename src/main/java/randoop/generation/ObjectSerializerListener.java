@@ -36,8 +36,7 @@ public class ObjectSerializerListener implements IEventListener {
 
 	@Override
 	public void generationStepPost(ExecutableSequence s) {
-		// TODO: Implement for all o that are active in the last sentence of the sequence s
-		if (!s.isNormalExecution()) return;
+		if (!s.genNewObjects()) return;
 		
 		List<Object> lastStmtObjs = s.getLastStmtObjects();
 		

@@ -12,7 +12,7 @@ public class OriginalRandoopManager implements IRedundancyStrategy {
 	public void writeResults(String filename, boolean fullExt) { }
 
 	@Override
-	public boolean checkIsNew(TypedOperation operation, ExecutableSequence eSeq) {
+	public boolean checkGenNewObjects(TypedOperation operation, ExecutableSequence eSeq) {
 		//currMan.addGeneratedSequence(eSeq.sequence);
 		return true;
 	}

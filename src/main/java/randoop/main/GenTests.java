@@ -222,7 +222,12 @@ public class GenTests extends GenInputsAbstract {
       System.exit(1);
     }
     if (!GenInputsAbstract.noprogressdisplay) {
-      System.out.println("PUBLIC MEMBERS=" + model.size());
+      System.out.println("PUBLIC MEMBERS=" + (model.size() - 1));
+    }
+    System.out.println("USING METHODS:");
+    for (TypedOperation op: model) {
+    	if (!op.toString().equals("java.lang.Object.<init> : () -> java.lang.Object"))
+    		System.out.println(op.toString());
     }
 
     /*

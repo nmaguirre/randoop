@@ -16,10 +16,11 @@ import randoop.Globals;
 import randoop.NormalExecution;
 import randoop.SubTypeSet;
 import randoop.fieldextensions.AllOperationsHandler;
-import randoop.fieldextensions.BoundedExtensionsComputer;
+import randoop.fieldextensions.GlobalExtensionsRedundancy;
 import randoop.fieldextensions.BuildersOnlyHandler;
+import randoop.fieldextensions.CanonicalStringsRedundancy;
 import randoop.fieldextensions.IBuildersManager;
-import randoop.fieldextensions.ObjectHashComputer;
+import randoop.fieldextensions.HashRedundancy;
 import randoop.fieldextensions.OriginalRandoopManager;
 import randoop.main.GenInputsAbstract;
 import randoop.operation.NonreceiverTerm;
@@ -133,13 +134,21 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     
     switch (GenInputsAbstract.filtering) {
     case FE:
-    	redundancyStrat = new BoundedExtensionsComputer(GenInputsAbstract.max_objects, 
+    	redundancyStrat = new GlobalExtensionsRedundancy(GenInputsAbstract.max_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
     			GenInputsAbstract.max_array_objects, 
     			GenInputsAbstract.omitfields);
     	break;
+    case BEHASH:
+    	redundancyStrat = new HashRedundancy(GenInputsAbstract.max_objects, 
+    			GenInputsAbstract.max_extensions_primitives, 
+    			GenInputsAbstract.max_array_objects, 
+    			GenInputsAbstract.omitfields,
+    			GenInputsAbstract.output_objects,
+    			GenInputsAbstract.output_object_seqs);
+    	break; 
     case BE:
-    	redundancyStrat = new ObjectHashComputer(GenInputsAbstract.max_objects, 
+    	redundancyStrat = new CanonicalStringsRedundancy(GenInputsAbstract.max_objects, 
     			GenInputsAbstract.max_extensions_primitives, 
     			GenInputsAbstract.max_array_objects, 
     			GenInputsAbstract.omitfields,
@@ -150,7 +159,6 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
     	redundancyStrat = new OriginalRandoopManager();
     	break;
     }
-
     
   }
 
@@ -432,7 +440,7 @@ private void BEIteration(ComponentManager prevMan, ComponentManager currMan, Com
 			  execSeqs++;
 			  if (eSeq.sequence.hasActiveFlags()) {
 				  // TODO: Decouple opManager from currMan
-				  if (!redundancyStrat.checkIsNew(operation, eSeq)) {
+				  if (!redundancyStrat.checkGenNewObjects(operation, eSeq)) {
 					  eSeq.clean();
 					  continue;
 				  }

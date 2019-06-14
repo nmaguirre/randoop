@@ -678,6 +678,16 @@ public class ExecutableSequence {
 	  }
 	  return res;
   }
-  
+
+  private boolean genNewObjs = false;
+
+  public void setGenNewObjects(boolean genNewObjs) {
+	  this.genNewObjs = genNewObjs;
+  }
+
+  public boolean genNewObjects() {
+	  return genNewObjs;
+  }
+
 
 }

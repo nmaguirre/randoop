@@ -21,15 +21,15 @@ import randoop.sequence.Statement;
 import utils.Tuple;
 
 
-public class ObjectHashComputer extends BoundedExtensionsComputer {
+public class CanonicalStringsRedundancy extends GlobalExtensionsRedundancy {
 	
-	private Map<String, Set<Integer>> hashes = new LinkedHashMap<>();
+	private Map<String, Set<String>> canStrs = new LinkedHashMap<>();
 	
 	FileWriter objWriter;
 	FileWriter seqWriter;
 	
 	// classesUnderTest = null to consider all classes as relevant
-	public ObjectHashComputer(int maxStoppingObjs, int maxStoppingPrims, int maxStoppingArr,
+	public CanonicalStringsRedundancy(int maxStoppingObjs, int maxStoppingPrims, int maxStoppingArr,
 			Pattern omitfields, String outputObjs, String outputObjSeqs) {
 		super(maxStoppingObjs, maxStoppingPrims, maxStoppingArr, omitfields);
 		
@@ -87,36 +87,16 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 				index++;
 			}	
 			
-			/*
-			for (String cls: objsByType.keySet()) {
-				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(cls);
-				collector.start();
-				collector.setTestMode();
-				for (Tuple<Object, Integer> t: objsByType.get(cls)) {
-					if (!canonicalizer.canonicalize(t.getFirst(), collector))
-						return null;
-				}
-				collector.testCommitAllPairs();
-				if (collector.testExtensionsLimitExceeded())
-					return null;
-			}
-			*/
-			
 			// Test does not exceed the limits
 			for (String cls: objsByType.keySet()) {
-				FieldExtensionsCollector collector = outputExt.getOrCreateCollectorForMethodParam(cls);
-				if (collector.testExtensionsWereExtended()) {
-					collector.commitSuccessfulTestsPairs();
-				}
 				// FIXME: We currently do not keep track of the exact object that has extended the extensions
 				// but return all indices of the objects for the class for which we saw new field values
 				for (Tuple<Object, Integer> t: objsByType.get(cls)) {
 					FieldExtensionsCollector col = new FieldExtensionsCollector();
 					if (!canonicalizer.canonicalize(t.getFirst(), col))
 						return null;
-					//int hash = col.getExtensions().toString().hashCode();
-					int hash = col.getExtensions().toString().hashCode();
-					if (addHash(cls, hash)) {
+					String objCanStr = col.getExtensions().toSortedString();
+					if (addString(cls, objCanStr)) {
 						indices.add(t.getSecond());
 						
 						if (objWriter != null)  {
@@ -130,7 +110,7 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 									seqWriter.write("index: " + t.getSecond() + "\n");
 									seqWriter.write(sequence.toCodeString() + "\n");
 									if (GenInputsAbstract.output_full_extensions) {
-										seqWriter.write(col.getExtensions().toSortedString() + "\n");
+										seqWriter.write(objCanStr + "\n");
 									}
 									seqWriter.write("---\n");
 								}
@@ -151,14 +131,14 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 		return indices;
 	}
 	
-	public boolean addHash(String key, Integer hash) {
-		Set<Integer> keyHashes = hashes.get(key);
-		if (keyHashes == null) {
-			keyHashes = new LinkedHashSet<>();
-			hashes.put(key, keyHashes);
+	public boolean addString(String key, String objCanStr) {
+		Set<String> keyCanStrs = canStrs.get(key);
+		if (keyCanStrs == null) {
+			keyCanStrs = new LinkedHashSet<>();
+			canStrs.put(key, keyCanStrs);
 		}
 		
-		return keyHashes.add(hash);
+		return keyCanStrs.add(objCanStr);
 	}
 	
 	@Override
@@ -167,9 +147,9 @@ public class ObjectHashComputer extends BoundedExtensionsComputer {
 			FileWriter writer = new FileWriter(filename);
 			writer.write(outputExt.getStatistics(fullres));
 			int totalObjs = 0;
-			for (String cls: hashes.keySet()) {
-				writer.write(cls + " objects: " + hashes.get(cls).size() + "\n");
-				totalObjs += hashes.get(cls).size();
+			for (String cls: canStrs.keySet()) {
+				writer.write(cls + " objects: " + canStrs.get(cls).size() + "\n");
+				totalObjs += canStrs.get(cls).size();
 			}
 			writer.write("Total objects sum: "+ totalObjs + "\n");
 			writer.close();

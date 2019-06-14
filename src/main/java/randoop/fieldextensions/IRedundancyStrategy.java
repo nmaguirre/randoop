@@ -8,6 +8,6 @@ public interface IRedundancyStrategy {
 
 	void writeResults(String filename, boolean fullres);
 
-	boolean checkIsNew(TypedOperation operation, ExecutableSequence eSeq);
+	boolean checkGenNewObjects(TypedOperation operation, ExecutableSequence eSeq);
 
 }
