@@ -75,6 +75,20 @@ public class CanonicalHeap {
 		return new AbstractMap.SimpleEntry<>(CanonicalizationResult.OK, newCanonicalObject(obj, clazz));
 	}
 	
+	public CanonicalObject findExistingCanonicalObjectByName(CanonicalObject obj) {
+		List<CanonicalObject> clazzObjs = objects.get(obj.getCanonicalClass());
+		// Some classes are found out at runtime, for example, when they are the return type of a method.
+		if (clazzObjs == null) {
+			return null;
+		}
+		
+		for (CanonicalObject currObj: clazzObjs)
+			if (currObj.stringRepresentation().equals(obj.stringRepresentation())) 
+				return currObj;
+		
+		return null;
+	}
+	
 	public CanonicalObject findExistingCanonicalObject(Object obj, CanonicalClass clazz) {
 		List<CanonicalObject> clazzObjs = objects.get(clazz);
 		// Some classes are found out at runtime, for example, when they are the return type of a method.
@@ -179,7 +193,7 @@ public class CanonicalHeap {
 	public CanonicalObject mutatedValue;
 	public CanonicalField mutatedField;
 	
-	private boolean mutateRandomObjectField(CanonicalObject toMutate) {
+	public boolean mutateRandomObjectField(CanonicalObject toMutate) {
 		// 3- Pick the field to be mutated.
 		CanonicalField rdmFld =	pickRandomFieldToMutate(toMutate);
 		if (rdmFld == null) {
@@ -297,7 +311,13 @@ public class CanonicalHeap {
 		return objects.get(cls).get(toMutateInd);
 	}
 	
-
+	public CanonicalObject getRandomCanonicalObject(CanonicalClass cls) {
+		List<CanonicalObject> objs = objects.get(cls);
+		if (objs == null) return null;
+		int rdmIndex = Randomness.nextRandomInt(objs.size());
+		return objs.get(rdmIndex);	
+	}
+	
 	public boolean mutateRandomObjectField(CanonicalObject toMutate, int retries) {
 		int retriesLeft = retries;
 		boolean succeeded = false;
@@ -363,7 +383,31 @@ public class CanonicalHeap {
 		return succeeded; 
 	}
 	
+
+	public boolean makeRandomObjectFieldSymbolic(CanonicalClass cls) {
+		return makeRandomObjectFieldSymbolic(cls, null, null); 
+	}
+
+
+	public boolean makeRandomObjectFieldSymbolic(CanonicalClass cls, CanonicalObject mutatedObject, CanonicalField mutatedField) {
+		return makeRandomObjectFieldSymbolic(getRandomCanonicalObject(cls), mutatedObject, mutatedField); 
+	}
 	
+	
+	public CanonicalObject getSymbolicNode() {
+			CanonicalObject symbValue = null;
+			if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.AvlTree"))
+				symbValue = getCanonicalObject(DummySymbolicAVL.getObject()).getValue();
+			else if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet"))
+				symbValue = getCanonicalObject(DummySymbolicTSet.getObject()).getValue();
+			else if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.BinomialHeap"))
+				symbValue = getCanonicalObject(DummySymbolicBHeapNode.getObject()).getValue();
+			else
+				assert false : "Unsupported class";
+			return symbValue;
+	  }
+	
+
 	private boolean makeRandomObjectFieldSymbolic(CanonicalObject toMutate, CanonicalObject mutatedObject, CanonicalField mutatedField) {
 		// 3- Pick the field to be mutated.
 		CanonicalField rdmFld =	pickRandomFieldToMakeSymbolic(toMutate);
@@ -376,6 +420,8 @@ public class CanonicalHeap {
 			rdmValue = getCanonicalObject(DummySymbolicAVL.getObject()).getValue();
 		else if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet"))
 			rdmValue = getCanonicalObject(DummySymbolicTSet.getObject()).getValue();
+		else if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.BinomialHeap"))
+			rdmValue = getCanonicalObject(DummySymbolicBHeapNode.getObject()).getValue();
 		else
 			assert false : "Unsupported class";
 		
@@ -384,15 +430,14 @@ public class CanonicalHeap {
 			if (toMutate.getObject() == mutatedObject.getObject() &&
 					rdmFld.getName().equals(mutatedField.getName()))
 				return false;
-			
-			if ((rdmFld.getValue(toMutate) instanceof DummySymbolicAVL) || 
-				(rdmFld.getValue(toMutate) instanceof DummySymbolicTSet))
-				return false;
-			/*
-			if (readAccessedField(toMutate.getObject(), "_accessed_" + rdmFld.getName()))
-				return false;
-				*/
 		}
+
+		// Don't allow to make symbolic already symbolic values
+		Object oldValue = rdmFld.getValue(toMutate);
+		if (oldValue != null && IDummySymbolic.class.isAssignableFrom(oldValue.getClass()))
+				//instanceof DummySymbolicAVL) || 
+//			(rdmFld.getValue(toMutate) instanceof DummySymbolicTSet))
+			return false;
 
 		// 5- set toMutate.rdmFld = rdmValue
 		rdmFld.setValue(toMutate, rdmValue);
@@ -418,7 +463,6 @@ public class CanonicalHeap {
 		}
 		return res;
 	}
-	
 	
 	
 	private CanonicalField pickRandomFieldToMakeSymbolic(CanonicalObject toMutate) {
@@ -457,6 +501,41 @@ public class CanonicalHeap {
 //			CanonicalizerLog.logLine("Randomly picked a field:" + rdmFld.stringRepresentation(toMutate));
 		
 		return rdmFld;
+	}
+	
+	
+	public List<CanonicalField> getSymbolicFields(CanonicalObject toMutate) {
+		List<CanonicalField> candidateFields = new ArrayList<>();
+		Entry<CanonicalizationResult, List<CanonicalField>> objFieldsRes = toMutate.getCanonicalFields();
+		assert objFieldsRes.getKey() == CanonicalizationResult.OK: "Getting fields of object " + toMutate + " failed";
+		Pattern dontMutate = GenInputsAbstract.vectorization_dont_mutate_fields;
+
+		for (CanonicalField fld: objFieldsRes.getValue() /*rdmClass.getCanonicalFields()*/) {
+			if (dontMutate != null && dontMutate.matcher(fld.getName()).find()) {
+				if (CanonicalizerLog.isLoggingOn()) {
+					CanonicalizerLog.logLine("Field " + fld.getName() + " matches "
+							+ "--vectorization-dont-mutate-fields regular expression, don't mutate it");
+				}
+				continue;
+			}
+			
+			CanonicalClass fType = fld.getCanonicalType();
+			if (!fld.isStatic() &&
+					!fld.isFinal() && 
+					!fType.isObject() && 
+					// We allow for mutation of non reference fields when mutating within extensions
+					((!fType.isPrimitive() && store.isClassFromCode(fType)))
+					)
+				candidateFields.add(fld);
+		}	
+		
+		if (candidateFields.isEmpty()) {
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("No fields available to mutate. Retrying...");
+			return null;
+		}
+		
+		return candidateFields;
 	}
 	
 	

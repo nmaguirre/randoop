@@ -15,6 +15,8 @@ import java.util.Map.Entry;
 
 import org.tmatesoft.svn.core.wc.admin.ISVNHistoryHandler;
 
+import com.thoughtworks.xstream.XStream;
+
 import java.util.Set;
 
 import randoop.BugInRandoopException;
@@ -58,6 +60,7 @@ import randoop.util.heapcanonicalization.CanonicalizationResult;
 import randoop.util.heapcanonicalization.CanonicalizerLog;
 import randoop.util.heapcanonicalization.DummyHeapRoot;
 import randoop.util.heapcanonicalization.DummySymbolicAVL;
+import randoop.util.heapcanonicalization.DummySymbolicTSet;
 import randoop.util.heapcanonicalization.HeapCanonicalizer;
 import randoop.util.heapcanonicalization.IDummySymbolic;
 import randoop.util.heapcanonicalization.candidatevectors.BugInCandidateVectorsCanonicalization;
@@ -217,6 +220,9 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 		  ComponentManager currMan = new ComponentManager(); 
 		  currMan.copyAllSequences(componentManager);
 
+		  if (GenInputsAbstract.iterations_to_omitfields != Integer.MAX_VALUE && seqLength == GenInputsAbstract.iterations_to_omitfields) {
+			  opManager.setOmitFields(GenInputsAbstract.omitfields_after_iterations);
+		  }
 
 		  // Notify listeners we are about to perform a generation step.
 		  if (listenerMgr != null) {
@@ -719,7 +725,6 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 	public static CandidateVectorsFieldExtensions candVectExtensions;
 	
 	public void initNewCanonicalizerForVectorization(Collection<String> classNames, int vectMaxObjects) {
-
 		//vectorization_hard_array_limits = true;
 	    store = new CanonicalStore(classNames, Integer.MAX_VALUE);
 
@@ -787,17 +792,27 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 			  posVectors.add(candidateVector.toString());
 
 			  if (SymbolicVectorsWriter.isEnabled()) {
-				  generateSymbolicStructures(eSeq, index, objHeap);
-				  //for (String vector: vectors)
-				  //SymbolicVectorsWriter.logLine(vector);
+				  if (GenInputsAbstract.pseudoexhaustive_mutations)
+					  generateSystematicSymbolicStructures(eSeq, index);
+				  else {
+					  for (int k = 0; k < GenInputsAbstract.pos_strs_rep; k++)
+						  generateRandomSymbolicStructures(eSeq, index);
+				  }
 			  }
 			  
 			  // Generate negative symbolic vectors
 			  if (NegativeSymbolicVectorsWriter.isEnabled()) {
-				  for (int i = 0; i < GenInputsAbstract.neg_strs_rep; i++)
-					  mutateAFieldOfEachObjectAndGenNegativeVector(eSeq, index);
-				  //for (String vector: vectors)
-				  //NegativeSymbolicVectorsWriter.logLine(vector);
+				  for (int k = 0; k < GenInputsAbstract.neg_strs_rep; k++) {
+					  if (GenInputsAbstract.pseudoexhaustive_mutations) {
+						  int mutAttempts = 10;
+						  for (int j = 0; j < mutAttempts; j++) {
+							  if (generateSystematicNegativeSymbolicStructures(eSeq, index))
+								  break;
+						  }
+					  }
+					  else
+						  mutateRandomFieldAndGenerateNegativeSymbolicStructures(eSeq, index);
+				  }
 			  }
 		  }
 		  else { // res.getKey() != CanonicalizationResult.OK
@@ -810,6 +825,348 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 			  }
 		  }
 		  index++;
+	  }
+  }
+  
+  private XStream xstream = new XStream();
+  
+  private Object cloneObject(Object o) {
+	  String xml = xstream.toXML(o);
+	  return xstream.fromXML(xml);
+  }
+  
+  private int MAXSYMB = GenInputsAbstract.symbolic_mutations_by_structure;
+  
+  private void generateSystematicSymbolicStructures(ExecutableSequence eSeq, int index) {
+		  // Rebuild object
+		  eSeq.execute(executionVisitor, checkGenerator);
+		  Object toMutate = eSeq.getLastStmtRuntimeObjects().get(index);
+		  
+		  if (CanonicalizerLog.isLoggingOn()) {
+			  CanonicalizerLog.logLine(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+			  CanonicalizerLog.logLine(">>>> Object to make symbolic:");
+		  }
+		  Set<String> genVects = new HashSet<>();
+		  int scope = AbstractGenerator.vectorization_max_objects;
+		  generateSystematicSymbolicStructures(toMutate, genVects, scope);
+  }
+  
+  private void generateSystematicSymbolicStructures(Object o, Set<String> genVects, int depth) {
+	  if (genVects.size() == MAXSYMB || depth == 0) return;
+	  for (CanonicalClass cls: vectorCanonicalizer.getStore().getCanonicalClassesFromArgs()) {
+		  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(o);
+		  CanonicalHeap objHeap = res.getValue();
+		  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+		  String vectorStr = candidateVector.toString();
+		  assert isStructurallyPositive(o);
+		  if (!genVects.add(vectorStr))
+			  return;
+		  int toMutateInd = 0;
+		  if (objHeap.objectsPerClass().get(cls) == null) return;
+		  
+		  while (toMutateInd < objHeap.objectsPerClass().get(cls)) {
+			  int fldInd = 0;
+			  while (true) {
+				  if (toMutateInd >= objHeap.objectsPerClass().get(cls))
+					  // Number of objects in the heap decreases after abstraction
+					  return;
+				  CanonicalObject toMut = objHeap.getCanonicalObject(cls, toMutateInd);
+				  List<CanonicalField> fields = objHeap.getSymbolicFields(toMut);
+				  if (fldInd >= fields.size())
+					  break;
+				  CanonicalField fld = fields.get(fldInd);
+				  // Don't allow to make symbolic already symbolic values
+				  Object oldValue = fld.getValue(toMut);
+				  if (oldValue != null && IDummySymbolic.class.isAssignableFrom(oldValue.getClass())) {
+					  fldInd++;
+					  continue;
+				  }
+				  // Save original object
+				  Object oClone = cloneObject(o);
+				  // Mutate and call recursively from the mutated object
+				  fld.setValue(toMut, objHeap.getSymbolicNode());
+				  if (CanonicalizerLog.isLoggingOn())
+					  CanonicalizerLog.logLine("Mutation successful. Field " + fld.stringRepresentation(toMut) + " of object " + 
+							  toMut.stringRepresentation() + " set to " + objHeap.getSymbolicNode().stringRepresentation());
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(o);
+				  objHeap = res.getValue();
+				  assert isStructurallyPositive(o);
+				  candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+				  vectorStr = candidateVector.toString();
+				  if (posSymbVectors.add(vectorStr)) {
+					  if (CanonicalizerLog.isLoggingOn()) {
+						  CanonicalizerLog.logLine("New symbolic vector:");
+						  CanonicalizerLog.logLine(candidateVector.toString());
+					  }
+				  }
+				  generateSystematicSymbolicStructures(o, genVects, depth-1);
+				  // Recover original object and continue
+				  o = oClone;
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(o);
+				  objHeap = res.getValue();
+				  assert isStructurallyPositive(o);
+				  fldInd++;
+			  }
+			  toMutateInd++;
+		  }
+	  }
+  }
+  
+  private boolean generateSystematicNegativeSymbolicStructures(ExecutableSequence eSeq, int index) {
+	  for (CanonicalClass cls: vectorCanonicalizer.getStore().getCanonicalClassesFromArgs()) {
+		  // Rebuild object
+		  eSeq.execute(executionVisitor, checkGenerator);
+		  Object mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
+		  // Canonicalize and mutate the current object
+		  if (CanonicalizerLog.isLoggingOn())
+			  CanonicalizerLog.logLine(">>> Object before mutation");
+		  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+		  CanonicalHeap toMutateHeap = res.getValue();	
+		  // Get a random object to mutate
+		  CanonicalObject toMutate = toMutateHeap.getRandomCanonicalObject(cls);
+		  // No objects of the class to mutate
+		  if (toMutate == null) return false;
+
+		  if (!toMutateHeap.mutateRandomObjectField(toMutate)
+				  || isStructurallyPositive(mutObj))
+			  return false;
+		  if (CanonicalizerLog.isLoggingOn())
+			  CanonicalizerLog.logLine(">>> Object after mutation");
+		  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+		  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+		  negVectors.add(candidateVector.toString());
+		  Set<String> genVects = new HashSet<>();
+		  int scope = AbstractGenerator.vectorization_max_objects;
+		  generateSystematicNegativeSymbolicStructures(mutObj, genVects, scope, toMutateHeap.mutatedObject, toMutateHeap.mutatedField);
+	  }
+	  return true;
+  }
+  
+  private void generateSystematicNegativeSymbolicStructures(Object curr, Set<String> genVects, int depth, CanonicalObject mutatedObject, CanonicalField mutatedField) {
+	  if (genVects.size() == MAXSYMB || depth == 0) return;
+	  for (CanonicalClass cls: vectorCanonicalizer.getStore().getCanonicalClassesFromArgs()) {
+		  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(curr);
+		  CanonicalHeap objHeap = res.getValue();
+		  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+		  String vectorStr = candidateVector.toString();
+		  //assert isStructurallyPositive(curr);
+		  if (!genVects.add(vectorStr))
+			  return;
+		  
+		  //CanonicalObject mutatedObj = mutatedObject;
+		  CanonicalObject mutatedObj = objHeap.findExistingCanonicalObjectByName(mutatedObject);
+		  if (objHeap.objectsPerClass().get(cls) == null) return;
+
+		  int toMutateInd = 0;
+		  while (toMutateInd < objHeap.objectsPerClass().get(cls)) {
+			  int fldInd = 0;
+			  while (true) {
+				  if (toMutateInd >= objHeap.objectsPerClass().get(cls))
+					  // Number of objects in the heap decreases after abstraction
+					  return;
+				  CanonicalObject toMut = objHeap.getCanonicalObject(cls, toMutateInd);
+				  List<CanonicalField> fields = objHeap.getSymbolicFields(toMut);
+				  if (fldInd >= fields.size())
+					  break;
+				  CanonicalField fld = fields.get(fldInd);
+				  // Do not allow to mutate the mutated object field in the generation of negative symbolic instances
+				  if (toMut.getObject() == mutatedObj.getObject() &&
+						  fld.getName().equals(mutatedField.getName())) {
+					  fldInd++;
+					  continue;
+				  }
+				  // Don't allow to make symbolic already symbolic values
+				  Object oldValue = fld.getValue(toMut);
+				  if (oldValue != null && IDummySymbolic.class.isAssignableFrom(oldValue.getClass())) {
+					  fldInd++;
+					  continue;
+				  }
+				  // Save original object
+				  Object oClone = cloneObject(curr);
+				  // Make field symbolic 
+				  fld.setValue(toMut, objHeap.getSymbolicNode());
+				  if (CanonicalizerLog.isLoggingOn())
+					  CanonicalizerLog.logLine("Mutation successful. Field " + fld.stringRepresentation(toMut) + " of object " + 
+							  toMut.stringRepresentation() + " set to " + objHeap.getSymbolicNode().stringRepresentation());
+				  
+				  if (isSymbolicPositive(curr)) {
+					  if (CanonicalizerLog.isLoggingOn())
+						  CanonicalizerLog.logLine(">>>> Object became positive after symbolic abstraction!!!");
+					  // Restore object before failed symbolic abstraction and continue
+					  curr = oClone;
+					  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(curr);
+					  objHeap = res.getValue(); 
+					  CanonicalObject mutatedObjClone = objHeap.findExistingCanonicalObjectByName(mutatedObj);
+					  assert mutatedObjClone != null: "Mutated object clone must exist after a copy";
+					  mutatedObj = mutatedObjClone;
+					  fldInd++;
+					  continue;
+				  }
+				  
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(curr);
+				  objHeap = res.getValue();
+				  CanonicalObject updatedMutatedObj = objHeap.findExistingCanonicalObject(mutatedObj.getObject(), mutatedObj.getCanonicalClass());
+				  // Check reachability of mutatedObj in mutHeap
+				  if (updatedMutatedObj == null) {
+					  if (CanonicalizerLog.isLoggingOn())
+						  CanonicalizerLog.logLine(">>>> The mutation was lost during symbolic abstraction. The object became positive!!!");
+					  // Restore object before failed symbolic abstraction and continue
+					  curr = oClone;
+					  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(curr);
+					  objHeap = res.getValue(); 
+					  CanonicalObject mutatedObjClone = objHeap.findExistingCanonicalObjectByName(mutatedObj);
+					  assert mutatedObjClone != null: "Mutated object clone must exist after a copy";
+					  mutatedObj = mutatedObjClone;
+					  fldInd++;
+					  continue; 
+				  }
+				  
+				  if (CanonicalizerLog.isLoggingOn())
+					  CanonicalizerLog.logLine(">>>> New negative symbolic object"); 
+				  
+				  candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+				  vectorStr = candidateVector.toString();
+				  if (negSymbVectors.add(vectorStr)) {
+					  if (CanonicalizerLog.isLoggingOn()) {
+						  CanonicalizerLog.logLine("New negative symbolic vector:");
+						  CanonicalizerLog.logLine(candidateVector.toString());
+					  }
+				  }
+				  // Call recursively from the symbolic object
+				  generateSystematicNegativeSymbolicStructures(curr, genVects, depth-1, updatedMutatedObj, mutatedField);
+				  // Recover original object and continue
+				  curr = oClone;
+				  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(curr);
+				  objHeap = res.getValue();
+				  CanonicalObject mutatedObjClone = objHeap.findExistingCanonicalObjectByName(mutatedObj);
+				  assert mutatedObjClone != null: "Mutated object clone must exist after a copy";
+				  mutatedObj = mutatedObjClone;
+				  fldInd++;
+			  }
+			  toMutateInd++;
+		  }
+	  }
+  } 
+  
+  
+  
+  
+  
+  
+  
+
+
+  private void generateRandomSymbolicStructures(ExecutableSequence eSeq, int index) {
+	  for (CanonicalClass cls: vectorCanonicalizer.getStore().getCanonicalClassesFromArgs()) {
+		  // Rebuild object
+		  eSeq.execute(executionVisitor, checkGenerator);
+		  Object mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
+		  
+		  if (CanonicalizerLog.isLoggingOn()) {
+			  CanonicalizerLog.logLine(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+			  CanonicalizerLog.logLine(">>>> Object to make symbolic:");
+		  }
+		  
+		  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  CanonicalHeap objHeap = res.getValue();
+		  assert isStructurallyPositive(mutObj);
+
+		  //int numNodes = AbstractGenerator.vectorization_max_objects;//objHeap.objectsPerClass().get(cls);
+		  int numNodes = GenInputsAbstract.symbolic_mutations_by_structure;
+		  makeRandomObjectFieldsSymbolic(mutObj, objHeap, cls, numNodes);
+	  }
+  }
+  
+  private CanonicalHeap makeRandomObjectFieldsSymbolic(Object mutObj, CanonicalHeap objHeap, CanonicalClass cls, int maxSymbNodes) {
+	  CanonicalHeap ch = objHeap;
+	  for (int ind = 0; ind < maxSymbNodes; ind++) {
+		  if (!ch.makeRandomObjectFieldSymbolic(cls))
+			  continue;
+
+		  if (CanonicalizerLog.isLoggingOn()) {
+			  CanonicalizerLog.logLine(">>>> New symbolic object");
+		  }
+
+		  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+		  posSymbVectors.add(candidateVector.toString());
+		  if (CanonicalizerLog.isLoggingOn()) {
+			  CanonicalizerLog.logLine("New symbolic vector:");
+			  CanonicalizerLog.logLine(candidateVector.toString());
+		  }
+		  assert isSymbolicPositive(mutObj) : "Negative vector generated after symbolic abstraction: " + candidateVector.toString();
+		  ch = res.getValue();
+	  }
+	  return ch;
+  }
+  
+  private boolean mutateRandomFieldAndGenerateNegativeSymbolicStructures(ExecutableSequence eSeq, int index) {
+	  for (CanonicalClass cls: vectorCanonicalizer.getStore().getCanonicalClassesFromArgs()) {
+		  // Rebuild object before mutation
+		  eSeq.execute(executionVisitor, checkGenerator);
+		  Object mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
+		  // Canonicalize and mutate the current object
+		  if (CanonicalizerLog.isLoggingOn())
+			  CanonicalizerLog.logLine(">>> Object before mutation");
+		  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+		  CanonicalHeap toMutateHeap = res.getValue();	
+
+		  // Get a random object to mutate
+		  CanonicalObject toMutate = toMutateHeap.getRandomCanonicalObject(cls);
+		  if (!toMutateHeap.mutateRandomObjectField(toMutate)
+				  || isStructurallyPositive(mutObj))
+			  return false;
+
+		  if (CanonicalizerLog.isLoggingOn())
+			  CanonicalizerLog.logLine(">>> Object after mutation");
+		  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+		  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+		  negVectors.add(candidateVector.toString());
+		  if (NegativeSymbolicVectorsWriter.isEnabled()) {
+			  int numNodes = GenInputsAbstract.symbolic_mutations_by_structure;
+			  generateNegativeSymbolicStructures(mutObj, res.getValue(), toMutateHeap.mutatedObject, toMutateHeap.mutatedField, toMutateHeap.mutatedValue, numNodes);
+		  }
+	  }
+	  return true;
+  } 
+
+  private void generateNegativeSymbolicStructures(Object mutObj, CanonicalHeap mutHeap, CanonicalObject mutatedObject, CanonicalField mutatedField, CanonicalObject mutatedValue, int maxSymbNodes) {
+	  for (CanonicalClass cls: vectorCanonicalizer.getStore().getCanonicalClassesFromArgs()) {
+		  CanonicalHeap ch = mutHeap;
+		  for (int ind = 0; ind < maxSymbNodes; ind++) {
+			  if (!ch.makeRandomObjectFieldSymbolic(cls, mutatedObject, mutatedField))
+				  continue;
+			  if (CanonicalizerLog.isLoggingOn()) 
+				  CanonicalizerLog.logLine(">>>> New symbolic object");
+			  if (isSymbolicPositive(mutObj)) {
+				  if (CanonicalizerLog.isLoggingOn())
+					  CanonicalizerLog.logLine(">>>> Object became positive after symbolic abstraction!!!");
+				  return;
+			  }
+			  
+			  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+			  ch = res.getValue();
+			  // Check reachability of mutObj in mutHeap
+			  if (ch.findExistingCanonicalObject(mutatedObject.getObject(), mutatedObject.getCanonicalClass()) == null) {
+				  if (CanonicalizerLog.isLoggingOn())
+					  CanonicalizerLog.logLine(">>>> The mutation was lost during symbolic abstraction. The object became positive!!!");
+				  return; 
+			  }
+			  
+			  if (CanonicalizerLog.isLoggingOn())
+				  CanonicalizerLog.logLine(">>>> New negative symbolic object");
+
+			  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+			  negSymbVectors.add(candidateVector.toString());
+			  if (CanonicalizerLog.isLoggingOn()) {
+				  CanonicalizerLog.logLine("New negative symbolic vector:");
+				  CanonicalizerLog.logLine(candidateVector.toString());
+			  }
+		  }
 	  }
   }
   
@@ -878,7 +1235,6 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 	  return ch;
   }
   
-  
 
   private boolean makeRandomFieldSymbolic(Object mutObj, CanonicalObject canMutObj, CanonicalHeap toMutateHeap, CanonicalObject mutatedObject, CanonicalField mutatedField) {
 	  int objRetries = 30;
@@ -900,6 +1256,37 @@ public class ForwardGeneratorBE extends AbstractGeneratorBE {
 	  }
 	  
 	  return succeed;
+  }
+  
+  
+  private boolean mutateARandomFieldOfObjectAndGenNegativeVector(ExecutableSequence eSeq, int index) {
+	  for (CanonicalClass cls: vectorCanonicalizer.getStore().getCanonicalClassesFromArgs()) {
+		  // Rebuild object before mutation
+		  eSeq.execute(executionVisitor, checkGenerator);
+		  Object mutObj = eSeq.getLastStmtRuntimeObjects().get(index);
+		  // Canonicalize and mutate the current object
+		  if (CanonicalizerLog.isLoggingOn())
+			  CanonicalizerLog.logLine(">>> Object before mutation");
+		  Entry<CanonicalizationResult, CanonicalHeap> res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+		  CanonicalHeap toMutateHeap = res.getValue();	
+
+		  // Get a random object to mutate
+		  CanonicalObject toMutate = toMutateHeap.getRandomCanonicalObject(cls);
+		  if (!toMutateHeap.mutateRandomObjectField(toMutate)
+				  || isStructurallyPositive(mutObj))
+			  return false;
+
+		  if (CanonicalizerLog.isLoggingOn())
+			  CanonicalizerLog.logLine(">>> Object after mutation");
+		  res = vectorCanonicalizer.traverseBreadthFirstAndCanonicalize(mutObj);
+		  assert res.getKey() == CanonicalizationResult.OK: "Mutation should not create new objects";
+		  CandidateVector<Object> candidateVector = symbCandVectGenerator.makeCandidateVectorFrom(res.getValue());
+		  negVectors.add(candidateVector.toString());
+		  if (NegativeSymbolicVectorsWriter.isEnabled())
+			  generateNegativeSymbolicStructures(mutObj, res.getValue(), toMutateHeap.mutatedObject, toMutateHeap.mutatedField, toMutateHeap.mutatedValue);
+	  }
+	  return true;
   }
   
   

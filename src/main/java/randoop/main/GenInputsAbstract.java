@@ -63,27 +63,40 @@ public abstract class GenInputsAbstract extends CommandHandler {
   public static File classlist = null;
   
   @Option("Max objects to make canonicalization stop and drop current test")
-  public static int max_objects = 3;
+  public static int max_objects = 5000;
 
   @Option("Max primitive values in field extensions to make canonicalization stop and drop current test")
-  public static int max_extensions_primitives = 3;
+  public static int max_extensions_primitives = 5000;
   
   @Option("Max values in array objects to make canonicalization stop and drop current test")
-  public static int max_array_objects = 3;
+  public static int max_array_objects = 5000;
 
   @Option("")
-  public static int neg_strs_rep = 20;
+  public static int neg_strs_rep = 5;
   
   @Option("")
-  public static int symneg_strs_rep = 20;
+  public static int symneg_strs_rep = 30;
 
   @Option("")
-  public static int pos_strs_rep = 20;
+  public static int pos_strs_rep = 5;
+  
+  @Option("")
+  public static int symbolic_mutations_by_structure = 500;
 
+  @Option("")
+  public static Pattern omitfields_after_iterations = null;
+
+  @Option("")
+  public static int iterations_to_omitfields = Integer.MAX_VALUE;
+
+  @Option("")
+  public static boolean pseudoexhaustive_mutations = true;
+  
   public enum Filtering {
 	 NO,
 	 FE,
-	 BE
+	 BE,
+	 FESH
   }
   
   @Option("Do not canonicalize fields that match regular expression <string>")

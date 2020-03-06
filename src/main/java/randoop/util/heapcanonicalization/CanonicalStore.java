@@ -1,5 +1,6 @@
 package randoop.util.heapcanonicalization;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import randoop.main.GenInputsAbstract;
 
 public class CanonicalStore {
 
+	public static Set<String> classesFromArgs = GenInputsAbstract.getClassnamesFromArgs();
 	private final Map<String, CanonicalClass> classes = new LinkedHashMap<>();
 	private final Set<String> mainClasses = new HashSet<>();
 	// Contains the names of the stored classes at the moment of analyzing the source code of the main classes.
@@ -34,6 +36,8 @@ public class CanonicalStore {
 			sortedNames.add(DummySymbolicAVL.class.getName());
 		else if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet"))
 			sortedNames.add(DummySymbolicTSet.class.getName());
+		else if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.BinomialHeap"))
+			sortedNames.add(DummySymbolicBHeapNode.class.getName());
 		else
 			assert false : "Unsupported class";
 		
@@ -64,6 +68,21 @@ public class CanonicalStore {
 		return res;
 	}
 	*/
+	
+
+	public Collection<CanonicalClass> getCanonicalClassesFromArgs() { 
+		List<CanonicalClass> res = new ArrayList<>();
+		for (CanonicalClass cls: classes.values()) {
+			// FIXME: Ugly hacky method that returns only clases from BLISS case studies
+			if (classesFromArgs.contains("symbolicheap.bounded.BinomialHeap")) {
+				if (cls.getName().equals("symbolicheap.bounded.BinomialHeapNode"))
+					res.add(cls);
+			}
+			else if (classesFromArgs.contains(cls.getName()))
+					res.add(cls);
+		}
+		return res;
+	}
 	
 	public CanonicalClass getCanonicalClass(String name) {
 		CanonicalClass cls = classes.get(name);

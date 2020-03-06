@@ -1,6 +1,7 @@
 package randoop.fieldextensions;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import randoop.generation.ComponentManager;
 import randoop.operation.TypedOperation;
@@ -31,5 +32,11 @@ public class OriginalRandoopManager implements ISequenceManager {
 	public List<TypedOperation> getBuilders(int seqLength) {
 		return buildersManager.getBuilders(seqLength);
 	}
+
+	@Override
+	public void setOmitFields(Pattern omitfields) {
+		throw new Error("Unimplemented method");
+	}
+	
 
 }

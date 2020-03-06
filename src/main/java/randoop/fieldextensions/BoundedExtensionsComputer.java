@@ -60,6 +60,11 @@ public class BoundedExtensionsComputer implements ISequenceManager {
 		this.maxStoppingObjs = maxStoppingObjs;
 	}
 	
+	
+	public void setOmitFields(Pattern omitfields) {
+		canonicalizer.setIgnoredFields(omitfields);
+	}
+	
 
 	// Returns the indices where the objects that initialize new field values are, null if 
 	// some object exceeds given bounds or the execution of the sequence fails 

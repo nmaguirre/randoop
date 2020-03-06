@@ -1,6 +1,7 @@
 package randoop.fieldextensions;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import randoop.generation.ComponentManager;
 import randoop.operation.TypedOperation;
@@ -15,5 +16,6 @@ public interface ISequenceManager {
 	void writeBuilders(String filename);
 
 	List<TypedOperation> getBuilders(int seqLength);
-
+	
+	public void setOmitFields(Pattern omitfields);
 }
