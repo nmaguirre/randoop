@@ -199,6 +199,23 @@ public class CanonicalHeap {
 		if (rdmFld == null) {
 			return false;
 		}
+		
+		// FIXME: TreeSet color mutation hack
+		if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet") && rdmFld.getName().equals("color")) {
+			Object fldValue = rdmFld.getValue(toMutate);
+			CanonicalObject rdmValue = null;
+			if (fldValue.equals(0)) {
+				rdmValue = new CanonicalObject(1, null, -1, null);
+			}
+			else {
+				rdmValue = new CanonicalObject(0, null, -1, null);
+			}
+			rdmFld.setValue(toMutate, rdmValue);
+			mutatedObject = toMutate;
+			mutatedField = rdmFld;
+			mutatedValue = rdmValue;
+			return true;
+		}
 
 		// 4- Pick the value the selected field will be set to.
 		Object fldValue = rdmFld.getValue(toMutate);
@@ -275,6 +292,10 @@ public class CanonicalHeap {
 					((!fType.isPrimitive() && store.isClassFromCode(fType)))
 					)
 				candidateFields.add(fld);
+			
+			// FIXME: TreeSet color mutation hack
+			if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet") && fld.getName().equals("color"))
+				candidateFields.add(fld);	
 		}	
 		
 		if (candidateFields.isEmpty()) {
@@ -438,12 +459,20 @@ public class CanonicalHeap {
 				//instanceof DummySymbolicAVL) || 
 //			(rdmFld.getValue(toMutate) instanceof DummySymbolicTSet))
 			return false;
-
-		// 5- set toMutate.rdmFld = rdmValue
-		rdmFld.setValue(toMutate, rdmValue);
-		if (CanonicalizerLog.isLoggingOn())
-			CanonicalizerLog.logLine("Mutation successful. Field " + rdmFld.stringRepresentation(toMutate) + " of object " + 
-					toMutate.stringRepresentation() + " set to " + rdmValue.stringRepresentation());
+		
+		
+		// FIXME: TreeSet color mutation hack
+		if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet") && rdmFld.getName().equals("color")) {
+			if (rdmFld.getValue(toMutate).equals(new Integer(-1))) return false;
+			rdmFld.setValue(toMutate, new CanonicalObject(-1, null, -1, null));
+		} 
+		else {
+			// 5- set toMutate.rdmFld = rdmValue
+			rdmFld.setValue(toMutate, rdmValue);
+			if (CanonicalizerLog.isLoggingOn())
+				CanonicalizerLog.logLine("Mutation successful. Field " + rdmFld.stringRepresentation(toMutate) + " of object " + 
+						toMutate.stringRepresentation() + " set to " + rdmValue.stringRepresentation());
+		}
 		
 		return true;
 	}
@@ -488,6 +517,11 @@ public class CanonicalHeap {
 					((!fType.isPrimitive() && store.isClassFromCode(fType)))
 					)
 				candidateFields.add(fld);
+			
+			// FIXME: TreeSet color mutation hack
+			if (GenInputsAbstract.testclass.get(0).equals("symbolicheap.bounded.TreeSet") && fld.getName().equals("color"))
+				candidateFields.add(fld);
+			
 		}	
 		
 		if (candidateFields.isEmpty()) {

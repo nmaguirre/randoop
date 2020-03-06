@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import randoop.CheckRep;
 import randoop.util.heapcanonicalization.DummySymbolicTSet;
 
 
@@ -99,7 +100,7 @@ public class TreeSet {
   }
 
   private boolean hybridRepOK_colors(TreeSet root) {
-    if (!(this instanceof DummySymbolicTSet)) {
+    if (!(this instanceof DummySymbolicTSet) && root.color != -1) {
       if (root.color() != BLACK)
         return false;
       List<TreeSet> worklist = new ArrayList<TreeSet>();
